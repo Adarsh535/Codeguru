@@ -1,0 +1,802 @@
+{
+  "banners": [
+    {
+      "title": "Top placement ",
+      "subtitle": "this is Ai  video",
+      "type": "video",
+      "mediaUrl": "http://localhost:5000/uploads/file-1789038525984-401902701.mp4",
+      "badge": "TOP PLACEMENT DRIVES 2026",
+      "ctaText": "Explore Courses",
+      "active": true,
+      "_id": "6aa28fddeb47ffc4d9bab468",
+      "createdAt": "2026-09-10T11:09:17.387Z",
+      "updatedAt": "2026-09-10T11:09:17.387Z",
+      "__v": 0
+    },
+    {
+      "title": "ewrwere",
+      "subtitle": "",
+      "type": "video",
+      "mediaUrl": "https://www.youtube.com/watch?v=vJQCAtzSfuo&list=RDvJQCAtzSfuo&start_radio=1",
+      "badge": "TOP PLACEMENT DRIVES 2026",
+      "ctaText": "Explore Courses",
+      "active": true,
+      "_id": "6a9adc004ce47e0f3cfadb1d",
+      "createdAt": "2026-09-04T14:56:00.076Z",
+      "__v": 0
+    },
+    {
+      "title": "ndsfnlk",
+      "subtitle": "sdasdasd",
+      "type": "image",
+      "mediaUrl": "http://localhost:5000/uploads/file-1788533622131-17657915.png",
+      "badge": "TOP PLACEMENT DRIVES 2026",
+      "ctaText": "Explore Courses",
+      "active": true,
+      "_id": "6a9adb7b4ce47e0f3cfadb1c",
+      "createdAt": "2026-09-04T14:53:47.867Z",
+      "__v": 0
+    },
+    {
+      "title": "fndsklnnfs",
+      "subtitle": "sadasdasa",
+      "type": "video",
+      "mediaUrl": "http://localhost:5000/uploads/file-1788533498793-311746235.mp4",
+      "badge": "TOP PLACEMENT DRIVES 2026",
+      "ctaText": "Explore Courses",
+      "active": true,
+      "_id": "6a9adb004ce47e0f3cfadb1b",
+      "createdAt": "2026-09-04T14:51:44.547Z",
+      "__v": 0
+    },
+    {
+      "title": "hlo ",
+      "subtitle": "emfojflksdm",
+      "type": "image",
+      "mediaUrl": "http://localhost:5000/uploads/file-1788533005922-121626878.png",
+      "badge": "TOP PLACEdsdfsdfsMENT DRIVES 2026",
+      "ctaText": "Explsdasdasore Courses",
+      "active": true,
+      "_id": "6a9ad90f4ce47e0f3cfadb1a",
+      "createdAt": "2026-09-04T14:43:27.516Z",
+      "__v": 0
+    },
+    {
+      "title": "to placement ",
+      "subtitle": " mkmlm;lm",
+      "type": "image",
+      "mediaUrl": "http://localhost:5000/uploads/file-1788529130318-177922951.jpg",
+      "badge": "TOP PLACEMENT DRIVES 2026",
+      "ctaText": "mern ",
+      "active": true,
+      "_id": "6a9aca094ce47e0f3cfadb19",
+      "createdAt": "2026-09-04T13:39:21.203Z",
+      "__v": 0
+    }
+  ],
+  "courses": [
+    {
+      "title": "full stack web development cource - new ",
+      "category": "coding",
+      "subCat": "web",
+      "duration": "6 Months",
+      "price": "₹ 24,999",
+      "level": "Beginner to Advanced",
+      "badge": "Job Guaranteed New-Batch 2026",
+      "description": "this is web devlopment cource for student  ",
+      "technologies": [
+        "React",
+        "Node.js",
+        "MongoDB"
+      ],
+      "_id": "6aa2909feb47ffc4d9bab469",
+      "createdAt": "2026-09-10T11:12:31.811Z",
+      "updatedAt": "2026-09-10T11:12:31.811Z",
+      "__v": 0
+    },
+    {
+      "title": "emoiqwjeoijprje2",
+      "category": "coding",
+      "subCat": "web",
+      "duration": "6 Months",
+      "price": "₹ ,999",
+      "level": "Beginner to Advanced",
+      "badge": "Job Guaranteed Batch",
+      "description": "bkjbkjkjbkjbjnjnwdeeeeeddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddfs",
+      "technologies": [
+        "React",
+        "Node.js",
+        "MongoDB"
+      ],
+      "_id": "6aa21697bad958e2693bc68d",
+      "createdAt": "2026-09-10T02:31:51.646Z",
+      "updatedAt": "2026-09-10T02:31:51.646Z",
+      "__v": 0
+    },
+    {
+      "title": "full stack web develoment ",
+      "category": "coding",
+      "subCat": "web",
+      "duration": "6 Months",
+      "price": "₹ 24,999",
+      "level": "Beginner to Advanced",
+      "badge": "Job Guaranteed Batch",
+      "description": "",
+      "technologies": [
+        "React",
+        "Node.js",
+        "MongoDB"
+      ],
+      "_id": "6aa216792074d81ddca81123",
+      "createdAt": "2026-09-10T02:31:21.355Z",
+      "updatedAt": "2026-09-10T02:31:21.355Z",
+      "__v": 0
+    },
+    {
+      "title": "mern ",
+      "category": "engineering",
+      "subCat": "web",
+      "duration": "6 Months",
+      "price": "₹ 24,999",
+      "level": "Beginner to Advanced",
+      "badge": "Job Guaranteed Batch",
+      "description": "weewfef",
+      "technologies": [
+        "React",
+        "Node.js",
+        "MongoDB"
+      ],
+      "active": true,
+      "createdAt": "2026-09-05T07:59:06.346Z",
+      "_id": "6a9bcbca658d8d9585111189",
+      "__v": 0
+    },
+    {
+      "id": "c-1788535707026",
+      "title": "networking ",
+      "category": "networking",
+      "duration": "6 Months",
+      "price": "₹ 24,999",
+      "level": "Beginner to Advanced",
+      "badge": "Job Guaranteed Batch",
+      "description": "sad lsdnflkdsnfldsnflks",
+      "technologies": [
+        "React",
+        "Node.js",
+        "MongoDB"
+      ],
+      "active": true,
+      "createdAt": "2026-09-04T15:28:27.027Z"
+    },
+    {
+      "id": "c-1788535417841",
+      "title": "knlknlmlkm;l",
+      "category": "robotics",
+      "duration": "6 Months",
+      "price": "₹ 24,999",
+      "level": "Beginner to Advanced",
+      "badge": "Job Guaranteed Batch",
+      "description": "lm;k;l,;l,;l,'l,l",
+      "technologies": [
+        "React",
+        "Node.js",
+        "MongoDB"
+      ],
+      "active": true,
+      "createdAt": "2026-09-04T15:23:37.841Z"
+    },
+    {
+      "id": "c-1788529643918",
+      "title": "mern ",
+      "category": "Coding & Development",
+      "duration": " 3Months",
+      "price": "1332",
+      "level": "Beginner to Advanced",
+      "badge": "Job Guaranteed Batch",
+      "description": "this cource is very powerfull",
+      "technologies": [
+        "React",
+        "Node.js",
+        "MongoDB"
+      ],
+      "active": true,
+      "createdAt": "2026-09-04T13:47:23.918Z"
+    },
+    {
+      "id": "c-101",
+      "title": "Full Stack Web Development (MERN)",
+      "category": "Coding & Development",
+      "duration": "6 Months",
+      "price": "₹ 24,999",
+      "level": "Beginner to Advanced",
+      "badge": "Bestseller",
+      "description": "Master React 18, Node.js, Express, MongoDB, TailwindCSS, and System Design with 5 real-world projects.",
+      "technologies": [
+        "React",
+        "Node.js",
+        "MongoDB",
+        "Express",
+        "TailwindCSS"
+      ],
+      "active": true
+    },
+    {
+      "id": "c-102",
+      "title": "Java Full Stack & DSA Masterclass",
+      "category": "Software Engineering",
+      "duration": "6 Months",
+      "price": "₹ 26,999",
+      "level": "Intermediate",
+      "badge": "Job Guaranteed Batch",
+      "description": "Complete Java 21, Spring Boot, Microservices, Data Structures & Algorithms with 450+ solved LeetCode problems.",
+      "technologies": [
+        "Java",
+        "Spring Boot",
+        "Microservices",
+        "DSA",
+        "SQL"
+      ],
+      "active": true
+    },
+    {
+      "id": "c-103",
+      "title": "Python Data Science & AI / ML",
+      "category": "AI & Data Science",
+      "duration": "5 Months",
+      "price": "₹ 28,999",
+      "level": "All Levels",
+      "badge": "Trending",
+      "description": "Hands-on Machine Learning, Deep Learning, PyTorch, Pandas, Neural Networks, and Generative AI.",
+      "technologies": [
+        "Python",
+        "Pandas",
+        "PyTorch",
+        "TensorFlow",
+        "Scikit-Learn"
+      ],
+      "active": true
+    },
+    {
+      "id": "c-104",
+      "title": "DevOps & Cloud Engineering (AWS & Docker)",
+      "category": "Cloud & Infrastructure",
+      "duration": "4 Months",
+      "price": "₹ 22,999",
+      "level": "Intermediate",
+      "badge": "High Salary Role",
+      "description": "Master CI/CD pipelines, Docker containerization, Kubernetes orchestration, Terraform, and AWS Cloud.",
+      "technologies": [
+        "Docker",
+        "Kubernetes",
+        "AWS",
+        "Terraform",
+        "Jenkins"
+      ],
+      "active": true
+    }
+  ],
+  "placements": [
+    {
+      "id": "tp-2",
+      "name": "PRIYA VERMA",
+      "photo": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
+      "college": "KNIT SULTANPUR",
+      "batch": "PLACEMENT BATCH 2025",
+      "company": "TCS DIGITAL, BENGALURU",
+      "companyLogo": "https://upload.wikimedia.org/wikipedia/commons/b/b1/Tata_Consultancy_Services_Logo.svg",
+      "role": "SYSTEM ENGINEER",
+      "package": "12.0 LPA",
+      "verified": true
+    },
+    {
+      "id": "tp-3",
+      "name": "AMIT PATEL",
+      "photo": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+      "college": "IET LUCKNOW",
+      "batch": "JOB PLACEMENT 2025",
+      "company": "WIPRO TECHNOLOGIES, HYDERABAD",
+      "companyLogo": "https://upload.wikimedia.org/wikipedia/commons/a/a0/Wipro_Primary_Logo_Color_RGB.svg",
+      "role": "CLOUD & DEVOPS ENGINEER",
+      "package": "11.5 LPA",
+      "verified": true
+    }
+  ],
+  "team": [
+    {
+      "name": "Er Adarsh verma ",
+      "role": "Senior Instructor",
+      "photo": "http://localhost:5000/uploads/file-1789037889874-751013702.jpeg",
+      "experience": "8+ Years Exp",
+      "bio": "i name is Adarsh verma  and im form  lakhimpur khreri  and i am studetnt of BCA",
+      "specialization": "Full Stack & System Design",
+      "_id": "6aa28d44eb47ffc4d9bab467",
+      "createdAt": "2026-09-10T10:58:12.122Z",
+      "updatedAt": "2026-09-10T10:58:12.122Z",
+      "__v": 0
+    },
+    {
+      "id": "team-1788534062124",
+      "name": "AdARSH",
+      "role": "MERN DEVELOPR",
+      "photo": "http://localhost:5000/uploads/file-1788534060501-624548278.png",
+      "tag": "#TEAMCODEGURU",
+      "bio": "UHIHKNKKHGGGGGGGGGGGGGGGGGGGGHHJHJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJLNM",
+      "questionPrompt": "Do you have any project in mind?",
+      "phone": "9198483820",
+      "website": "codeguru.com",
+      "createdAt": "2026-09-04T15:01:02.124Z"
+    }
+  ],
+  "branches": [
+    {
+      "id": "branch-1",
+      "category": "REGIONAL TECH HUB & CAMPUS",
+      "title": "Ayodhya Branch Office",
+      "address": "NEAR BENIGANJ CHAURAHA, MAIN HIGHWAY ROAD, AYODHYA, UTTAR PRADESH 224001",
+      "phone": "+91 91984 83820",
+      "timings": "Mon - Sat | 10:00 AM - 07:00 PM"
+    }
+  ],
+  "leads": [
+    {
+      "leadId": "LEAD-8810",
+      "name": "Aditya verma",
+      "phone": "8052411746",
+      "location": "Lucknow, UP",
+      "course": "DevOps & Cloud Engineering",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Lucknow, UP)",
+      "_id": "6aa28bdfeb47ffc4d9bab466",
+      "createdAt": "2026-09-10T10:52:15.037Z",
+      "updatedAt": "2026-09-10T10:52:15.037Z",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-8744",
+      "name": "Adarsh verma",
+      "phone": "av969998@gmail.com",
+      "location": "Lucknow, UP",
+      "course": "Full Stack Web Development (New Registered Student)",
+      "status": "New",
+      "notes": "New Student Registered (av969998@gmail.com)",
+      "_id": "6aa180b8272d66824fd6fd03",
+      "createdAt": "2026-09-09T15:52:24.674Z",
+      "updatedAt": "2026-09-09T15:52:24.674Z",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-5284",
+      "name": "Adarsh verma",
+      "phone": "av969998@gmail.com",
+      "location": "Lucknow, UP",
+      "course": "Full Stack Web Development (New Registered Student)",
+      "status": "New",
+      "notes": "New Student Registered (av969998@gmail.com)",
+      "_id": "6aa17edeac0339fa84772d59",
+      "createdAt": "2026-09-09T15:44:30.466Z",
+      "updatedAt": "2026-09-09T15:44:30.466Z",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-3169",
+      "name": "Adarsh verma",
+      "phone": "9670912923",
+      "location": "Lucknow, UP",
+      "course": "C++ & Competitive Programming",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Lucknow, UP)",
+      "_id": "6aa17ecdac0339fa84772d56",
+      "createdAt": "2026-09-09T15:44:13.965Z",
+      "updatedAt": "2026-09-09T15:44:13.965Z",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-1088",
+      "name": "deva",
+      "phone": "deva123@gmail.com",
+      "location": "Lucknow, UP",
+      "course": "Full Stack Web Development (New User Registration)",
+      "status": "New",
+      "notes": "New Student Registered (deva123@gmail.com)",
+      "_id": "6aa173303d6ed3068341425e",
+      "createdAt": "2026-09-09T14:54:40.205Z",
+      "updatedAt": "2026-09-09T14:54:40.205Z",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-9946",
+      "name": "komal verma",
+      "phone": "komal123@gmail.com",
+      "location": "Lucknow, UP",
+      "course": "Full Stack Web Development (New User Registration)",
+      "status": "New",
+      "notes": "New Student Registered (komal123@gmail.com)",
+      "_id": "6aa1558649fe4a02518b3429",
+      "createdAt": "2026-09-09T12:48:06.359Z",
+      "updatedAt": "2026-09-09T12:48:06.359Z",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-9862",
+      "name": "Rahul verma",
+      "phone": "9670912923",
+      "location": "Lucknow, UP",
+      "course": "DevOps & Cloud Engineering",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Lucknow, UP)",
+      "_id": "6aa10ad1db585e210ce73c77",
+      "createdAt": "2026-09-09T07:29:21.749Z",
+      "updatedAt": "2026-09-09T07:29:21.749Z",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-2846",
+      "name": "ramu  verma",
+      "phone": "9670912923",
+      "location": "Lucknow, UP",
+      "course": "Java Full Stack & DSA",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Lucknow, UP)",
+      "createdAt": "2026-09-08T15:45:12.846Z",
+      "_id": "6aa02d88447097e4aa89d25a",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-6490",
+      "name": "radha  verma",
+      "phone": "0000000000",
+      "location": "Lucknow, UP",
+      "course": "Cyber Security & Ethical Hacking",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Lucknow, UP)",
+      "createdAt": "2026-09-07T07:22:36.490Z",
+      "_id": "6a9e663cc97c543f5439264e",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-8358",
+      "name": "kumar  verm",
+      "phone": "0000000000",
+      "location": "Lucknow, UP",
+      "course": "C++ & Competitive Programming",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Lucknow, UP)",
+      "createdAt": "2026-09-06T17:22:08.358Z",
+      "_id": "6a9da140ef26b793f0ada779",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-0309",
+      "name": "nkjvbnskjnlksfnlkfs",
+      "phone": "d dklsmmfl",
+      "location": "Lucknow, UP",
+      "course": "Full Stack Web Development",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Lucknow, UP)",
+      "createdAt": "2026-09-05T17:28:10.309Z",
+      "_id": "6a9c512adff1a0b2dc1dffd4",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-9031",
+      "name": "adarsh",
+      "phone": "2222222222",
+      "location": "Lucknow, UP",
+      "course": "Java Full Stack & DSA",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Lucknow, UP)",
+      "createdAt": "2026-09-05T07:56:29.031Z",
+      "_id": "6a9bcb2d658d8d9585111100",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-2408",
+      "name": "Adarsh verma",
+      "phone": "9670912923",
+      "location": "Lucknow, UP",
+      "course": "Full Stack Web Development",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Lucknow, UP)",
+      "createdAt": "2026-09-04T19:56:52.408Z",
+      "_id": "6a9b228437dd61e2876803e8",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-9589",
+      "name": "radha",
+      "phone": "4444444444",
+      "location": "Lucknow, UP",
+      "course": "Cyber Security & Ethical Hacking",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Lucknow, UP)",
+      "createdAt": "2026-09-04T19:38:09.589Z",
+      "_id": "6a9b1e2137dd61e287680103",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-6061",
+      "name": "komal",
+      "phone": "444",
+      "location": "Sarai Mir, UP",
+      "course": "Full Stack Web Development",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:55:46.061Z",
+      "_id": "6a9b143237dd61e28767fff6",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-5838",
+      "name": "komal",
+      "phone": "444",
+      "location": "Sarai Mir, UP",
+      "course": "Full Stack Web Development",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:55:45.838Z",
+      "_id": "6a9b143137dd61e28767fff5",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-5574",
+      "name": "komal",
+      "phone": "444",
+      "location": "Sarai Mir, UP",
+      "course": "Full Stack Web Development",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:55:45.574Z",
+      "_id": "6a9b143137dd61e28767fff4",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-5278",
+      "name": "komal",
+      "phone": "444",
+      "location": "Sarai Mir, UP",
+      "course": "Full Stack Web Development",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:55:45.278Z",
+      "_id": "6a9b143137dd61e28767fff3",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-4934",
+      "name": "komal",
+      "phone": "444",
+      "location": "Sarai Mir, UP",
+      "course": "Full Stack Web Development",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:55:44.934Z",
+      "_id": "6a9b143037dd61e28767fff2",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-4780",
+      "name": "komal",
+      "phone": "444",
+      "location": "Sarai Mir, UP",
+      "course": "Full Stack Web Development",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:55:44.780Z",
+      "_id": "6a9b143037dd61e28767fff1",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-4278",
+      "name": "komal",
+      "phone": "44",
+      "location": "Sarai Mir, UP",
+      "course": "Full Stack Web Development",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:55:44.278Z",
+      "_id": "6a9b143037dd61e28767fff0",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-4028",
+      "name": "komal",
+      "phone": "4",
+      "location": "Sarai Mir, UP",
+      "course": "Full Stack Web Development",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:55:44.029Z",
+      "_id": "6a9b143037dd61e28767ffef",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-3853",
+      "name": "komal",
+      "phone": "4",
+      "location": "Sarai Mir, UP",
+      "course": "Full Stack Web Development",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:55:43.854Z",
+      "_id": "6a9b142f37dd61e28767ffee",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-1187",
+      "name": "monu",
+      "phone": "9670912923",
+      "location": "Sarai Mir, UP",
+      "course": "Java Full Stack & DSA",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:44:11.187Z",
+      "_id": "6a9b117b37dd61e28767fe61",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-9697",
+      "name": "raju",
+      "phone": "9670912923",
+      "location": "Sarai Mir, UP",
+      "course": "Cyber Security & Ethical Hacking",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:43:39.697Z",
+      "_id": "6a9b115b37dd61e28767fe48",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-2021",
+      "name": "sonu",
+      "phone": "9670912923",
+      "location": "Sarai Mir, UP",
+      "course": "Cyber Security & Ethical Hacking",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:43:12.021Z",
+      "_id": "6a9b114037dd61e28767fe33",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-8012",
+      "name": "ad",
+      "phone": "967092923",
+      "location": "Sarai Mir, UP",
+      "course": "Cyber Security & Ethical Hacking",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:37:48.013Z",
+      "_id": "6a9b0ffc37dd61e28767fdb4",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-2369",
+      "name": "deva  verma",
+      "phone": "9670912923",
+      "location": "Sarai Mir, UP",
+      "course": "Python Data Science & AI",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:11:42.371Z",
+      "_id": "6a9b09de37dd61e28767fcc1",
+      "__v": 0
+    },
+    {
+      "leadId": "LEAD-3026",
+      "name": "komal verma",
+      "phone": "9670912923",
+      "location": "Sarai Mir, UP",
+      "course": "Python Data Science & AI",
+      "status": "New",
+      "notes": "Submitted via Inquiry Form (Auto Location: Sarai Mir, UP)",
+      "createdAt": "2026-09-04T18:10:43.027Z",
+      "_id": "6a9b09a337dd61e28767fcbc",
+      "__v": 0
+    },
+    {
+      "id": "LEAD-9540",
+      "name": "sonu verma",
+      "phone": "9670912923",
+      "location": "Lucknow, UP",
+      "course": "Python Data Science & AI",
+      "status": "Contacted",
+      "createdAt": "2026-09-04T15:45:59.540Z",
+      "notes": "Submitted via Contact Form (Lucknow, UP)"
+    },
+    {
+      "id": "LEAD-4951",
+      "name": "RAJA",
+      "phone": "9670912923",
+      "location": "Lucknow, UP",
+      "course": "Full Stack Web Development",
+      "status": "Contacted",
+      "createdAt": "2026-09-04T15:15:04.951Z",
+      "notes": "Submitted via Contact Form (Lucknow, UP)"
+    },
+    {
+      "id": "LEAD-3784",
+      "name": "sivam",
+      "phone": "9670912923",
+      "location": "Lucknow, UP",
+      "course": "Java Full Stack & DSA",
+      "status": "Enrolled",
+      "createdAt": "2026-09-04T13:59:03.784Z",
+      "notes": "Submitted via Contact Form (Lucknow, UP)"
+    },
+    {
+      "id": "LEAD-0767",
+      "name": "sachin verma",
+      "phone": "9670912923",
+      "location": "Lucknow, UP",
+      "course": "Java Full Stack & DSA",
+      "status": "Enrolled",
+      "createdAt": "2026-09-04T13:53:00.767Z",
+      "notes": "Submitted via Contact Form (Lucknow, UP)"
+    },
+    {
+      "id": "LEAD-9882",
+      "name": "ruchi",
+      "phone": "9670912923",
+      "location": "Lucknow, UP",
+      "course": "Java Full Stack & DSA",
+      "status": "Enrolled",
+      "createdAt": "2026-09-04T13:36:49.882Z",
+      "notes": "Submitted via Contact Form (Lucknow, UP)"
+    },
+    {
+      "id": "LEAD-3058",
+      "name": "remesh",
+      "phone": "9670912923",
+      "location": "Lucknow, UP",
+      "course": "Full Stack Web Development",
+      "status": "Enrolled",
+      "createdAt": "2026-09-04T13:36:23.059Z",
+      "notes": "Submitted via Contact Form (Lucknow, UP)"
+    },
+    {
+      "id": "LEAD-5827",
+      "name": "komal",
+      "phone": "9670912923",
+      "location": "Lucknow, UP",
+      "course": "Java Full Stack & DSA",
+      "status": "Enrolled",
+      "createdAt": "2026-09-04T13:31:55.827Z",
+      "notes": "Submitted via Contact Form (Lucknow, UP)"
+    },
+    {
+      "id": "LEAD-7531",
+      "name": "deva",
+      "phone": "9670912923",
+      "location": "Lucknow, UP",
+      "course": "Java Full Stack & DSA",
+      "status": "Enrolled",
+      "createdAt": "2026-09-04T13:28:17.531Z",
+      "notes": "Submitted via Contact Form (Lucknow, UP)"
+    },
+    {
+      "id": "LEAD-1001",
+      "name": "Saurabh Kumar",
+      "phone": "9876543210",
+      "location": "Lucknow, UP",
+      "course": "Full Stack Web Development",
+      "status": "Enrolled",
+      "createdAt": "2026-09-04T13:26:41.960Z",
+      "notes": "Interested in MERN stack job guarantee batch"
+    },
+    {
+      "id": "LEAD-1002",
+      "name": "Ananya Mishra",
+      "phone": "9123456789",
+      "location": "Ayodhya, UP",
+      "course": "Java Full Stack & DSA",
+      "status": "Enrolled",
+      "createdAt": "2026-09-04T13:26:41.961Z",
+      "notes": "Requested callback after 5 PM"
+    }
+  ],
+  "traffic": {
+    "todayVisitors": 131,
+    "liveActive": 1,
+    "totalVisitors": 131
+  }
+}

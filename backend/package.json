@@ -1,0 +1,21 @@
+{
+  "name": "codeguru-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.11.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.19.2",
+    "mongodb": "^7.6.0",
+    "mongoose": "^9.9.4",
+    "multer": "^1.4.5-lts.1"
+  }
+}

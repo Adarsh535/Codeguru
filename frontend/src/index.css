@@ -1,0 +1,241 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth Custom Animations */
+@keyframes modalSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(100%) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modalSlideDown {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100%) scale(0.96);
+  }
+}
+
+@keyframes backdropFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes backdropFadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cardItemPop {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-modal-slide-up {
+  animation: modalSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-modal-slide-down {
+  animation: modalSlideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-backdrop-in {
+  animation: backdropFadeIn 0.3s ease-out forwards;
+}
+
+.animate-backdrop-out {
+  animation: backdropFadeOut 0.25s ease-in forwards;
+}
+
+@keyframes infiniteScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-infinite-scroll {
+  display: flex;
+  width: max-content;
+  animation: infiniteScroll 28s linear infinite;
+}
+
+.animate-infinite-scroll:hover {
+  animation-play-state: paused;
+}
+
+@keyframes infiniteScrollReverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animate-infinite-scroll-reverse {
+  display: flex;
+  width: max-content;
+  animation: infiniteScrollReverse 28s linear infinite;
+}
+
+.animate-infinite-scroll-reverse:hover {
+  animation-play-state: paused;
+}
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8fafc;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: 'Outfit', sans-serif;
+  }
+}
+
+/* DARK MODE THEME SYSTEM */
+html.dark body {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+html.dark .bg-white {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 {
+  background-color: #0f172a !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-700,
+html.dark .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .border-slate-200,
+html.dark .border-slate-100,
+html.dark .border-slate-200\/80,
+html.dark .border-slate-200\/90 {
+  border-color: #334155 !important;
+}
+
+html.dark header,
+html.dark footer,
+html.dark .fixed.bottom-0 {
+  background-color: rgba(15, 23, 42, 0.95) !important;
+  border-color: #334155 !important;
+}
+
+/* Premium Glassmorphism Utility Classes */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 4px 20px -2px rgba(6, 182, 212, 0.05);
+}
+
+.glass-pill-cyan {
+  background: rgba(236, 254, 255, 0.9);
+  border: 1px solid rgba(165, 243, 252, 0.9);
+  color: #0e7490;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.08);
+}
+
+.glass-pill-cyan:hover {
+  background: rgba(207, 250, 254, 1);
+  border-color: rgba(34, 211, 238, 1);
+}
+
+.glass-pill-amber {
+  background: rgba(254, 252, 232, 0.9);
+  border: 1px solid rgba(254, 240, 138, 0.9);
+  color: #a16207;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
+}
+
+.glass-pill-amber:hover {
+  background: rgba(254, 249, 195, 1);
+  border-color: rgba(250, 204, 21, 1);
+}
+
+.pt-safe {
+  padding-top: max(14px, env(safe-area-inset-top));
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom Styled Visible Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #f59e0b, #f97316);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #d97706, #ea580c);
+}
