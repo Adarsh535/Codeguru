@@ -1,41 +1,41 @@
 import React, { useState, useEffect, useRef } from 'react';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import PauseIcon from '@mui/icons-material/Pause';
-import VolumeUpIcon from '@mui/icons-material/VolumeUp';
-import VolumeOffIcon from '@mui/icons-material/VolumeOff';
-import SparklesIcon from '@mui/icons-material/FlashOn';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Zap } from 'lucide-react';
 import { apiService } from '../../services/apiService';
 
 const DEFAULT_SLIDES = [
   {
     id: 'default-1',
+    type: 'image',
+    title: 'Success Stories & Campus Placement Highlights 🚀',
+    subtitle: 'Watch Exclusive Campus Placement & Tech Drive Highlights with 100% Verified Placements',
+    imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop',
+    badge: 'SUCCESS STORIES',
+    badgeColor: 'bg-[#10b981] text-white',
+    ctaText: 'Explore Placements'
+  },
+  {
+    id: 'default-2',
     type: 'video',
     title: 'CodeGuru Official Video 🎥',
     subtitle: 'Watch Exclusive Campus Placement & Tech Drive Highlights',
     videoUrl: '/codeguru%20video.mp4',
     poster: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',
-    badge: '🎬 FEATURED VIDEO',
-    badgeColor: 'bg-rose-500 text-white border-rose-300 shadow-md',
-    ctaText: 'Apply Drive',
-    ctaColor: 'bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 hover:from-amber-400 hover:to-yellow-300'
+    badge: 'FEATURED VIDEO',
+    badgeColor: 'bg-rose-500 text-white',
+    ctaText: 'Apply Drive'
   },
   {
-    id: 'default-2',
+    id: 'default-3',
     type: 'image',
-    title: 'MERN Stack Developer Bootcamp 🚀',
+    title: 'MERN Stack Developer Bootcamp 🔥',
     subtitle: 'MongoDB • Express • React • Node.js | Live Projects + 100% Placement Support',
     imageUrl: 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?auto=format&fit=crop&w=1200&q=80',
-    badge: '🔥 NEW BATCH STARTING 15TH SEPT',
-    badgeColor: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-400 text-slate-950 font-black border-amber-300 shadow-md',
+    badge: 'NEW BATCH 2026',
+    badgeColor: 'bg-gradient-to-r from-orange-400 to-amber-500 text-white',
     originalPrice: '₹14,999',
     price: '₹4,999',
     discount: '66% OFF',
-    batchDate: 'New Batch Starts 15th Sept',
-    ctaText: 'Enroll Now @ ₹4,999',
-    ctaColor: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white hover:from-emerald-400 hover:to-cyan-400 shadow-emerald-900/30'
+    ctaText: 'Enroll Now @ ₹4,999'
   }
 ];
 
@@ -60,18 +60,16 @@ export default function BannerSlider({ onOpenContactModal }) {
 
   const videoRefs = useRef({});
 
-  // Auto slide timer logic: image slides use 5s timer, video slides wait for video completion (onEnded)
   useEffect(() => {
     const currentSlide = slides[currentIndex];
-    if (currentSlide.type === 'image') {
+    if (!currentSlide || currentSlide.type === 'image') {
       const timer = setInterval(() => {
         handleNext();
       }, 5000);
       return () => clearInterval(timer);
     }
-  }, [currentIndex]);
+  }, [currentIndex, slides]);
 
-  // Handle video play/pause on slide change
   useEffect(() => {
     Object.keys(videoRefs.current).forEach((key) => {
       const video = videoRefs.current[key];
@@ -115,7 +113,6 @@ export default function BannerSlider({ onOpenContactModal }) {
     });
   };
 
-  // Touch Swipe Handlers for Mobile (280px+)
   const handleTouchStart = (e) => {
     setTouchStart(e.targetTouches[0].clientX);
   };
@@ -137,21 +134,20 @@ export default function BannerSlider({ onOpenContactModal }) {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-1.5 xxs:px-3 sm:px-6 mt-3 xxs:mt-4 sm:mt-5 mb-1 select-none">
+    <div className="w-full px-3 sm:px-4 pt-4 select-none">
       <div
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="relative w-full h-[195px] xxs:h-[230px] sm:h-[310px] md:h-[370px] lg:h-[420px] rounded-3xl xxs:rounded-[32px] sm:rounded-[36px] overflow-hidden border border-slate-200/90 shadow-lg shadow-cyan-900/10 group"
+        className="relative w-full aspect-[4/3] sm:aspect-[21/9] rounded-[28px] overflow-hidden shadow-xl bg-slate-900 group"
       >
-        {/* SLIDES CONTAINER */}
+        {/* SLIDES TRACK */}
         <div
           className="w-full h-full flex transition-transform duration-500 ease-out"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {slides.map((slide, index) => (
-            <div key={slide.id} className="relative w-full h-full shrink-0 overflow-hidden bg-slate-950">
-              {/* MEDIA: VIDEO OR IMAGE */}
+            <div key={slide.id || index} className="relative w-full h-full shrink-0 overflow-hidden bg-slate-900">
               {slide.type === 'video' ? (
                 <div className="relative w-full h-full">
                   <video
@@ -160,134 +156,120 @@ export default function BannerSlider({ onOpenContactModal }) {
                     poster={slide.poster}
                     muted={isMuted}
                     playsInline
-                    onEnded={() => {
-                      handleNext();
-                    }}
-                    className="w-full h-full object-cover"
+                    onEnded={handleNext}
+                    className="w-full h-full object-cover opacity-80"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
                 </div>
               ) : (
                 <div className="relative w-full h-full">
                   <img
                     src={slide.imageUrl}
                     alt={slide.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
                 </div>
               )}
 
-              {/* OVERLAY CONTENT */}
-              <div className="absolute inset-0 p-2.5 xxs:p-3.5 sm:p-6 flex flex-col justify-between z-10">
-                {/* Top Badge & Video Sound Toggle */}
-                <div className="flex items-center justify-between">
-                  <span className={`px-2.5 py-1 text-[8.5px] xxs:text-[9.5px] sm:text-xs font-black uppercase tracking-wider rounded-full border shadow-xs flex items-center gap-1 ${slide.badgeColor}`}>
-                    <SparklesIcon className="!w-3 !h-3" />
-                    {slide.badge}
-                  </span>
+              {/* GRADIENT OVERLAY */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#022069]/90 via-slate-900/30 to-transparent pointer-events-none" />
 
-                  {/* Video Mute/Unmute & Play/Pause Controls */}
-                  {slide.type === 'video' && index === currentIndex && (
-                    <div className="flex items-center gap-1 bg-slate-900/80 backdrop-blur-md p-1 rounded-full border border-white/20">
+              {/* TOP-LEFT BADGE */}
+              <div className="absolute top-4 left-4 z-10 pointer-events-none">
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold font-sans tracking-wide shadow-md ${slide.badgeColor || 'bg-[#10b981] text-white'}`}>
+                  <Zap className="w-3.5 h-3.5 fill-white text-white" />
+                  <span>{slide.badge || 'SUCCESS STORIES'}</span>
+                </div>
+              </div>
+
+              {/* TOP-RIGHT CONTROLS (Play/Pause & Mute) */}
+              <div className="absolute top-4 right-4 z-10 pointer-events-auto">
+                <div className="bg-[#1e293b]/70 backdrop-blur-md rounded-full flex items-center p-1 shadow-lg gap-1">
+                  {slide.type === 'video' && (
+                    <>
                       <button
                         onClick={() => toggleVideoPlay(index)}
-                        className="w-6 h-6 xxs:w-7 xxs:h-7 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center transition-colors cursor-pointer"
-                        title={isPlaying ? 'Pause Video' : 'Play Video'}
+                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors text-white cursor-pointer"
+                        title={isPlaying ? 'Pause' : 'Play'}
                       >
-                        {isPlaying ? <PauseIcon className="!w-3.5 !h-3.5" /> : <PlayArrowIcon className="!w-3.5 !h-3.5" />}
+                        {isPlaying ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
                       </button>
                       <button
                         onClick={toggleAudio}
-                        className="w-6 h-6 xxs:w-7 xxs:h-7 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center transition-colors cursor-pointer"
-                        title={isMuted ? 'Unmute Sound' : 'Mute Sound'}
+                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors text-white bg-white/10 cursor-pointer"
+                        title={isMuted ? 'Unmute' : 'Mute'}
                       >
-                        {isMuted ? <VolumeOffIcon className="!w-3.5 !h-3.5" /> : <VolumeUpIcon className="!w-3.5 !h-3.5" />}
+                        {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
                       </button>
-                    </div>
+                    </>
                   )}
                 </div>
+              </div>
 
-                {/* Bottom Slide Info & Call To Action Button */}
-                <div className="max-w-xl">
-                  <h2 className="text-xs xxs:text-sm sm:text-xl md:text-2xl font-black text-white font-heading leading-tight drop-shadow-md truncate">
-                    {slide.title}
-                  </h2>
-                  <p className="text-[9.5px] xxs:text-xs sm:text-sm text-slate-200 mt-1 line-clamp-2 drop-shadow-sm font-medium">
-                    {slide.subtitle}
-                  </p>
+              {/* SLIDE CONTENT INFO */}
+              <div className="absolute bottom-10 left-4 right-4 z-10 flex flex-col justify-end max-w-2xl">
+                <h2 className="text-base sm:text-2xl md:text-3xl font-black text-white leading-tight drop-shadow-md">
+                  {slide.title}
+                </h2>
+                <p className="text-xs sm:text-base text-slate-200 mt-1 sm:mt-2 line-clamp-2 drop-shadow-sm font-medium">
+                  {slide.subtitle}
+                </p>
 
-                  {/* Price & Batch Details Pill */}
-                  {slide.price && (
-                    <div className="mt-1 xxs:mt-1.5 flex flex-wrap items-center gap-1.5">
-                      <div className="flex items-baseline gap-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-lg border border-white/20">
-                        <span className="text-[9px] xxs:text-[10px] font-bold text-slate-400 line-through">
-                          {slide.originalPrice}
-                        </span>
-                        <span className="text-xs xxs:text-sm sm:text-base font-black text-amber-400">
-                          {slide.price}
-                        </span>
-                        <span className="px-1.5 py-0.2 text-[8px] xxs:text-[9px] font-black bg-emerald-500 text-white rounded">
-                          {slide.discount}
-                        </span>
-                      </div>
-                      {slide.batchDate && (
-                        <span className="px-2 py-0.5 text-[8px] xxs:text-[9.5px] sm:text-xs font-extrabold bg-indigo-600/90 text-white backdrop-blur-md rounded-lg border border-indigo-400/50 shadow-xs">
-                          📅 {slide.batchDate}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="mt-1.5 xxs:mt-2.5 flex items-center gap-1.5">
-                    <button
-                      onClick={onOpenContactModal}
-                      className={`px-3 xxs:px-4 py-1 xxs:py-1.5 text-[9.5px] xxs:text-xs sm:text-sm font-black uppercase tracking-wider rounded-xl shadow-md border border-white/30 flex items-center gap-1.5 transition-all duration-200 active:scale-95 cursor-pointer ${slide.ctaColor}`}
-                    >
-                      {slide.ctaText}
-                      <ArrowForwardIcon className="!w-3.5 !h-3.5" />
-                    </button>
+                {slide.price && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-sm sm:text-xl font-black text-amber-400">{slide.price}</span>
+                    <span className="text-xs sm:text-sm text-slate-400 line-through">{slide.originalPrice}</span>
+                    <span className="text-xs font-bold text-emerald-400">{slide.discount}</span>
                   </div>
+                )}
+
+                <div className="mt-3 flex items-center gap-2">
+                  <button
+                    onClick={onOpenContactModal}
+                    className="bg-[#2463eb] hover:bg-blue-700 text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-md transition-transform active:scale-95 cursor-pointer"
+                  >
+                    {slide.ctaText || 'Inquire Now'}
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* LEFT NAV ARROW */}
+        {/* LEFT NAV CHEVRON */}
         <button
           onClick={handlePrev}
-          className="absolute left-1.5 top-1/2 -translate-y-1/2 w-6 h-6 xxs:w-7 xxs:h-7 rounded-full bg-slate-900/60 hover:bg-slate-900/90 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all opacity-80 hover:opacity-100 active:scale-90 z-20"
-          title="Previous Slide"
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-[#1e293b]/60 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-colors z-20 pointer-events-auto cursor-pointer"
+          title="Previous"
         >
-          <ChevronLeftIcon className="!w-3.5 !h-3.5 xxs:!w-4 xxs:!h-4" />
+          <ChevronLeft className="w-4.5 h-4.5" />
         </button>
 
-        {/* RIGHT NAV ARROW */}
+        {/* RIGHT NAV CHEVRON */}
         <button
           onClick={handleNext}
-          className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 xxs:w-7 xxs:h-7 rounded-full bg-slate-900/60 hover:bg-slate-900/90 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all opacity-80 hover:opacity-100 active:scale-90 z-20"
-          title="Next Slide"
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-[#1e293b]/60 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-colors z-20 pointer-events-auto cursor-pointer"
+          title="Next"
         >
-          <ChevronRightIcon className="!w-3.5 !h-3.5 xxs:!w-4 xxs:!h-4" />
+          <ChevronRight className="w-4.5 h-4.5" />
         </button>
 
         {/* BOTTOM PAGINATION DOTS */}
-        <div className="absolute bottom-1.5 xxs:bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 z-20 bg-slate-950/40 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10">
-          {slides.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentIndex(idx)}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                currentIndex === idx
-                  ? 'w-4 xxs:w-5 bg-gradient-to-r from-amber-400 to-yellow-300'
-                  : 'w-1.5 bg-white/40 hover:bg-white/70'
-              }`}
-              title={`Go to slide ${idx + 1}`}
-            />
-          ))}
+        <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-col items-center pointer-events-none">
+          <div className="flex items-center gap-1.5 bg-slate-900/50 backdrop-blur-sm px-3 py-2 rounded-full pointer-events-auto">
+            {slides.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentIndex(idx)}
+                className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                  currentIndex === idx ? 'w-4 bg-[#facc15]' : 'w-1.5 bg-slate-400'
+                }`}
+                title={`Slide ${idx + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
   );
 }
+

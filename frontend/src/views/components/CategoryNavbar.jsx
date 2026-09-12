@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import CodeIcon from '@mui/icons-material/Code';
-import EngineeringIcon from '@mui/icons-material/Engineering';
-import LanIcon from '@mui/icons-material/Lan';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import SchoolIcon from '@mui/icons-material/School';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { Heart, Clock, ArrowRight, Code, Cpu, Server, Wrench, Zap, Globe } from 'lucide-react';
 import { apiService } from '../../services/apiService';
 
-export default function CategoryNavbar({ onOpenContactModal }) {
-  const [activeTab, setActiveTab] = useState('coding');
-  const [activeCodingSubTab, setActiveCodingSubTab] = useState('web');
+export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal }) {
+  const [activeCategory, setActiveCategory] = useState('coding');
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [likedCourses, setLikedCourses] = useState({});
   const [customCourses, setCustomCourses] = useState([]);
 
   useEffect(() => {
@@ -23,456 +18,352 @@ export default function CategoryNavbar({ onOpenContactModal }) {
     return () => { isMounted = false; };
   }, []);
 
-  const codingSubCategories = [
-    { id: 'web', label: 'Web Development' },
-    { id: 'app', label: 'App Development' },
-    { id: 'software', label: 'Software Development' }
-  ];
+  const toggleHeart = (e, courseId) => {
+    e.stopPropagation();
+    setLikedCourses(prev => ({ ...prev, [courseId]: !prev[courseId] }));
+  };
 
   const categories = [
     {
       id: 'coding',
-      label: 'Coding',
-      icon: CodeIcon,
-      gradient: 'from-cyan-500 to-blue-600',
-      activeBg: 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25',
-      inactiveBg: 'bg-slate-50 text-slate-700 hover:bg-cyan-50 hover:text-cyan-900 border-slate-200',
-      title: 'Coding & Full Stack Software Engineering',
-      badge: '🔥 HIGH PLACEMENT TRACK',
-      badgeStyle: 'bg-cyan-100 text-cyan-800 border-cyan-300',
-      courses: [
-        /* Web Development Courses */
-        {
-          id: 'mern',
-          subCat: 'web',
-          title: 'Full-Stack Web Development (MERN)',
-          sub: 'MongoDB, Express, React, Node.js + Live Projects',
-          duration: '6 Months',
-          price: '₹4,999',
-          original: '₹14,999',
-          tag: 'HOT',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg'
-        },
-        {
-          id: 'react-next',
-          subCat: 'web',
-          title: 'Frontend Masterclass (React & Next.js)',
-          sub: 'React 18, Next.js 14, TailwindCSS, TypeScript & UI/UX',
-          duration: '4 Months',
-          price: '₹3,999',
-          original: '₹11,999',
-          tag: 'POPULAR',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Nextjs-logo.svg'
-        },
-        {
-          id: 'backend-api',
-          subCat: 'web',
-          title: 'Backend Engineering & REST APIs',
-          sub: 'Node.js, Express, Python FastAPI, PostgreSQL & Microservices',
-          duration: '4 Months',
-          price: '₹3,499',
-          original: '₹9,999',
-          tag: 'IN DEMAND',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d9/Node.js_logo.svg'
-        },
-
-        /* App Development Courses */
-        {
-          id: 'flutter',
-          subCat: 'app',
-          title: 'Flutter & Dart Cross-Platform Mobile Apps',
-          sub: 'Build Native Android & iOS Apps with Flutter & Firebase',
-          duration: '5 Months',
-          price: '₹4,999',
-          original: '₹14,999',
-          tag: 'TOP RATED',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/17/Google-flutter-logo.png'
-        },
-        {
-          id: 'android-kotlin',
-          subCat: 'app',
-          title: 'Android App Development (Kotlin)',
-          sub: 'Android Studio, Kotlin, Jetpack Compose, MVVM Architecture',
-          duration: '4 Months',
-          price: '₹4,499',
-          original: '₹12,999',
-          tag: 'CAREER TRACK',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/74/Kotlin_Icon.svg'
-        },
-        {
-          id: 'ios-swift',
-          subCat: 'app',
-          title: 'iOS App Development (Swift & SwiftUI)',
-          sub: 'Swift 5, SwiftUI, Xcode, CoreData & App Store Publishing',
-          duration: '5 Months',
-          price: '₹5,499',
-          original: '₹15,999',
-          tag: 'PREMIUM',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Swift_logo_color.svg'
-        },
-
-        /* Software Development Courses */
-        {
-          id: 'dsa',
-          subCat: 'software',
-          title: 'Java Data Structures & Algorithms (DSA)',
-          sub: '300+ Solved Problems, Trees, Graphs, LeetCode Mastery',
-          duration: '4 Months',
-          price: '₹3,499',
-          original: '₹9,999',
-          tag: 'TOP RATED',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/en/3/30/Java_programming_language_logo.svg'
-        },
-        {
-          id: 'cpp-system',
-          subCat: 'software',
-          title: 'C++ & System Design Bootcamp',
-          sub: 'STL, OOPs, Low Level System Design for Top MNCs',
-          duration: '3 Months',
-          price: '₹2,999',
-          original: '₹7,999',
-          tag: 'POPULAR',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/18/ISO_C%2B%2B_Logo.svg'
-        },
-        {
-          id: 'ai-python',
-          subCat: 'software',
-          title: 'Python AI & Data Science Masterclass',
-          sub: 'Python, NumPy, Pandas, Scikit-learn, ML Models & AI',
-          duration: '5 Months',
-          price: '₹5,499',
-          original: '₹15,999',
-          tag: 'NEW',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg'
-        },
-        {
-          id: 'qa-testing',
-          subCat: 'software',
-          title: 'Software QA & Automation Testing',
-          sub: 'Selenium, Cypress, JUnit, Postman & API Automation',
-          duration: '3 Months',
-          price: '₹3,299',
-          original: '₹8,999',
-          tag: 'ESSENTIAL',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Selenium_Logo.png'
-        }
-      ]
-    },
-    {
-      id: 'engineering',
-      label: 'Engineering',
-      icon: EngineeringIcon,
-      gradient: 'from-cyan-500 to-blue-600',
-      activeBg: 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25',
-      inactiveBg: 'bg-slate-50 text-slate-700 hover:bg-cyan-50 hover:text-cyan-900 border-slate-200',
-      title: 'Core Engineering & Tech Training',
-      badge: '⚙️ INDUSTRY READY TRACK',
-      badgeStyle: 'bg-cyan-100 text-cyan-800 border-cyan-300',
-      courses: [
-        {
-          id: 'cad',
-          title: 'Mechanical CAD/CAM & SolidWorks',
-          sub: '3D Modeling, Simulation & Product Assemblies',
-          duration: '4 Months',
-          price: '₹4,499',
-          original: '₹12,999',
-          tag: 'CAREER TRACK',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/37/Dassault_Syst%C3%A8mes_logo.svg'
-        },
-        {
-          id: 'vlsi',
-          title: 'Electrical & VLSI Chip Design',
-          sub: 'Embedded Systems, Verilog & Circuit Design',
-          duration: '5 Months',
-          price: '₹5,999',
-          original: '₹16,999',
-          tag: 'HIGH DEMAND',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/87/Microchip_Technology_logo.svg'
-        },
-        {
-          id: 'civil',
-          title: 'Civil AutoCAD & STAAD Pro',
-          sub: 'Structural Analysis & Modern Building Plans',
-          duration: '3 Months',
-          price: '₹3,999',
-          original: '₹10,999',
-          tag: 'CORE TECH',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Autodesk_Logo_2021.svg'
-        },
-        {
-          id: 'cs-core',
-          title: 'CS/IT Core Fundamentals',
-          sub: 'Operating Systems, DBMS, SQL, Linux & Networks',
-          duration: '3 Months',
-          price: '₹2,999',
-          original: '₹7,999',
-          tag: 'ESSENTIAL',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Linux_Tux_standalone.svg'
-        }
-      ]
-    },
-    {
-      id: 'networking',
-      label: 'Networking',
-      icon: LanIcon,
-      gradient: 'from-cyan-500 to-blue-600',
-      activeBg: 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25',
-      inactiveBg: 'bg-slate-50 text-slate-700 hover:bg-cyan-50 hover:text-cyan-900 border-slate-200',
-      title: 'Cloud Computing, DevOps & Cyber Security',
-      badge: '🌐 CLOUD ARCHITECT TRACK',
-      badgeStyle: 'bg-cyan-100 text-cyan-800 border-cyan-300',
-      courses: [
-        {
-          id: 'aws',
-          title: 'AWS & Multi-Cloud Solutions Architect',
-          sub: 'AWS, Azure, Cloud Infrastructure & Security',
-          duration: '4 Months',
-          price: '₹5,999',
-          original: '₹17,999',
-          tag: 'BESTSELLER',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg'
-        },
-        {
-          id: 'devops',
-          title: 'DevOps & Kubernetes Masterclass',
-          sub: 'Docker, K8s, Jenkins, Terraform, CI/CD Pipelines',
-          duration: '4 Months',
-          price: '₹6,499',
-          original: '₹18,999',
-          tag: 'HIGH SALARY',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/39/Kubernetes_logo_without_workmark.svg'
-        },
-        {
-          id: 'cyber',
-          title: 'Ethical Hacking & Cyber Security',
-          sub: 'Network Penetration Testing & Cyber Defense',
-          duration: '5 Months',
-          price: '₹6,999',
-          original: '₹19,999',
-          tag: 'POPULAR',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/23/Kali-linux-logo.svg'
-        },
-        {
-          id: 'ccna',
-          title: 'CCNA & Network Administrator',
-          sub: 'Cisco Routing, Switching & Protocols Mastery',
-          duration: '3 Months',
-          price: '₹3,499',
-          original: '₹9,999',
-          tag: 'CERTIFIED',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Cisco_logo_blue_2016.svg'
-        }
-      ]
+      name: 'Coding & Software Development',
+      icon: Code,
+      img: '/images/categories/coding.png',
+      bgColor: 'bg-blue-50'
     },
     {
       id: 'robotics',
-      label: 'Robotics',
-      icon: SmartToyIcon,
-      gradient: 'from-cyan-500 to-blue-600',
-      activeBg: 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25',
-      inactiveBg: 'bg-slate-50 text-slate-700 hover:bg-cyan-50 hover:text-cyan-900 border-slate-200',
-      title: 'Robotics, Industrial IoT & AI Hardware',
-      badge: '🤖 FUTURE TECH TRACK',
-      badgeStyle: 'bg-purple-100 text-purple-800 border-purple-300',
-      courses: [
-        {
-          id: 'ai-robot',
-          title: 'AI Robotics & Autonomous Systems',
-          sub: 'ROS, Computer Vision, OpenCV, Raspberry Pi',
-          duration: '6 Months',
-          price: '₹7,999',
-          original: '₹22,999',
-          tag: 'ADVANCED',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/c8/ROS_Logo.png'
-        },
-        {
-          id: 'embedded',
-          title: 'Embedded Systems & Microcontrollers',
-          sub: 'Arduino, ARM Cortex, ESP32, Embedded C',
-          duration: '4 Months',
-          price: '₹4,999',
-          original: '₹13,999',
-          tag: 'HANDS ON',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/87/Arduino_Logo.svg'
-        },
-        {
-          id: 'iiot',
-          title: 'Industrial IoT & Automation',
-          sub: 'PLC Scada, Sensors, Wireless Protocols & Cloud',
-          duration: '4 Months',
-          price: '₹5,499',
-          original: '₹15,999',
-          tag: 'FUTURE READY',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4c/Typescript_logo_2020.svg'
-        },
-        {
-          id: 'drone',
-          title: 'Drone Technology & Flight Avionics',
-          sub: 'Drone Assembly, Flight Controllers & Hardware',
-          duration: '3 Months',
-          price: '₹6,499',
-          original: '₹18,999',
-          tag: 'NEW',
-          logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg'
-        }
-      ]
+      name: 'Robotics & IoT',
+      icon: Cpu,
+      img: '/images/categories/robotics.png',
+      bgColor: 'bg-indigo-50'
+    },
+    {
+      id: 'networking',
+      name: 'Networking & Server Administration',
+      icon: Server,
+      img: '/images/categories/networking.png',
+      bgColor: 'bg-cyan-50'
+    },
+    {
+      id: 'repair',
+      name: 'Computer & Mobile Repair',
+      icon: Wrench,
+      img: '/images/categories/repair.png',
+      bgColor: 'bg-orange-50'
+    },
+    {
+      id: 'electrical',
+      name: 'Electrical, Electronics & Home Appliance Repair',
+      icon: Zap,
+      img: '/images/categories/electrical.png',
+      bgColor: 'bg-emerald-50'
+    },
+    {
+      id: 'marketing',
+      name: 'Digital Marketing & Online Business',
+      icon: Globe,
+      img: '/images/categories/marketing.png',
+      bgColor: 'bg-rose-50'
     }
   ];
 
-  const currentCategory = categories.find((c) => c.id === activeTab) || categories[0];
-  const CurrentIcon = currentCategory.icon;
-
-  const dynamicCategoryCourses = customCourses.filter(c => {
-    const cat = (c.category || 'coding').toLowerCase();
-    return cat === activeTab.toLowerCase();
-  });
-
-  const baseCourses = [
-    ...dynamicCategoryCourses,
-    ...currentCategory.courses
+  const trainingFilters = [
+    'All',
+    '45 Days Summer Training',
+    '45 Days Winter Training',
+    '6 Month Course',
+    '3 Months Internship',
+    'One Year Course'
   ];
 
-  const displayedCourses = activeTab === 'coding'
-    ? baseCourses.filter((c) => (c.subCat || 'web').toLowerCase() === activeCodingSubTab.toLowerCase())
-    : baseCourses;
+  const allCourses = [
+    {
+      id: 'python-beginners',
+      categoryId: 'coding',
+      title: 'Python Programming for Beginners',
+      duration: '3 Months',
+      level: 'Beginner',
+      mode: 'Live + Record',
+      price: '₹4,999',
+      originalPrice: '₹7,999',
+      discount: '37% OFF',
+      tag: 'BESTSELLER',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+      iconBg: 'bg-blue-50'
+    },
+    {
+      id: 'mern-stack',
+      categoryId: 'coding',
+      title: 'Full-Stack Web Development (MERN)',
+      duration: '6 Months',
+      level: 'Intermediate',
+      mode: 'Live Classes',
+      price: '₹8,999',
+      originalPrice: '₹14,000',
+      discount: '35% OFF',
+      tag: null,
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
+      iconBg: 'bg-cyan-50'
+    },
+    {
+      id: 'react-nextjs',
+      categoryId: 'coding',
+      title: 'Frontend Masterclass (React & Next.js)',
+      duration: '4 Months',
+      level: 'Advanced',
+      mode: 'Self-Paced',
+      price: '₹3,999',
+      originalPrice: '₹6,999',
+      discount: '42% OFF',
+      tag: 'BESTSELLER',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg',
+      iconBg: 'bg-slate-100'
+    },
+    {
+      id: 'backend-node',
+      categoryId: 'coding',
+      title: 'Backend Engineering & REST APIs',
+      duration: '4 Months',
+      level: 'Intermediate',
+      mode: 'Live + Record',
+      price: '₹5,499',
+      originalPrice: '₹8,500',
+      discount: '35% OFF',
+      tag: null,
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
+      iconBg: 'bg-green-50'
+    },
+    {
+      id: 'swift-ios',
+      categoryId: 'coding',
+      title: 'iOS App Development with Swift',
+      duration: '5 Months',
+      level: 'Beginner',
+      mode: 'Live Classes',
+      price: '₹6,999',
+      originalPrice: '₹11,000',
+      discount: '36% OFF',
+      tag: 'BESTSELLER',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg',
+      iconBg: 'bg-orange-50'
+    },
+    {
+      id: 'java-springboot',
+      categoryId: 'coding',
+      title: 'Java & Spring Boot Enterprise Dev',
+      duration: '6 Months',
+      level: 'Advanced',
+      mode: 'Live + Record',
+      price: '₹7,499',
+      originalPrice: '₹12,999',
+      discount: '42% OFF',
+      tag: null,
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
+      iconBg: 'bg-red-50'
+    },
+    {
+      id: 'robotics-ai',
+      categoryId: 'robotics',
+      title: 'Robotics & Hardware Automation',
+      duration: '4 Months',
+      level: 'Intermediate',
+      mode: 'Live + Lab',
+      price: '₹7,999',
+      originalPrice: '₹12,000',
+      discount: '33% OFF',
+      tag: 'BESTSELLER',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+      iconBg: 'bg-indigo-50'
+    },
+    {
+      id: 'ccna-net',
+      categoryId: 'networking',
+      title: 'Networking & Server Admin (CCNA)',
+      duration: '3 Months',
+      level: 'Beginner',
+      mode: 'Live Classes',
+      price: '₹4,499',
+      originalPrice: '₹7,500',
+      discount: '40% OFF',
+      tag: 'POPULAR',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg',
+      iconBg: 'bg-cyan-50'
+    }
+  ];
+
+  const currentCategoryObj = categories.find(c => c.id === activeCategory) || categories[0];
+
+  const displayedCourses = allCourses.filter(c => c.categoryId === activeCategory);
 
   return (
-    <div className="sticky top-[48px] xxs:top-[54px] sm:top-[64px] z-30 w-full max-w-7xl mx-auto px-1.5 xxs:px-3 sm:px-6 my-2 select-none">
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl xxs:rounded-[32px] p-2 xxs:p-2.5 sm:p-4 border border-slate-200/90 shadow-md relative overflow-hidden flex flex-col gap-2">
+    <section className="w-full px-3 sm:px-4 py-8 bg-slate-50/50 select-none">
+      <div className="max-w-7xl mx-auto w-full">
         
-        {/* Single-Line Row for All 4 Category Options - Optimized for 280px Mobile Screens */}
-        <div className="grid grid-cols-4 gap-0.5 xxs:gap-1 sm:gap-1.5">
+        {/* SECTION TITLE HEADER */}
+        <div className="flex items-center gap-2 mb-4 px-2 md:px-0 w-full">
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+          <h2 className="text-left text-sm md:text-base font-bold text-slate-600 tracking-widest uppercase">
+            Our Courses
+          </h2>
+        </div>
+
+        {/* CATEGORY SELECTOR CARDS GRID */}
+        <div className="grid grid-cols-3 gap-2 md:flex md:gap-6 md:overflow-x-visible pb-4 md:pb-0 pt-2 px-1 md:mx-0 md:px-0">
           {categories.map((cat) => {
+            const isCatActive = activeCategory === cat.id;
             const IconComp = cat.icon;
-            const isActive = activeTab === cat.id;
 
             return (
               <button
                 key={cat.id}
-                onClick={() => setActiveTab(cat.id)}
-                className={`py-1.5 xxs:py-2 px-0.5 xxs:px-1.5 sm:px-3 rounded-full border transition-all duration-200 flex items-center justify-center text-center cursor-pointer active:scale-95 group relative overflow-hidden ${
-                  isActive
-                    ? `${cat.activeBg} border-transparent shadow-sm`
-                    : `${cat.inactiveBg} border-slate-200/80`
-                }`}
+                onClick={() => setActiveCategory(cat.id)}
+                className="group flex flex-col items-center justify-start w-full md:w-auto md:flex-1 shrink-0 gap-2 sm:gap-3 cursor-pointer"
               >
-                {/* Text Label: Full spelling visible without truncation even on 280px screens */}
-                <span className={`text-[9px] xxs:text-[10px] sm:text-xs md:text-sm font-extrabold tracking-tight xxs:tracking-normal whitespace-nowrap ${
-                  isActive ? 'text-white' : 'text-slate-900 font-heading'
-                }`}>
-                  {cat.label}
+                <div
+                  className={`relative flex items-center justify-center p-2 rounded-[16px] xl:rounded-[28px] transition-all duration-300 w-full aspect-square ${
+                    isCatActive
+                      ? 'border-2 border-blue-500 shadow-blue-100 ring-4 ring-blue-50/50 bg-white'
+                      : 'border-2 border-transparent hover:-translate-y-1 bg-white/60'
+                  }`}
+                >
+                  <img
+                    src={cat.img}
+                    alt={cat.name}
+                    className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <span
+                  className={`text-[11px] sm:text-xs md:text-sm font-extrabold text-center leading-tight px-1 transition-colors ${
+                    isCatActive ? 'text-blue-600' : 'text-slate-700 group-hover:text-blue-500'
+                  }`}
+                >
+                  {cat.name}
                 </span>
               </button>
             );
           })}
         </div>
 
-        {/* EXPANDED SECTION DRAWER RIGHT BELOW NAVBAR TABS */}
-        <div className="pt-2 border-t border-slate-100 animate-card-pop">
-          {/* Section Header */}
-          <div className="flex items-center justify-between mb-1.5 xxs:mb-2 gap-1">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <div className={`p-1 xxs:p-1.5 rounded-full bg-gradient-to-tr ${currentCategory.gradient} text-white flex items-center justify-center shadow-xs shrink-0`}>
-                <CurrentIcon className="!w-3.5 !h-3.5 xxs:!w-4 xxs:!h-4 sm:!w-5 sm:!h-5" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-[10px] xxs:text-xs sm:text-base font-extrabold text-slate-900 font-heading leading-tight truncate">
-                  {currentCategory.title}
-                </h3>
-              </div>
-            </div>
+        {/* ACTIVE CATEGORY HEADING */}
+        <div className="flex items-center justify-start py-5 mt-2 sm:px-2 border-t border-slate-100">
+          <h2 className="text-xl md:text-[26px] font-light text-black tracking-wide truncate">
+            {currentCategoryObj.name} Programs
+          </h2>
+        </div>
 
-            <button
-              onClick={onOpenContactModal}
-              className="px-2 xxs:px-3 py-1 text-[8px] xxs:text-[10px] sm:text-xs font-black uppercase tracking-tight bg-slate-900 hover:bg-slate-800 text-white rounded-full shadow-xs transition-all flex items-center gap-0.5 xxs:gap-1 cursor-pointer shrink-0 active:scale-95"
-            >
-              Inquire Now
-              <ArrowForwardIcon className="!w-2.5 !h-2.5 xxs:!w-3 xxs:!h-3" />
-            </button>
-          </div>
+        {/* TRAINING DURATION FILTER PILLS BAR */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-6 custom-scrollbar px-2 sm:px-0">
+          <span className="font-bold text-slate-700 text-sm whitespace-nowrap pl-1 pr-2">Training:</span>
+          {trainingFilters.slice(1).map((filter) => {
+            const isFilterActive = activeFilter === filter;
+            return (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(isFilterActive ? 'All' : filter)}
+                className={`flex flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-full font-extrabold text-[13px] transition-all duration-300 cursor-pointer ${
+                  isFilterActive
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                {filter}
+              </button>
+            );
+          })}
+        </div>
 
-          {/* Coding Sub-Categories Navigation Filter Pills */}
-          {activeTab === 'coding' && (
-            <div className="flex items-center gap-1.5 xxs:gap-2 mb-2 pb-1 border-b border-slate-100 overflow-x-auto no-scrollbar">
-              {codingSubCategories.map((sub) => {
-                const isSubActive = activeCodingSubTab === sub.id;
-                return (
-                  <button
-                    key={sub.id}
-                    onClick={() => setActiveCodingSubTab(sub.id)}
-                    className={`px-3 py-1 xxs:py-1.5 rounded-full text-[10px] xxs:text-xs font-black tracking-tight whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 flex items-center justify-center active:scale-95 ${
-                      isSubActive
-                        ? 'bg-gradient-to-r from-cyan-600 via-teal-600 to-blue-600 text-white shadow-xs scale-105'
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80'
-                    }`}
-                  >
-                    <span>{sub.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+        {/* COURSE CARDS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 pb-10">
+          {displayedCourses.map((course) => {
+            const isLiked = !!likedCourses[course.id];
 
-          {/* Active Category Courses Cards Grid with Custom Visible Scrollbar */}
-          <div className="max-h-[300px] xxs:max-h-[360px] sm:max-h-[420px] overflow-y-auto pr-1.5 custom-scrollbar">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 xxs:gap-2.5">
-              {displayedCourses.map((course) => (
-                <div
-                  key={course.id}
-                  onClick={onOpenContactModal}
-                  className="p-2.5 xxs:p-3.5 sm:p-4 rounded-2xl xxs:rounded-3xl bg-white hover:bg-gradient-to-r hover:from-cyan-50/30 hover:to-amber-50/30 border border-slate-200/90 hover:border-cyan-400 shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col justify-between gap-2 xxs:gap-2.5 group active:scale-[0.98]"
+            return (
+              <div
+                key={course.id}
+                className="group relative flex flex-col p-4 sm:p-5 bg-white border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] rounded-[20px] hover:shadow-[0_8px_30px_-5px_rgba(0,0,0,0.12)] hover:border-blue-100 transition-all duration-300 w-full"
+              >
+                {/* HEART BOOKMARK BUTTON */}
+                <button
+                  onClick={(e) => toggleHeart(e, course.id)}
+                  className="absolute top-4 right-4 text-slate-300 hover:text-rose-500 transition-colors cursor-pointer"
+                  title="Save course"
                 >
-                  {/* Header Row: Tech Logo + Title + Tag */}
-                  <div className="flex items-start gap-2 xxs:gap-2.5 min-w-0">
-                    <div className="w-7 h-7 xxs:w-9 xxs:h-9 sm:w-10 sm:h-10 rounded-full bg-slate-50 border border-slate-200/80 p-1 xxs:p-1.5 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
-                      <img
-                        src={course.logoUrl}
-                        alt={course.title}
-                        className="w-full h-full object-contain filter group-hover:brightness-110 transition-all"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="min-w-0">
-                        <h4 className="text-[8.5px] xxs:text-[9.5px] sm:text-xs md:text-sm font-extrabold text-slate-900 group-hover:text-cyan-700 transition-colors leading-snug tracking-tight">
-                          {course.title}
-                        </h4>
-                      </div>
-                      <p className="text-[9px] xxs:text-[10px] sm:text-[11px] text-slate-500 line-clamp-1 mt-0.5 font-medium">
-                        {course.sub}
-                      </p>
-                    </div>
+                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
+                </button>
+
+                {/* TOP HEADER DETAILS */}
+                <div className="flex gap-3 sm:gap-4 mb-4 pr-6">
+                  <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[14px] flex items-center justify-center flex-shrink-0 ${course.iconBg}`}>
+                    <img
+                      src={course.icon}
+                      alt={course.title}
+                      className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
+                    />
                   </div>
-
-                  {/* Footer Row: Duration + Price + Enroll Button */}
-                  <div className="flex items-center justify-between pt-1.5 xxs:pt-2 border-t border-slate-100/80 gap-1.5 xxs:gap-2 shrink-0">
-                    <div className="flex items-center gap-1 xxs:gap-1.5 flex-wrap">
-                      <span className="text-[8px] xxs:text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                        ⏱️ {course.duration}
-                      </span>
-                      <div className="flex items-baseline gap-1 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                        <span className="text-[10px] xxs:text-xs font-black text-emerald-700">
-                          {course.price}
-                        </span>
-                        <span className="line-through text-slate-400 text-[8px] xxs:text-[9px] font-normal">
-                          {course.original}
-                        </span>
+                  <div className="flex flex-col pt-0.5 min-w-0">
+                    {course.tag ? (
+                      <div className="mb-1.5 w-max px-2 py-0.5 bg-[#e5fcf1] text-[#00a86b] text-[10px] font-bold rounded leading-none uppercase tracking-wide">
+                        {course.tag}
                       </div>
+                    ) : (
+                      <div className="mb-1.5 w-max px-2 py-0.5 text-[10px] opacity-0 leading-none">-</div>
+                    )}
+                    <h3 className="font-extrabold text-slate-900 text-[15px] sm:text-[17px] leading-snug mb-1.5 truncate">
+                      {course.title}
+                    </h3>
+                    <div className="flex items-center gap-1.5 text-[11px] md:text-[12px] text-slate-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+                      <Clock className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                      <span>{course.duration}</span>
+                      <span className="w-1 h-1 rounded-full bg-slate-300 flex-shrink-0" />
+                      <span>{course.level}</span>
+                      <span className="w-1 h-1 rounded-full bg-slate-300 flex-shrink-0" />
+                      <span>{course.mode}</span>
                     </div>
-
-                    <button className="px-2.5 xxs:px-3.5 py-1 xxs:py-1.5 text-[8px] xxs:text-[10px] sm:text-xs font-black uppercase tracking-wider bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 text-white rounded-full shadow-xs hover:shadow-md transition-all flex items-center gap-0.5 xxs:gap-1 shrink-0 active:scale-95 cursor-pointer">
-                      Enroll
-                      <ArrowForwardIcon className="!w-2.5 !h-2.5 xxs:!w-3 xxs:!h-3" />
-                    </button>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
+                <div className="w-full h-px bg-slate-100 my-3" />
+
+                {/* PRICE & ENROLL ACTION ROW */}
+                <div className="flex flex-row items-center justify-between pt-1 mt-auto">
+                  <div className="flex items-baseline gap-1.5 sm:gap-2">
+                    <span className="text-xl sm:text-[22px] font-black text-slate-900 tracking-tight">
+                      {course.price}
+                    </span>
+                    <span className="text-[11px] sm:text-xs font-semibold text-slate-400 line-through">
+                      {course.originalPrice}
+                    </span>
+                    <span className="text-[11px] sm:text-xs font-bold text-emerald-500">
+                      {course.discount}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => onOpenEnrollModal ? onOpenEnrollModal(course) : onOpenContactModal()}
+                    className="bg-[#2463eb] hover:bg-blue-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-[13px] sm:text-sm font-bold flex items-center justify-center gap-1 shadow-sm transition-transform active:scale-95 cursor-pointer"
+                  >
+                    Enroll Now <ArrowRight className="w-4 h-4 -mr-1" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* VIEW MORE BUTTON */}
+        <div className="flex justify-center mt-2 pb-8">
+          <button
+            onClick={onOpenContactModal}
+            className="bg-slate-900 hover:bg-gray-800 text-white px-8 py-3 rounded-full text-sm font-bold shadow-lg transition-transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2 cursor-pointer"
+          >
+            View More <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
 
       </div>
-    </div>
+    </section>
   );
 }
+
 

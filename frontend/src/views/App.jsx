@@ -101,7 +101,7 @@ export default function App() {
 
   return (
     <DeviceGuard>
-      <div className="flex flex-col min-h-screen bg-white text-slate-900 justify-between pt-16 xxs:pt-20 sm:pt-24 pb-16 xxs:pb-20">
+      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 justify-between overflow-x-hidden pb-20 sm:pb-8">
         
         {/* RESPONSIVE TOPBAR HEADER */}
         <Navbar
@@ -116,53 +116,53 @@ export default function App() {
           setActiveTab={setActiveTab}
         />
 
-        {activeTab === 'my-batch' ? (
-          /* MY BATCH STUDENT PORTAL VIEW */
-          <MyBatchPage
-            onOpenContactModal={() => setIsContactModalOpen(true)}
-            onOpenEnrollModal={() => handleOpenEnrollModal()}
-          />
-        ) : activeTab === 'profile' ? (
-          /* PROFILE PAGE VIEW */
-          <ProfilePage onOpenContactModal={() => setIsContactModalOpen(true)} />
-        ) : activeTab === 'courses' ? (
-          /* COURSES TAB VIEW */
-          <div className="flex flex-col gap-2">
-            <CategoryNavbar onOpenContactModal={() => setIsContactModalOpen(true)} onOpenEnrollModal={handleOpenEnrollModal} />
-            <TechLanguageSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
-            <BannerSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
-            <ContactUsSection />
-          </div>
-        ) : activeTab === 'services' ? (
-          /* SERVICES TAB VIEW */
-          <div className="flex flex-col gap-2">
-            <CompanyLogoSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
-            <OurBranchesSection onOpenContactModal={() => setIsContactModalOpen(true)} />
-            <OurTeamSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
-            <ContactUsSection />
-          </div>
-        ) : activeTab === 'placements' ? (
-          /* PLACEMENTS TAB VIEW */
-          <div className="flex flex-col gap-2">
-            <TopPlacementSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
-            <CompanyLogoSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
-            <ContactUsSection />
-          </div>
-        ) : (
-          /* DEFAULT HOME VIEW */
-          <>
-            <BannerSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
-            <TechLanguageSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
-            <CompanyLogoSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
-            <CategoryNavbar onOpenContactModal={() => setIsContactModalOpen(true)} onOpenEnrollModal={handleOpenEnrollModal} />
-            <TopPlacementSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
-            <OurTeamSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
-            <OurBranchesSection onOpenContactModal={() => setIsContactModalOpen(true)} />
-            <ContactUsSection />
-          </>
-        )}
-
-        <div className="flex-1" />
+        <main className="flex-1 overflow-x-hidden">
+          {activeTab === 'my-batch' ? (
+            /* MY BATCH STUDENT PORTAL VIEW */
+            <MyBatchPage
+              onOpenContactModal={() => setIsContactModalOpen(true)}
+              onOpenEnrollModal={() => handleOpenEnrollModal()}
+            />
+          ) : activeTab === 'profile' ? (
+            /* PROFILE PAGE VIEW */
+            <ProfilePage onOpenContactModal={() => setIsContactModalOpen(true)} />
+          ) : activeTab === 'courses' ? (
+            /* COURSES TAB VIEW */
+            <div className="flex flex-col gap-2">
+              <CategoryNavbar onOpenContactModal={() => setIsContactModalOpen(true)} onOpenEnrollModal={handleOpenEnrollModal} />
+              <TechLanguageSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
+              <BannerSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
+              <ContactUsSection />
+            </div>
+          ) : activeTab === 'services' ? (
+            /* SERVICES TAB VIEW */
+            <div className="flex flex-col gap-2">
+              <CompanyLogoSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
+              <OurBranchesSection onOpenContactModal={() => setIsContactModalOpen(true)} />
+              <OurTeamSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
+              <ContactUsSection />
+            </div>
+          ) : activeTab === 'placements' ? (
+            /* PLACEMENTS TAB VIEW */
+            <div className="flex flex-col gap-2">
+              <TopPlacementSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
+              <CompanyLogoSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
+              <ContactUsSection />
+            </div>
+          ) : (
+            /* DEFAULT HOME VIEW */
+            <div className="flex flex-col w-full pb-12 bg-slate-50">
+              <BannerSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
+              <TechLanguageSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
+              <CompanyLogoSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
+              <CategoryNavbar onOpenContactModal={() => setIsContactModalOpen(true)} onOpenEnrollModal={handleOpenEnrollModal} />
+              <TopPlacementSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
+              <OurTeamSlider onOpenContactModal={() => setIsContactModalOpen(true)} />
+              <OurBranchesSection onOpenContactModal={() => setIsContactModalOpen(true)} />
+              <ContactUsSection />
+            </div>
+          )}
+        </main>
 
         {/* RESPONSIVE BOTTOM FOOTER NAVBAR */}
         <BottomNav
