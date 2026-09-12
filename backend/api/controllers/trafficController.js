@@ -2,11 +2,10 @@
  * ============================================================================
  * API CONTROLLER: TRAFFIC CONTROLLER (trafficController.js)
  * ============================================================================
- * Handles realtime visitor tracking, page views, search analytics, and stats.
+ * Handles realtime visitor tracking, page views, search analytics, and stats via MongoDB Atlas.
  */
 
 import { Traffic } from '../../models/Traffic.js';
-import { getDB, saveDB } from '../../db/jsonStore.js';
 
 // In-memory active user sessions tracker
 const activeSessions = new Map();
@@ -24,13 +23,9 @@ const cleanupSessions = () => {
 };
 
 /**
- * --------------------------------------------------------------------------
- * API ENDPOINT: Get Traffic & Visitor Stats
- * --------------------------------------------------------------------------
  * @route   GET /api/traffic/stats
  * @desc    Returns today visitors count, live active users, top searched courses, and city distribution.
  * @access  Admin Private
- * @returns {JSON} { success: boolean, data: Object }
  */
 export const getTrafficStats = async (req, res) => {
   cleanupSessions();
@@ -42,62 +37,36 @@ export const getTrafficStats = async (req, res) => {
     if (!todayRecord) {
       todayRecord = await Traffic.create({
         date: todayStr,
-        pageViews: 1248,
-        uniqueVisitors: 860,
+        pageViews: 1,
+        uniqueVisitors: 1,
         cities: [
-          { name: 'Lucknow, UP', count: 580 },
-          { name: 'Ayodhya, UP', count: 275 }
+          { name: 'Lucknow, UP', count: 1 }
         ],
-        searchedCourses: [
-          { query: 'MERN Stack Development', count: 42 },
-          { query: 'Java Full Stack & DSA', count: 35 },
-          { query: 'Data Science & AI', count: 28 }
-        ]
+        searchedCourses: []
       });
     }
 
     return res.json({
       success: true,
       data: {
-        todayVisitors: todayRecord.uniqueVisitors || 860,
-        todayPageViews: todayRecord.pageViews || 1248,
-        liveActive: activeSessions.size || 14,
-        totalVisitors: (todayRecord.uniqueVisitors || 860) * 12,
+        todayVisitors: todayRecord.uniqueVisitors || 1,
+        todayPageViews: todayRecord.pageViews || 1,
+        liveActive: activeSessions.size || 1,
+        totalVisitors: todayRecord.uniqueVisitors || 1,
         cityBreakdown: todayRecord.cities || [],
         topSearchedCourses: todayRecord.searchedCourses || []
       }
     });
   } catch (e) {
-    console.warn('[trafficController Warning] MongoDB Traffic stats error, using JSON store:', e.message);
+    console.error('[trafficController Error]:', e.message);
+    return res.status(500).json({ success: false, message: e.message });
   }
-
-  const db = getDB();
-  const trafficData = db.traffic || {
-    todayVisitors: 860,
-    liveActive: activeSessions.size || 14,
-    totalVisitors: 9800,
-    cityBreakdown: [
-      { name: 'Lucknow, UP', count: 580 },
-      { name: 'Ayodhya, UP', count: 275 }
-    ],
-    topSearchedCourses: [
-      { query: 'MERN Stack Development', count: 42 },
-      { query: 'Java Full Stack & DSA', count: 35 }
-    ]
-  };
-
-  res.json({ success: true, data: trafficData });
 };
 
 /**
- * --------------------------------------------------------------------------
- * API ENDPOINT: Record Page Visit
- * --------------------------------------------------------------------------
  * @route   POST /api/traffic/visit
  * @desc    Logs a webpage visit from a user IP/session.
  * @access  Public
- * @param   {Object} req.body - { ip, city, page }
- * @returns {JSON} { success: boolean }
  */
 export const recordVisit = async (req, res) => {
   const visitorIp = req.body.ip || req.ip || '127.0.0.1';
@@ -128,14 +97,9 @@ export const recordVisit = async (req, res) => {
 };
 
 /**
- * --------------------------------------------------------------------------
- * API ENDPOINT: Track Course Search Keyword
- * --------------------------------------------------------------------------
  * @route   POST /api/traffic/search-course
  * @desc    Tracks searched course query keywords for demand analytics.
  * @access  Public
- * @param   {Object} req.body - { query: string }
- * @returns {JSON} { success: boolean }
  */
 export const trackCourseSearch = async (req, res) => {
   const query = (req.body.query || '').trim();

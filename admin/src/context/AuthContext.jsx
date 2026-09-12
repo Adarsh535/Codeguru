@@ -56,17 +56,26 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updateUser = (newUserData) => {
+    setUser(prev => {
+      const updated = { ...(prev || {}), ...newUserData };
+      localStorage.setItem(AUTH_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem(AUTH_KEY);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isSessionValid }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, isAuthenticated: !!user, isSessionValid }}>
       {children}
     </AuthContext.Provider>
   );
 }
+
 
 export function useAuth() {
   const context = useContext(AuthContext);

@@ -65,10 +65,11 @@ export const adminCmsModel = {
       }
       return [];
     } catch (err) {
-      console.warn('[adminCmsModel API Warning] Banners API call failed, reading localStorage:', err);
-      return JSON.parse(localStorage.getItem('codeguru_banners') || '[]');
+      console.warn('[adminCmsModel API Warning] Banners API call failed:', err);
+      return [];
     }
   },
+
 
   /**
    * --------------------------------------------------------------------------

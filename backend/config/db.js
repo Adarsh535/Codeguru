@@ -1,3 +1,4 @@
+import dns from 'dns';
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { Admin } from '../models/Admin.js';
@@ -12,25 +13,102 @@ import { NavMenu } from '../models/NavMenu.js';
 import { Student } from '../models/Student.js';
 import { Enrollment } from '../models/Enrollment.js';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/codeguru_db';
+// Configure DNS fallback servers to ensure Windows Node.js resolves MongoDB Atlas _mongodb._tcp SRV records cleanly
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch (dnsErr) {
+  // Ignore DNS set errors if restricted by network policy
+}
+
+export const getSanitizedUri = (rawUri) => {
+  if (!rawUri) return 'mongodb://127.0.0.1:27017/codeguru_db';
+  try {
+    let formattedUri = rawUri.trim();
+    if (formattedUri.startsWith('mongodb+srv://') || formattedUri.startsWith('mongodb://')) {
+      const schemeSplit = formattedUri.split('://');
+      const rest = schemeSplit[1];
+      const lastAt = rest.lastIndexOf('@');
+      if (lastAt !== -1) {
+        const userPass = rest.substring(0, lastAt);
+        let hostPath = rest.substring(lastAt + 1);
+        
+        // Ensure default database name exists in connection string
+        if (hostPath.endsWith('/')) {
+          hostPath += 'codeguru_db?retryWrites=true&w=majority';
+        } else if (!hostPath.includes('/') || hostPath.split('/')[1] === '') {
+          hostPath += '/codeguru_db?retryWrites=true&w=majority';
+        }
+
+        const colonIndex = userPass.indexOf(':');
+        if (colonIndex !== -1) {
+          const username = userPass.substring(0, colonIndex);
+          const rawPassword = userPass.substring(colonIndex + 1);
+          const encodedPassword = encodeURIComponent(decodeURIComponent(rawPassword));
+          return `${schemeSplit[0]}://${username}:${encodedPassword}@${hostPath}`;
+        }
+      }
+    }
+  } catch (e) {
+    // If parsing fails, return rawUri
+  }
+  return rawUri;
+};
+
+const rawTargetUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/codeguru_db';
+const MONGODB_URI = getSanitizedUri(rawTargetUri);
+const LOCAL_MONGODB_URI = 'mongodb://127.0.0.1:27017/codeguru_db';
+
 
 export const connectDB = async () => {
-  try {
-    const isAtlas = MONGODB_URI.includes('mongodb+srv://') || MONGODB_URI.includes('.mongodb.net');
-    const conn = await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 10000
-    });
-    
-    // Mask password for console security
-    const sanitizedURI = MONGODB_URI.replace(/:([^@]+)@/, ':****@');
-    
-    console.log(`================================================`);
-    console.log(`🍃 MongoDB Connected Successfully via Mongoose (${isAtlas ? 'MongoDB Atlas Cloud' : 'Local MongoDB'})`);
-    console.log(`📍 Host: ${conn.connection.host}`);
-    console.log(`🗄️ Database Name: ${conn.connection.name}`);
-    console.log(`🧭 Connection String: ${sanitizedURI}`);
-    console.log(`================================================`);
+  let activeUri = MONGODB_URI;
+  let isAtlas = activeUri.includes('mongodb+srv://') || activeUri.includes('.mongodb.net');
+  let conn;
 
+  try {
+    conn = await mongoose.connect(activeUri, {
+      serverSelectionTimeoutMS: 5000
+    });
+  } catch (primaryErr) {
+    console.warn(`================================================`);
+    console.warn(`⚠️ Primary MongoDB Connection Failed (${primaryErr.message})`);
+    
+    if (isAtlas) {
+      console.warn(`🔄 Attempting Fallback to Local MongoDB (127.0.0.1:27017)...`);
+      try {
+        activeUri = LOCAL_MONGODB_URI;
+        isAtlas = false;
+        conn = await mongoose.connect(activeUri, {
+          serverSelectionTimeoutMS: 5000
+        });
+      } catch (fallbackErr) {
+        console.warn(`================================================`);
+        console.warn(`⚠️ Local MongoDB Connection Error (${fallbackErr.message})`);
+        console.warn(`👉 For MongoDB Atlas:`);
+        console.warn(`   1. Check your Atlas Connection String in backend/.env`);
+        console.warn(`   2. Ensure IP Access List includes your IP or 0.0.0.0/0 in Atlas Network Access`);
+        console.warn(`   3. Verify database username & password are correct`);
+        console.warn(`👉 For Local MongoDB: Ensure MongoDB service is running at mongodb://127.0.0.1:27017`);
+        console.warn(`================================================`);
+        return false;
+      }
+    } else {
+      console.warn(`👉 Ensure MongoDB service is running locally at mongodb://127.0.0.1:27017`);
+      console.warn(`================================================`);
+      return false;
+    }
+  }
+
+  // Mask password for console security
+  const sanitizedURI = activeUri.replace(/:([^@]+)@/, ':****@');
+  
+  console.log(`================================================`);
+  console.log(`🍃 MongoDB Connected Successfully via Mongoose (${isAtlas ? 'MongoDB Atlas Cloud' : 'Local MongoDB Fallback'})`);
+  console.log(`📍 Host: ${conn.connection.host}`);
+  console.log(`🗄️ Database Name: ${conn.connection.name}`);
+  console.log(`🧭 Connection String: ${sanitizedURI}`);
+  console.log(`================================================`);
+
+  try {
     // 1. Initialize 'admins' collection
     const existingAdmin = await Admin.findOne({ email: 'admin@codeguru.com' });
     if (!existingAdmin) {
@@ -57,20 +135,8 @@ export const connectDB = async () => {
       console.log(`🖼️ Banners collection initialized in 'banners'`);
     }
 
-    // 3. Initialize 'leads' collection
-    const leadCount = await Lead.countDocuments();
-    if (leadCount === 0) {
-      await Lead.create({
-        leadId: 'LEAD-1001',
-        name: 'Saurabh Kumar',
-        phone: '9876543210',
-        location: 'Lucknow, UP',
-        course: 'Full Stack Web Development',
-        status: 'New',
-        notes: 'Interested in MERN stack job guarantee batch'
-      });
-      console.log(`📩 Leads collection initialized in 'leads'`);
-    }
+    // 3. Ensure 'leads' collection exists without fake seed data
+
 
     // 4. Initialize 'courses' collection
     const courseCount = await Course.countDocuments();
@@ -188,15 +254,9 @@ export const connectDB = async () => {
     }
 
     return true;
-  } catch (err) {
-    console.warn(`================================================`);
-    console.warn(`⚠️ MongoDB Connection Error (${err.message})`);
-    console.warn(`👉 For MongoDB Atlas:`);
-    console.warn(`   1. Check your Atlas Connection String in backend/.env`);
-    console.warn(`   2. Ensure IP Access List includes your IP or 0.0.0.0/0 in Atlas Network Access`);
-    console.warn(`   3. Verify database username & password are correct (avoid special characters or URL-encode them)`);
-    console.warn(`👉 For Local MongoDB: Ensure MongoDB service is running at mongodb://127.0.0.1:27017`);
-    console.warn(`================================================`);
-    return false;
+  } catch (initErr) {
+    console.error(`Error initializing database collections:`, initErr.message);
+    return true;
   }
 };
+

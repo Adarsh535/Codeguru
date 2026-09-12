@@ -32,20 +32,7 @@ export function FeesPaymentsView() {
         }));
         setPayments(formatted);
       } else {
-        setPayments([
-          {
-            id: 'TXN-908122',
-            studentName: 'Rahul Sharma',
-            admId: 'CG-STU-101',
-            course: 'Full Stack MERN',
-            totalFee: '₹24,999',
-            paidAmount: '₹24,999',
-            pendingAmount: '₹0',
-            mode: 'UPI QR Code',
-            status: 'Paid',
-            date: '07 Sep 2026'
-          }
-        ]);
+        setPayments([]);
       }
     } catch (err) {
       console.error('Error loading finance enrollments:', err);
@@ -205,10 +192,25 @@ export function FeesPaymentsView() {
 // 2. INVOICES VIEW
 // ==========================================
 export function InvoicesView() {
-  const [invoices] = useState([
-    { id: 'INV-2026-089', student: 'Rahul Sharma', course: 'Full Stack MERN', amount: '₹25,000', date: '01 Aug 2026', status: 'Paid', tax: '₹4,500 GST' },
-    { id: 'INV-2026-090', student: 'Ananya Verma', course: 'Data Science & AI', amount: '₹35,000', date: '10 Aug 2026', status: 'Partial', tax: '₹6,300 GST' }
-  ]);
+  const [invoices, setInvoices] = useState([]);
+
+  useEffect(() => {
+    enrollmentService.getEnrollments().then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        setInvoices(data.map(i => ({
+          id: `INV-${i.enrollmentId || i.id || '101'}`,
+          student: i.studentName || 'Student',
+          course: i.courseName || 'Course',
+          amount: i.fee || '₹24,999',
+          date: i.enrollmentDate || new Date().toLocaleDateString('en-IN'),
+          status: 'Paid',
+          tax: '₹0 GST'
+        })));
+      } else {
+        setInvoices([]);
+      }
+    }).catch(() => setInvoices([]));
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -231,27 +233,33 @@ export function InvoicesView() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-            {invoices.map(inv => (
-              <tr key={inv.id} className="hover:bg-slate-50/50">
-                <td className="p-4 font-mono font-bold text-blue-600">{inv.id}</td>
-                <td className="p-4 font-extrabold text-slate-900">{inv.student}</td>
-                <td className="p-4 font-semibold text-slate-700">{inv.course}</td>
-                <td className="p-4 font-black text-slate-900">{inv.amount}</td>
-                <td className="p-4 text-slate-500 font-mono">{inv.tax}</td>
-                <td className="p-4">
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${
-                    inv.status === 'Paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                  }`}>
-                    {inv.status}
-                  </span>
-                </td>
-                <td className="p-4 text-right">
-                  <button onClick={() => alert(`Downloading Invoice ${inv.id}...`)} className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-600 hover:text-white font-extrabold text-xs transition-all cursor-pointer">
-                    Download Tax PDF
-                  </button>
+            {invoices.length > 0 ? (
+              invoices.map(inv => (
+                <tr key={inv.id} className="hover:bg-slate-50/50">
+                  <td className="p-4 font-mono font-bold text-blue-600">{inv.id}</td>
+                  <td className="p-4 font-extrabold text-slate-900">{inv.student}</td>
+                  <td className="p-4 font-semibold text-slate-700">{inv.course}</td>
+                  <td className="p-4 font-black text-slate-900">{inv.amount}</td>
+                  <td className="p-4 text-slate-500 font-mono">{inv.tax}</td>
+                  <td className="p-4">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700">
+                      {inv.status}
+                    </span>
+                  </td>
+                  <td className="p-4 text-right">
+                    <button onClick={() => alert(`Downloading Invoice ${inv.id}...`)} className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-600 hover:text-white font-extrabold text-xs transition-all cursor-pointer">
+                      Download Tax PDF
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="p-8 text-center text-slate-500 font-bold">
+                  No tax invoices generated. Add enrollments in MongoDB database to populate tax invoices.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
@@ -270,9 +278,7 @@ export function ReceiptsView() {
 // 4. REFUNDS VIEW
 // ==========================================
 export function RefundsView() {
-  const [refunds] = useState([
-    { id: 'REF-001', student: 'Vikas Sharma', amount: '₹5,000', date: '02 Sep 2026', reason: 'Course Opt-Out before batch launch', status: 'Approved & Processed' }
-  ]);
+  const [refunds] = useState([]);
 
   return (
     <div className="space-y-6">
@@ -294,20 +300,28 @@ export function RefundsView() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-            {refunds.map(r => (
-              <tr key={r.id} className="hover:bg-slate-50/50">
-                <td className="p-4 font-mono font-bold text-rose-600">{r.id}</td>
-                <td className="p-4 font-extrabold text-slate-900">{r.student}</td>
-                <td className="p-4 font-black text-rose-600">{r.amount}</td>
-                <td className="p-4 text-slate-600">{r.reason}</td>
-                <td className="p-4 text-slate-400 font-mono">{r.date}</td>
-                <td className="p-4 text-right">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700">
-                    {r.status}
-                  </span>
+            {refunds.length > 0 ? (
+              refunds.map(r => (
+                <tr key={r.id} className="hover:bg-slate-50/50">
+                  <td className="p-4 font-mono font-bold text-rose-600">{r.id}</td>
+                  <td className="p-4 font-extrabold text-slate-900">{r.student}</td>
+                  <td className="p-4 font-black text-rose-600">{r.amount}</td>
+                  <td className="p-4 text-slate-600">{r.reason}</td>
+                  <td className="p-4 text-slate-400 font-mono">{r.date}</td>
+                  <td className="p-4 text-right">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700">
+                      {r.status}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="p-8 text-center text-slate-500 font-bold">
+                  No refund requests recorded in database.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

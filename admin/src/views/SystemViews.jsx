@@ -59,11 +59,7 @@ export function RolesPermissionsView() {
 // 2. DETAILED AUDIT LOGS VIEW
 // ==========================================
 export function AuditLogsView() {
-  const [logs] = useState([
-    { id: 'l1', user: 'Rahul Sharma (Super Admin)', action: 'Course Fee Updated', details: 'Full Stack MERN fee changed from ₹24,999 to ₹19,999', ip: '192.168.1.10', time: '07 Sep 2026, 10:32 AM' },
-    { id: 'l2', user: 'Priya (Counselor)', action: 'Lead Status Updated', details: 'Lead Amit Verma marked as Enrolled', ip: '192.168.1.14', time: '07 Sep 2026, 09:15 AM' },
-    { id: 'l3', user: 'Super Admin', action: 'New Hero Banner Uploaded', details: 'Added banner-september-special.webp', ip: '192.168.1.10', time: '06 Sep 2026, 05:40 PM' }
-  ]);
+  const [logs] = useState([]);
 
   return (
     <div className="space-y-6">
@@ -73,19 +69,25 @@ export function AuditLogsView() {
       </div>
 
       <div className="space-y-3">
-        {logs.map(l => (
-          <div key={l.id} className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-slate-900 text-sm">{l.action}</span>
-                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">{l.user}</span>
+        {logs.length > 0 ? (
+          logs.map(l => (
+            <div key={l.id} className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-slate-900 text-sm">{l.action}</span>
+                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">{l.user}</span>
+                </div>
+                <p className="text-slate-600 font-medium">{l.details}</p>
+                <div className="text-[10px] text-slate-400 font-mono">IP Address: {l.ip}</div>
               </div>
-              <p className="text-slate-600 font-medium">{l.details}</p>
-              <div className="text-[10px] text-slate-400 font-mono">IP Address: {l.ip}</div>
+              <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1 shrink-0"><Clock className="w-3.5 h-3.5" /> {l.time}</span>
             </div>
-            <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1 shrink-0"><Clock className="w-3.5 h-3.5" /> {l.time}</span>
+          ))
+        ) : (
+          <div className="bg-white p-8 rounded-3xl border border-slate-200/80 text-center text-slate-500 font-bold text-xs">
+            No system audit log events recorded yet. All administrative actions will be logged here automatically.
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
@@ -141,16 +143,16 @@ export function DatabaseBackupView() {
       <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs space-y-6">
         <div>
           <h1 className="text-xl font-black text-slate-900">Database & Backup Vault</h1>
-          <p className="text-xs font-semibold text-slate-500">MongoDB cluster health, instant manual JSON backup export & automated daily snapshots</p>
+          <p className="text-xs font-semibold text-slate-500">MongoDB Atlas Cluster health, manual JSON export & automated cloud backups</p>
         </div>
 
         <div className="space-y-4 text-xs font-medium">
           <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
             <div>
               <div className="font-extrabold text-slate-900">MongoDB Connection Health</div>
-              <div className="text-emerald-600 font-bold text-[11px]">Connected • mongodb://127.0.0.1:27017/codeguru_db</div>
+              <div className="text-emerald-600 font-bold text-[11px]">Connected • MongoDB Atlas Cloud Database</div>
             </div>
-            <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-black">Healthy</span>
+            <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-black">Atlas Live</span>
           </div>
 
           <button
@@ -170,10 +172,7 @@ export function DatabaseBackupView() {
 // ==========================================
 export function AdminUsersView() {
   const [users, setUsers] = useState([
-    { id: 'ADM-01', name: 'Super Admin', email: 'admin@codeguru.com', role: 'Super Admin', status: 'Active', lastLogin: 'Today, 12:45 PM' },
-    { id: 'ADM-02', name: 'Priya Sharma', email: 'priya@codeguru.com', role: 'Counselor', status: 'Active', lastLogin: 'Today, 11:30 AM' },
-    { id: 'ADM-03', name: 'Vikrant Shinde', email: 'vikrant@codeguru.com', role: 'Trainer', status: 'Active', lastLogin: 'Yesterday, 04:15 PM' },
-    { id: 'ADM-04', name: 'Accountant Dept', email: 'accounts@codeguru.com', role: 'Accountant', status: 'Active', lastLogin: '05 Sep 2026' }
+    { id: 'ADM-01', name: 'Super Admin', email: 'admin@codeguru.com', role: 'Super Admin', status: 'Active', lastLogin: 'Live Session' }
   ]);
 
   const [showAddModal, setShowAddModal] = useState(false);

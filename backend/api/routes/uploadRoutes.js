@@ -7,15 +7,30 @@
 
 import express from 'express';
 import { upload } from '../../middleware/upload.js';
-import { handleFileUpload } from '../controllers/uploadController.js';
+import { handleFileUpload, getUploadStatus, deleteFile } from '../controllers/uploadController.js';
 
 const router = express.Router();
 
 /**
+ * @api    GET /api/upload/status
+ * @desc   Checks Cloudinary credentials and connectivity status
+ * @access Public
+ */
+router.get('/status', getUploadStatus);
+
+/**
  * @api    POST /api/upload
- * @desc   Uploads a single media file (Image/Video) and returns public file URL
+ * @desc   Uploads a single media file (Image/Video) to Cloudinary or Local Storage
  * @access Public / Upload
  */
 router.post('/', upload.single('file'), handleFileUpload);
 
+/**
+ * @api    DELETE /api/upload
+ * @desc   Deletes file from Cloudinary by public_id
+ * @access Public / Upload
+ */
+router.delete('/', deleteFile);
+
 export default router;
+

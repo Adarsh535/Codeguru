@@ -26,16 +26,14 @@ export default function LoginView() {
     }
 
     setIsSubmitting(true);
-    setIsSuccessModalOpen(true);
+    const res = await login(email, password);
 
-    setTimeout(async () => {
-      const res = await login(email, password);
-      if (!res.success) {
-        setIsSuccessModalOpen(false);
-        setIsSubmitting(false);
-        setError(res.message);
-      }
-    }, 1400);
+    if (res.success) {
+      setIsSuccessModalOpen(true);
+    } else {
+      setIsSubmitting(false);
+      setError(res.message || 'Invalid Admin Credentials');
+    }
   };
 
   return (

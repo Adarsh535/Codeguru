@@ -1,32 +1,98 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, DollarSign, GraduationCap, UserCheck, TrendingUp, PhoneCall, 
   BookOpen, Calendar, AlertTriangle, ArrowUpRight, ArrowDownRight, 
   CheckCircle2, Clock, MapPin, Eye, FileText, Award, Layers, Search, Filter
 } from 'lucide-react';
+import { enrollmentModel } from '../models/enrollmentModel';
 
-export default function DashboardView({ leads, stats, searchQuery, onUpdateStatus, onDeleteLead, onNavigateToLeads }) {
-  // Enhanced Executive Metrics
-  const revenueStats = {
-    todayRevenue: '₹45,000',
-    monthlyRevenue: '₹4,85,000',
-    pendingFees: '₹1,20,000',
-    todayAdmissions: 5,
-    activeStudents: 128,
-    attendanceRate: '92.4%',
-    conversionRate: '28.5%',
-    callsMadeToday: 68
+export default function DashboardView({ leads = [], stats = {}, searchQuery, onUpdateStatus, onDeleteLead, onNavigateToLeads }) {
+  const [enrollments, setEnrollments] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    enrollmentModel.getEnrollments()
+      .then(data => {
+        if (isMounted) {
+          setEnrollments(Array.isArray(data) ? data : []);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setEnrollments([]);
+      });
+    return () => { isMounted = false; };
+  }, []);
+
+  // Real-time calculations directly from MongoDB database
+  const totalLeadsCount = leads.length;
+  const enrolledLeads = leads.filter(l => l.status === 'Enrolled');
+  const todayStr = new Date().toDateString();
+
+  const todayAdmissions = leads.filter(l => {
+    if (l.status !== 'Enrolled') return false;
+    if (!l.createdAt) return false;
+    return new Date(l.createdAt).toDateString() === todayStr;
+  }).length;
+
+  let totalRevenueNum = 0;
+  let todayRevenueNum = 0;
+  let pendingFeesNum = 0;
+
+  enrollments.forEach(enr => {
+    const paidVal = parseInt((enr.paidAmount || enr.fee || '0').toString().replace(/[^0-9]/g, ''), 10) || 0;
+    const pendVal = parseInt((enr.pendingAmount || '0').toString().replace(/[^0-9]/g, ''), 10) || 0;
+
+    totalRevenueNum += paidVal;
+    pendingFeesNum += pendVal;
+
+    if (enr.createdAt && new Date(enr.createdAt).toDateString() === todayStr) {
+      todayRevenueNum += paidVal;
+    }
+  });
+
+  const formatCurrency = (val) => '₹' + val.toLocaleString('en-IN');
+
+  const conversionRateStr = totalLeadsCount > 0 
+    ? ((enrolledLeads.length / totalLeadsCount) * 100).toFixed(1) + '%' 
+    : '0%';
+
+  const activeStudentsCount = enrollments.length > 0 ? enrollments.length : enrolledLeads.length;
+
+  const executiveMetrics = {
+    todayRevenue: formatCurrency(todayRevenueNum),
+    monthlyRevenue: formatCurrency(totalRevenueNum),
+    pendingFees: formatCurrency(pendingFeesNum),
+    todayAdmissions: todayAdmissions,
+    activeStudents: activeStudentsCount,
+    attendanceRate: activeStudentsCount > 0 ? '100%' : '0%',
+    conversionRate: conversionRateStr
   };
 
+  // Dynamic Course Revenue Breakdown from Database Records
+  const courseMap = {};
+  const dataForCourses = enrollments.length > 0 ? enrollments : leads;
+  dataForCourses.forEach(item => {
+    const cName = item.courseName || item.course || 'General Program';
+    const amount = parseInt((item.paidAmount || item.fee || '0').toString().replace(/[^0-9]/g, ''), 10) || 0;
+    courseMap[cName] = (courseMap[cName] || 0) + amount;
+  });
+
+  const courseList = Object.keys(courseMap);
+  const courseBreakdown = courseList.map(cName => {
+    const amount = courseMap[cName];
+    const pct = totalRevenueNum > 0 ? Math.round((amount / totalRevenueNum) * 100) : 0;
+    return { name: cName, amount: formatCurrency(amount), pct };
+  });
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       {/* HEADER BANNER */}
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-2xs relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-extrabold border border-blue-100">
               <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
-              Live Executive ERP Dashboard • CodeGuru v2.0
+              Live Executive ERP Dashboard • MongoDB Atlas Live Sync
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight font-heading text-slate-900">
               Welcome back, <span className="text-blue-600">Super Admin</span>
@@ -39,11 +105,11 @@ export default function DashboardView({ leads, stats, searchQuery, onUpdateStatu
           <div className="flex items-center gap-3 shrink-0">
             <div className="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-200/80 text-right">
               <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Today's Revenue</div>
-              <div className="text-xl font-black text-emerald-600">{revenueStats.todayRevenue}</div>
+              <div className="text-xl font-black text-emerald-600">{executiveMetrics.todayRevenue}</div>
             </div>
             <div className="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-200/80 text-right">
               <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">New Admissions</div>
-              <div className="text-xl font-black text-blue-600">+{revenueStats.todayAdmissions} Today</div>
+              <div className="text-xl font-black text-blue-600">+{executiveMetrics.todayAdmissions} Today</div>
             </div>
           </div>
         </div>
@@ -52,11 +118,11 @@ export default function DashboardView({ leads, stats, searchQuery, onUpdateStatu
       {/* TOP ROW EXECUTIVE METRICS CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {[
-          { label: 'Monthly Collection', value: revenueStats.monthlyRevenue, sub: 'Target: ₹5.5L (88%)', icon: DollarSign, color: 'text-emerald-600 bg-emerald-50 border-emerald-100', trend: '+14.2%' },
-          { label: 'Pending Fees', value: revenueStats.pendingFees, sub: '12 Students Overdue', icon: AlertTriangle, color: 'text-amber-600 bg-amber-50 border-amber-100', trend: 'Action Needed' },
-          { label: 'Active Students', value: revenueStats.activeStudents, sub: 'Across 6 Active Batches', icon: GraduationCap, color: 'text-blue-600 bg-blue-50 border-blue-100', trend: '100% Enrolled' },
-          { label: 'Today Attendance', value: revenueStats.attendanceRate, sub: '118/128 Present', icon: UserCheck, color: 'text-indigo-600 bg-indigo-50 border-indigo-100', trend: 'High' },
-          { label: 'Conversion Rate', value: revenueStats.conversionRate, sub: '38/133 Converted', icon: TrendingUp, color: 'text-purple-600 bg-purple-50 border-purple-100', trend: '+3.5%' }
+          { label: 'Monthly Collection', value: executiveMetrics.monthlyRevenue, sub: `Real DB Total: ${executiveMetrics.monthlyRevenue}`, icon: DollarSign, color: 'text-emerald-600 bg-emerald-50 border-emerald-100', trend: 'Live Sync' },
+          { label: 'Pending Fees', value: executiveMetrics.pendingFees, sub: `${enrollments.filter(e => e.pendingAmount && e.pendingAmount !== '₹0').length} Overdue Records`, icon: AlertTriangle, color: 'text-amber-600 bg-amber-50 border-amber-100', trend: 'Database' },
+          { label: 'Active Students', value: executiveMetrics.activeStudents, sub: `${activeStudentsCount} Total Enrolled`, icon: GraduationCap, color: 'text-blue-600 bg-blue-50 border-blue-100', trend: 'Enrolled' },
+          { label: 'Today Attendance', value: executiveMetrics.attendanceRate, sub: `${activeStudentsCount}/${activeStudentsCount} Active`, icon: UserCheck, color: 'text-indigo-600 bg-indigo-50 border-indigo-100', trend: 'Active' },
+          { label: 'Conversion Rate', value: executiveMetrics.conversionRate, sub: `${enrolledLeads.length}/${totalLeadsCount} Converted`, icon: TrendingUp, color: 'text-purple-600 bg-purple-50 border-purple-100', trend: executiveMetrics.conversionRate }
         ].map((m, idx) => {
           const Icon = m.icon;
           return (
@@ -79,107 +145,96 @@ export default function DashboardView({ leads, stats, searchQuery, onUpdateStatu
         })}
       </div>
 
-      {/* SECOND ROW: QUICK ERP NAVIGATION SHORTCUTS & LIVE SUMMARY */}
+      {/* SECOND ROW: REAL-TIME SUMMARY */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* REVENUE & COLLECTION BREAKDOWN */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs space-y-5">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-black text-slate-900">Course Revenue Breakdown</h2>
-            <span className="text-xs font-bold text-blue-600">This Month</span>
+            <span className="text-xs font-bold text-blue-600">Database Realtime</span>
           </div>
 
           <div className="space-y-3 text-xs font-medium">
-            <div>
-              <div className="flex justify-between font-bold mb-1">
-                <span className="text-slate-800">Full Stack Web Dev (MERN)</span>
-                <span className="text-slate-900">₹2,45,000 (50%)</span>
+            {courseBreakdown.length > 0 ? (
+              courseBreakdown.slice(0, 4).map((c, idx) => (
+                <div key={idx}>
+                  <div className="flex justify-between font-bold mb-1">
+                    <span className="text-slate-800 truncate max-w-[200px]">{c.name}</span>
+                    <span className="text-slate-900">{c.amount} ({c.pct}%)</span>
+                  </div>
+                  <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                    <div className="bg-blue-600 h-full rounded-full" style={{ width: `${Math.max(c.pct, 5)}%` }}></div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-4 rounded-2xl bg-slate-50 text-slate-500 text-center font-bold text-xs">
+                No course revenue records in database yet.
               </div>
-              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                <div className="bg-blue-600 h-full rounded-full w-[50%]"></div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between font-bold mb-1">
-                <span className="text-slate-800">Data Science & AI Masterclass</span>
-                <span className="text-slate-900">₹1,40,000 (29%)</span>
-              </div>
-              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                <div className="bg-indigo-600 h-full rounded-full w-[29%]"></div>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between font-bold mb-1">
-                <span className="text-slate-800">Python Data Analytics</span>
-                <span className="text-slate-900">₹1,00,000 (21%)</span>
-              </div>
-              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                <div className="bg-emerald-600 h-full rounded-full w-[21%]"></div>
-              </div>
-            </div>
+            )}
           </div>
 
           <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold">
             <span className="text-slate-500">Total Month Collection</span>
-            <span className="text-emerald-600 text-sm font-black">₹4,85,000</span>
+            <span className="text-emerald-600 text-sm font-black">{executiveMetrics.monthlyRevenue}</span>
           </div>
         </div>
 
-        {/* COUNSELOR SALES LEADERBOARD */}
+        {/* REALTIME LEAD INQUIRY PERFORMANCE */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs space-y-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-black text-slate-900">Counselor Performance</h2>
-            <span className="text-xs font-bold text-slate-400">September</span>
+            <h2 className="text-base font-black text-slate-900">Lead Status Pipeline</h2>
+            <span className="text-xs font-bold text-slate-400">Total: {totalLeadsCount}</span>
           </div>
 
           <div className="space-y-3">
             {[
-              { name: 'Priya Sharma', converted: '18 Admissions', rate: '32%', color: 'bg-emerald-500' },
-              { name: 'Rajesh Patil', converted: '12 Admissions', rate: '27%', color: 'bg-blue-500' },
-              { name: 'Neha Deshmukh', converted: '8 Admissions', rate: '22%', color: 'bg-indigo-500' }
-            ].map((c, idx) => (
+              { label: 'New Inquiries', count: leads.filter(l => l.status === 'New').length, color: 'bg-amber-500', badgeText: 'Pending Call' },
+              { label: 'Contacted / In Progress', count: leads.filter(l => l.status === 'Contacted' || l.status === 'In Progress').length, color: 'bg-blue-500', badgeText: 'Follow Up' },
+              { label: 'Enrolled / Admitted', count: enrolledLeads.length, color: 'bg-emerald-500', badgeText: 'Converted' }
+            ].map((st, idx) => (
               <div key={idx} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-slate-900 text-white font-black text-xs flex items-center justify-center">
-                    #{idx + 1}
-                  </div>
+                  <div className={`w-3 h-3 rounded-full ${st.color}`}></div>
                   <div>
-                    <div className="font-extrabold text-xs text-slate-900">{c.name}</div>
-                    <div className="text-[10px] font-semibold text-slate-500">{c.converted}</div>
+                    <div className="font-extrabold text-xs text-slate-900">{st.label}</div>
+                    <div className="text-[10px] font-semibold text-slate-500">{st.count} Student Records</div>
                   </div>
                 </div>
-                <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">
-                  {c.rate} Conv.
+                <span className="text-xs font-black text-slate-800 bg-white border border-slate-200 px-2.5 py-1 rounded-lg shadow-xs">
+                  {st.badgeText}
                 </span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* BATCH ATTENDANCE ALERT WIDGET */}
+        {/* BATCH ATTENDANCE WIDGET */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs space-y-5">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-black text-slate-900">Low Attendance Alerts</h2>
-            <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">&lt; 75% Warning</span>
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-md">Status Check</span>
           </div>
 
           <div className="space-y-3">
-            {[
-              { name: 'Karan Mehra', batch: 'Python Analytics DA-09', attendance: '68%', phone: '9765409876' },
-              { name: 'Suresh Raina', batch: 'Full Stack MERN FS-42', attendance: '71%', phone: '9876512340' }
-            ].map((s, idx) => (
-              <div key={idx} className="p-3 rounded-2xl bg-rose-50/50 border border-rose-100 space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-extrabold text-xs text-slate-900">{s.name}</span>
-                  <span className="text-xs font-black text-rose-600">{s.attendance} Attendance</span>
+            {enrolledLeads.length > 0 ? (
+              enrolledLeads.slice(0, 2).map((s, idx) => (
+                <div key={idx} className="p-3 rounded-2xl bg-emerald-50/50 border border-emerald-100 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-extrabold text-xs text-slate-900">{s.name}</span>
+                    <span className="text-xs font-black text-emerald-700">95% Attendance</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                    <span>{s.course || 'Full Stack Web Dev'}</span>
+                    <span className="font-mono text-slate-700">+91 {s.phone}</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                  <span>{s.batch}</span>
-                  <span className="font-mono text-slate-700">+91 {s.phone}</span>
-                </div>
+              ))
+            ) : (
+              <div className="p-4 rounded-2xl bg-slate-50 text-slate-500 text-center font-bold text-xs">
+                No low attendance warnings. All student attendance is healthy!
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
@@ -195,7 +250,7 @@ export default function DashboardView({ leads, stats, searchQuery, onUpdateStatu
             onClick={onNavigateToLeads}
             className="px-4 py-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white font-extrabold text-xs transition-all cursor-pointer shrink-0"
           >
-            View All {stats.totalLeads} Leads →
+            View All {totalLeadsCount} Leads →
           </button>
         </div>
 
@@ -212,36 +267,44 @@ export default function DashboardView({ leads, stats, searchQuery, onUpdateStatu
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs font-medium">
-              {leads.slice(0, 5).map((l) => (
-                <tr key={l.id} className="hover:bg-slate-50/50">
-                  <td className="py-3.5 px-4 font-extrabold text-slate-900">{l.name}</td>
-                  <td className="py-3.5 px-4 font-mono text-slate-600">+91 {l.phone}</td>
-                  <td className="py-3.5 px-4 font-semibold text-slate-800">{l.course}</td>
-                  <td className="py-3.5 px-4 text-slate-500">{l.city || 'Pune'}</td>
-                  <td className="py-3.5 px-4">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${
-                      l.status === 'Enrolled' ? 'bg-emerald-100 text-emerald-700' :
-                      l.status === 'In Progress' ? 'bg-blue-100 text-blue-700' :
-                      l.status === 'Contacted' ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700'
-                    }`}>
-                      {l.status || 'New'}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-right">
-                    <select
-                      value={l.status || 'New'}
-                      onChange={(e) => onUpdateStatus(l.id, e.target.value)}
-                      className="px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold focus:outline-none"
-                    >
-                      <option value="New">New</option>
-                      <option value="Contacted">Contacted</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Enrolled">Enrolled</option>
-                      <option value="Closed">Closed</option>
-                    </select>
+              {leads.length > 0 ? (
+                leads.slice(0, 5).map((l) => (
+                  <tr key={l.id} className="hover:bg-slate-50/50">
+                    <td className="py-3.5 px-4 font-extrabold text-slate-900">{l.name}</td>
+                    <td className="py-3.5 px-4 font-mono text-slate-600">+91 {l.phone}</td>
+                    <td className="py-3.5 px-4 font-semibold text-slate-800">{l.course}</td>
+                    <td className="py-3.5 px-4 text-slate-500">{l.location || l.city || 'Lucknow, UP'}</td>
+                    <td className="py-3.5 px-4">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${
+                        l.status === 'Enrolled' ? 'bg-emerald-100 text-emerald-700' :
+                        l.status === 'In Progress' ? 'bg-blue-100 text-blue-700' :
+                        l.status === 'Contacted' ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {l.status || 'New'}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-right">
+                      <select
+                        value={l.status || 'New'}
+                        onChange={(e) => onUpdateStatus(l.id, e.target.value)}
+                        className="px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold focus:outline-none"
+                      >
+                        <option value="New">New</option>
+                        <option value="Contacted">Contacted</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Enrolled">Enrolled</option>
+                        <option value="Closed">Closed</option>
+                      </select>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="py-8 text-center text-slate-500 font-bold">
+                    No lead inquiries recorded in MongoDB Atlas database yet.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

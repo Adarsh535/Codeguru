@@ -34,23 +34,39 @@ export const loginAdmin = async (req, res) => {
     const cleanEmail = email.toLowerCase().trim();
     let admin = await Admin.findOne({ email: cleanEmail });
 
-    // Seed default Master Admin if first time login and matching fallback
-    if (!admin && cleanEmail === 'admin@codeguru.com' && password === 'admin123') {
-      const hashedPassword = await bcrypt.hash('admin123', 10);
-      admin = await Admin.create({
-        name: 'Super Admin',
-        email: 'admin@codeguru.com',
-        password: hashedPassword,
-        role: 'Master Admin'
-      });
+    // Fallback: If not found by email, check if there is an admin record in database
+    if (!admin) {
+      const existingAdmins = await Admin.find({});
+      if (existingAdmins.length === 0) {
+        // Seed initial admin account
+        const hashedPassword = await bcrypt.hash(password || 'admin123', 10);
+        admin = await Admin.create({
+          name: 'Super Admin',
+          email: cleanEmail,
+          password: hashedPassword,
+          role: 'Master Admin'
+        });
+      } else if (cleanEmail === 'admin@codeguru.com') {
+        admin = existingAdmins[0];
+      }
     }
 
-    const isMatch = admin ? (await bcrypt.compare(password, admin.password) || admin.password === password) : false;
+    let isMatch = false;
+    if (admin) {
+      isMatch = await bcrypt.compare(password, admin.password);
+      // Fallback for plain text password match if any legacy record
+      if (!isMatch && admin.password === password) {
+        isMatch = true;
+        // Upgrade password to bcrypt hash
+        admin.password = await bcrypt.hash(password, 10);
+        await admin.save();
+      }
+    }
 
     if (admin && isMatch) {
       return res.json({
         success: true,
-        message: 'Admin login successful (authenticated via MongoDB)',
+        message: 'Admin login successful (authenticated via MongoDB Atlas)',
         token: `jwt_token_${admin._id}_${Date.now()}`,
         user: {
           id: admin._id,
@@ -63,11 +79,11 @@ export const loginAdmin = async (req, res) => {
 
     return res.status(401).json({
       success: false,
-      message: 'Invalid Admin Credentials'
+      message: 'Invalid Admin Email or Password'
     });
   } catch (err) {
     console.error('[authController Error] Auth Error:', err);
-    return res.status(500).json({ success: false, message: 'Database Auth Error' });
+    return res.status(500).json({ success: false, message: 'Database Auth Error: ' + err.message });
   }
 };
 
@@ -87,9 +103,28 @@ export const updateCredentials = async (req, res) => {
 
   try {
     const targetEmail = (currentEmail || 'admin@codeguru.com').toLowerCase().trim();
-    const admin = await Admin.findOne({ email: targetEmail });
+    let admin = await Admin.findOne({ email: targetEmail });
+    
+    // Fallback: If not found by email, pick the first admin record in database
     if (!admin) {
-      return res.status(404).json({ success: false, message: 'Admin account not found in database' });
+      admin = await Admin.findOne();
+    }
+
+    // If still no admin exists, create one
+    if (!admin) {
+      const initialPassword = newPassword ? await bcrypt.hash(newPassword, 10) : await bcrypt.hash('admin123', 10);
+      admin = await Admin.create({
+        name: 'Super Admin',
+        email: (newEmail || 'admin@codeguru.com').toLowerCase().trim(),
+        password: initialPassword,
+        role: 'Master Admin'
+      });
+
+      return res.json({
+        success: true,
+        message: 'Admin account created and credentials saved to MongoDB Atlas',
+        user: { id: admin._id, name: admin.name, email: admin.email, role: admin.role }
+      });
     }
 
     if (newEmail) admin.email = newEmail.toLowerCase().trim();
@@ -99,14 +134,15 @@ export const updateCredentials = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Admin credentials updated in MongoDB successfully',
-      user: { name: admin.name, email: admin.email, role: admin.role }
+      message: 'Admin credentials updated in MongoDB Atlas successfully',
+      user: { id: admin._id, name: admin.name, email: admin.email, role: admin.role }
     });
   } catch (err) {
     console.error('[authController Error] Failed to update credentials:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
 
 /**
  * --------------------------------------------------------------------------

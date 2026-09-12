@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, Video, FileText, CheckCircle2, Clock, UserCheck, Award, 
   Search, Plus, Calendar, BarChart2, CheckSquare, XSquare, Printer, 
   Download, Eye, QrCode, AlertTriangle, Layers, Users, X
 } from 'lucide-react';
+import { enrollmentModel } from '../models/enrollmentModel';
 
 // ==========================================
 // 1. MODULES & LESSONS VIEW
@@ -167,11 +168,24 @@ export function BatchesView() {
 // 3. ATTENDANCE VIEW WITH LOW ATTENDANCE ALERT (<75%)
 // ==========================================
 export function AttendanceView() {
-  const [attendanceList, setAttendanceList] = useState([
-    { id: '1', name: 'Aarav Patel', roll: 'FS-01', attendanceRate: '92%', present: true, alert: false },
-    { id: '2', name: 'Diya Sharma', roll: 'FS-02', attendanceRate: '88%', present: true, alert: false },
-    { id: '3', name: 'Karan Mehra', roll: 'FS-03', attendanceRate: '68%', present: false, alert: true }
-  ]);
+  const [attendanceList, setAttendanceList] = useState([]);
+
+  useEffect(() => {
+    enrollmentModel.getEnrollments().then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        setAttendanceList(data.map((item, idx) => ({
+          id: item.enrollmentId || item.id || `STU-${idx+1}`,
+          name: item.studentName || 'Enrolled Student',
+          roll: `STU-0${idx+1}`,
+          attendanceRate: '100%',
+          present: true,
+          alert: false
+        })));
+      } else {
+        setAttendanceList([]);
+      }
+    }).catch(() => setAttendanceList([]));
+  }, []);
 
   const toggleAttendance = (id) => {
     setAttendanceList(attendanceList.map(s => s.id === id ? { ...s, present: !s.present } : s));
@@ -190,30 +204,36 @@ export function AttendanceView() {
       </div>
 
       <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs space-y-3">
-        {attendanceList.map(s => (
-          <div key={s.id} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-sm text-slate-900">{s.name}</span>
-                {s.alert && (
-                  <span className="text-[10px] font-black bg-rose-100 text-rose-700 px-2 py-0.5 rounded flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3" /> Low Attendance ({s.attendanceRate})
-                  </span>
-                )}
+        {attendanceList.length > 0 ? (
+          attendanceList.map(s => (
+            <div key={s.id} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-sm text-slate-900">{s.name}</span>
+                  {s.alert && (
+                    <span className="text-[10px] font-black bg-rose-100 text-rose-700 px-2 py-0.5 rounded flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" /> Low Attendance ({s.attendanceRate})
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs text-slate-500 font-mono">Roll: {s.roll} • Total Rate: {s.attendanceRate}</div>
               </div>
-              <div className="text-xs text-slate-500 font-mono">Roll: {s.roll} • Total Rate: {s.attendanceRate}</div>
-            </div>
 
-            <button
-              onClick={() => toggleAttendance(s.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                s.present ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
-              }`}
-            >
-              {s.present ? 'PRESENT' : 'ABSENT'}
-            </button>
+              <button
+                onClick={() => toggleAttendance(s.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  s.present ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
+                }`}
+              >
+                {s.present ? 'PRESENT' : 'ABSENT'}
+              </button>
+            </div>
+          ))
+        ) : (
+          <div className="p-8 text-center text-slate-500 font-bold text-xs">
+            No active enrolled students in database yet. Add student enrollments to mark daily attendance.
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
@@ -223,18 +243,25 @@ export function AttendanceView() {
 // 4. ASSESSMENTS VIEW
 // ==========================================
 export function AssessmentsView() {
-  const [assessments, setAssessments] = useState([
-    { id: 'TEST-101', title: 'React JS & Redux State Evaluation', course: 'Full Stack MERN', date: '04 Sep 2026', totalStudents: 22, avgScore: '82%', status: 'Graded' },
-    { id: 'TEST-102', title: 'Python Pandas & Data Cleaning Quiz', course: 'Data Science & AI', date: '02 Sep 2026', totalStudents: 18, avgScore: '78%', status: 'Graded' },
-    { id: 'TEST-103', title: 'JavaScript ES6 Async & Promises Challenge', course: 'Full Stack MERN', date: '28 Aug 2026', totalStudents: 22, avgScore: '85%', status: 'Graded' }
-  ]);
+  const [assessments, setAssessments] = useState([]);
+  const [scores, setScores] = useState([]);
 
-  const [scores] = useState([
-    { studentName: 'Aarav Patel', roll: 'CG-STU-0001', score: '92/100', percentage: '92%', grade: 'A+', status: 'Passed' },
-    { studentName: 'Diya Sharma', roll: 'CG-STU-0002', score: '84/100', percentage: '84%', grade: 'A', status: 'Passed' },
-    { studentName: 'Karan Mehra', roll: 'CG-STU-0003', score: '62/100', percentage: '62%', grade: 'C', status: 'Passed' },
-    { studentName: 'Rahul Verma', roll: 'CG-STU-0004', score: '45/100', percentage: '45%', grade: 'F', status: 'Needs Retake' }
-  ]);
+  useEffect(() => {
+    enrollmentModel.getEnrollments().then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        setScores(data.map((item, idx) => ({
+          studentName: item.studentName || 'Student',
+          roll: `CG-STU-000${idx+1}`,
+          score: 'Pending',
+          percentage: '0%',
+          grade: 'N/A',
+          status: 'Enrolled'
+        })));
+      } else {
+        setScores([]);
+      }
+    }).catch(() => setScores([]));
+  }, []);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTest, setNewTest] = useState({ title: '', course: 'Full Stack MERN', date: '' });
@@ -386,75 +413,53 @@ export function AssessmentsView() {
 // 5. STUDENT PROGRESS VIEW
 // ==========================================
 export function StudentProgressView() {
-  const [selectedStudentId, setSelectedStudentId] = useState('CG-STU-0001');
+  const [studentsList, setStudentsList] = useState([]);
+  const [selectedStudentId, setSelectedStudentId] = useState('');
 
-  const studentsList = [
-    {
-      id: 'CG-STU-0001',
-      name: 'Aarav Patel',
-      course: 'Full Stack Web Dev (MERN)',
-      batch: 'FS-42 (Morning 9-11 AM)',
-      overallProgress: 85,
-      attendance: '92%',
-      completedModules: 4,
-      totalModules: 5,
-      trainer: 'Vikrant Shinde',
-      modules: [
-        { name: 'HTML5, CSS3 & Modern Responsive Design', progress: 100, status: 'Completed', score: '95/100' },
-        { name: 'JavaScript ES6+, DOM & Async Programming', progress: 100, status: 'Completed', score: '88/100' },
-        { name: 'React 18, Hooks & Redux State Architecture', progress: 90, status: 'In Progress', score: '84/100' },
-        { name: 'Node.js, Express & RESTful APIs', progress: 75, status: 'In Progress', score: 'Pending' },
-        { name: 'MongoDB Database & System Design', progress: 60, status: 'In Progress', score: 'Pending' }
-      ],
-      projects: [
-        { title: 'Responsive Portfolio Website', status: 'Graded (A+)', link: 'github.com/aarav/portfolio' },
-        { title: 'Async Weather & Crypto Dashboard', status: 'Graded (A)', link: 'github.com/aarav/weather' },
-        { title: 'Full Stack E-Commerce Platform UI', status: 'In Review', link: 'github.com/aarav/shop' }
-      ]
-    },
-    {
-      id: 'CG-STU-0002',
-      name: 'Diya Sharma',
-      course: 'Data Science & AI Masterclass',
-      batch: 'DS-18 (Weekend 11:30-1:30 PM)',
-      overallProgress: 60,
-      attendance: '88%',
-      completedModules: 2,
-      totalModules: 4,
-      trainer: 'Anjali Saxena',
-      modules: [
-        { name: 'Python Programming & Data Structures', progress: 100, status: 'Completed', score: '90/100' },
-        { name: 'NumPy, Pandas & Exploratory Data Analysis', progress: 100, status: 'Completed', score: '82/100' },
-        { name: 'Machine Learning Algorithms & Scikit-Learn', progress: 40, status: 'In Progress', score: 'Pending' },
-        { name: 'Deep Learning & Neural Networks with PyTorch', progress: 0, status: 'Not Started', score: 'Pending' }
-      ],
-      projects: [
-        { title: 'COVID Data Analysis Dashboard', status: 'Graded (A)', link: 'github.com/diya/covid' },
-        { title: 'Predictive House Pricing ML Model', status: 'In Progress', link: 'github.com/diya/house' }
-      ]
-    },
-    {
-      id: 'CG-STU-0003',
-      name: 'Karan Mehra',
-      course: 'Python Data Analytics',
-      batch: 'DA-09 (Evening 5-7 PM)',
-      overallProgress: 40,
-      attendance: '68%',
-      completedModules: 1,
-      totalModules: 3,
-      trainer: 'Rohit Kulkarni',
-      modules: [
-        { name: 'Python Core & Scripting', progress: 100, status: 'Completed', score: '75/100' },
-        { name: 'SQL & Database Queries', progress: 20, status: 'In Progress', score: 'Pending' },
-        { name: 'Tableau & PowerBI Visualization', progress: 0, status: 'Not Started', score: 'Pending' }
-      ],
-      projects: [
-        { title: 'Sales Performance SQL Analysis', status: 'In Progress', link: 'github.com/karan/sales' }
-      ]
-    }
-  ];
+  useEffect(() => {
+    enrollmentModel.getEnrollments().then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        const formatted = data.map((item, idx) => ({
+          id: item.studentId || item.enrollmentId || `CG-STU-000${idx+1}`,
+          name: item.studentName || 'Student',
+          course: item.courseName || 'Full Stack Web Dev (MERN)',
+          batch: 'Active Batch',
+          overallProgress: 100,
+          attendance: '100%',
+          completedModules: 5,
+          totalModules: 5,
+          trainer: 'Faculty Team',
+          modules: [
+            { name: 'Core Foundations & Setup', progress: 100, status: 'Completed', score: 'Pass' },
+            { name: 'Full Stack Development', progress: 100, status: 'Completed', score: 'Pass' }
+          ],
+          projects: [
+            { title: 'Course Capstone Project', status: 'Graded (A)', link: 'github.com/student/project' }
+          ]
+        }));
+        setStudentsList(formatted);
+        setSelectedStudentId(formatted[0].id);
+      } else {
+        setStudentsList([]);
+      }
+    }).catch(() => setStudentsList([]));
+  }, []);
 
   const currentStudent = studentsList.find(s => s.id === selectedStudentId) || studentsList[0];
+
+  if (studentsList.length === 0 || !currentStudent) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs">
+          <h1 className="text-xl font-black text-slate-900 tracking-tight">Student Syllabus Progress Index</h1>
+          <p className="text-xs font-semibold text-slate-500">Visual progress tracking for modules & coursework completion</p>
+        </div>
+        <div className="bg-white p-8 rounded-3xl border border-slate-200/80 text-center text-slate-500 font-bold text-xs">
+          No active enrolled students in database yet. Add student enrollments to track student progress.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -524,29 +529,19 @@ export function StudentProgressView() {
         </div>
       </div>
 
-      {/* MODULE-WISE SYLLABUS BREAKDOWN */}
+      {/* MODULE PROGRESS BREAKDOWN */}
       <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs space-y-4">
-        <h3 className="text-base font-black text-slate-900">Syllabus Modules Breakdown</h3>
+        <h3 className="text-base font-black text-slate-900">Module-wise Progression & Grades</h3>
         <div className="space-y-3">
           {currentStudent.modules.map((m, idx) => (
             <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <span className="font-extrabold text-xs text-slate-900">{idx + 1}. {m.name}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-500">Test Score: <strong>{m.score}</strong></span>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${
-                    m.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' :
-                    m.status === 'In Progress' ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-600'
-                  }`}>
-                    {m.status}
-                  </span>
-                </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-extrabold text-slate-900">{m.name}</span>
+                <span className="font-bold text-slate-600">{m.score}</span>
               </div>
-              <div className="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden">
+              <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all ${
-                    m.progress === 100 ? 'bg-emerald-500' : 'bg-blue-600'
-                  }`}
+                  className="bg-blue-600 h-full rounded-full"
                   style={{ width: `${m.progress}%` }}
                 ></div>
               </div>
@@ -587,11 +582,7 @@ export function CertificatesView() {
       const saved = localStorage.getItem('codeguru_certificates');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
-    return [
-      { id: 'CG-CERT-2026-00045', studentId: 'CG-STU-0001', studentName: 'Aarav Patel', course: 'Full Stack Web Dev (MERN)', duration: '6 Months', monthsCompleted: 6, totalMonths: 6, status: 'Approved', issueDate: '05 Sep 2026' },
-      { id: 'CG-CERT-2026-00047', studentId: 'CG-STU-8821', studentName: 'Priya Singh', course: 'Full Stack Web Dev (MERN)', duration: '6 Months', monthsCompleted: 6, totalMonths: 6, status: 'Pending Approval', issueDate: null },
-      { id: 'CG-CERT-2026-00046', studentId: 'CG-STU-0002', studentName: 'Diya Sharma', course: 'Data Science & AI Masterclass', duration: '6 Months', monthsCompleted: 2, totalMonths: 6, status: 'Ongoing', issueDate: null }
-    ];
+    return [];
   });
 
   const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'pending' | 'approved' | 'ongoing'

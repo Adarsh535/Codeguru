@@ -12,24 +12,15 @@ export default function PlacementsManagerView() {
     placements,
     showAddModal,
     setShowAddModal,
-    uploading,
+    uploadingStudent,
+    uploadingCompany,
     formData,
     setFormData,
-    handleAvatarUpload: handleStudentPhotoUpload,
+    handleStudentPhotoUpload,
+    handleCompanyLogoUpload,
     handleCreatePlacement: handleSubmit,
     handleDeletePlacement: handleDelete
   } = usePlacementsController();
-
-  const [uploadingCompany, setUploadingCompany] = useState(false);
-
-  const handleCompanyLogoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploadingCompany(true);
-    const url = await apiAdminService.uploadFile(file);
-    if (url) setFormData(prev => ({ ...prev, companyLogo: url }));
-    setUploadingCompany(false);
-  };
 
 
 

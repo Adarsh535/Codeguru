@@ -11,104 +11,34 @@ import { API_BASE } from './apiClient';
 const API_URL = `${API_BASE}/leads`;
 const STORAGE_KEY = 'codeguru_leads';
 
-const SEED_LEADS = [
-  {
-    id: 'LEAD-1001',
-    leadId: 'LEAD-1001',
-    name: 'Saurabh Kumar',
-    phone: '9876543210',
-    location: 'Lucknow, UP',
-    course: 'Full Stack Web Development',
-    status: 'New',
-    createdAt: new Date().toISOString(),
-    notes: 'Interested in MERN stack job guarantee batch'
-  },
-  {
-    id: 'LEAD-1002',
-    leadId: 'LEAD-1002',
-    name: 'Ananya Mishra',
-    phone: '9123456789',
-    location: 'Ayodhya, UP',
-    course: 'Java Full Stack & DSA',
-    status: 'Contacted',
-    createdAt: new Date().toISOString(),
-    notes: 'Requested callback after 5 PM'
-  },
-  {
-    id: 'LEAD-1003',
-    leadId: 'LEAD-1003',
-    name: 'Vikas Sharma',
-    phone: '9988776655',
-    location: 'Delhi-NCR',
-    course: 'Python Data Science & AI',
-    status: 'Enrolled',
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    notes: 'Fee paid via UPI, joined Lucknow offline batch'
-  },
-  {
-    id: 'LEAD-1004',
-    leadId: 'LEAD-1004',
-    name: 'Pooja Verma',
-    phone: '9811223344',
-    location: 'Noida, UP',
-    course: 'DevOps & Cloud Engineering',
-    status: 'In Progress',
-    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-    notes: 'Attended demo session'
-  },
-  {
-    id: 'LEAD-1005',
-    leadId: 'LEAD-1005',
-    name: 'Rohan Gupta',
-    phone: '9765432109',
-    location: 'Ayodhya, UP',
-    course: 'Cyber Security & Ethical Hacking',
-    status: 'New',
-    createdAt: new Date().toISOString(),
-    notes: 'Inquired from Ayodhya branch'
-  }
-];
-
 export const leadModel = {
   /**
    * --------------------------------------------------------------------------
    * API: Get All Student Leads
    * --------------------------------------------------------------------------
    * @route   GET http://localhost:5000/api/leads
-   * @desc    Backend MongoDB se saare student inquiry leads fetch karta hai.
-   *          Agar backend server offline ho to local storage cache ya initial seed data fallback data deta hai.
+   * @desc    Backend MongoDB database se live student inquiry leads fetch karta hai.
    * @access  Admin Private
-   * @returns {Promise<Array>} Normalized array of lead objects { id, name, phone, course, location, status, createdAt }
+   * @returns {Promise<Array>} Array of lead objects fetched strictly from backend database
    */
   getLeads: async () => {
     try {
       const res = await fetch(API_URL);
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
-        const normalized = data.data.map(item => ({
+        return data.data.map(item => ({
           ...item,
           id: item._id || item.leadId || item.id,
           location: item.location || 'Lucknow, UP',
           createdAt: item.createdAt || new Date().toISOString()
         }));
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
-        return normalized;
       }
     } catch (err) {
-      console.warn('[leadModel API Warning] Backend API offline, loading from local cache:', err);
+      console.warn('[leadModel API Warning] Backend API error:', err);
     }
-
-    try {
-      const data = localStorage.getItem(STORAGE_KEY);
-      if (data) {
-        return JSON.parse(data);
-      }
-    } catch (err) {
-      console.error('[leadModel Cache Error] Failed to load local leads:', err);
-    }
-
-    return SEED_LEADS;
+    return [];
   },
+
 
   /**
    * --------------------------------------------------------------------------

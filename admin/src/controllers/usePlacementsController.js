@@ -11,19 +11,21 @@ import { adminCmsModel } from '../models/adminCmsModel';
 export function usePlacementsController() {
   const [placements, setPlacements] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploadingStudent, setUploadingStudent] = useState(false);
+  const [uploadingCompany, setUploadingCompany] = useState(false);
   const [formData, setFormData] = useState({
-    studentName: '',
+    name: '',
     company: '',
     package: '',
     role: 'Software Engineer',
-    avatarUrl: '',
-    course: 'Full Stack Web Development'
+    photo: '',
+    companyLogo: '',
+    college: ''
   });
 
   const loadPlacements = useCallback(async () => {
     const data = await adminCmsModel.getPlacements();
-    setPlacements(data);
+    setPlacements(Array.isArray(data) ? data : []);
   }, []);
 
   useEffect(() => {
@@ -33,36 +35,60 @@ export function usePlacementsController() {
     return () => window.removeEventListener('codeguru_refresh_all', handleRefresh);
   }, [loadPlacements]);
 
-  const handleAvatarUpload = async (e) => {
-    const file = e.target.files[0];
+  const handleStudentPhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploading(true);
+    setUploadingStudent(true);
     const url = await adminCmsModel.uploadFile(file);
     if (url) {
-      setFormData(prev => ({ ...prev, avatarUrl: url }));
+      setFormData(prev => ({ ...prev, photo: url }));
     }
-    setUploading(false);
+    setUploadingStudent(false);
+  };
+
+  const handleCompanyLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingCompany(true);
+    const url = await adminCmsModel.uploadFile(file);
+    if (url) {
+      setFormData(prev => ({ ...prev, companyLogo: url }));
+    }
+    setUploadingCompany(false);
   };
 
   const handleCreatePlacement = async (e) => {
     e.preventDefault();
-    if (!formData.studentName || !formData.company || !formData.package) {
+    if (!formData.name || !formData.company || !formData.package) {
       alert('Please fill student name, company, and package details!');
       return;
     }
 
-    const created = await adminCmsModel.addPlacement(formData);
+    const payload = {
+      name: formData.name,
+      studentName: formData.name,
+      company: formData.company,
+      companyLogo: formData.companyLogo || '',
+      role: formData.role || 'Software Engineer',
+      package: formData.package,
+      photo: formData.photo || '',
+      college: formData.college || 'CodeGuru Academy'
+    };
+
+    const created = await adminCmsModel.addPlacement(payload);
     if (created) {
       await loadPlacements();
       setShowAddModal(false);
       setFormData({
-        studentName: '',
+        name: '',
         company: '',
         package: '',
         role: 'Software Engineer',
-        avatarUrl: '',
-        course: 'Full Stack Web Development'
+        photo: '',
+        companyLogo: '',
+        college: ''
       });
       window.dispatchEvent(new Event('codeguru_refresh_all'));
     }
@@ -80,11 +106,13 @@ export function usePlacementsController() {
     placements,
     showAddModal,
     setShowAddModal,
-    uploading,
+    uploadingStudent,
+    uploadingCompany,
     formData,
     setFormData,
     loadPlacements,
-    handleAvatarUpload,
+    handleStudentPhotoUpload,
+    handleCompanyLogoUpload,
     handleCreatePlacement,
     handleDeletePlacement
   };

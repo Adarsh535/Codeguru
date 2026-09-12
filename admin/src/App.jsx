@@ -128,7 +128,7 @@ function AdminMainApp() {
                 onUpdateStatus={handleUpdateStatus}
               />
             )}
-            {activeTab === 'crm-admissions' && <AdmissionsView />}
+            {activeTab === 'crm-admissions' && <AdmissionsView leads={leads} />}
             {activeTab === 'crm-students' && <StudentsView />}
             {activeTab === 'crm-communication' && <CommunicationView />}
 

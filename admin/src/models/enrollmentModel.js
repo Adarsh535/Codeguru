@@ -22,18 +22,12 @@ export const enrollmentModel = {
         return data.data;
       }
     } catch (err) {
-      console.warn('[enrollmentModel Admin] Backend API offline, fetching from local cache:', err.message);
-    }
-
-    try {
-      const local = localStorage.getItem(STORAGE_KEY);
-      if (local) return JSON.parse(local);
-    } catch (err) {
-      console.error('Local cache read error:', err);
+      console.warn('[enrollmentModel Admin] Backend API error:', err.message);
     }
 
     return [];
   },
+
 
   /**
    * Update enrollment status or fee status
