@@ -27,9 +27,12 @@ export const handleFileUpload = async (req, res) => {
         secure: true
       });
 
+      const isVideo = req.file.mimetype.startsWith('video/') || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(req.file.originalname);
+
       const uploadResult = await cloudinary.uploader.upload(req.file.path, {
         folder: 'codeguru_uploads',
-        resource_type: 'auto'
+        resource_type: isVideo ? 'video' : 'auto',
+        timeout: 180000
       });
 
       // Cleanup local temp file after cloud upload
@@ -37,13 +40,14 @@ export const handleFileUpload = async (req, res) => {
 
       return res.json({
         success: true,
-        message: 'File uploaded to Cloudinary successfully',
+        message: `File uploaded to Cloudinary successfully (${isVideo ? 'Video' : 'Image'})`,
         url: uploadResult.secure_url,
         public_id: uploadResult.public_id,
         filename: req.file.filename,
         mimetype: req.file.mimetype,
         size: req.file.size,
-        provider: 'Cloudinary'
+        provider: 'Cloudinary',
+        resource_type: uploadResult.resource_type || (isVideo ? 'video' : 'image')
       });
     }
 

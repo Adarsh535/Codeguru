@@ -49,12 +49,12 @@ export default function OurTeamSlider({ onOpenContactModal }) {
     apiService.getTeam().then(data => {
       if (isMounted && data && data.length > 0) {
         const formatted = data.map(item => ({
-          id: item.id,
+          id: item.id || item._id,
           name: item.name,
           role: item.role || 'Senior Tech Instructor',
           tag: '#TEAMCODEGURRU',
-          photo: item.photo || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=500&fit=crop&crop=faces',
-          bio: item.specialization || 'Full Stack & Software Engineering Expert.',
+          photo: item.photoUrl || item.photo || item.image || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=500&fit=crop&crop=faces',
+          bio: item.bio || item.specialization || 'Full Stack & Software Engineering Expert.',
           phone: item.phone || '9198483...'
         }));
         setTeamMembers(formatted);

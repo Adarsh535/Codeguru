@@ -168,20 +168,25 @@ export default function BannersManagerView() {
                   {/* FILE UPLOAD BOX */}
                   <div className="flex flex-col gap-1">
                     <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wide">2. Select File</label>
-                    <div className="border-2 border-dashed border-blue-300 hover:border-blue-500 bg-blue-50/30 rounded-xl p-2 flex items-center justify-center gap-2 cursor-pointer relative transition-all h-[42px]">
+                    <div className={`border-2 border-dashed rounded-xl p-2 flex items-center justify-center gap-2 cursor-pointer relative transition-all h-[42px] ${
+                      uploading ? 'border-amber-400 bg-amber-50/50 animate-pulse' : (formData.mediaUrl ? 'border-emerald-400 bg-emerald-50/40' : 'border-blue-300 hover:border-blue-500 bg-blue-50/30')
+                    }`}>
                       <input
                         type="file"
+                        disabled={uploading}
                         accept={formData.type === 'video' ? 'video/*' : 'image/*,video/*'}
                         onChange={handleFileUpload}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
                       />
-                      {formData.type === 'video' ? (
+                      {uploading ? (
+                        <div className="w-4 h-4 border-2 border-amber-600 border-t-transparent rounded-full animate-spin shrink-0" />
+                      ) : formData.type === 'video' ? (
                         <MovieIcon className="!w-4 !h-4 text-rose-600 shrink-0" />
                       ) : (
                         <CloudUploadIcon className="!w-4 !h-4 text-blue-600 shrink-0" />
                       )}
                       <span className="text-[11px] font-bold text-slate-800 truncate">
-                        {uploading ? 'Uploading...' : (formData.mediaUrl ? 'File Loaded ✓' : `Click to Upload ${formData.type === 'video' ? 'Video' : 'Image'}`)}
+                        {uploading ? '⏳ Uploading to Cloudinary...' : (formData.mediaUrl ? '✓ Media Uploaded / Loaded' : `Click to Upload ${formData.type === 'video' ? 'Video' : 'Image'}`)}
                       </span>
                     </div>
                   </div>

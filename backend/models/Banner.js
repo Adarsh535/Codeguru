@@ -12,6 +12,8 @@ const bannerSchema = new mongoose.Schema({
   subtitle: { type: String, default: '' },
   type: { type: String, enum: ['image', 'video'], default: 'image' },
   mediaUrl: { type: String, required: true },
+  videoUrl: { type: String, default: '' },
+  imageUrl: { type: String, default: '' },
   badge: { type: String, default: 'PROMOTION' },
   ctaText: { type: String, default: 'Learn More' },
   active: { type: Boolean, default: true }

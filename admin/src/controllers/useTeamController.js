@@ -40,6 +40,8 @@ export function useTeamController() {
     const url = await adminCmsModel.uploadFile(file);
     if (url) {
       setFormData(prev => ({ ...prev, photoUrl: url }));
+    } else {
+      alert('Failed to upload instructor photo to Cloudinary.');
     }
     setUploading(false);
   };

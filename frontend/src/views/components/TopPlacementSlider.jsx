@@ -10,7 +10,13 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
     let isMounted = true;
     apiService.getPlacements().then(data => {
       if (isMounted && data && data.length > 0) {
-        setStudents(data);
+        const formatted = data.map(item => ({
+          ...item,
+          id: item.id || item._id,
+          photo: item.photo || item.avatarUrl || item.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+          companyLogo: item.companyLogo || item.logo || 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg'
+        }));
+        setStudents(formatted);
       }
     });
     return () => { isMounted = false; };

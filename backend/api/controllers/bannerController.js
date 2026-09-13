@@ -29,11 +29,16 @@ export const getBanners = async (req, res) => {
  */
 export const addBanner = async (req, res) => {
   try {
+    const mediaUrl = req.body.mediaUrl || '';
+    const isVideo = req.body.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(mediaUrl);
+
     const banner = await Banner.create({
       title: req.body.title || 'New Banner Title',
       subtitle: req.body.subtitle || '',
-      type: req.body.type || 'image',
-      mediaUrl: req.body.mediaUrl || '',
+      type: isVideo ? 'video' : (req.body.type || 'image'),
+      mediaUrl: mediaUrl,
+      videoUrl: req.body.videoUrl || (isVideo ? mediaUrl : ''),
+      imageUrl: req.body.imageUrl || (!isVideo ? mediaUrl : ''),
       badge: req.body.badge || 'PROMOTION',
       ctaText: req.body.ctaText || 'Learn More',
       active: true

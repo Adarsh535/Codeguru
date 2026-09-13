@@ -33,14 +33,14 @@ export const adminCmsModel = {
         body: formData
       });
       const data = await res.json();
-      return data.success ? data.url : null;
+      if (data.success && data.url) {
+        return data.url;
+      }
+      console.warn('[adminCmsModel API Warning] File upload returned error response:', data);
+      return null;
     } catch (err) {
-      console.warn('[adminCmsModel API Warning] Backend file upload failed, fallback to DataURL:', err);
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(file);
-      });
+      console.error('[adminCmsModel API Error] Backend file upload failed:', err);
+      return null;
     }
   },
 

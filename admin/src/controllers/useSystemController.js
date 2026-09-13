@@ -43,8 +43,19 @@ export function useSystemController(user, updateUser) {
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
+
+    if (!email || !email.includes('@') || !email.includes('.')) {
+      setMessage({ type: 'error', text: 'Please enter a valid email address!' });
+      return;
+    }
+
     if (newPassword && newPassword !== confirmPassword) {
-      setMessage({ type: 'error', text: 'Passwords do not match!' });
+      setMessage({ type: 'error', text: 'Passwords do not match! Please re-enter passwords.' });
+      return;
+    }
+
+    if (newPassword && newPassword.length < 4) {
+      setMessage({ type: 'error', text: 'New password must be at least 4 characters long!' });
       return;
     }
 
@@ -64,11 +75,11 @@ export function useSystemController(user, updateUser) {
       if (updateUser) {
         updateUser({ email: updatedEmail });
       }
-      setMessage({ type: 'success', text: `Admin credentials updated successfully! New Email: ${updatedEmail}` });
+      setMessage({ type: 'success', text: `Admin credentials updated successfully in MongoDB database! Active Email: ${updatedEmail}` });
       setNewPassword('');
       setConfirmPassword('');
     } else {
-      setMessage({ type: 'error', text: res.message || 'Failed to update admin credentials' });
+      setMessage({ type: 'error', text: res.message || 'Failed to update admin credentials in MongoDB' });
     }
   };
 

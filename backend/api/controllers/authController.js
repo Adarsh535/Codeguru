@@ -112,7 +112,10 @@ export const updateCredentials = async (req, res) => {
 
     // If still no admin exists, create one
     if (!admin) {
-      const initialPassword = newPassword ? await bcrypt.hash(newPassword, 10) : await bcrypt.hash('admin123', 10);
+      const initialPassword = (newPassword && newPassword.trim().length >= 4)
+        ? await bcrypt.hash(newPassword.trim(), 10)
+        : await bcrypt.hash('admin123', 10);
+
       admin = await Admin.create({
         name: 'Super Admin',
         email: (newEmail || 'admin@codeguru.com').toLowerCase().trim(),
@@ -127,8 +130,23 @@ export const updateCredentials = async (req, res) => {
       });
     }
 
-    if (newEmail) admin.email = newEmail.toLowerCase().trim();
-    if (newPassword) admin.password = await bcrypt.hash(newPassword, 10);
+    if (newEmail && newEmail.trim().length > 0) {
+      const cleanNewEmail = newEmail.toLowerCase().trim();
+      if (cleanNewEmail !== admin.email) {
+        const existingOther = await Admin.findOne({ email: cleanNewEmail, _id: { $ne: admin._id } });
+        if (existingOther) {
+          return res.status(400).json({ success: false, message: 'An admin account with this email address already exists.' });
+        }
+        admin.email = cleanNewEmail;
+      }
+    }
+
+    if (newPassword && newPassword.trim().length > 0) {
+      if (newPassword.trim().length < 4) {
+        return res.status(400).json({ success: false, message: 'New password must be at least 4 characters long.' });
+      }
+      admin.password = await bcrypt.hash(newPassword.trim(), 10);
+    }
 
     await admin.save();
 
@@ -139,7 +157,10 @@ export const updateCredentials = async (req, res) => {
     });
   } catch (err) {
     console.error('[authController Error] Failed to update credentials:', err);
-    res.status(500).json({ success: false, message: err.message });
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: 'Email address is already in use by another admin.' });
+    }
+    res.status(500).json({ success: false, message: 'Database Error: ' + err.message });
   }
 };
 

@@ -24,5 +24,5 @@ const storage = multer.diskStorage({
 
 export const upload = multer({
   storage,
-  limits: { fileSize: 50 * 1024 * 1024 } // 50MB max file size for images/videos
+  limits: { fileSize: 500 * 1024 * 1024 } // 500MB max file size for videos/images
 });

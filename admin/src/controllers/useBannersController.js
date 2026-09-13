@@ -37,7 +37,7 @@ export function useBannersController() {
     const file = e.target.files[0];
     if (!file) return;
 
-    const isVideoFile = file.type.startsWith('video/') || /\.(mp4|webm|mov|m4v|avi)$/i.test(file.name);
+    const isVideoFile = file.type.startsWith('video/') || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(file.name);
 
     setUploading(true);
     const url = await adminCmsModel.uploadFile(file);
@@ -47,6 +47,8 @@ export function useBannersController() {
         mediaUrl: url,
         type: isVideoFile ? 'video' : 'image'
       }));
+    } else {
+      alert('File upload to Cloudinary failed. Please check backend or file size.');
     }
     setUploading(false);
   };
@@ -58,7 +60,15 @@ export function useBannersController() {
       return;
     }
 
-    const created = await adminCmsModel.addBanner(formData);
+    const isVideo = formData.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(formData.mediaUrl);
+    const payload = {
+      ...formData,
+      type: isVideo ? 'video' : 'image',
+      videoUrl: isVideo ? formData.mediaUrl : '',
+      imageUrl: !isVideo ? formData.mediaUrl : ''
+    };
+
+    const created = await adminCmsModel.addBanner(payload);
     if (created) {
       await loadBanners();
       setShowAddModal(false);

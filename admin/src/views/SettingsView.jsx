@@ -149,14 +149,23 @@ export default function SettingsView() {
             </div>
           </div>
 
+          {message && (
+            <div className={`p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 border mt-1 ${
+              message.type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-rose-50 text-rose-800 border-rose-300'
+            }`}>
+              <CheckCircleIcon className="!w-4 !h-4" />
+              <span>{message.text}</span>
+            </div>
+          )}
+
           <div className="flex items-center justify-end mt-2">
             <button
               type="submit"
               disabled={isSaving}
-              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95"
             >
               <SaveIcon className="!w-4 !h-4" />
-              <span>{isSaving ? 'Saving to Database...' : 'Save Settings'}</span>
+              <span>{isSaving ? 'Saving to MongoDB...' : 'Save Settings'}</span>
             </button>
           </div>
         </form>

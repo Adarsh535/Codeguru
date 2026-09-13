@@ -23,7 +23,18 @@ router.get('/status', getUploadStatus);
  * @desc   Uploads a single media file (Image/Video) to Cloudinary or Local Storage
  * @access Public / Upload
  */
-router.post('/', upload.single('file'), handleFileUpload);
+router.post('/', (req, res, next) => {
+  upload.single('file')(req, res, (err) => {
+    if (err) {
+      console.error('[Multer Upload Error]:', err.message);
+      return res.status(400).json({
+        success: false,
+        message: err.message || 'File upload error'
+      });
+    }
+    next();
+  });
+}, handleFileUpload);
 
 /**
  * @api    DELETE /api/upload

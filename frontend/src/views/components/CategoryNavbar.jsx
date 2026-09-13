@@ -209,7 +209,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal }
         </div>
 
         {/* CATEGORY SELECTOR CARDS GRID */}
-        <div className="grid grid-cols-3 gap-2 md:flex md:gap-6 md:overflow-x-visible pb-4 md:pb-0 pt-2 px-1 md:mx-0 md:px-0">
+        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-5 justify-items-center w-full pb-4 md:pb-2 pt-2 px-1 md:mx-0 md:px-0">
           {categories.map((cat) => {
             const isCatActive = activeCategory === cat.id;
             const IconComp = cat.icon;
@@ -218,23 +218,23 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal }
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className="group flex flex-col items-center justify-start w-full md:w-auto md:flex-1 shrink-0 gap-2 sm:gap-3 cursor-pointer"
+                className="group flex flex-col items-center justify-start w-full gap-2 sm:gap-2.5 cursor-pointer"
               >
                 <div
-                  className={`relative flex items-center justify-center p-2 rounded-[16px] xl:rounded-[28px] transition-all duration-300 w-full aspect-square ${
+                  className={`relative flex items-center justify-center p-2.5 sm:p-4 md:p-4.5 rounded-[14px] sm:rounded-[18px] md:rounded-[24px] transition-all duration-300 w-full max-w-[95px] sm:max-w-[130px] md:max-w-[150px] aspect-square ${
                     isCatActive
-                      ? 'border-2 border-blue-500 shadow-blue-100 ring-4 ring-blue-50/50 bg-white'
-                      : 'border-2 border-transparent hover:-translate-y-1 bg-white/60'
+                      ? 'border-2 border-blue-500 shadow-md shadow-blue-500/10 ring-4 ring-blue-50/60 bg-white scale-[1.02]'
+                      : 'border border-slate-200/80 hover:border-blue-300 hover:shadow-sm hover:-translate-y-1 bg-white'
                   }`}
                 >
                   <img
                     src={cat.img}
                     alt={cat.name}
-                    className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full max-h-14 sm:max-h-20 md:max-h-24 object-contain relative z-10 transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
                 <span
-                  className={`text-[11px] sm:text-xs md:text-sm font-extrabold text-center leading-tight px-1 transition-colors ${
+                  className={`text-[11px] sm:text-xs md:text-sm font-extrabold text-center leading-tight px-1 max-w-[150px] transition-colors ${
                     isCatActive ? 'text-blue-600' : 'text-slate-700 group-hover:text-blue-500'
                   }`}
                 >
@@ -281,39 +281,39 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal }
             return (
               <div
                 key={course.id}
-                className="group relative flex flex-col p-4 sm:p-5 bg-white border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] rounded-[20px] hover:shadow-[0_8px_30px_-5px_rgba(0,0,0,0.12)] hover:border-blue-100 transition-all duration-300 w-full"
+                className="group relative flex flex-col p-3.5 sm:p-5 bg-white border border-slate-100 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.06)] rounded-[16px] sm:rounded-[20px] hover:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] hover:border-blue-100 transition-all duration-300 w-full"
               >
                 {/* HEART BOOKMARK BUTTON */}
                 <button
                   onClick={(e) => toggleHeart(e, course.id)}
-                  className="absolute top-4 right-4 text-slate-300 hover:text-rose-500 transition-colors cursor-pointer"
+                  className="absolute top-3 right-3 sm:top-4 sm:right-4 text-slate-300 hover:text-rose-500 transition-colors cursor-pointer"
                   title="Save course"
                 >
-                  <Heart className={`w-5 h-5 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
+                  <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
                 </button>
 
                 {/* TOP HEADER DETAILS */}
-                <div className="flex gap-3 sm:gap-4 mb-4 pr-6">
-                  <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[14px] flex items-center justify-center flex-shrink-0 ${course.iconBg}`}>
+                <div className="flex gap-2.5 sm:gap-4 mb-2.5 sm:mb-4 pr-5 sm:pr-6">
+                  <div className={`w-11 h-11 sm:w-15 sm:h-15 rounded-[12px] sm:rounded-[14px] flex items-center justify-center flex-shrink-0 ${course.iconBg}`}>
                     <img
                       src={course.icon}
                       alt={course.title}
-                      className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
+                      className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
                     />
                   </div>
                   <div className="flex flex-col pt-0.5 min-w-0">
                     {course.tag ? (
-                      <div className="mb-1.5 w-max px-2 py-0.5 bg-[#e5fcf1] text-[#00a86b] text-[10px] font-bold rounded leading-none uppercase tracking-wide">
+                      <div className="mb-1 w-max px-1.5 py-0.5 bg-[#e5fcf1] text-[#00a86b] text-[9px] sm:text-[10px] font-bold rounded leading-none uppercase tracking-wide">
                         {course.tag}
                       </div>
                     ) : (
-                      <div className="mb-1.5 w-max px-2 py-0.5 text-[10px] opacity-0 leading-none">-</div>
+                      <div className="mb-1 w-max px-1.5 py-0.5 text-[9px] opacity-0 leading-none">-</div>
                     )}
-                    <h3 className="font-extrabold text-slate-900 text-[15px] sm:text-[17px] leading-snug mb-1.5 truncate">
+                    <h3 className="font-extrabold text-slate-900 text-[14px] sm:text-[17px] leading-snug mb-1 sm:mb-1.5 truncate">
                       {course.title}
                     </h3>
-                    <div className="flex items-center gap-1.5 text-[11px] md:text-[12px] text-slate-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
-                      <Clock className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                    <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[12px] text-slate-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+                      <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400 flex-shrink-0" />
                       <span>{course.duration}</span>
                       <span className="w-1 h-1 rounded-full bg-slate-300 flex-shrink-0" />
                       <span>{course.level}</span>
@@ -323,27 +323,27 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal }
                   </div>
                 </div>
 
-                <div className="w-full h-px bg-slate-100 my-3" />
+                <div className="w-full h-px bg-slate-100 my-2.5 sm:my-3" />
 
                 {/* PRICE & ENROLL ACTION ROW */}
-                <div className="flex flex-row items-center justify-between pt-1 mt-auto">
-                  <div className="flex items-baseline gap-1.5 sm:gap-2">
-                    <span className="text-xl sm:text-[22px] font-black text-slate-900 tracking-tight">
+                <div className="flex flex-row items-center justify-between pt-0.5 sm:pt-1 mt-auto">
+                  <div className="flex items-baseline gap-1 sm:gap-2">
+                    <span className="text-lg sm:text-[22px] font-black text-slate-900 tracking-tight">
                       {course.price}
                     </span>
-                    <span className="text-[11px] sm:text-xs font-semibold text-slate-400 line-through">
+                    <span className="text-[10px] sm:text-xs font-semibold text-slate-400 line-through">
                       {course.originalPrice}
                     </span>
-                    <span className="text-[11px] sm:text-xs font-bold text-emerald-500">
+                    <span className="text-[10px] sm:text-xs font-bold text-emerald-500">
                       {course.discount}
                     </span>
                   </div>
 
                   <button
                     onClick={() => onOpenEnrollModal ? onOpenEnrollModal(course) : onOpenContactModal()}
-                    className="bg-[#2463eb] hover:bg-blue-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-[13px] sm:text-sm font-bold flex items-center justify-center gap-1 shadow-sm transition-transform active:scale-95 cursor-pointer"
+                    className="bg-[#2463eb] hover:bg-blue-700 text-white px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-md sm:rounded-lg text-[12px] sm:text-sm font-bold flex items-center justify-center gap-1 shadow-sm transition-transform active:scale-95 cursor-pointer"
                   >
-                    Enroll Now <ArrowRight className="w-4 h-4 -mr-1" />
+                    Enroll Now <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 -mr-0.5 sm:-mr-1" />
                   </button>
                 </div>
               </div>

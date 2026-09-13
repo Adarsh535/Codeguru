@@ -43,6 +43,8 @@ export function usePlacementsController() {
     const url = await adminCmsModel.uploadFile(file);
     if (url) {
       setFormData(prev => ({ ...prev, photo: url }));
+    } else {
+      alert('Failed to upload student photo to Cloudinary.');
     }
     setUploadingStudent(false);
   };
@@ -55,6 +57,8 @@ export function usePlacementsController() {
     const url = await adminCmsModel.uploadFile(file);
     if (url) {
       setFormData(prev => ({ ...prev, companyLogo: url }));
+    } else {
+      alert('Failed to upload company logo to Cloudinary.');
     }
     setUploadingCompany(false);
   };

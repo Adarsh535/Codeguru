@@ -46,7 +46,19 @@ export default function BannerSlider({ onOpenContactModal }) {
     let isMounted = true;
     apiService.getBanners().then(dynamicBanners => {
       if (isMounted && dynamicBanners && dynamicBanners.length > 0) {
-        setSlides(dynamicBanners);
+        const formatted = dynamicBanners.map(b => {
+          const media = b.mediaUrl || b.videoUrl || b.imageUrl || '';
+          const isVid = b.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(media) || media.includes('/video/');
+          return {
+            ...b,
+            id: b._id || b.id,
+            type: isVid ? 'video' : 'image',
+            mediaUrl: media,
+            videoUrl: b.videoUrl || media,
+            imageUrl: b.imageUrl || media
+          };
+        });
+        setSlides(formatted);
       }
     });
     return () => { isMounted = false; };
@@ -62,7 +74,8 @@ export default function BannerSlider({ onOpenContactModal }) {
 
   useEffect(() => {
     const currentSlide = slides[currentIndex];
-    if (!currentSlide || currentSlide.type === 'image') {
+    const isVid = currentSlide && (currentSlide.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(currentSlide.mediaUrl || currentSlide.videoUrl || ''));
+    if (!currentSlide || !isVid) {
       const timer = setInterval(() => {
         handleNext();
       }, 5000);
@@ -146,29 +159,36 @@ export default function BannerSlider({ onOpenContactModal }) {
           className="w-full h-full flex transition-transform duration-500 ease-out"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
-          {slides.map((slide, index) => (
-            <div key={slide.id || index} className="relative w-full h-full shrink-0 overflow-hidden bg-slate-900">
-              {slide.type === 'video' ? (
-                <div className="relative w-full h-full">
-                  <video
-                    ref={(el) => (videoRefs.current[index] = el)}
-                    src={slide.videoUrl}
-                    poster={slide.poster}
-                    muted={isMuted}
-                    playsInline
-                    onEnded={handleNext}
-                    className="w-full h-full object-cover opacity-80"
-                  />
-                </div>
-              ) : (
-                <div className="relative w-full h-full">
-                  <img
-                    src={slide.imageUrl}
-                    alt={slide.title}
-                    className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
-                  />
-                </div>
-              )}
+          {slides.map((slide, index) => {
+            const videoSource = slide.videoUrl || slide.mediaUrl;
+            const imageSource = slide.imageUrl || slide.mediaUrl;
+            const isVideoSlide = slide.type === 'video' || (videoSource && (/\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(videoSource) || videoSource.includes('/video/')));
+
+            return (
+              <div key={slide.id || index} className="relative w-full h-full shrink-0 overflow-hidden bg-slate-900">
+                {isVideoSlide ? (
+                  <div className="relative w-full h-full">
+                    <video
+                      ref={(el) => (videoRefs.current[index] = el)}
+                      src={videoSource}
+                      poster={slide.poster}
+                      muted={isMuted}
+                      playsInline
+                      autoPlay
+                      loop
+                      onEnded={handleNext}
+                      className="w-full h-full object-cover opacity-90"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative w-full h-full">
+                    <img
+                      src={imageSource}
+                      alt={slide.title}
+                      className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                    />
+                  </div>
+                )}
 
               {/* GRADIENT OVERLAY */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#022069]/90 via-slate-900/30 to-transparent pointer-events-none" />
@@ -184,7 +204,7 @@ export default function BannerSlider({ onOpenContactModal }) {
               {/* TOP-RIGHT CONTROLS (Play/Pause & Mute) */}
               <div className="absolute top-4 right-4 z-10 pointer-events-auto">
                 <div className="bg-[#1e293b]/70 backdrop-blur-md rounded-full flex items-center p-1 shadow-lg gap-1">
-                  {slide.type === 'video' && (
+                  {(slide.type === 'video' || (slide.videoUrl && (/\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(slide.videoUrl) || slide.videoUrl.includes('/video/')))) && (
                     <>
                       <button
                         onClick={() => toggleVideoPlay(index)}
@@ -232,7 +252,8 @@ export default function BannerSlider({ onOpenContactModal }) {
                 </div>
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
 
         {/* LEFT NAV CHEVRON */}

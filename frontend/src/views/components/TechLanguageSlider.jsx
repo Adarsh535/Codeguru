@@ -55,24 +55,24 @@ export default function TechLanguageSlider({ onOpenContactModal }) {
   const doubleTech = [...techStack, ...techStack, ...techStack];
 
   return (
-    <div className="w-full flex flex-col gap-3 sm:gap-4 py-3 sm:py-4 overflow-hidden bg-white mt-1 border-b border-t border-slate-100 shadow-sm relative z-10 select-none">
+    <div className="w-full flex flex-col gap-2 py-1.5 sm:py-2.5 overflow-hidden bg-white border-b border-t border-slate-100 shadow-xs relative z-10 select-none">
       <div className="w-full inline-flex flex-nowrap overflow-hidden [mask-image:_linear-gradient(to_right,transparent_0,_black_24px,_black_calc(100%-24px),transparent_100%)]">
-        <ul className="flex items-center justify-start [&_li]:mx-2 animate-[marquee-reverse_25s_linear_infinite] w-max hover:[animation-play-state:paused]">
+        <ul className="flex items-center justify-start [&_li]:mx-1.5 animate-[marquee-reverse_25s_linear_infinite] w-max hover:[animation-play-state:paused]">
           {doubleTech.map((tech, index) => (
             <li
               key={`${tech.id}-${index}`}
               onClick={onOpenContactModal}
-              className={`flex flex-shrink-0 items-center justify-between gap-3 px-3 py-1.5 min-[320px]:px-4 min-[320px]:py-2 rounded-full border ${tech.borderBg} shadow-sm bg-white cursor-pointer hover:scale-105 transition-transform`}
+              className={`flex flex-shrink-0 items-center justify-between gap-1.5 sm:gap-2.5 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full border ${tech.borderBg} shadow-xs bg-white cursor-pointer hover:scale-105 transition-transform`}
             >
               <img
                 src={tech.logo}
                 alt={tech.name}
-                className="w-4 h-4 min-[320px]:w-5 min-[320px]:h-5 object-contain"
+                className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 object-contain"
               />
-              <span className="font-extrabold text-[10px] min-[320px]:text-xs whitespace-nowrap tracking-tight">
+              <span className="font-extrabold text-[10px] sm:text-xs whitespace-nowrap tracking-tight">
                 {tech.name}
               </span>
-              <span className={`text-[9px] min-[320px]:text-[10px] font-bold px-2 py-0.5 rounded-full ${tech.tagBg}`}>
+              <span className={`text-[8.5px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tech.tagBg}`}>
                 {tech.tag}
               </span>
             </li>
