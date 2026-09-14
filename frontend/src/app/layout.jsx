@@ -98,7 +98,7 @@ export default function RootLayout({ children }) {
   };
 
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -111,7 +111,7 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="font-sans bg-slate-50 text-slate-900 antialiased selection:bg-orange-500 selection:text-white">
+      <body className="font-sans bg-slate-50 text-slate-900 antialiased selection:bg-orange-500 selection:text-white" suppressHydrationWarning>
         <ClientShell>{children}</ClientShell>
       </body>
     </html>
