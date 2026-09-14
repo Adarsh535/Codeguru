@@ -47,6 +47,22 @@ export default function ClientShell({ children }) {
     };
   }, []);
 
+  // Auto-open Inquiry ("Get in Touch") popup modal immediately on site load & every 40 seconds
+  useEffect(() => {
+    const initialTimer = setTimeout(() => {
+      setIsInquiryModalOpen(true);
+    }, 600);
+
+    const recurringInterval = setInterval(() => {
+      setIsInquiryModalOpen(true);
+    }, 40000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(recurringInterval);
+    };
+  }, []);
+
   const handleOpenEnrollModal = (batch = null) => {
     if (!user) {
       setAuthModalMode('register');
