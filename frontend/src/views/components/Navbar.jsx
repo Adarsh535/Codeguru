@@ -61,7 +61,7 @@ export default function Navbar({
   };
 
   return (
-    <header className="w-full bg-white border-b border-gray-100 shadow-sm sticky top-0 z-50">
+    <header className="fixed top-0 left-0 right-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-xs z-50">
       <div className="w-full max-w-7xl mx-auto px-1.5 min-[320px]:px-2 sm:px-4 lg:px-8">
         <div className="flex justify-between items-center h-auto min-h-[50px] sm:h-20 py-1.5 sm:py-0 w-full overflow-hidden">
           
