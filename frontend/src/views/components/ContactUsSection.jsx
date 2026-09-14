@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';

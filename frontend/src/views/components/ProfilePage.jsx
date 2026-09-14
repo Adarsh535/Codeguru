@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import PersonIcon from '@mui/icons-material/Person';
 import InfoIcon from '@mui/icons-material/Info';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -12,22 +14,24 @@ import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 export default function ProfilePage({ onOpenContactModal }) {
-  const [user, setUser] = useState(() => {
-    try {
-      const u = localStorage.getItem('codeguru_user');
-      return u ? JSON.parse(u) : null;
-    } catch (e) {
-      return null;
-    }
-  });
+  const [user, setUser] = useState(null);
 
   const [activeModal, setActiveModal] = useState(null); // 'login', 'signup', 'about', 'refund', 'settings', 'privacy', 'cancellation', 'terms', 'help'
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'signup'
   const [formData, setFormData] = useState({ email: '', password: '', name: '' });
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    return localStorage.getItem('codeguru_theme') === 'dark' || document.documentElement.classList.contains('dark');
-  });
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const u = localStorage.getItem('codeguru_user');
+        if (u) setUser(JSON.parse(u));
+        const isDark = localStorage.getItem('codeguru_theme') === 'dark' || (typeof document !== 'undefined' && document.documentElement.classList.contains('dark'));
+        setIsDarkMode(isDark);
+      }
+    } catch (e) {}
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('codeguru_user');

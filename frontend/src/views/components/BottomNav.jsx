@@ -1,10 +1,33 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { Home, BookOpen, Phone, Layers, User } from 'lucide-react';
+import { Home, BookOpen, Phone, Layers, User, GraduationCap } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function BottomNav({ activeTab: externalActiveTab, setActiveTab: externalSetActiveTab, onOpenContactModal, onOpenPlacementModal }) {
-  const [internalActiveTab, setInternalActiveTab] = useState('home');
-  const activeTab = externalActiveTab !== undefined ? externalActiveTab : internalActiveTab;
-  const setActiveTab = externalSetActiveTab || setInternalActiveTab;
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const getTabFromPathname = (path) => {
+    if (!path || path === '/') return 'home';
+    if (path.includes('courses')) return 'courses';
+    if (path.includes('services')) return 'services';
+    if (path.includes('placements')) return 'placements';
+    if (path.includes('my-batch')) return 'my-batch';
+    if (path.includes('profile')) return 'profile';
+    return 'home';
+  };
+
+  const currentTab = externalActiveTab || getTabFromPathname(pathname);
+
+  const handleNavClick = (id, route) => {
+    if (externalSetActiveTab) {
+      externalSetActiveTab(id);
+    }
+    if (router && route) {
+      router.push(route);
+    }
+  };
 
   const handleCallClick = (e) => {
     e.preventDefault();
@@ -15,12 +38,14 @@ export default function BottomNav({ activeTab: externalActiveTab, setActiveTab: 
     {
       id: 'home',
       label: 'Home',
-      icon: Home
+      icon: Home,
+      route: '/'
     },
     {
       id: 'courses',
       label: 'Courses',
-      icon: BookOpen
+      icon: BookOpen,
+      route: '/courses'
     },
     {
       id: 'center-call',
@@ -30,12 +55,14 @@ export default function BottomNav({ activeTab: externalActiveTab, setActiveTab: 
     {
       id: 'services',
       label: 'Services',
-      icon: Layers
+      icon: Layers,
+      route: '/services'
     },
     {
       id: 'profile',
       label: 'Profile',
-      icon: User
+      icon: User,
+      route: '/profile'
     }
   ];
 
@@ -61,13 +88,13 @@ export default function BottomNav({ activeTab: externalActiveTab, setActiveTab: 
             );
           }
 
-          const isActive = activeTab === item.id;
+          const isActive = currentTab === item.id;
           const IconComponent = item.icon;
 
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => handleNavClick(item.id, item.route)}
               className="relative flex flex-col items-center justify-center w-14 h-full z-10 group transition-transform active:scale-90 cursor-pointer"
             >
               <div
@@ -101,4 +128,3 @@ export default function BottomNav({ activeTab: externalActiveTab, setActiveTab: 
     </div>
   );
 }
-

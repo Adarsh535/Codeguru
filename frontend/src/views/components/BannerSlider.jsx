@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Zap } from 'lucide-react';
 import { apiService } from '../../services/apiService';

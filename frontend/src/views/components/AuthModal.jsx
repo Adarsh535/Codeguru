@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';

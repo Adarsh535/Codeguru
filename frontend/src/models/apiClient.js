@@ -5,7 +5,10 @@
  * Centralized API client base URL and HTTP request helpers for Frontend app.
  */
 
-export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+export const API_BASE = 
+  (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_BASE_URL) || 
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || 
+  'http://localhost:5000/api';
 
 /**
  * Helper for executing HTTP requests to Express REST API Backend

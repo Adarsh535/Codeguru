@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { GraduationCap, Check, ArrowRight } from 'lucide-react';
 import { TOP_PLACEMENTS_STUDENTS } from '../../models/placementModel';

@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { Heart, Clock, ArrowRight, Code, Cpu, Server, Wrench, Zap, Globe } from 'lucide-react';
 import { apiService } from '../../services/apiService';

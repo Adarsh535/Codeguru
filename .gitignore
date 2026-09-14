@@ -16,6 +16,8 @@ dist/
 **/dist/
 build/
 **/build/
+.next/
+**/.next/
 
 # Uploaded media files
 backend/uploads/*

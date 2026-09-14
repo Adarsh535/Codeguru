@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { LOCATIONS, PLACEMENT_CATEGORIES, PLACEMENTS } from '../models/placementModel';
 import { apiService } from '../services/apiService';

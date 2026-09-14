@@ -1,5 +1,9 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { MapPin, Navigation, LogIn, UserPlus, LogOut, User } from 'lucide-react';
+import { MapPin, Navigation, LogIn, UserPlus, LogOut, User, BookOpen, Layers, GraduationCap, School } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function Navbar({
   selectedLocation,
@@ -11,6 +15,8 @@ export default function Navbar({
   setActiveTab
 }) {
   const [user, setUser] = useState(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const checkUser = () => {
     try {
@@ -41,6 +47,17 @@ export default function Navbar({
     window.dispatchEvent(new Event('storage'));
     window.dispatchEvent(new Event('codeguru_user_updated'));
     if (setActiveTab) setActiveTab('home');
+    if (router) router.push('/');
+  };
+
+  const handleBrandClick = () => {
+    if (setActiveTab) setActiveTab('home');
+    if (router) router.push('/');
+  };
+
+  const handleProfileClick = () => {
+    if (setActiveTab) setActiveTab('profile');
+    if (router) router.push('/profile');
   };
 
   return (
@@ -52,7 +69,7 @@ export default function Navbar({
           <div className="flex items-center gap-1 sm:gap-3 flex-shrink min-w-0 pr-1">
             {/* Logo Icon */}
             <button
-              onClick={() => setActiveTab && setActiveTab('home')}
+              onClick={handleBrandClick}
               className="w-7 h-7 min-w-[28px] sm:w-12 sm:h-12 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-full border border-blue-100 bg-white shadow-sm cursor-pointer hover:scale-105 active:scale-95 transition-transform"
               title="CodeGuru Home"
             >
@@ -69,7 +86,7 @@ export default function Navbar({
             {/* Brand Title & Location */}
             <div className="flex flex-col justify-center min-w-0">
               <div
-                onClick={() => setActiveTab && setActiveTab('home')}
+                onClick={handleBrandClick}
                 className="flex items-center cursor-pointer min-w-0"
               >
                 <div className="flex items-center gap-0.5 sm:gap-1 font-black text-xs sm:text-2xl tracking-tighter uppercase leading-none truncate">
@@ -93,12 +110,64 @@ export default function Navbar({
             </div>
           </div>
 
+          {/* MIDDLE DESKTOP NAVIGATION LINKS */}
+          <nav className="hidden md:flex items-center gap-1 lg:gap-2 mx-4">
+            <Link
+              href="/"
+              onClick={() => setActiveTab && setActiveTab('home')}
+              className={`px-3 py-2 rounded-xl font-bold text-xs lg:text-sm transition-colors ${
+                pathname === '/' ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:text-orange-600 hover:bg-slate-50'
+              }`}
+            >
+              Home
+            </Link>
+            <Link
+              href="/courses"
+              onClick={() => setActiveTab && setActiveTab('courses')}
+              className={`px-3 py-2 rounded-xl font-bold text-xs lg:text-sm transition-colors ${
+                pathname === '/courses' ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:text-orange-600 hover:bg-slate-50'
+              }`}
+            >
+              Courses
+            </Link>
+            <Link
+              href="/services"
+              onClick={() => setActiveTab && setActiveTab('services')}
+              className={`px-3 py-2 rounded-xl font-bold text-xs lg:text-sm transition-colors ${
+                pathname === '/services' ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:text-orange-600 hover:bg-slate-50'
+              }`}
+            >
+              Services
+            </Link>
+            <Link
+              href="/placements"
+              onClick={() => setActiveTab && setActiveTab('placements')}
+              className={`px-3 py-2 rounded-xl font-bold text-xs lg:text-sm transition-colors ${
+                pathname === '/placements' ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:text-orange-600 hover:bg-slate-50'
+              }`}
+            >
+              Placements
+            </Link>
+            {user && (
+              <Link
+                href="/my-batch"
+                onClick={() => setActiveTab && setActiveTab('my-batch')}
+                className={`px-3 py-2 rounded-xl font-bold text-xs lg:text-sm transition-colors flex items-center gap-1.5 ${
+                  pathname === '/my-batch' ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:text-orange-600 hover:bg-slate-50'
+                }`}
+              >
+                <School className="w-4 h-4 text-orange-500" />
+                <span>My Batch</span>
+              </Link>
+            )}
+          </nav>
+
           {/* RIGHT SIDE: USER PROFILE / LOGIN / REGISTER BUTTONS */}
           <div className="flex items-center gap-1 min-[320px]:gap-1.5 sm:gap-3 md:gap-4 flex-shrink-0 ml-auto">
             {user ? (
               <div className="flex items-center gap-1 sm:gap-2">
                 <button
-                  onClick={() => setActiveTab && setActiveTab('profile')}
+                  onClick={handleProfileClick}
                   className="flex items-center justify-center gap-1 sm:gap-2 px-2 py-1 sm:px-4 sm:py-2 rounded-full border border-gray-200 text-slate-800 font-bold text-[9px] sm:text-sm bg-white hover:bg-gray-50 transition-colors shadow-sm cursor-pointer active:scale-95"
                   title="View Profile"
                 >
@@ -143,4 +212,3 @@ export default function Navbar({
     </header>
   );
 }
-

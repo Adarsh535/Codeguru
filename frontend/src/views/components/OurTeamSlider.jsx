@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { OUR_TEAM_MEMBERS } from '../../models/placementModel';
 import { apiService } from '../../services/apiService';
