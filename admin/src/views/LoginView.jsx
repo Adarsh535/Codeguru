@@ -9,8 +9,8 @@ import { useAuth } from '../context/AuthContext';
 
 export default function LoginView() {
   const { login } = useAuth();
-  const [email, setEmail] = useState('admin@codeguru.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
@@ -67,7 +67,7 @@ export default function LoginView() {
         )}
 
         {/* LOGIN FORM */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4" autoComplete="off">
           
           {/* EMAIL FIELD */}
           <div className="flex flex-col gap-1.5">
@@ -77,6 +77,7 @@ export default function LoginView() {
               <input
                 type="text"
                 required
+                autoComplete="off"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@codeguru.com"
@@ -93,6 +94,7 @@ export default function LoginView() {
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
