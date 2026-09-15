@@ -138,6 +138,9 @@ export function useContactFormController() {
       const updatedLeads = [newLead, ...existingLeads];
       localStorage.setItem('codeguru_leads', JSON.stringify(updatedLeads));
 
+      // Mark inquiry as submitted so popup doesn't appear automatically again
+      localStorage.setItem('codeguru_inquiry_submitted', 'true');
+
       // Fire cross-tab and local events
       window.dispatchEvent(new Event('storage'));
       window.dispatchEvent(new CustomEvent('codeguru_lead_added', { detail: newLead }));

@@ -75,6 +75,7 @@ export default function BottomNav({ activeTab: externalActiveTab, setActiveTab: 
               <div key={item.id} className="relative flex flex-col items-center justify-center w-16 h-full z-20">
                 <div className="absolute -top-[22px] w-[62px] h-[62px] bg-white rounded-full flex items-center justify-center z-10 shadow-md border border-slate-100">
                   <button
+                    suppressHydrationWarning
                     onClick={handleCallClick}
                     className="relative bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 w-[52px] h-[52px] rounded-full flex items-center justify-center shadow-lg shadow-orange-500/30 z-20 transition-transform active:scale-90 duration-300 cursor-pointer"
                     title="Call / Contact Us"
@@ -91,6 +92,7 @@ export default function BottomNav({ activeTab: externalActiveTab, setActiveTab: 
 
           return (
             <button
+              suppressHydrationWarning
               key={item.id}
               onClick={() => handleNavClick(item.id, item.route)}
               className="relative flex flex-col items-center justify-center w-14 h-full z-10 group transition-transform active:scale-90 cursor-pointer"

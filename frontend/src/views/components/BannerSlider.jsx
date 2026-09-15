@@ -209,6 +209,7 @@ export default function BannerSlider({ onOpenContactModal }) {
                   {(slide.type === 'video' || (slide.videoUrl && (/\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(slide.videoUrl) || slide.videoUrl.includes('/video/')))) && (
                     <>
                       <button
+                        suppressHydrationWarning
                         onClick={() => toggleVideoPlay(index)}
                         className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors text-white cursor-pointer"
                         title={isPlaying ? 'Pause' : 'Play'}
@@ -216,6 +217,7 @@ export default function BannerSlider({ onOpenContactModal }) {
                         {isPlaying ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
                       </button>
                       <button
+                        suppressHydrationWarning
                         onClick={toggleAudio}
                         className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors text-white bg-white/10 cursor-pointer"
                         title={isMuted ? 'Unmute' : 'Mute'}
@@ -246,6 +248,7 @@ export default function BannerSlider({ onOpenContactModal }) {
 
                 <div className="mt-3 flex items-center gap-2">
                   <button
+                    suppressHydrationWarning
                     onClick={onOpenContactModal}
                     className="bg-[#2463eb] hover:bg-blue-700 text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-md transition-transform active:scale-95 cursor-pointer"
                   >
@@ -260,6 +263,7 @@ export default function BannerSlider({ onOpenContactModal }) {
 
         {/* LEFT NAV CHEVRON */}
         <button
+          suppressHydrationWarning
           onClick={handlePrev}
           className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-[#1e293b]/60 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-colors z-20 pointer-events-auto cursor-pointer"
           title="Previous"
@@ -269,6 +273,7 @@ export default function BannerSlider({ onOpenContactModal }) {
 
         {/* RIGHT NAV CHEVRON */}
         <button
+          suppressHydrationWarning
           onClick={handleNext}
           className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-[#1e293b]/60 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-colors z-20 pointer-events-auto cursor-pointer"
           title="Next"
@@ -281,6 +286,7 @@ export default function BannerSlider({ onOpenContactModal }) {
           <div className="flex items-center gap-1.5 bg-slate-900/50 backdrop-blur-sm px-3 py-2 rounded-full pointer-events-auto">
             {slides.map((_, idx) => (
               <button
+                suppressHydrationWarning
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
                 className={`h-1.5 rounded-full transition-all cursor-pointer ${

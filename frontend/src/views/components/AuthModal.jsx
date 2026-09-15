@@ -178,6 +178,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
 
           {/* CLOSE BUTTON */}
           <button
+            suppressHydrationWarning
             onClick={onClose}
             className="absolute top-3 right-3 w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center transition-all cursor-pointer"
             title="Close"
@@ -202,6 +203,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
           {/* TAB TOGGLE SWITCH */}
           <div className="mt-2.5 inline-flex p-0.5 bg-slate-100 rounded-full border border-slate-200/80 text-[11px] font-bold w-full max-w-[210px]">
             <button
+              suppressHydrationWarning
               type="button"
               onClick={() => { setMode('login'); setErrors({}); }}
               className={`flex-1 py-1 rounded-full transition-all cursor-pointer font-extrabold ${
@@ -213,6 +215,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
               Login
             </button>
             <button
+              suppressHydrationWarning
               type="button"
               onClick={() => { setMode('register'); setErrors({}); }}
               className={`flex-1 py-1 rounded-full transition-all cursor-pointer font-extrabold ${
@@ -244,7 +247,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
             </div>
           ) : (
             /* FORM STATE */
-            <form onSubmit={handleSubmit} className="flex flex-col gap-2.5" noValidate>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-2.5" noValidate suppressHydrationWarning>
               
               {serverError && (
                 <div className="bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2 rounded-xl text-xs font-bold animate-fadeIn flex items-center gap-2">
@@ -262,6 +265,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
                   <div className="relative flex items-center">
                     <PersonOutlinedIcon className="absolute left-3.5 !w-4 !h-4 text-slate-400" />
                     <input
+                      suppressHydrationWarning
                       type="text"
                       name="name"
                       value={formData.name}
@@ -286,6 +290,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
                 <div className="relative flex items-center">
                   <MailOutlinedIcon className="absolute left-3.5 !w-4 !h-4 text-slate-400" />
                   <input
+                    suppressHydrationWarning
                     type="email"
                     name="email"
                     value={formData.email}
@@ -309,6 +314,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
                 <div className="relative flex items-center">
                   <LockOutlinedIcon className="absolute left-3.5 !w-4 !h-4 text-slate-400" />
                   <input
+                    suppressHydrationWarning
                     type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
@@ -319,6 +325,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
                     } rounded-full text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all`}
                   />
                   <button
+                    suppressHydrationWarning
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3.5 text-slate-400 hover:text-slate-600 cursor-pointer"
@@ -338,6 +345,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
 
               {/* SUBMIT BUTTON */}
               <button
+                suppressHydrationWarning
                 type="submit"
                 disabled={loading}
                 className="mt-1 w-full py-2.5 px-4 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-xs shadow-xs shadow-orange-500/20 hover:shadow-md active:scale-[0.98] transition-all cursor-pointer font-heading disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -358,6 +366,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
                   <p>
                     Don't have an account?{' '}
                     <button
+                      suppressHydrationWarning
                       type="button"
                       onClick={() => { setMode('register'); setErrors({}); }}
                       className="font-bold text-amber-600 hover:underline cursor-pointer"
@@ -369,6 +378,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
                   <p>
                     Already have an account?{' '}
                     <button
+                      suppressHydrationWarning
                       type="button"
                       onClick={() => { setMode('login'); setErrors({}); }}
                       className="font-bold text-amber-600 hover:underline cursor-pointer"

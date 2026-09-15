@@ -47,14 +47,30 @@ export default function ClientShell({ children }) {
     };
   }, []);
 
-  // Auto-open Inquiry ("Get in Touch") popup modal immediately on site load & every 40 seconds
+  // Auto-open Inquiry ("Get in Touch") popup modal immediately on site load & every 40 seconds (unless already submitted)
   useEffect(() => {
+    const isAlreadySubmitted = () => {
+      try {
+        return typeof window !== 'undefined' && localStorage.getItem('codeguru_inquiry_submitted') === 'true';
+      } catch (e) {
+        return false;
+      }
+    };
+
+    if (isAlreadySubmitted()) return;
+
     const initialTimer = setTimeout(() => {
-      setIsInquiryModalOpen(true);
+      if (!isAlreadySubmitted()) {
+        setIsInquiryModalOpen(true);
+      }
     }, 600);
 
     const recurringInterval = setInterval(() => {
-      setIsInquiryModalOpen(true);
+      if (isAlreadySubmitted()) {
+        clearInterval(recurringInterval);
+      } else {
+        setIsInquiryModalOpen(true);
+      }
     }, 40000);
 
     return () => {
@@ -123,7 +139,7 @@ export default function ClientShell({ children }) {
 
   return (
     <DeviceGuard>
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 justify-between overflow-x-hidden pt-[56px] sm:pt-20 pb-20 sm:pb-8" suppressHydrationWarning>
+      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 justify-between overflow-x-hidden pt-[70px] sm:pt-26 md:pt-28 pb-20 sm:pb-8" suppressHydrationWarning>
         
         {/* RESPONSIVE TOPBAR HEADER */}
         <Navbar

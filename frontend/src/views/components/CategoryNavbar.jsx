@@ -218,6 +218,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal }
 
             return (
               <button
+                suppressHydrationWarning
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
                 className="group flex flex-col items-center justify-start w-full gap-2 sm:gap-2.5 cursor-pointer"
@@ -261,6 +262,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal }
             const isFilterActive = activeFilter === filter;
             return (
               <button
+                suppressHydrationWarning
                 key={filter}
                 onClick={() => setActiveFilter(isFilterActive ? 'All' : filter)}
                 className={`flex flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-full font-extrabold text-[13px] transition-all duration-300 cursor-pointer ${
@@ -287,6 +289,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal }
               >
                 {/* HEART BOOKMARK BUTTON */}
                 <button
+                  suppressHydrationWarning
                   onClick={(e) => toggleHeart(e, course.id)}
                   className="absolute top-3 right-3 sm:top-4 sm:right-4 text-slate-300 hover:text-rose-500 transition-colors cursor-pointer"
                   title="Save course"
@@ -342,6 +345,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal }
                   </div>
 
                   <button
+                    suppressHydrationWarning
                     onClick={() => onOpenEnrollModal ? onOpenEnrollModal(course) : onOpenContactModal()}
                     className="bg-[#2463eb] hover:bg-blue-700 text-white px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-md sm:rounded-lg text-[12px] sm:text-sm font-bold flex items-center justify-center gap-1 shadow-sm transition-transform active:scale-95 cursor-pointer"
                   >
@@ -356,6 +360,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal }
         {/* VIEW MORE BUTTON */}
         <div className="flex justify-center mt-2 pb-8">
           <button
+            suppressHydrationWarning
             onClick={onOpenContactModal}
             className="bg-slate-900 hover:bg-gray-800 text-white px-8 py-3 rounded-full text-sm font-bold shadow-lg transition-transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2 cursor-pointer"
           >

@@ -109,6 +109,7 @@ export default function OurBranchesSection({ onOpenContactModal }) {
                 {/* ACTION BUTTON: KNOW MORE */}
                 <div className="pt-1.5 border-t border-slate-100 flex items-center justify-between gap-1">
                   <button
+                    suppressHydrationWarning
                     onClick={onOpenContactModal}
                     className="border-2 border-cyan-600 hover:bg-cyan-600 text-cyan-700 hover:text-white px-2.5 py-1 rounded-lg text-[8.5px] xxs:text-[9.5px] sm:text-xs font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
                   >

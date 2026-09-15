@@ -188,7 +188,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
 
           {/* STEP 1: PLAN & STUDENT DETAILS */}
           {step === 1 && (
-            <form onSubmit={handleGoToPayment} className="space-y-4 animate-fadeIn">
+            <form onSubmit={handleGoToPayment} className="space-y-4 animate-fadeIn" suppressHydrationWarning>
               
               {/* BATCH SUMMARY CARD */}
               <div className="p-4 bg-gradient-to-br from-slate-50 to-blue-50/50 rounded-2xl border border-slate-200 space-y-2">
@@ -218,6 +218,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
                 <label className="font-extrabold text-slate-900 block mb-1.5 text-xs">Choose Fee Payment Plan</label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
+                    suppressHydrationWarning
                     type="button"
                     onClick={() => setPaymentPlan('Full Payment')}
                     className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
@@ -232,6 +233,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
                   </button>
 
                   <button
+                    suppressHydrationWarning
                     type="button"
                     onClick={() => setPaymentPlan('2 Installments')}
                     className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
@@ -254,6 +256,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
                 <div>
                   <label className="text-[11px] font-bold text-slate-600 block mb-1">Full Name *</label>
                   <input
+                    suppressHydrationWarning
                     type="text"
                     required
                     value={studentName}
@@ -267,6 +270,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
                   <div>
                     <label className="text-[11px] font-bold text-slate-600 block mb-1">Phone Number *</label>
                     <input
+                      suppressHydrationWarning
                       type="tel"
                       required
                       value={studentPhone}
@@ -279,6 +283,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
                   <div>
                     <label className="text-[11px] font-bold text-slate-600 block mb-1">Email Address</label>
                     <input
+                      suppressHydrationWarning
                       type="email"
                       value={studentEmail}
                       onChange={(e) => setStudentEmail(e.target.value)}
@@ -291,6 +296,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
 
               {/* PROCEED TO PAYMENT BUTTON */}
               <button
+                suppressHydrationWarning
                 type="submit"
                 className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs shadow-md shadow-blue-500/25 transition-all cursor-pointer flex items-center justify-center gap-2 mt-2"
               >

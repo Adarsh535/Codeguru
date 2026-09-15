@@ -73,31 +73,40 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
         }`}
       >
         {/* Sticky Top Header (Clean White Theme) */}
-        <div className="bg-white p-4 xxs:p-5 flex items-center justify-between relative overflow-hidden shrink-0 border-b border-slate-100">
-          <div className="flex items-center gap-2.5 relative z-10">
-            <div className="w-8 h-8 xxs:w-9 xxs:h-9 rounded-[50%] bg-white border border-slate-200/80 p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
-              <img
-                src="/full-brand-logo.png"
-                alt="CodeGuru Logo"
-                className="w-full h-full object-contain rounded-[50%]"
-              />
-            </div>
-            <div>
-              <h3 className="text-base xxs:text-lg font-black font-heading tracking-tight text-slate-900">
-                Get in Touch
-              </h3>
-              <p className="text-[10px] xxs:text-xs text-slate-500 font-medium">Quick Course & Placement Registration</p>
-            </div>
-          </div>
-
-          {/* Close Button */}
+        <div className="bg-white p-4 xxs:p-5 pr-11 xxs:pr-14 flex flex-col gap-2 relative shrink-0 border-b border-slate-100">
+          {/* Close Button (Positioned safely in top-right corner) */}
           <button
+            suppressHydrationWarning
             onClick={handleClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-colors shadow-2xs shrink-0 active:scale-90 cursor-pointer relative z-10"
+            className="absolute top-3.5 right-3.5 xxs:top-4 xxs:right-4 z-20 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-colors shadow-2xs shrink-0 active:scale-90 cursor-pointer"
             title="Close"
           >
             <CloseIcon className="!w-4.5 !h-4.5" />
           </button>
+
+          {/* Top Row: Mascot Icon + Brand Text Logo */}
+          <div className="flex items-center gap-2 min-w-0 max-w-full overflow-hidden">
+            <div className="w-7 h-7 xxs:w-8 xxs:h-8 rounded-full bg-white border border-slate-200/90 p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
+              <img
+                src="/logo-icon.png"
+                alt="CodeGuru Mascot"
+                className="w-full h-full object-contain rounded-full"
+              />
+            </div>
+            <img
+              src="/brand-text-logo.png"
+              alt="CODE GURRU"
+              className="h-4 min-[360px]:h-4.5 sm:h-5.5 w-auto max-w-[120px] min-[360px]:max-w-[150px] sm:max-w-[200px] object-contain shrink-1 min-w-0"
+            />
+          </div>
+
+          {/* Bottom Row: Title & Subtitle */}
+          <div className="flex flex-col gap-0.5">
+            <h3 className="text-base xxs:text-lg font-black font-heading tracking-tight text-slate-900 leading-tight">
+              Get in Touch
+            </h3>
+            <p className="text-[10.5px] xxs:text-xs text-slate-500 font-medium">Quick Course & Placement Registration</p>
+          </div>
         </div>
 
         {/* Scrollable Form Body */}
@@ -110,7 +119,7 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3.5" suppressHydrationWarning>
             
             {/* ROW 1: Name & Phone */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -120,6 +129,7 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
                   <span className="text-red-500 font-bold">*</span>
                 </label>
                 <input
+                  suppressHydrationWarning
                   type="text"
                   name="name"
                   required
@@ -136,6 +146,7 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
                   <span className="text-red-500 font-bold">*</span>
                 </label>
                 <input
+                  suppressHydrationWarning
                   type="tel"
                   name="phone"
                   required
@@ -154,6 +165,7 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
                 <span>Interested Course</span>
               </label>
               <select
+                suppressHydrationWarning
                 name="course"
                 value={formData.course}
                 onChange={handleChange}
@@ -170,6 +182,7 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
 
             {/* ROW 3: Submit Button */}
             <button
+              suppressHydrationWarning
               type="submit"
               className="w-full bg-[#549ebf] hover:bg-[#4387a6] active:bg-[#35728f] text-white font-black text-xs uppercase tracking-wider py-3 px-4 rounded-full transition-all duration-200 shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99] mt-1"
             >

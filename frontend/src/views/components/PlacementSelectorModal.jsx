@@ -84,6 +84,7 @@ export default function PlacementSelectorModal({
               </div>
             </div>
             <button
+              suppressHydrationWarning
               onClick={handleClose}
               className="w-8 h-8 rounded-full bg-slate-100 hover:bg-indigo-100 flex items-center justify-center text-slate-500 hover:text-indigo-900 transition-colors shrink-0 active:scale-95"
               title="Close modal"
@@ -101,6 +102,7 @@ export default function PlacementSelectorModal({
 
             return (
               <button
+                suppressHydrationWarning
                 key={cat.id}
                 onClick={() => {
                   onSelectCategory(cat);

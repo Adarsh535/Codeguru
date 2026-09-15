@@ -174,6 +174,7 @@ export default function ContactModal({ isOpen, onClose }) {
 
             {/* Prominent Close Button ("X") */}
             <button
+              suppressHydrationWarning
               onClick={handleClose}
               className="w-8 h-8 rounded-full bg-slate-100 hover:bg-amber-100 flex items-center justify-center text-slate-600 hover:text-amber-900 transition-colors shadow-xs shrink-0 active:scale-90"
               title="Close modal"

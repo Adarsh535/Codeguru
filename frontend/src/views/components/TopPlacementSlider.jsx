@@ -128,7 +128,7 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
                           100% Verified
                         </span>
                       </div>
-                      <button className="text-cyan-600 hover:bg-cyan-50 font-black text-[12px] px-3 py-1.5 rounded-full flex items-center gap-1 uppercase tracking-tight transition-colors cursor-pointer">
+                      <button suppressHydrationWarning className="text-cyan-600 hover:bg-cyan-50 font-black text-[12px] px-3 py-1.5 rounded-full flex items-center gap-1 uppercase tracking-tight transition-colors cursor-pointer">
                         Inquire <ArrowRight className="w-3 h-3 stroke-[3px]" />
                       </button>
                     </div>
