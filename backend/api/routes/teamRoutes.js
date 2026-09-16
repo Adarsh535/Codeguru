@@ -6,7 +6,7 @@
  */
 
 import express from 'express';
-import { getTeam, addTeamMember, deleteTeamMember } from '../controllers/teamController.js';
+import { getTeam, addTeamMember, updateTeamMember, deleteTeamMember } from '../controllers/teamController.js';
 
 const router = express.Router();
 
@@ -23,6 +23,13 @@ router.get('/', getTeam);
  * @access Admin Private
  */
 router.post('/', addTeamMember);
+
+/**
+ * @api    PUT /api/team/:id
+ * @desc   Updates an instructor profile by ID
+ * @access Admin Private
+ */
+router.put('/:id', updateTeamMember);
 
 /**
  * @api    DELETE /api/team/:id

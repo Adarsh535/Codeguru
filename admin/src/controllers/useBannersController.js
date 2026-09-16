@@ -11,6 +11,7 @@ import { adminCmsModel } from '../models/adminCmsModel';
 export function useBannersController() {
   const [banners, setBanners] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingBannerId, setEditingBannerId] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -32,6 +33,32 @@ export function useBannersController() {
     window.addEventListener('codeguru_refresh_all', handleRefresh);
     return () => window.removeEventListener('codeguru_refresh_all', handleRefresh);
   }, [loadBanners]);
+
+  const handleOpenAddModal = () => {
+    setEditingBannerId(null);
+    setFormData({
+      title: '',
+      subtitle: '',
+      type: 'image',
+      badge: 'TOP PLACEMENT DRIVES 2026',
+      ctaText: 'Explore Courses',
+      mediaUrl: ''
+    });
+    setShowAddModal(true);
+  };
+
+  const handleEditBanner = (banner) => {
+    setEditingBannerId(banner._id || banner.id);
+    setFormData({
+      title: banner.title || '',
+      subtitle: banner.subtitle || '',
+      type: banner.type || 'image',
+      badge: banner.badge || 'TOP PLACEMENT DRIVES 2026',
+      ctaText: banner.ctaText || 'Explore Courses',
+      mediaUrl: banner.mediaUrl || banner.imageUrl || banner.videoUrl || ''
+    });
+    setShowAddModal(true);
+  };
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -68,10 +95,17 @@ export function useBannersController() {
       imageUrl: !isVideo ? formData.mediaUrl : ''
     };
 
-    const created = await adminCmsModel.addBanner(payload);
-    if (created) {
+    let result = null;
+    if (editingBannerId) {
+      result = await adminCmsModel.updateBanner(editingBannerId, payload);
+    } else {
+      result = await adminCmsModel.addBanner(payload);
+    }
+
+    if (result) {
       await loadBanners();
       setShowAddModal(false);
+      setEditingBannerId(null);
       setFormData({
         title: '',
         subtitle: '',
@@ -96,6 +130,9 @@ export function useBannersController() {
     banners,
     showAddModal,
     setShowAddModal,
+    editingBannerId,
+    handleOpenAddModal,
+    handleEditBanner,
     uploading,
     formData,
     setFormData,

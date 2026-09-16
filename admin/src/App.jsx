@@ -98,7 +98,7 @@ function AdminMainApp() {
           />
 
           {/* DYNAMIC VIEW ROUTER */}
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+          <main className="flex-1 px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-6 sm:pb-8 max-w-7xl w-full mx-auto">
             {/* 1. MAIN */}
             {activeTab === 'dashboard' && (
               <DashboardView

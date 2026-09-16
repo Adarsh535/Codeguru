@@ -2,6 +2,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTeamController } from '../controllers/useTeamController';
@@ -11,6 +12,9 @@ export default function TeamManagerView() {
     team,
     showAddModal,
     setShowAddModal,
+    editingTeamId,
+    handleOpenAddModal,
+    handleEditTeamMember: handleEdit,
     uploading,
     formData,
     setFormData,
@@ -29,7 +33,7 @@ export default function TeamManagerView() {
         </div>
 
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={handleOpenAddModal}
           className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold shadow-sm hover:shadow-blue-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0"
         >
           <AddIcon className="!w-4 !h-4" />
@@ -39,47 +43,59 @@ export default function TeamManagerView() {
 
       {/* TEAM GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {team.map((member) => (
-          <div key={member.id} className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col group hover:border-slate-300 transition-all">
-            <div className="p-6 flex flex-col items-center text-center gap-3 relative flex-1">
-              
-              <button
-                onClick={() => handleDelete(member.id)}
-                className="absolute top-4 right-4 p-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
-                title="Delete Member"
-              >
-                <DeleteOutlineIcon className="!w-4 !h-4" />
-              </button>
+        {team.map((member) => {
+          const memberId = member._id || member.id;
+          return (
+            <div key={memberId} className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col group hover:border-slate-300 transition-all">
+              <div className="p-6 flex flex-col items-center text-center gap-3 relative flex-1">
+                
+                <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => handleEdit(member)}
+                    className="p-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
+                    title="Edit Member"
+                  >
+                    <EditOutlinedIcon className="!w-4 !h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(memberId)}
+                    className="p-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                    title="Delete Member"
+                  >
+                    <DeleteOutlineIcon className="!w-4 !h-4" />
+                  </button>
+                </div>
 
-              <div className="w-24 h-24 rounded-full border-4 border-slate-100 overflow-hidden shadow-md bg-slate-100 shrink-0">
-                <img
-                  src={member.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
-                  alt={member.name}
-                  className="w-full h-full object-cover"
-                />
+                <div className="w-24 h-24 rounded-full border-4 border-slate-100 overflow-hidden shadow-md bg-slate-100 shrink-0">
+                  <img
+                    src={member.photoUrl || member.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
+                    alt={member.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-black text-blue-600 tracking-wider uppercase bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
+                    {member.tag || '#TEAMCODEGURU'}
+                  </span>
+                  <h3 className="text-base font-extrabold text-slate-900 mt-2 font-heading">{member.name}</h3>
+                  <p className="text-xs font-bold text-slate-600">{member.role}</p>
+                </div>
+
+                {member.bio && (
+                  <p className="text-xs font-medium text-slate-500 line-clamp-3 mt-1">
+                    {member.bio}
+                  </p>
+                )}
               </div>
 
-              <div>
-                <span className="text-[10px] font-black text-blue-600 tracking-wider uppercase bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
-                  {member.tag || '#TEAMCODEGURU'}
-                </span>
-                <h3 className="text-base font-extrabold text-slate-900 mt-2 font-heading">{member.name}</h3>
-                <p className="text-xs font-bold text-slate-600">{member.role}</p>
+              <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
+                <span>Verified Instructor</span>
+                <span className="text-emerald-600 font-bold">● Active Status</span>
               </div>
-
-              {member.bio && (
-                <p className="text-xs font-medium text-slate-500 line-clamp-3 mt-1">
-                  {member.bio}
-                </p>
-              )}
             </div>
-
-            <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
-              <span>Verified Instructor</span>
-              <span className="text-emerald-600 font-bold">● Active Status</span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* ADD TEAM MEMBER MODAL */}
@@ -89,7 +105,9 @@ export default function TeamManagerView() {
             
             {/* MODAL HEADER */}
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
-              <h3 className="text-base font-black text-slate-900 font-heading">Upload Team Member / Mentor</h3>
+              <h3 className="text-base font-black text-slate-900 font-heading">
+                {editingTeamId ? 'Edit Team Member / Mentor' : 'Upload Team Member / Mentor'}
+              </h3>
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
@@ -109,7 +127,7 @@ export default function TeamManagerView() {
                   <input type="file" accept="image/*" onChange={handlePhotoUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                   <CloudUploadIcon className="!w-5 !h-5 text-blue-600" />
                   <span className="text-xs font-bold text-slate-700">
-                    {uploading ? 'Uploading Photo...' : (formData.photo ? 'Photo Loaded ✓' : 'Click to Upload Portrait Photo')}
+                    {uploading ? 'Uploading Photo...' : (formData.photoUrl || formData.photo ? 'Photo Loaded ✓' : 'Click to Upload Portrait Photo')}
                   </span>
                 </div>
               </div>
@@ -168,7 +186,7 @@ export default function TeamManagerView() {
                   form="teamForm"
                   className="px-5 py-2 rounded-xl text-xs font-extrabold bg-blue-600 text-white hover:bg-blue-700 shadow-sm transition-all cursor-pointer"
                 >
-                  Save & Publish Card
+                  {editingTeamId ? 'Update Team Member' : 'Save & Publish Card'}
                 </button>
               </div>
 

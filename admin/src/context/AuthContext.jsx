@@ -11,7 +11,9 @@ const AUTH_KEY = 'codeguru_admin_session';
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
-      const saved = localStorage.getItem(AUTH_KEY);
+      // Clear any legacy persistent session from localStorage
+      localStorage.removeItem(AUTH_KEY);
+      const saved = sessionStorage.getItem(AUTH_KEY);
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -36,7 +38,7 @@ export function AuthProvider({ children }) {
         loggedAt: new Date().toISOString()
       };
       setUser(userData);
-      localStorage.setItem(AUTH_KEY, JSON.stringify(userData));
+      sessionStorage.setItem(AUTH_KEY, JSON.stringify(userData));
       return { success: true };
     }
     return { success: false, message: data.message || 'Invalid Admin Credentials' };
@@ -59,13 +61,14 @@ export function AuthProvider({ children }) {
   const updateUser = (newUserData) => {
     setUser(prev => {
       const updated = { ...(prev || {}), ...newUserData };
-      localStorage.setItem(AUTH_KEY, JSON.stringify(updated));
+      sessionStorage.setItem(AUTH_KEY, JSON.stringify(updated));
       return updated;
     });
   };
 
   const logout = () => {
     setUser(null);
+    sessionStorage.removeItem(AUTH_KEY);
     localStorage.removeItem(AUTH_KEY);
   };
 

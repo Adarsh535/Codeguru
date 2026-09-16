@@ -11,6 +11,7 @@ import { adminCmsModel } from '../models/adminCmsModel';
 export function useCoursesController() {
   const [courses, setCourses] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingCourseId, setEditingCourseId] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     category: 'coding',
@@ -35,6 +36,42 @@ export function useCoursesController() {
     return () => window.removeEventListener('codeguru_refresh_all', handleRefresh);
   }, [loadCourses]);
 
+  const handleOpenAddModal = () => {
+    setEditingCourseId(null);
+    setFormData({
+      title: '',
+      category: 'coding',
+      subCat: 'web',
+      duration: '6 Months',
+      price: '₹ 24,999',
+      level: 'Beginner to Advanced',
+      badge: 'Job Guaranteed Batch',
+      description: '',
+      technologies: 'React, Node.js, MongoDB'
+    });
+    setShowAddModal(true);
+  };
+
+  const handleEditCourse = (course) => {
+    setEditingCourseId(course._id || course.id);
+    const techs = Array.isArray(course.technologies)
+      ? course.technologies.join(', ')
+      : (course.technologies || '');
+
+    setFormData({
+      title: course.title || '',
+      category: course.category || 'coding',
+      subCat: course.subCat || 'web',
+      duration: course.duration || '6 Months',
+      price: course.price || '₹ 24,999',
+      level: course.level || 'Beginner to Advanced',
+      badge: course.badge || 'Job Guaranteed Batch',
+      description: course.description || '',
+      technologies: techs || 'React, Node.js, MongoDB'
+    });
+    setShowAddModal(true);
+  };
+
   const handleCreateCourse = async (e) => {
     e.preventDefault();
     if (!formData.title || !formData.price) {
@@ -44,13 +81,22 @@ export function useCoursesController() {
 
     const payload = {
       ...formData,
-      technologies: formData.technologies.split(',').map(t => t.trim()).filter(Boolean)
+      technologies: typeof formData.technologies === 'string'
+        ? formData.technologies.split(',').map(t => t.trim()).filter(Boolean)
+        : formData.technologies
     };
 
-    const created = await adminCmsModel.addCourse(payload);
-    if (created) {
+    let result = null;
+    if (editingCourseId) {
+      result = await adminCmsModel.updateCourse(editingCourseId, payload);
+    } else {
+      result = await adminCmsModel.addCourse(payload);
+    }
+
+    if (result) {
       await loadCourses();
       setShowAddModal(false);
+      setEditingCourseId(null);
       setFormData({
         title: '',
         category: 'coding',
@@ -78,6 +124,9 @@ export function useCoursesController() {
     courses,
     showAddModal,
     setShowAddModal,
+    editingCourseId,
+    handleOpenAddModal,
+    handleEditCourse,
     formData,
     setFormData,
     loadCourses,

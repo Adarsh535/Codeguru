@@ -324,10 +324,11 @@ export function StudentsView() {
 }
 
 // ==========================================
-// 2. ADMISSIONS PIPELINE VIEW
+// 2. ADMISSIONS PIPELINE VIEW (GRAPH & ANALYTICS)
 // ==========================================
 export function AdmissionsView({ leads: propLeads = [] }) {
   const [internalLeads, setInternalLeads] = useState([]);
+  const [chartType, setChartType] = useState('bar'); // 'bar' | 'funnel' | 'pie'
 
   useEffect(() => {
     if (!propLeads || propLeads.length === 0) {
@@ -338,31 +339,236 @@ export function AdmissionsView({ leads: propLeads = [] }) {
   }, [propLeads]);
 
   const activeLeads = (propLeads && propLeads.length > 0) ? propLeads : internalLeads;
+  const totalLeads = activeLeads.length || 1;
+
+  const newCount = activeLeads.filter(l => l.status === 'New' || !l.status).length;
+  const contactedCount = activeLeads.filter(l => l.status === 'Contacted').length;
+  const progressCount = activeLeads.filter(l => l.status === 'In Progress').length;
+  const enrolledCount = activeLeads.filter(l => l.status === 'Enrolled').length;
 
   const pipeline = [
-    { stage: 'New Lead', count: activeLeads.filter(l => l.status === 'New' || !l.status).length, color: 'border-blue-200 bg-blue-50/50' },
-    { stage: 'Contacted', count: activeLeads.filter(l => l.status === 'Contacted').length, color: 'border-indigo-200 bg-indigo-50/50' },
-    { stage: 'In Progress', count: activeLeads.filter(l => l.status === 'In Progress').length, color: 'border-purple-200 bg-purple-50/50' },
-    { stage: 'Enrolled', count: activeLeads.filter(l => l.status === 'Enrolled').length, color: 'border-emerald-200 bg-emerald-50/50' }
+    { id: 'new', stage: 'New Lead', count: newCount, pct: Math.round((newCount / totalLeads) * 100), color: '#3b82f6', gradient: 'from-blue-500 to-cyan-500', barBg: 'bg-gradient-to-t from-blue-600 to-cyan-400', textColor: 'text-blue-600', lightBg: 'bg-blue-50 border-blue-100' },
+    { id: 'contacted', stage: 'Contacted', count: contactedCount, pct: Math.round((contactedCount / totalLeads) * 100), color: '#6366f1', gradient: 'from-indigo-500 to-violet-500', barBg: 'bg-gradient-to-t from-indigo-600 to-violet-400', textColor: 'text-indigo-600', lightBg: 'bg-indigo-50 border-indigo-100' },
+    { id: 'progress', stage: 'In Progress', count: progressCount, pct: Math.round((progressCount / totalLeads) * 100), color: '#a855f7', gradient: 'from-purple-500 to-pink-500', barBg: 'bg-gradient-to-t from-purple-600 to-pink-400', textColor: 'text-purple-600', lightBg: 'bg-purple-50 border-purple-100' },
+    { id: 'enrolled', stage: 'Enrolled', count: enrolledCount, pct: Math.round((enrolledCount / totalLeads) * 100), color: '#10b981', gradient: 'from-emerald-500 to-teal-500', barBg: 'bg-gradient-to-t from-emerald-600 to-teal-400', textColor: 'text-emerald-600', lightBg: 'bg-emerald-50 border-emerald-100' }
   ];
 
+  const maxVal = Math.max(...pipeline.map(p => p.count), 1);
+  const conversionRate = Math.round((enrolledCount / totalLeads) * 100);
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs">
+    <div className="space-y-4">
+      {/* HEADER WITH GRAPH TOGGLE */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-2xs">
         <div>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight">Admission & Enrollment Pipeline</h1>
-          <p className="text-xs font-semibold text-slate-500">Realtime lead conversion funnel calculated directly from MongoDB database</p>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[11px] font-black border border-blue-100 mb-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+            Realtime Analytics • {activeLeads.length} Total Registered Leads
+          </div>
+          <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Admission & Enrollment Pipeline Graph</h1>
+          <p className="text-xs font-semibold text-slate-500">Visual lead conversion graph calculated directly from MongoDB Atlas</p>
+        </div>
+
+        {/* GRAPH VIEW TOGGLES */}
+        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-2xl border border-slate-200/80 shrink-0">
+          <button
+            onClick={() => setChartType('bar')}
+            className={`px-3 py-1 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+              chartType === 'bar' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            📊 Bar Chart
+          </button>
+          <button
+            onClick={() => setChartType('funnel')}
+            className={`px-3 py-1 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+              chartType === 'funnel' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            🔻 Funnel Flow
+          </button>
+          <button
+            onClick={() => setChartType('pie')}
+            className={`px-3 py-1 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+              chartType === 'pie' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            🍩 Donut Chart
+          </button>
         </div>
       </div>
 
-      {/* PIPELINE FUNNEL GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* PIPELINE METRIC CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {pipeline.map(p => (
-          <div key={p.stage} className={`p-5 rounded-3xl border ${p.color} text-center space-y-2 shadow-2xs`}>
-            <span className="text-xs font-extrabold uppercase text-slate-500 block truncate">{p.stage}</span>
-            <div className="text-3xl font-black text-slate-900">{p.count}</div>
+          <div key={p.id} className={`p-3.5 sm:p-4 rounded-2xl border ${p.lightBg} shadow-2xs hover:shadow-md transition-all space-y-1`}>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">{p.stage}</span>
+              <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${p.textColor} bg-white shadow-xs border border-slate-200`}>
+                {p.pct}% Share
+              </span>
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl font-black text-slate-900 tracking-tight">{p.count}</span>
+              <span className="text-xs font-bold text-slate-400">Leads</span>
+            </div>
           </div>
         ))}
+      </div>
+
+      {/* MAIN GRAPH DISPLAY CONTAINER */}
+      <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-2xs space-y-4">
+        
+        {/* GRAPH HEADER STATS */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div>
+            <h2 className="text-sm sm:text-base font-black text-slate-900">
+              {chartType === 'bar' ? 'Pipeline Stage Distribution (Bar Graph)' : chartType === 'funnel' ? 'Funnel Conversion Progress' : 'Pipeline Percentage Share (Donut Graph)'}
+            </h2>
+            <p className="text-xs font-semibold text-slate-500">
+              Live statistics based on current database records
+            </p>
+          </div>
+          <div className="bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/80 text-right">
+            <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Lead-to-Enrollment Rate</span>
+            <span className="text-base font-black text-emerald-600">{conversionRate}% Conversion</span>
+          </div>
+        </div>
+
+        {/* 1. BAR CHART VISUALIZATION */}
+        {chartType === 'bar' && (
+          <div className="pt-2 pb-1">
+            <div className="h-48 w-full flex items-end justify-between gap-4 sm:gap-8 px-4 relative">
+              
+              {/* Y-Axis Dotted Gridlines */}
+              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-6 pr-4">
+                {[1, 0.75, 0.5, 0.25, 0].map((step, idx) => (
+                  <div key={idx} className="flex items-center gap-3 w-full">
+                    <span className="text-[9px] font-mono font-bold text-slate-400 w-8 text-right">
+                      {Math.round(maxVal * step)}
+                    </span>
+                    <div className="flex-1 border-b border-dashed border-slate-200"></div>
+                  </div>
+                ))}
+              </div>
+
+              {/* BAR COLUMNS */}
+              {pipeline.map((p) => {
+                const heightPercent = maxVal > 0 ? Math.max((p.count / maxVal) * 100, 8) : 8;
+                return (
+                  <div key={p.id} className="flex-1 flex flex-col items-center h-full justify-end z-10 group relative">
+                    
+                    {/* Tooltip on hover */}
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg absolute -top-8 shadow-xl pointer-events-none whitespace-nowrap z-30">
+                      {p.stage}: <strong>{p.count} Leads</strong> ({p.pct}%)
+                    </div>
+
+                    {/* Count Pill above bar */}
+                    <div className="mb-1 text-center">
+                      <span className="text-xs sm:text-sm font-black text-slate-900 block leading-tight">{p.count}</span>
+                    </div>
+
+                    {/* Gradient Bar Column */}
+                    <div className="w-full max-w-[64px] bg-slate-100 rounded-xl p-1 shadow-inner h-full max-h-[120px] flex items-end">
+                      <div
+                        className={`w-full rounded-lg ${p.barBg} shadow-md transition-all duration-700 ease-out group-hover:brightness-110`}
+                        style={{ height: `${heightPercent}%` }}
+                      ></div>
+                    </div>
+
+                    {/* X-Axis Label */}
+                    <div className="mt-2 text-center">
+                      <span className="text-xs font-bold text-slate-800 block truncate">{p.stage}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 2. FUNNEL FLOW CHART VISUALIZATION */}
+        {chartType === 'funnel' && (
+          <div className="space-y-2.5 py-1">
+            {pipeline.map((p) => {
+              const widthPct = Math.max(p.pct, 6);
+              return (
+                <div key={p.id} className="space-y-1">
+                  <div className="flex justify-between items-center text-xs font-bold">
+                    <span className="text-slate-800">{p.stage}</span>
+                    <span className="text-slate-900 font-extrabold">{p.count} Leads <span className="text-slate-400 font-normal">({p.pct}%)</span></span>
+                  </div>
+                  <div className="w-full bg-slate-100 h-8 rounded-xl p-0.5 border border-slate-200/80 overflow-hidden flex items-center">
+                    <div
+                      className={`h-full rounded-lg ${p.barBg} transition-all duration-700 flex items-center justify-end px-2.5 shadow-xs`}
+                      style={{ width: `${widthPct}%` }}
+                    >
+                      {p.pct > 15 && (
+                        <span className="text-white text-[11px] font-black drop-shadow-xs">{p.count}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* 3. DONUT / PIE CHART VISUALIZATION */}
+        {chartType === 'pie' && (
+          <div className="flex flex-col md:flex-row items-center justify-around gap-6 py-1">
+            
+            {/* SVG DONUT CHART */}
+            <div className="relative w-36 h-36 flex items-center justify-center shrink-0">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f1f5f9" strokeWidth="3.5" />
+                {(() => {
+                  let accumPct = 0;
+                  return pipeline.map((p) => {
+                    const strokeDasharray = `${p.pct} ${100 - p.pct}`;
+                    const strokeDashoffset = 100 - accumPct;
+                    accumPct += p.pct;
+                    return (
+                      <circle
+                        key={p.id}
+                        cx="18"
+                        cy="18"
+                        r="15.915"
+                        fill="transparent"
+                        stroke={p.color}
+                        strokeWidth="3.8"
+                        strokeDasharray={strokeDasharray}
+                        strokeDashoffset={strokeDashoffset}
+                        className="transition-all duration-700"
+                      />
+                    );
+                  });
+                })()}
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span className="text-xl font-black text-slate-900 leading-none">{totalLeads}</span>
+                <span className="text-[9px] font-extrabold text-slate-400 uppercase mt-0.5">Total Leads</span>
+              </div>
+            </div>
+
+            {/* LEGEND TABLE */}
+            <div className="space-y-2 w-full max-w-md">
+              {pipeline.map(p => (
+                <div key={p.id} className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-3 h-3 rounded-md shrink-0 shadow-xs" style={{ backgroundColor: p.color }}></span>
+                    <span className="font-bold text-slate-800">{p.stage}</span>
+                  </div>
+                  <div className="flex items-center gap-2.5 font-mono font-bold text-[11px]">
+                    <span className="text-slate-900">{p.count} Leads</span>
+                    <span className="text-slate-400">({p.pct}%)</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

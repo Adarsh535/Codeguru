@@ -6,7 +6,7 @@
  */
 
 import express from 'express';
-import { getPlacements, addPlacement, deletePlacement } from '../controllers/placementController.js';
+import { getPlacements, addPlacement, updatePlacement, deletePlacement } from '../controllers/placementController.js';
 
 const router = express.Router();
 
@@ -23,6 +23,13 @@ router.get('/', getPlacements);
  * @access Admin Private
  */
 router.post('/', addPlacement);
+
+/**
+ * @api    PUT /api/placements/:id
+ * @desc   Updates placement record by ID
+ * @access Admin Private
+ */
+router.put('/:id', updatePlacement);
 
 /**
  * @api    DELETE /api/placements/:id

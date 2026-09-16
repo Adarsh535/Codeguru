@@ -85,31 +85,31 @@ export default function DashboardView({ leads = [], stats = {}, searchQuery, onU
   });
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-5 animate-fade-in">
       {/* HEADER BANNER */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-2xs relative overflow-hidden">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-extrabold border border-blue-100">
-              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+      <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-2xs relative overflow-hidden">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[11px] font-extrabold border border-blue-100">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
               Live Executive ERP Dashboard • MongoDB Atlas Live Sync
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight font-heading text-slate-900">
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight font-heading text-slate-900">
               Welcome back, <span className="text-blue-600">Super Admin</span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 max-w-2xl font-medium leading-relaxed">
+            <p className="text-xs text-slate-500 max-w-2xl font-medium leading-normal">
               Here is your real-time institute overview: track revenue, admissions, active student attendance, and counselor performance.
             </p>
           </div>
           
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-200/80 text-right">
-              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Today's Revenue</div>
-              <div className="text-xl font-black text-emerald-600">{executiveMetrics.todayRevenue}</div>
+          <div className="flex items-center gap-2.5 shrink-0">
+            <div className="bg-slate-50 px-3.5 py-2 rounded-2xl border border-slate-200/80 text-right">
+              <div className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Today's Revenue</div>
+              <div className="text-lg font-black text-emerald-600">{executiveMetrics.todayRevenue}</div>
             </div>
-            <div className="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-200/80 text-right">
-              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">New Admissions</div>
-              <div className="text-xl font-black text-blue-600">+{executiveMetrics.todayAdmissions} Today</div>
+            <div className="bg-slate-50 px-3.5 py-2 rounded-2xl border border-slate-200/80 text-right">
+              <div className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">New Admissions</div>
+              <div className="text-lg font-black text-blue-600">+{executiveMetrics.todayAdmissions} Today</div>
             </div>
           </div>
         </div>

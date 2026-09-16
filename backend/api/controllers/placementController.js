@@ -49,6 +49,21 @@ export const addPlacement = async (req, res) => {
 };
 
 /**
+ * @route   PUT /api/placements/:id
+ * @desc    Updates placement record in MongoDB Atlas by ID.
+ * @access  Admin Private
+ */
+export const updatePlacement = async (req, res) => {
+  try {
+    const placement = await Placement.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (placement) return res.json({ success: true, message: 'Placement record updated in MongoDB Atlas', data: placement });
+    return res.status(404).json({ success: false, message: 'Placement record not found' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
  * @route   DELETE /api/placements/:id
  * @desc    Deletes a placement record from MongoDB Atlas by ID.
  * @access  Admin Private

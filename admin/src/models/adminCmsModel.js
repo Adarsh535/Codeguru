@@ -115,6 +115,32 @@ export const adminCmsModel = {
 
   /**
    * --------------------------------------------------------------------------
+   * API: Update Hero Banner
+   * --------------------------------------------------------------------------
+   * @route   PUT http://localhost:5000/api/banners/:id
+   * @desc    Existing hero banner details update karta hai.
+   * @param   {string} id - Banner ID
+   * @param   {Object} payload - { title, subtitle, type, badge, ctaText, mediaUrl }
+   * @returns {Promise<Object|null>} Updated banner object
+   */
+  updateBanner: async (id, payload) => {
+    try {
+      const res = await fetch(`${API_BASE}/banners/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      const item = data.data;
+      return item ? { ...item, id: item._id || item.id } : null;
+    } catch (err) {
+      console.error('[adminCmsModel API Error] Error updating banner:', err);
+      return null;
+    }
+  },
+
+  /**
+   * --------------------------------------------------------------------------
    * API: Get All Courses
    * --------------------------------------------------------------------------
    * @route   GET http://localhost:5000/api/courses
@@ -178,6 +204,32 @@ export const adminCmsModel = {
       await fetch(`${API_BASE}/courses/${id}`, { method: 'DELETE' });
     } catch (err) {
       console.error('[adminCmsModel API Error] Error deleting course:', err);
+    }
+  },
+
+  /**
+   * --------------------------------------------------------------------------
+   * API: Update Course
+   * --------------------------------------------------------------------------
+   * @route   PUT http://localhost:5000/api/courses/:id
+   * @desc    Course details update karta hai.
+   * @param   {string} id - Course ID
+   * @param   {Object} payload
+   * @returns {Promise<Object|null>} Updated course record
+   */
+  updateCourse: async (id, payload) => {
+    try {
+      const res = await fetch(`${API_BASE}/courses/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      const item = data.data;
+      return item ? { ...item, id: item._id || item.id } : null;
+    } catch (err) {
+      console.error('[adminCmsModel API Error] Error updating course:', err);
+      return null;
     }
   },
 
@@ -251,6 +303,32 @@ export const adminCmsModel = {
 
   /**
    * --------------------------------------------------------------------------
+   * API: Update Student Placement Record
+   * --------------------------------------------------------------------------
+   * @route   PUT http://localhost:5000/api/placements/:id
+   * @desc    Placement record details update karta hai.
+   * @param   {string} id - Placement ID
+   * @param   {Object} payload
+   * @returns {Promise<Object|null>} Updated placement record
+   */
+  updatePlacement: async (id, payload) => {
+    try {
+      const res = await fetch(`${API_BASE}/placements/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      const item = data.data;
+      return item ? { ...item, id: item._id || item.id } : null;
+    } catch (err) {
+      console.error('[adminCmsModel API Error] Error updating placement:', err);
+      return null;
+    }
+  },
+
+  /**
+   * --------------------------------------------------------------------------
    * API: Get CodeGuru Team Members & Instructors
    * --------------------------------------------------------------------------
    * @route   GET http://localhost:5000/api/team
@@ -314,6 +392,32 @@ export const adminCmsModel = {
       await fetch(`${API_BASE}/team/${id}`, { method: 'DELETE' });
     } catch (err) {
       console.error('[adminCmsModel API Error] Error deleting team member:', err);
+    }
+  },
+
+  /**
+   * --------------------------------------------------------------------------
+   * API: Update Team Member
+   * --------------------------------------------------------------------------
+   * @route   PUT http://localhost:5000/api/team/:id
+   * @desc    Team member profile update karta hai.
+   * @param   {string} id - Team Member ID
+   * @param   {Object} payload
+   * @returns {Promise<Object|null>} Updated team member object
+   */
+  updateTeamMember: async (id, payload) => {
+    try {
+      const res = await fetch(`${API_BASE}/team/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      const item = data.data;
+      return item ? { ...item, id: item._id || item.id } : null;
+    } catch (err) {
+      console.error('[adminCmsModel API Error] Error updating team member:', err);
+      return null;
     }
   },
 

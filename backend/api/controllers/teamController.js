@@ -45,6 +45,21 @@ export const addTeamMember = async (req, res) => {
 };
 
 /**
+ * @route   PUT /api/team/:id
+ * @desc    Updates instructor profile in MongoDB Atlas by ID.
+ * @access  Admin Private
+ */
+export const updateTeamMember = async (req, res) => {
+  try {
+    const member = await Team.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (member) return res.json({ success: true, message: 'Team member updated in MongoDB Atlas', data: member });
+    return res.status(404).json({ success: false, message: 'Team member not found' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
  * @route   DELETE /api/team/:id
  * @desc    Deletes an instructor profile from MongoDB Atlas by ID.
  * @access  Admin Private

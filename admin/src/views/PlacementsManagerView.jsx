@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import CloseIcon from '@mui/icons-material/Close';
@@ -12,6 +13,9 @@ export default function PlacementsManagerView() {
     placements,
     showAddModal,
     setShowAddModal,
+    editingPlacementId,
+    handleOpenAddModal,
+    handleEditPlacement: handleEdit,
     uploadingStudent,
     uploadingCompany,
     formData,
@@ -38,7 +42,7 @@ export default function PlacementsManagerView() {
         </div>
 
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={handleOpenAddModal}
           className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
         >
           <AddIcon className="!w-4 !h-4" />
@@ -70,13 +74,22 @@ export default function PlacementsManagerView() {
                 </div>
               </div>
 
-              <button
-                onClick={() => handleDelete(itemId)}
-                className="self-end p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
-                title="Delete Poster"
-              >
-                <DeleteOutlineIcon className="!w-4 !h-4" />
-              </button>
+              <div className="self-end flex items-center gap-1">
+                <button
+                  onClick={() => handleEdit(item)}
+                  className="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/20 transition-colors cursor-pointer"
+                  title="Edit Poster"
+                >
+                  <EditOutlinedIcon className="!w-4 !h-4" />
+                </button>
+                <button
+                  onClick={() => handleDelete(itemId)}
+                  className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
+                  title="Delete Poster"
+                >
+                  <DeleteOutlineIcon className="!w-4 !h-4" />
+                </button>
+              </div>
             </div>
           );
         })}
@@ -89,7 +102,9 @@ export default function PlacementsManagerView() {
             
             {/* MODAL HEADER */}
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
-              <h3 className="text-base font-black text-slate-900 font-heading">Upload Student Placement Poster</h3>
+              <h3 className="text-base font-black text-slate-900 font-heading">
+                {editingPlacementId ? 'Edit Student Placement Poster' : 'Upload Student Placement Poster'}
+              </h3>
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
@@ -206,7 +221,7 @@ export default function PlacementsManagerView() {
                   form="placementForm"
                   className="px-5 py-2 rounded-xl text-xs font-extrabold bg-blue-600 text-white hover:bg-blue-700 shadow-sm transition-all cursor-pointer"
                 >
-                  Publish Placement Poster
+                  {editingPlacementId ? 'Update Placement Poster' : 'Publish Placement Poster'}
                 </button>
               </div>
 

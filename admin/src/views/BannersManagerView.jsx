@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import MovieIcon from '@mui/icons-material/Movie';
 import ImageIcon from '@mui/icons-material/Image';
@@ -15,6 +16,9 @@ export default function BannersManagerView() {
     banners,
     showAddModal,
     setShowAddModal,
+    editingBannerId,
+    handleOpenAddModal,
+    handleEditBanner: handleEdit,
     uploading,
     formData,
     setFormData,
@@ -43,7 +47,7 @@ export default function BannersManagerView() {
         </div>
 
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={handleOpenAddModal}
           className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
         >
           <AddIcon className="!w-4 !h-4" />
@@ -91,13 +95,22 @@ export default function BannersManagerView() {
 
                 <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                   <span className="text-[11px] font-bold text-slate-400">CTA: {banner.ctaText}</span>
-                  <button
-                    onClick={() => handleDelete(bannerId)}
-                    className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer"
-                    title="Delete Banner"
-                  >
-                    <DeleteOutlineIcon className="!w-4 !h-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleEdit(banner)}
+                      className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                      title="Edit Banner"
+                    >
+                      <EditOutlinedIcon className="!w-4 !h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(bannerId)}
+                      className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer"
+                      title="Delete Banner"
+                    >
+                      <DeleteOutlineIcon className="!w-4 !h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -115,7 +128,7 @@ export default function BannersManagerView() {
               <div className="flex items-center gap-2">
                 <div className="w-2 h-5 bg-blue-600 rounded-full" />
                 <h3 className="text-sm sm:text-base font-black text-slate-900 font-heading">
-                  Upload Homepage Image or Video Banner
+                  {editingBannerId ? 'Edit Hero Banner' : 'Upload Homepage Image or Video Banner'}
                 </h3>
               </div>
               <button
@@ -285,7 +298,7 @@ export default function BannersManagerView() {
                   className="px-5 py-2 rounded-xl text-xs font-extrabold bg-blue-600 text-white hover:bg-blue-700 shadow-sm transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
                 >
                   <CloudUploadIcon className="!w-4 !h-4" />
-                  <span>{uploading ? 'Uploading...' : 'Save & Publish Banner'}</span>
+                  <span>{uploading ? 'Saving...' : (editingBannerId ? 'Update Banner' : 'Save & Publish Banner')}</span>
                 </button>
               </div>
 

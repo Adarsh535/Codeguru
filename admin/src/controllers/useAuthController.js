@@ -13,7 +13,8 @@ const AUTH_KEY = 'codeguru_admin_session';
 export function useAuthController() {
   const [user, setUser] = useState(() => {
     try {
-      const saved = localStorage.getItem(AUTH_KEY);
+      localStorage.removeItem(AUTH_KEY);
+      const saved = sessionStorage.getItem(AUTH_KEY);
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -32,7 +33,7 @@ export function useAuthController() {
         loggedAt: new Date().toISOString()
       };
       setUser(userData);
-      localStorage.setItem(AUTH_KEY, JSON.stringify(userData));
+      sessionStorage.setItem(AUTH_KEY, JSON.stringify(userData));
       return { success: true };
     }
     return { success: false, message: data.message || 'Invalid Admin Credentials' };
@@ -54,6 +55,7 @@ export function useAuthController() {
 
   const logout = () => {
     setUser(null);
+    sessionStorage.removeItem(AUTH_KEY);
     localStorage.removeItem(AUTH_KEY);
   };
 

@@ -11,6 +11,7 @@ import { adminCmsModel } from '../models/adminCmsModel';
 export function usePlacementsController() {
   const [placements, setPlacements] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingPlacementId, setEditingPlacementId] = useState(null);
   const [uploadingStudent, setUploadingStudent] = useState(false);
   const [uploadingCompany, setUploadingCompany] = useState(false);
   const [formData, setFormData] = useState({
@@ -34,6 +35,34 @@ export function usePlacementsController() {
     window.addEventListener('codeguru_refresh_all', handleRefresh);
     return () => window.removeEventListener('codeguru_refresh_all', handleRefresh);
   }, [loadPlacements]);
+
+  const handleOpenAddModal = () => {
+    setEditingPlacementId(null);
+    setFormData({
+      name: '',
+      company: '',
+      package: '',
+      role: 'Software Engineer',
+      photo: '',
+      companyLogo: '',
+      college: ''
+    });
+    setShowAddModal(true);
+  };
+
+  const handleEditPlacement = (item) => {
+    setEditingPlacementId(item._id || item.id);
+    setFormData({
+      name: item.name || item.studentName || '',
+      company: item.company || '',
+      package: item.package || '',
+      role: item.role || 'Software Engineer',
+      photo: item.photo || item.avatarUrl || '',
+      companyLogo: item.companyLogo || '',
+      college: item.college || ''
+    });
+    setShowAddModal(true);
+  };
 
   const handleStudentPhotoUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -81,10 +110,17 @@ export function usePlacementsController() {
       college: formData.college || 'CodeGuru Academy'
     };
 
-    const created = await adminCmsModel.addPlacement(payload);
-    if (created) {
+    let result = null;
+    if (editingPlacementId) {
+      result = await adminCmsModel.updatePlacement(editingPlacementId, payload);
+    } else {
+      result = await adminCmsModel.addPlacement(payload);
+    }
+
+    if (result) {
       await loadPlacements();
       setShowAddModal(false);
+      setEditingPlacementId(null);
       setFormData({
         name: '',
         company: '',
@@ -110,6 +146,9 @@ export function usePlacementsController() {
     placements,
     showAddModal,
     setShowAddModal,
+    editingPlacementId,
+    handleOpenAddModal,
+    handleEditPlacement,
     uploadingStudent,
     uploadingCompany,
     formData,

@@ -11,6 +11,7 @@ import { adminCmsModel } from '../models/adminCmsModel';
 export function useTeamController() {
   const [team, setTeam] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingTeamId, setEditingTeamId] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -31,6 +32,30 @@ export function useTeamController() {
     window.addEventListener('codeguru_refresh_all', handleRefresh);
     return () => window.removeEventListener('codeguru_refresh_all', handleRefresh);
   }, [loadTeam]);
+
+  const handleOpenAddModal = () => {
+    setEditingTeamId(null);
+    setFormData({
+      name: '',
+      role: 'Senior Instructor',
+      bio: '',
+      photoUrl: '',
+      experience: '8+ Years Exp'
+    });
+    setShowAddModal(true);
+  };
+
+  const handleEditTeamMember = (member) => {
+    setEditingTeamId(member._id || member.id);
+    setFormData({
+      name: member.name || '',
+      role: member.role || 'Senior Instructor',
+      bio: member.bio || '',
+      photoUrl: member.photoUrl || member.photo || '',
+      experience: member.experience || '8+ Years Exp'
+    });
+    setShowAddModal(true);
+  };
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
@@ -53,10 +78,22 @@ export function useTeamController() {
       return;
     }
 
-    const created = await adminCmsModel.addTeamMember(formData);
-    if (created) {
+    const payload = {
+      ...formData,
+      photo: formData.photoUrl
+    };
+
+    let result = null;
+    if (editingTeamId) {
+      result = await adminCmsModel.updateTeamMember(editingTeamId, payload);
+    } else {
+      result = await adminCmsModel.addTeamMember(payload);
+    }
+
+    if (result) {
       await loadTeam();
       setShowAddModal(false);
+      setEditingTeamId(null);
       setFormData({
         name: '',
         role: 'Senior Instructor',
@@ -80,6 +117,9 @@ export function useTeamController() {
     team,
     showAddModal,
     setShowAddModal,
+    editingTeamId,
+    handleOpenAddModal,
+    handleEditTeamMember,
     uploading,
     formData,
     setFormData,
