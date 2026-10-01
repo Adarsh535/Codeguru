@@ -15,6 +15,27 @@ export function useContactFormController() {
   });
   const [isCaptchaChecked, setIsCaptchaChecked] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [alertModalConfig, setAlertModalConfig] = useState({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+    buttonText: 'Done'
+  });
+
+  const closeAlertModal = () => {
+    setAlertModalConfig(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const showAlertModal = (type, title, message, buttonText = 'Done') => {
+    setAlertModalConfig({
+      isOpen: true,
+      type,
+      title,
+      message,
+      buttonText
+    });
+  };
 
   // Auto-detect student location silently in the background
   useEffect(() => {
@@ -107,11 +128,11 @@ export function useContactFormController() {
     const cleanLocation = formData.location ? formData.location.trim() : 'Lucknow, UP';
 
     if (!cleanName) {
-      alert('Please enter your name.');
+      showAlertModal('error', 'Ooops', 'Please enter your full name to proceed.', 'Done');
       return;
     }
-    if (!cleanPhone) {
-      alert('Please enter your phone number.');
+    if (!cleanPhone || cleanPhone.length < 10) {
+      showAlertModal('error', 'Ooops', 'Please enter a valid 10-digit mobile number.', 'Done');
       return;
     }
 
@@ -148,17 +169,26 @@ export function useContactFormController() {
       console.error('Error saving lead to Admin store:', err);
     }
 
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData(prev => ({ name: '', phone: '', location: prev.location || 'Lucknow, UP', course: 'Full Stack Web Development' }));
-      setIsCaptchaChecked(false);
-    }, 3000);
+    // Trigger sweet alert style popup modal
+    showAlertModal(
+      'success',
+      'Thank You!',
+      'Your query has been submitted successfully. Our expert team will contact you shortly.',
+      'Done'
+    );
+
+    // Reset form fields
+    setFormData(prev => ({ name: '', phone: '', location: prev.location || 'Lucknow, UP', course: 'Full Stack Web Development' }));
+    setIsCaptchaChecked(false);
   };
 
   return {
     formData,
     isCaptchaChecked,
     isSubmitted,
+    alertModalConfig,
+    closeAlertModal,
+    showAlertModal,
     handleChange,
     handleSubmit,
     toggleCaptcha

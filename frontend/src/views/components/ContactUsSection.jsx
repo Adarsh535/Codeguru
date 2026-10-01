@@ -4,6 +4,7 @@ import React from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Logo from './Logo';
+import AlertModal from './AlertModal';
 import { useContactFormController } from '../../controllers/useContactFormController';
 
 export default function ContactUsSection() {
@@ -11,6 +12,8 @@ export default function ContactUsSection() {
     formData,
     isCaptchaChecked,
     isSubmitted,
+    alertModalConfig,
+    closeAlertModal,
     handleChange,
     handleSubmit,
     toggleCaptcha
@@ -18,6 +21,16 @@ export default function ContactUsSection() {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-2 xxs:px-3 sm:px-6 my-1 select-none">
+      {/* POPUP ALERT MODAL */}
+      <AlertModal
+        isOpen={alertModalConfig.isOpen}
+        type={alertModalConfig.type}
+        title={alertModalConfig.title}
+        message={alertModalConfig.message}
+        buttonText={alertModalConfig.buttonText}
+        onClose={closeAlertModal}
+      />
+
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl xxs:rounded-[32px] p-4 xxs:p-5 sm:p-7 border border-slate-200/90 shadow-2xs relative overflow-hidden flex flex-col gap-2.5 xxs:gap-3">
         
         {/* FORM TITLE: CODEGURU LOGO + GET IN TOUCH */}

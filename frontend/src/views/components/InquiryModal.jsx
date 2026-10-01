@@ -5,6 +5,7 @@ import SendIcon from '@mui/icons-material/Send';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import Logo from './Logo';
+import AlertModal from './AlertModal';
 import { useContactFormController } from '../../controllers/useContactFormController';
 
 export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
@@ -15,6 +16,8 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
     formData,
     isCaptchaChecked,
     isSubmitted,
+    alertModalConfig,
+    closeAlertModal,
     handleChange,
     handleSubmit,
     toggleCaptcha
@@ -60,12 +63,22 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
   };
 
   return (
-    <div
-      onClick={handleClose}
-      className={`fixed inset-0 z-50 flex items-center justify-center p-3 xxs:p-4 bg-slate-950/70 backdrop-blur-md select-none transition-all duration-300 ${
-        isClosing ? 'animate-backdrop-out' : 'animate-backdrop-in'
-      }`}
-    >
+    <>
+      <AlertModal
+        isOpen={alertModalConfig.isOpen}
+        type={alertModalConfig.type}
+        title={alertModalConfig.title}
+        message={alertModalConfig.message}
+        buttonText={alertModalConfig.buttonText}
+        onClose={closeAlertModal}
+      />
+
+      <div
+        onClick={handleClose}
+        className={`fixed inset-0 z-50 flex items-center justify-center p-3 xxs:p-4 bg-slate-950/70 backdrop-blur-md select-none transition-all duration-300 ${
+          isClosing ? 'animate-backdrop-out' : 'animate-backdrop-in'
+        }`}
+      >
       <div
         onClick={(e) => e.stopPropagation()}
         className={`w-full max-w-lg bg-white rounded-3xl xxs:rounded-[36px] overflow-hidden border border-slate-200/90 shadow-2xl flex flex-col transition-all duration-300 transform ${
@@ -194,5 +207,6 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
         </div>
       </div>
     </div>
+    </>
   );
 }
