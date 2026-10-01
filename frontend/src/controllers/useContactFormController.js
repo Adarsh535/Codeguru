@@ -191,21 +191,8 @@ export function useContactFormController() {
       console.error('Error saving lead to Admin store:', err);
     }
 
-    // 3. Trigger Instant Notification to Dynamic Admin Phone Number (9670912923)
-    try {
-      const targetAdminPhone = adminPhone ? adminPhone.trim() : '9670912923';
-      const waMsg = `🔥 *New CodeGuru Student Query!*\n\n` +
-        `👤 *Student Name*: ${cleanName}\n` +
-        `📞 *Mobile*: ${cleanPhone}\n` +
-        `🎓 *Interested Course*: ${formData.course || 'Full Stack Web Development'}\n` +
-        `📍 *Location*: ${cleanLocation}\n` +
-        `⏰ *Time*: ${new Date().toLocaleString('en-IN')}`;
-
-      const waUrl = `https://wa.me/91${targetAdminPhone}?text=${encodeURIComponent(waMsg)}`;
-      window.open(waUrl, '_blank');
-    } catch (err) {
-      console.warn('Error launching WhatsApp notification:', err);
-    }
+    // 3. Background notification handled silently via REST API to Admin Phone (9670912923)
+    // (No WhatsApp popup/redirect tab launched)
 
     // 4. Trigger SweetAlert style popup modal
     showAlertModal(

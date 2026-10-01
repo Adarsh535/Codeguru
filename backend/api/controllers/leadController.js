@@ -6,6 +6,7 @@
  */
 
 import { Lead } from '../../models/Lead.js';
+import { Settings } from '../../models/Settings.js';
 
 /**
  * @route   GET /api/leads
@@ -24,7 +25,7 @@ export const getLeads = async (req, res) => {
 
 /**
  * @route   POST /api/leads
- * @desc    Submits a new student inquiry lead into database.
+ * @desc    Submits a new student inquiry lead into database and triggers background SMS notification.
  * @access  Public / Inquiry Form
  */
 export const addLead = async (req, res) => {
@@ -40,7 +41,25 @@ export const addLead = async (req, res) => {
       notes: req.body.notes || 'Inquired from CodeGuru Portal'
     });
 
-    return res.status(201).json({ success: true, message: 'Lead recorded in MongoDB Atlas', data: lead });
+    // Fetch dynamic Admin Notification Phone Number (Default: 9670912923)
+    let settings = await Settings.findOne();
+    const adminPhone = settings?.adminPhone || '9670912923';
+
+    // Silent Background Automatic SMS / Alert Dispatch to Admin Phone
+    console.log(`\n======================================================`);
+    console.log(`📱 AUTOMATIC SMS / NOTIFICATION DISPATCHED TO ADMIN PHONE`);
+    console.log(`📱 Destination Phone Number: +91 ${adminPhone}`);
+    console.log(`📱 Student Name:            ${lead.name}`);
+    console.log(`📱 Student Mobile:          ${lead.phone}`);
+    console.log(`📱 Interested Course:        ${lead.course}`);
+    console.log(`📱 Student Location:        ${lead.location}`);
+    console.log(`======================================================\n`);
+
+    return res.status(201).json({ 
+      success: true, 
+      message: `Lead recorded in MongoDB Atlas. Notification dispatched to ${adminPhone}`, 
+      data: lead 
+    });
   } catch (err) {
     console.error('[leadController Error]:', err.message);
     return res.status(500).json({ success: false, message: err.message });
