@@ -7,6 +7,7 @@
 
 import { Lead } from '../../models/Lead.js';
 import { Settings } from '../../models/Settings.js';
+import { sendRealSMS } from '../../services/smsService.js';
 
 /**
  * @route   GET /api/leads
@@ -45,15 +46,13 @@ export const addLead = async (req, res) => {
     let settings = await Settings.findOne();
     const adminPhone = settings?.adminPhone || '9670912923';
 
-    // Silent Background Automatic SMS / Alert Dispatch to Admin Phone
-    console.log(`\n======================================================`);
-    console.log(`📱 AUTOMATIC SMS / NOTIFICATION DISPATCHED TO ADMIN PHONE`);
-    console.log(`📱 Destination Phone Number: +91 ${adminPhone}`);
-    console.log(`📱 Student Name:            ${lead.name}`);
-    console.log(`📱 Student Mobile:          ${lead.phone}`);
-    console.log(`📱 Interested Course:        ${lead.course}`);
-    console.log(`📱 Student Location:        ${lead.location}`);
-    console.log(`======================================================\n`);
+    // Format text message for Cellular SIM SMS Delivery
+    const smsMessage = `CodeGuru Alert: New Query! Student: ${lead.name}, Phone: ${lead.phone}, Course: ${lead.course}, Location: ${lead.location}`;
+
+    // Dispatch Real SMS Gateway Service
+    sendRealSMS(adminPhone, smsMessage).catch(err => {
+      console.warn('Background SMS Dispatch error:', err.message);
+    });
 
     return res.status(201).json({ 
       success: true, 
