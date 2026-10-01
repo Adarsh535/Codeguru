@@ -17,6 +17,7 @@ import uploadRoutes from './routes/uploadRoutes.js';
 import trafficRoutes from './routes/trafficRoutes.js';
 import navMenuRoutes from './routes/navMenuRoutes.js';
 import enrollmentRoutes from './routes/enrollmentRoutes.js';
+import settingsRoutes from './routes/settingsRoutes.js';
 
 const apiRouter = express.Router();
 
@@ -32,6 +33,7 @@ apiRouter.use('/upload', uploadRoutes);
 apiRouter.use('/traffic', trafficRoutes);
 apiRouter.use('/navmenus', navMenuRoutes);
 apiRouter.use('/enrollments', enrollmentRoutes);
+apiRouter.use('/settings', settingsRoutes);
 
 export default apiRouter;
 

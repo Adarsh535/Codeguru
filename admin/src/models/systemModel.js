@@ -26,5 +26,31 @@ export const systemModel = {
       console.warn('[systemModel API Warning] Health check request failed:', err);
       return { success: false, message: 'Server offline or unreachable' };
     }
+  },
+
+  getSettings: async () => {
+    try {
+      const res = await fetch(`${API_BASE}/settings`);
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.warn('[systemModel API Warning] Fetch settings failed:', err);
+      return { success: false, data: { adminPhone: '9670912923', whatsappNotificationEnabled: true } };
+    }
+  },
+
+  updateSettings: async (settingsData) => {
+    try {
+      const res = await fetch(`${API_BASE}/settings`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settingsData)
+      });
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.warn('[systemModel API Warning] Update settings failed:', err);
+      return { success: false, message: 'Failed to update settings on server' };
+    }
   }
 };

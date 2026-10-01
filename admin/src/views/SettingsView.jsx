@@ -8,6 +8,8 @@ import KeyIcon from '@mui/icons-material/Key';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import EditIcon from '@mui/icons-material/Edit';
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { useAuth } from '../context/AuthContext';
 import { useSystemController } from '../controllers/useSystemController';
 
@@ -16,6 +18,12 @@ export default function SettingsView() {
   const {
     email,
     setEmail,
+    adminPhone,
+    setAdminPhone,
+    whatsappEnabled,
+    setWhatsappEnabled,
+    autoWhatsappRedirect,
+    setAutoWhatsappRedirect,
     newPassword,
     setNewPassword,
     confirmPassword,
@@ -25,7 +33,8 @@ export default function SettingsView() {
     dbProvider,
     isSaving,
     message,
-    handleUpdatePassword
+    handleUpdatePassword,
+    handleSaveSettings
   } = useSystemController(user, updateUser);
 
 
@@ -39,7 +48,7 @@ export default function SettingsView() {
           <span>Admin System Settings</span>
         </h1>
         <p className="text-xs font-semibold text-slate-500 mt-1">
-          Manage master admin login credentials, security keys, and check MongoDB database status.
+          Manage master admin login credentials, inquiry notification phone numbers, and check MongoDB database status.
         </p>
       </div>
 
@@ -51,6 +60,71 @@ export default function SettingsView() {
           <span>{message.text}</span>
         </div>
       )}
+
+      {/* INQUIRY NOTIFICATION PHONE NUMBER CARD */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-metoxi flex flex-col gap-5">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+              <WhatsAppIcon className="!w-5 !h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 font-heading">Inquiry & WhatsApp Notification Phone Number</h3>
+              <p className="text-xs text-slate-500">Student inquiry notifications will be sent to this number dynamically</p>
+            </div>
+          </div>
+          <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-100/70 border border-emerald-300 px-3 py-1 rounded-full">
+            Live Dynamic
+          </span>
+        </div>
+
+        <form onSubmit={handleSaveSettings} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <PhoneIphoneIcon className="!w-4 !h-4 text-emerald-600" />
+              <span>Admin Mobile Number (for receiving Inquiry Alerts & Messages)</span>
+            </label>
+            <input
+              type="tel"
+              required
+              value={adminPhone}
+              onChange={(e) => setAdminPhone(e.target.value)}
+              placeholder="e.g. 9670912923"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all bg-white shadow-xs"
+            />
+            <p className="text-[11px] text-slate-500 font-medium">
+              Whenever a student submits the Get in Touch form on the website, inquiry details will be routed to this number (Current: <strong className="text-slate-900">{adminPhone}</strong>).
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="flex items-center gap-2.5">
+              <WhatsAppIcon className="!w-5 !h-5 text-emerald-600" />
+              <div>
+                <div className="text-xs font-bold text-slate-900">Auto WhatsApp Message Trigger</div>
+                <div className="text-[11px] text-slate-500">Open instant WhatsApp chat on student form submit</div>
+              </div>
+            </div>
+            <input
+              type="checkbox"
+              checked={autoWhatsappRedirect}
+              onChange={(e) => setAutoWhatsappRedirect(e.target.checked)}
+              className="w-4 h-4 accent-emerald-600 cursor-pointer"
+            />
+          </div>
+
+          <div className="flex items-center justify-end">
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95"
+            >
+              <SaveIcon className="!w-4 !h-4" />
+              <span>{isSaving ? 'Saving to MongoDB...' : 'Save Notification Phone Number'}</span>
+            </button>
+          </div>
+        </form>
+      </div>
 
       {/* DATABASE STATUS CARD */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-metoxi flex flex-col gap-4">
@@ -148,15 +222,6 @@ export default function SettingsView() {
               />
             </div>
           </div>
-
-          {message && (
-            <div className={`p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 border mt-1 ${
-              message.type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-rose-50 text-rose-800 border-rose-300'
-            }`}>
-              <CheckCircleIcon className="!w-4 !h-4" />
-              <span>{message.text}</span>
-            </div>
-          )}
 
           <div className="flex items-center justify-end mt-2">
             <button

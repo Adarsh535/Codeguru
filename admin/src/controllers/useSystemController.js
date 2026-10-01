@@ -84,9 +84,55 @@ export function useSystemController(user, updateUser) {
   };
 
 
+  const [adminPhone, setAdminPhone] = useState('9670912923');
+  const [whatsappEnabled, setWhatsappEnabled] = useState(true);
+  const [autoWhatsappRedirect, setAutoWhatsappRedirect] = useState(true);
+
+  useEffect(() => {
+    systemModel.getSettings().then(res => {
+      if (res.success && res.data) {
+        if (res.data.adminPhone) setAdminPhone(res.data.adminPhone);
+        if (res.data.whatsappNotificationEnabled !== undefined) setWhatsappEnabled(res.data.whatsappNotificationEnabled);
+        if (res.data.autoWhatsappRedirect !== undefined) setAutoWhatsappRedirect(res.data.autoWhatsappRedirect);
+      }
+    });
+  }, []);
+
+  const handleSaveSettings = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    setIsSaving(true);
+    setMessage(null);
+
+    const cleanPhone = adminPhone ? adminPhone.trim() : '9670912923';
+    const res = await systemModel.updateSettings({
+      adminPhone: cleanPhone,
+      whatsappNotificationEnabled: whatsappEnabled,
+      autoWhatsappRedirect: autoWhatsappRedirect
+    });
+
+    setIsSaving(false);
+
+    if (res.success) {
+      try {
+        localStorage.setItem('codeguru_admin_phone', cleanPhone);
+        window.dispatchEvent(new Event('storage'));
+      } catch (err) {}
+
+      setMessage({ type: 'success', text: `Admin Notification Phone Number (${cleanPhone}) saved successfully in MongoDB!` });
+    } else {
+      setMessage({ type: 'error', text: res.message || 'Failed to update settings' });
+    }
+  };
+
   return {
     email,
     setEmail,
+    adminPhone,
+    setAdminPhone,
+    whatsappEnabled,
+    setWhatsappEnabled,
+    autoWhatsappRedirect,
+    setAutoWhatsappRedirect,
     newPassword,
     setNewPassword,
     confirmPassword,
@@ -96,7 +142,8 @@ export function useSystemController(user, updateUser) {
     dbProvider,
     isSaving,
     message,
-    handleUpdatePassword
+    handleUpdatePassword,
+    handleSaveSettings
   };
 }
 

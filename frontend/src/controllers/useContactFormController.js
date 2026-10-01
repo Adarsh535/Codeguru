@@ -4,6 +4,7 @@
  */
 import { useState, useEffect } from 'react';
 import { apiService } from '../services/apiService';
+import { API_BASE } from '../models/apiClient';
 import { sanitizeLocation, sanitizeCityName } from '../utils/locationSanitizer';
 
 export function useContactFormController() {
@@ -13,6 +14,7 @@ export function useContactFormController() {
     location: 'Lucknow, UP',
     course: 'Full Stack Web Development'
   });
+  const [adminPhone, setAdminPhone] = useState('9670912923');
   const [isCaptchaChecked, setIsCaptchaChecked] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [alertModalConfig, setAlertModalConfig] = useState({
@@ -36,6 +38,26 @@ export function useContactFormController() {
       buttonText
     });
   };
+
+  // Fetch dynamic Admin notification phone number from MongoDB Settings API
+  useEffect(() => {
+    try {
+      const storedPhone = localStorage.getItem('codeguru_admin_phone');
+      if (storedPhone) setAdminPhone(storedPhone);
+    } catch (e) {}
+
+    fetch(`${API_BASE}/settings`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data?.adminPhone) {
+          setAdminPhone(data.data.adminPhone);
+          try {
+            localStorage.setItem('codeguru_admin_phone', data.data.adminPhone);
+          } catch (e) {}
+        }
+      })
+      .catch(err => console.warn('[useContactFormController] Using cached notification phone number:', err));
+  }, []);
 
   // Auto-detect student location silently in the background
   useEffect(() => {
@@ -169,7 +191,23 @@ export function useContactFormController() {
       console.error('Error saving lead to Admin store:', err);
     }
 
-    // Trigger sweet alert style popup modal
+    // 3. Trigger Instant Notification to Dynamic Admin Phone Number (9670912923)
+    try {
+      const targetAdminPhone = adminPhone ? adminPhone.trim() : '9670912923';
+      const waMsg = `🔥 *New CodeGuru Student Query!*\n\n` +
+        `👤 *Student Name*: ${cleanName}\n` +
+        `📞 *Mobile*: ${cleanPhone}\n` +
+        `🎓 *Interested Course*: ${formData.course || 'Full Stack Web Development'}\n` +
+        `📍 *Location*: ${cleanLocation}\n` +
+        `⏰ *Time*: ${new Date().toLocaleString('en-IN')}`;
+
+      const waUrl = `https://wa.me/91${targetAdminPhone}?text=${encodeURIComponent(waMsg)}`;
+      window.open(waUrl, '_blank');
+    } catch (err) {
+      console.warn('Error launching WhatsApp notification:', err);
+    }
+
+    // 4. Trigger SweetAlert style popup modal
     showAlertModal(
       'success',
       'Thank You!',
