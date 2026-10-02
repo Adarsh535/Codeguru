@@ -8,8 +8,7 @@
  * 2. Twilio SMS API
  * 3. Fallback HTTP Webhooks
  */
-
-import fetch from 'node-fetch';
+// Native fetch is available globally in Node.js v18+
 
 /**
  * Sends a real cellular SMS alert to the target phone number
