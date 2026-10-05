@@ -62,8 +62,8 @@ export default function Navbar({
 
   return (
     <header className="fixed top-0 left-0 right-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-xs z-50">
-      <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-        <div className="flex justify-between items-center h-14 sm:h-20 py-1 sm:py-0 w-full overflow-hidden gap-1.5 sm:gap-4">
+      <div className="w-full max-w-7xl mx-auto px-2.5 sm:px-4 lg:px-8">
+        <div className="flex justify-between items-center h-14 sm:h-20 py-1 sm:py-0 w-full gap-1 sm:gap-4">
           
           {/* LEFT SIDE: LOGO ICON, LOGO TEXT, AND LOCATION */}
           <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-shrink-0">
@@ -205,7 +205,7 @@ export default function Navbar({
                 <button
                   suppressHydrationWarning
                   onClick={onOpenRegister || onOpenInquiryModal}
-                  className="flex items-center justify-center gap-1 sm:gap-2 px-2 py-1 min-[360px]:px-2.5 min-[360px]:py-1.5 sm:px-6 sm:py-2 rounded-full text-white font-bold text-[10px] min-[360px]:text-xs sm:text-sm bg-gradient-to-r from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 transition-all shadow-xs active:scale-95 whitespace-nowrap flex-shrink-0 cursor-pointer"
+                  className="flex items-center justify-center gap-1 sm:gap-2 px-2 py-1 min-[360px]:px-2.5 min-[360px]:py-1.5 sm:px-5 sm:py-2 rounded-full text-white font-bold text-[10px] min-[360px]:text-xs sm:text-sm bg-gradient-to-r from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 transition-all shadow-xs active:scale-95 whitespace-nowrap flex-shrink-0 cursor-pointer"
                 >
                   <UserPlus className="text-white w-3 h-3 min-[360px]:w-3.5 min-[360px]:h-3.5 sm:w-[18px] sm:h-[18px] flex-shrink-0" />
                   <span>Register</span>

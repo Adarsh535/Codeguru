@@ -149,12 +149,12 @@ export default function BannerSlider({ onOpenContactModal }) {
   };
 
   return (
-    <div className="w-full px-3 sm:px-4 pt-4 select-none">
+    <div className="w-full px-0 pt-0 mb-4 sm:mb-6 select-none">
       <div
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="relative w-full aspect-[4/3] sm:aspect-[21/9] rounded-[28px] overflow-hidden shadow-xl bg-slate-900 group"
+        className="relative w-full aspect-[16/9] sm:aspect-[24/8] lg:aspect-[28/8] max-h-[380px] rounded-b-[36px] sm:rounded-b-[48px] md:rounded-b-[56px] overflow-hidden bg-slate-900 group"
       >
         {/* SLIDES TRACK */}
         <div
@@ -179,7 +179,7 @@ export default function BannerSlider({ onOpenContactModal }) {
                       autoPlay
                       loop
                       onEnded={handleNext}
-                      className="w-full h-full object-cover opacity-90"
+                      className="w-full h-full object-cover opacity-100"
                     />
                   </div>
                 ) : (
@@ -187,21 +187,10 @@ export default function BannerSlider({ onOpenContactModal }) {
                     <img
                       src={imageSource}
                       alt={slide.title}
-                      className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                      className="w-full h-full object-cover opacity-100 group-hover:scale-105 transition-transform duration-700"
                     />
                   </div>
                 )}
-
-              {/* GRADIENT OVERLAY */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#022069]/90 via-slate-900/30 to-transparent pointer-events-none" />
-
-              {/* TOP-LEFT BADGE */}
-              <div className="absolute top-4 left-4 z-10 pointer-events-none">
-                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold font-sans tracking-wide shadow-md ${slide.badgeColor || 'bg-[#10b981] text-white'}`}>
-                  <Zap className="w-3.5 h-3.5 fill-white text-white" />
-                  <span>{slide.badge || 'SUCCESS STORIES'}</span>
-                </div>
-              </div>
 
               {/* TOP-RIGHT CONTROLS (Play/Pause & Mute) */}
               <div className="absolute top-4 right-4 z-10 pointer-events-auto">
@@ -228,58 +217,12 @@ export default function BannerSlider({ onOpenContactModal }) {
                   )}
                 </div>
               </div>
-
-              {/* SLIDE CONTENT INFO */}
-              <div className="absolute bottom-10 left-4 right-4 z-10 flex flex-col justify-end max-w-2xl">
-                <h2 className="text-base sm:text-2xl md:text-3xl font-black text-white leading-tight drop-shadow-md">
-                  {slide.title}
-                </h2>
-                <p className="text-xs sm:text-base text-slate-200 mt-1 sm:mt-2 line-clamp-2 drop-shadow-sm font-medium">
-                  {slide.subtitle}
-                </p>
-
-                {slide.price && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="text-sm sm:text-xl font-black text-amber-400">{slide.price}</span>
-                    <span className="text-xs sm:text-sm text-slate-400 line-through">{slide.originalPrice}</span>
-                    <span className="text-xs font-bold text-emerald-400">{slide.discount}</span>
-                  </div>
-                )}
-
-                <div className="mt-3 flex items-center gap-2">
-                  <button
-                    suppressHydrationWarning
-                    onClick={onOpenContactModal}
-                    className="bg-[#2463eb] hover:bg-blue-700 text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-md transition-transform active:scale-95 cursor-pointer"
-                  >
-                    {slide.ctaText || 'Inquire Now'}
-                  </button>
-                </div>
-              </div>
             </div>
           );
         })}
         </div>
 
-        {/* LEFT NAV CHEVRON */}
-        <button
-          suppressHydrationWarning
-          onClick={handlePrev}
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-[#1e293b]/60 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-colors z-20 pointer-events-auto cursor-pointer"
-          title="Previous"
-        >
-          <ChevronLeft className="w-4.5 h-4.5" />
-        </button>
 
-        {/* RIGHT NAV CHEVRON */}
-        <button
-          suppressHydrationWarning
-          onClick={handleNext}
-          className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-[#1e293b]/60 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-colors z-20 pointer-events-auto cursor-pointer"
-          title="Next"
-        >
-          <ChevronRight className="w-4.5 h-4.5" />
-        </button>
 
         {/* BOTTOM PAGINATION DOTS */}
         <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-col items-center pointer-events-none">

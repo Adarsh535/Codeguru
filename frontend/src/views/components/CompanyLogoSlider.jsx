@@ -54,7 +54,7 @@ export default function CompanyLogoSlider({ onOpenContactModal }) {
   return (
     <div className="w-full flex flex-col gap-2 py-1.5 sm:py-2 overflow-hidden bg-white border-b border-slate-100 shadow-xs relative z-10 select-none">
       <div className="w-full inline-flex flex-nowrap overflow-hidden [mask-image:_linear-gradient(to_right,transparent_0,_black_24px,_black_calc(100%-24px),transparent_100%)]">
-        <ul className="flex items-center justify-start [&_li]:mx-1.5 animate-[marquee_20s_linear_infinite] w-max hover:[animation-play-state:paused]">
+        <ul className="flex items-center justify-start [&_li]:mx-1.5 animate-[marquee_10s_linear_infinite] w-max hover:[animation-play-state:paused]">
           <li className="flex flex-shrink-0 items-center justify-start gap-1.5 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full border-yellow-400 bg-yellow-50 text-yellow-900 shadow-xs mx-1.5">
             <Building2 className="w-3.5 h-3.5 text-yellow-600" />
             <span className="font-black text-[9.5px] sm:text-xs whitespace-nowrap tracking-wide">TOP PARTNERS:</span>

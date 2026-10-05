@@ -27,6 +27,7 @@ export function useContactFormController() {
 
   const closeAlertModal = () => {
     setAlertModalConfig(prev => ({ ...prev, isOpen: false }));
+    setIsSubmitted(false);
   };
 
   const showAlertModal = (type, title, message, buttonText = 'Done') => {
@@ -201,6 +202,11 @@ export function useContactFormController() {
       'Your query has been submitted successfully. Our expert team will contact you shortly.',
       'Done'
     );
+
+    setIsSubmitted(true);
+    setTimeout(() => {
+      setIsSubmitted(false);
+    }, 3000);
 
     // Reset form fields
     setFormData(prev => ({ name: '', phone: '', location: prev.location || 'Lucknow, UP', course: 'Full Stack Web Development' }));

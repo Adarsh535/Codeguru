@@ -29,7 +29,7 @@ export default function HomePage({ onOpenContactModal, onOpenEnrollModal }) {
       <BannerSlider onOpenContactModal={onOpenContactModal} />
       <TechLanguageSlider onOpenContactModal={onOpenContactModal} />
       <CompanyLogoSlider onOpenContactModal={onOpenContactModal} />
-      <CategoryNavbar onOpenContactModal={onOpenContactModal} onOpenEnrollModal={onOpenEnrollModal} />
+      <CategoryNavbar onOpenContactModal={onOpenContactModal} onOpenEnrollModal={onOpenEnrollModal} isHomePage={true} />
       <TopPlacementSlider onOpenContactModal={onOpenContactModal} />
       <OurTeamSlider onOpenContactModal={onOpenContactModal} />
       <OurBranchesSection onOpenContactModal={onOpenContactModal} />

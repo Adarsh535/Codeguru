@@ -139,7 +139,7 @@ export default function ClientShell({ children }) {
 
   return (
     <DeviceGuard>
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 justify-between overflow-x-hidden pt-[70px] sm:pt-26 md:pt-28 pb-20 sm:pb-8" suppressHydrationWarning>
+      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 justify-between overflow-x-hidden pt-14 sm:pt-20 pb-20 sm:pb-8" suppressHydrationWarning>
         
         {/* RESPONSIVE TOPBAR HEADER */}
         <Navbar

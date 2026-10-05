@@ -66,8 +66,8 @@ export default function CoursesPage({ onOpenContactModal, onOpenEnrollModal }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }}
       />
-      <div className="flex flex-col gap-2 pb-12 bg-slate-50">
-        <CategoryNavbar onOpenContactModal={onOpenContactModal} onOpenEnrollModal={onOpenEnrollModal} />
+      <div className="flex flex-col gap-0 pb-6 bg-slate-50">
+        <CategoryNavbar onOpenContactModal={onOpenContactModal} onOpenEnrollModal={onOpenEnrollModal} isHomePage={false} />
         <TechLanguageSlider onOpenContactModal={onOpenContactModal} />
         <BannerSlider onOpenContactModal={onOpenContactModal} />
         <ContactUsSection />

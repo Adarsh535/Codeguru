@@ -26,6 +26,10 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
   useEffect(() => {
     if (isSubmitted) {
       onSubmitSuccess?.();
+      const timer = setTimeout(() => {
+        handleClose();
+      }, 2500);
+      return () => clearTimeout(timer);
     }
   }, [isSubmitted, onSubmitSuccess]);
 
