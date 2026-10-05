@@ -20,7 +20,7 @@ export default function ContactUsSection() {
   } = useContactFormController();
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-2 xxs:px-3 sm:px-6 my-1 select-none">
+    <div id="contact-section" className="w-full max-w-7xl mx-auto px-2 xxs:px-3 sm:px-6 my-1 select-none">
       {/* POPUP ALERT MODAL */}
       <AlertModal
         isOpen={alertModalConfig.isOpen}
