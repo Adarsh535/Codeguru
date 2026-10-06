@@ -11,7 +11,7 @@ export const metadata = {
     'CodeGuru Student Salary',
     'IT Job Placement Guarantee',
     'CodeGuru Hiring Partners',
-    'Top Placed Students IT Lucknow',
+    'Top Placed Students IT Ayodhya',
   ],
   alternates: {
     canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/placements`,

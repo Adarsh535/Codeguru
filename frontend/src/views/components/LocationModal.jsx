@@ -6,7 +6,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
-import { sanitizeLocation, sanitizeCityName, DEFAULT_LUCKNOW_LOCATION } from '../../utils/locationSanitizer';
+import { sanitizeLocation, sanitizeCityName, DEFAULT_AYODHYA_LOCATION } from '../../utils/locationSanitizer';
 
 export default function LocationModal({ isOpen, onClose, selectedLocation, onSelectLocation }) {
   const [isLocating, setIsLocating] = useState(false);
@@ -41,7 +41,7 @@ export default function LocationModal({ isOpen, onClose, selectedLocation, onSel
             const apiRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
             const data = await apiRes.json();
 
-            let rawCity = data.city || data.locality || data.principalSubdivision || 'Lucknow';
+            let rawCity = data.city || data.locality || data.principalSubdivision || 'Ayodhya';
             let state = data.principalSubdivision || 'Uttar Pradesh';
             let city = sanitizeCityName(rawCity, state);
 
@@ -100,7 +100,7 @@ export default function LocationModal({ isOpen, onClose, selectedLocation, onSel
           return;
         }
       } catch (e) {}
-      applyLocation(DEFAULT_LUCKNOW_LOCATION);
+      applyLocation(DEFAULT_AYODHYA_LOCATION);
     }
   };
 

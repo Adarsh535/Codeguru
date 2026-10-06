@@ -273,7 +273,7 @@ export default function DashboardView({ leads = [], stats = {}, searchQuery, onU
                     <td className="py-3.5 px-4 font-extrabold text-slate-900">{l.name}</td>
                     <td className="py-3.5 px-4 font-mono text-slate-600">+91 {l.phone}</td>
                     <td className="py-3.5 px-4 font-semibold text-slate-800">{l.course}</td>
-                    <td className="py-3.5 px-4 text-slate-500">{l.location || l.city || 'Lucknow, UP'}</td>
+                    <td className="py-3.5 px-4 text-slate-500">{l.location || l.city || 'Ayodhya, UP'}</td>
                     <td className="py-3.5 px-4">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${
                         l.status === 'Enrolled' ? 'bg-emerald-100 text-emerald-700' :

@@ -182,9 +182,9 @@ export const connectDB = async () => {
     const branchCount = await Branch.countDocuments();
     if (branchCount === 0) {
       await Branch.create({
-        title: 'Lucknow HQ Campus',
-        address: 'Hazratganj Tech Corridor, Lucknow, UP',
-        category: 'REGIONAL BRANCH & CAMPUS'
+        title: 'Ayodhya HQ Campus',
+        address: 'CodeGuru Tower, Near Naya Ghat Bypass Road, Ayodhya, UP - 224123',
+        category: 'HEADQUARTERS & MAIN CAMPUS'
       });
       console.log(`🏢 Branches collection initialized in 'branches'`);
     }
@@ -209,8 +209,8 @@ export const connectDB = async () => {
         pageViews: 1248,
         uniqueVisitors: 860,
         cities: [
-          { name: 'Lucknow, UP', count: 580 },
-          { name: 'Ayodhya, UP', count: 275 }
+          { name: 'Ayodhya, UP', count: 580 },
+          { name: 'Lucknow, UP', count: 275 }
         ]
       });
       console.log(`📈 Traffic collection initialized in 'traffics'`);

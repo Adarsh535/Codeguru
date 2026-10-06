@@ -13,7 +13,7 @@ export const metadata = {
     'CodeGuru',
     'Code Guru Placement',
     'Full Stack Web Development Course',
-    'MERN Stack Institute Lucknow',
+    'MERN Stack Institute Ayodhya',
     'Java Full Stack Training',
     'Python Coding Academy',
     'IT Job Placement Guarantee',
@@ -85,7 +85,7 @@ export default function RootLayout({ children }) {
     ],
     address: {
       '@type': 'PostalAddress',
-      addressLocality: 'Lucknow',
+      addressLocality: 'Ayodhya',
       addressRegion: 'Uttar Pradesh',
       addressCountry: 'IN',
     },

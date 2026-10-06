@@ -13,7 +13,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDeleteLead, onAddLead }) {
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newLeadData, setNewLeadData] = useState({ name: '', phone: '', location: 'Lucknow, UP', course: 'Full Stack Web Development', notes: '' });
+  const [newLeadData, setNewLeadData] = useState({ name: '', phone: '', location: 'Ayodhya, UP', course: 'Full Stack Web Development', notes: '' });
 
   const filteredLeads = leads.filter(lead => 
     !searchQuery ||
@@ -28,13 +28,13 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
     if (!newLeadData.name || !newLeadData.phone) return;
 
     onAddLead(newLeadData);
-    setNewLeadData({ name: '', phone: '', location: 'Lucknow, UP', course: 'Full Stack Web Development', notes: '' });
+    setNewLeadData({ name: '', phone: '', location: 'Ayodhya, UP', course: 'Full Stack Web Development', notes: '' });
     setShowAddModal(false);
   };
 
   const exportCSV = () => {
     const headers = ['ID,Name,Phone,Location,Course,Status,Date'];
-    const rows = leads.map(l => `"${l.id}","${l.name}","${l.phone}","${l.location || 'Lucknow, UP'}","${l.course}","${l.status}","${l.createdAt}"`);
+    const rows = leads.map(l => `"${l.id}","${l.name}","${l.phone}","${l.location || 'Ayodhya, UP'}","${l.course}","${l.status}","${l.createdAt}"`);
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers, ...rows].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
@@ -56,7 +56,7 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
         <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">${i + 1}</td>
         <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">${l.name}</td>
         <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; color: #2563eb; font-weight: 600;">+91 ${l.phone}</td>
-        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0;">${l.location || 'Lucknow, UP'}</td>
+        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0;">${l.location || 'Ayodhya, UP'}</td>
         <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0;">${l.course}</td>
         <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0;"><span style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 800;">${l.status}</span></td>
         <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-size: 11px; color: #64748b;">${new Date(l.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
@@ -224,7 +224,7 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
                   <td className="py-3.5 px-4 whitespace-nowrap">
                     <span className="inline-flex items-center gap-1 text-cyan-800 bg-cyan-50 border border-cyan-200/80 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap">
                       <LocationOnIcon className="!w-3.5 !h-3.5 text-cyan-600 shrink-0" />
-                      <span className="whitespace-nowrap">{lead.location || 'Lucknow, UP'}</span>
+                      <span className="whitespace-nowrap">{lead.location || 'Ayodhya, UP'}</span>
                     </span>
                   </td>
 

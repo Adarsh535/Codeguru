@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { LOCATIONS, PLACEMENT_CATEGORIES, PLACEMENTS } from '../models/placementModel';
 import { apiService } from '../services/apiService';
-import { sanitizeLocation, sanitizeCityName, DEFAULT_LUCKNOW_LOCATION } from '../utils/locationSanitizer';
+import { sanitizeLocation, sanitizeCityName, DEFAULT_AYODHYA_LOCATION } from '../utils/locationSanitizer';
 
 export function usePlacementController() {
   const [locations] = useState(LOCATIONS);
@@ -75,7 +75,7 @@ export function usePlacementController() {
               const apiRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
               const data = await apiRes.json();
 
-              let rawCity = data.city || data.locality || data.principalSubdivision || 'Lucknow';
+              let rawCity = data.city || data.locality || data.principalSubdivision || 'Ayodhya';
               let state = data.principalSubdivision || 'Uttar Pradesh';
               let city = sanitizeCityName(rawCity, state);
               let stateCode = getStateCode(state);
@@ -101,7 +101,7 @@ export function usePlacementController() {
               const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
               const geoData = await geoRes.json();
               if (geoData && geoData.address) {
-                let rawCity = geoData.address.city || geoData.address.town || geoData.address.city_district || geoData.address.county || 'Lucknow';
+                let rawCity = geoData.address.city || geoData.address.town || geoData.address.city_district || geoData.address.county || 'Ayodhya';
                 let state = geoData.address.state || 'Uttar Pradesh';
                 let city = sanitizeCityName(rawCity, state);
                 let stateCode = getStateCode(state);
@@ -143,7 +143,7 @@ export function usePlacementController() {
               }
             } catch (ipErr) {
               if (isMounted && !selectedLocation) {
-                applyDetectedLocation(DEFAULT_LUCKNOW_LOCATION);
+                applyDetectedLocation(DEFAULT_AYODHYA_LOCATION);
               }
             }
           },
@@ -169,7 +169,7 @@ export function usePlacementController() {
           }
         } catch (e) {
           if (isMounted && !selectedLocation) {
-            applyDetectedLocation(DEFAULT_LUCKNOW_LOCATION);
+            applyDetectedLocation(DEFAULT_AYODHYA_LOCATION);
           }
         }
       }

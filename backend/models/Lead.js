@@ -11,7 +11,7 @@ const leadSchema = new mongoose.Schema({
   leadId: { type: String, unique: true },
   name: { type: String, required: true },
   phone: { type: String, required: true },
-  location: { type: String, default: 'Lucknow, UP' },
+  location: { type: String, default: 'Ayodhya, UP' },
   course: { type: String, default: 'Full Stack Web Development' },
   status: { type: String, enum: ['New', 'Contacted', 'In Progress', 'Enrolled'], default: 'New' },
   notes: { type: String, default: '' }

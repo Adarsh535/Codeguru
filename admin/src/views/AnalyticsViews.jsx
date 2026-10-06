@@ -76,14 +76,14 @@ export function ReportsView() {
       switch (reportIndex) {
         case 0: // 1. Lead Inquiries Master Report
           dataRows = (leadsList.length > 0 ? leadsList : [
-            { id: 'CG-LEAD-101', name: 'Saurabh Kumar', phone: '9876543210', course: 'Full Stack Web Development', location: 'Lucknow, UP', status: 'New', createdAt: new Date().toISOString() },
+            { id: 'CG-LEAD-101', name: 'Saurabh Kumar', phone: '9876543210', course: 'Full Stack Web Development', location: 'Ayodhya, UP', status: 'New', createdAt: new Date().toISOString() },
             { id: 'CG-LEAD-102', name: 'Ananya Mishra', phone: '9123456789', course: 'Python AI & Data Science', location: 'Ayodhya, UP', status: 'Contacted', createdAt: new Date().toISOString() }
           ]).map((l, i) => ({
             'Lead ID': l.id || `CG-LEAD-${101 + i}`,
             'Student Name': l.name || 'Anonymous Lead',
             'Phone Number': l.phone || 'N/A',
             'Course Interested': l.course || 'Full Stack Web Dev',
-            'City / Location': l.location || l.city || 'Lucknow, UP',
+            'City / Location': l.location || l.city || 'Ayodhya, UP',
             'Inquiry Status': l.status || 'New',
             'Created Date': l.createdAt ? new Date(l.createdAt).toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN')
           }));
@@ -195,7 +195,7 @@ export function ReportsView() {
           (leadsList.length > 0 ? leadsList : [
             { location: 'Lucknow, UP' }, { location: 'Lucknow, UP' }, { location: 'Ayodhya, UP' }, { location: 'Kanpur, UP' }, { location: 'Noida, UP' }
           ]).forEach(l => {
-            const city = l.location || l.city || 'Lucknow, UP';
+            const city = l.location || l.city || 'Ayodhya, UP';
             cityMap[city] = (cityMap[city] || 0) + 1;
           });
           dataRows = Object.keys(cityMap).map(city => ({

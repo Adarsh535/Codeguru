@@ -11,7 +11,7 @@ export function useContactFormController() {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    location: 'Lucknow, UP',
+    location: 'Ayodhya, UP',
     course: 'Full Stack Web Development'
   });
   const [adminPhone, setAdminPhone] = useState('9670912923');
@@ -89,7 +89,7 @@ export function useContactFormController() {
               );
               const data = await res.json();
               if (data && data.address && isMounted) {
-                const rawCity = data.address.city || data.address.town || data.address.state_district || data.address.county || data.address.state || 'Lucknow';
+                const rawCity = data.address.city || data.address.town || data.address.state_district || data.address.county || data.address.state || 'Ayodhya';
                 const city = sanitizeCityName(rawCity, data.address.state);
                 const locStr = `${city}, UP`;
                 setFormData(prev => ({ ...prev, location: locStr }));
@@ -123,9 +123,9 @@ export function useContactFormController() {
         console.warn('IP Geolocation fallback failed:', err);
       }
 
-      // 4. Default fallback: Lucknow, UP
+      // 4. Default fallback: Ayodhya, UP
       if (isMounted) {
-        setFormData(prev => ({ ...prev, location: prev.location || 'Lucknow, UP' }));
+        setFormData(prev => ({ ...prev, location: prev.location || 'Ayodhya, UP' }));
       }
     };
 
@@ -148,7 +148,7 @@ export function useContactFormController() {
     e.preventDefault();
     const cleanName = formData.name ? formData.name.trim() : '';
     const cleanPhone = formData.phone ? formData.phone.trim() : '';
-    const cleanLocation = formData.location ? formData.location.trim() : 'Lucknow, UP';
+    const cleanLocation = formData.location ? formData.location.trim() : 'Ayodhya, UP';
 
     if (!cleanName) {
       showAlertModal('error', 'Ooops', 'Please enter your full name to proceed.', 'Done');
@@ -209,7 +209,7 @@ export function useContactFormController() {
     }, 3000);
 
     // Reset form fields
-    setFormData(prev => ({ name: '', phone: '', location: prev.location || 'Lucknow, UP', course: 'Full Stack Web Development' }));
+    setFormData(prev => ({ name: '', phone: '', location: prev.location || 'Ayodhya, UP', course: 'Full Stack Web Development' }));
     setIsCaptchaChecked(false);
   };
 

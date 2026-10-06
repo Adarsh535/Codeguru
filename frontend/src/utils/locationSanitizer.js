@@ -1,42 +1,40 @@
 /**
  * LOCATION SANITIZER UTILITY
- * Ensures IP / ISP telecom nodes in Uttar Pradesh (e.g. Bahraich, Bahraigh, Barabanki)
- * are accurately resolved & mapped to Lucknow, UP (or user's selected hub).
+ * Ensures IP / ISP telecom nodes in Uttar Pradesh are accurately resolved & mapped to Ayodhya, UP.
  */
 
-export const DEFAULT_LUCKNOW_LOCATION = {
-  id: 'loc-lko',
-  name: 'Lucknow, UP',
-  city: 'Lucknow',
-  state: 'Uttar Pradesh (Capital HQ)',
+export const DEFAULT_AYODHYA_LOCATION = {
+  id: 'loc-ayodhya',
+  name: 'Ayodhya, UP',
+  city: 'Ayodhya',
+  state: 'Uttar Pradesh (HQ)',
   icon: '🏛️',
   autoDetected: true
 };
 
 export function sanitizeLocation(locObj) {
-  if (!locObj) return DEFAULT_LUCKNOW_LOCATION;
+  if (!locObj) return DEFAULT_AYODHYA_LOCATION;
 
   const nameStr = (locObj.name || locObj.city || '').toLowerCase();
   
-  // Coarse IP/ISP telecom routing nodes in UP that frequently mistarget Lucknow visitors
-  const coarseUpNodes = ['bahraich', 'bahraigh', 'bahraig', 'barabanki', 'bara banki', 'unknown', 'telecom'];
+  const coarseUpNodes = ['unknown', 'telecom'];
 
   const isCoarseNode = coarseUpNodes.some(node => nameStr.includes(node));
 
   if (isCoarseNode) {
-    return DEFAULT_LUCKNOW_LOCATION;
+    return DEFAULT_AYODHYA_LOCATION;
   }
 
   return locObj;
 }
 
 export function sanitizeCityName(rawCity, rawRegion) {
-  if (!rawCity) return 'Lucknow';
+  if (!rawCity) return 'Ayodhya';
   const cityLower = rawCity.trim().toLowerCase();
   
-  const coarseUpNodes = ['bahraich', 'bahraigh', 'bahraig', 'barabanki', 'bara banki', 'unknown', 'telecom'];
+  const coarseUpNodes = ['unknown', 'telecom'];
   if (coarseUpNodes.some(node => cityLower.includes(node))) {
-    return 'Lucknow';
+    return 'Ayodhya';
   }
   return rawCity.trim();
 }

@@ -5,6 +5,7 @@ import { usePlacementController } from '../controllers/usePlacementController';
 import DeviceGuard from '../views/components/DeviceGuard';
 import Navbar from '../views/components/Navbar';
 import BottomNav from '../views/components/BottomNav';
+import Footer from '../views/components/Footer';
 import LocationModal from '../views/components/LocationModal';
 import PlacementSelectorModal from '../views/components/PlacementSelectorModal';
 import ContactModal from '../views/components/ContactModal';
@@ -212,6 +213,13 @@ export default function ClientShell({ children }) {
         <main className="flex-1 overflow-x-hidden">
           {childrenWithProps}
         </main>
+
+        {/* INTERACTIVE FOOTER WITH LIVE LOCATION MAP */}
+        <Footer
+          selectedLocation={selectedLocation}
+          onOpenLocationModal={() => setIsLocationModalOpen(true)}
+          onOpenContactModal={() => setIsContactModalOpen(true)}
+        />
 
         {/* RESPONSIVE BOTTOM FOOTER NAVBAR */}
         <BottomNav

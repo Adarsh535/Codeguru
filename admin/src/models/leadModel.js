@@ -29,7 +29,7 @@ export const leadModel = {
         return data.data.map(item => ({
           ...item,
           id: item._id || item.leadId || item.id,
-          location: item.location || 'Lucknow, UP',
+          location: item.location || 'Ayodhya, UP',
           createdAt: item.createdAt || new Date().toISOString()
         }));
       }

@@ -24,7 +24,7 @@ export function StudentsView() {
             name: e.studentName || 'Student',
             phone: e.studentPhone || '',
             email: e.studentEmail || '',
-            city: 'Lucknow, UP',
+            city: 'Ayodhya, UP',
             course: e.courseName || 'Full Stack Web Dev',
             batch: e.batchCode || 'FS-2026',
             trainer: e.mentor || 'Vikas Sharma',
@@ -39,7 +39,7 @@ export function StudentsView() {
             fatherName: 'N/A',
             dob: 'N/A',
             gender: 'N/A',
-            address: 'Lucknow, Uttar Pradesh',
+            address: 'Ayodhya, Uttar Pradesh',
             state: 'Uttar Pradesh',
             pincode: '226001',
             college: 'CodeGuru Academy',
@@ -678,7 +678,7 @@ export function FollowUpsView({ leads = [], onUpdateStatus }) {
                 <div className="text-slate-500 font-semibold flex items-center gap-2 flex-wrap">
                   <span>Course: <strong className="text-slate-700">{f.course}</strong></span>
                   <span>•</span>
-                  <span>Location: <strong className="text-slate-700">{f.location || 'Lucknow, UP'}</strong></span>
+                  <span>Location: <strong className="text-slate-700">{f.location || 'Ayodhya, UP'}</strong></span>
                 </div>
                 {f.notes && (
                   <p className="text-slate-600 italic bg-slate-50 p-2 rounded-xl border border-slate-100 inline-block max-w-xl">

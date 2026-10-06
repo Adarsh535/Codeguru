@@ -40,7 +40,7 @@ export const getTrafficStats = async (req, res) => {
         pageViews: 1,
         uniqueVisitors: 1,
         cities: [
-          { name: 'Lucknow, UP', count: 1 }
+          { name: 'Ayodhya, UP', count: 1 }
         ],
         searchedCourses: []
       });
@@ -73,7 +73,7 @@ export const recordVisit = async (req, res) => {
   activeSessions.set(visitorIp, Date.now());
 
   const todayStr = new Date().toISOString().split('T')[0];
-  const userCity = req.body.city || 'Lucknow, UP';
+  const userCity = req.body.city || 'Ayodhya, UP';
 
   try {
     let todayRecord = await Traffic.findOne({ date: todayStr });

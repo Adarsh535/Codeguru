@@ -4,8 +4,8 @@
  */
 
 export const LOCATIONS = [
-  { id: 'loc-lko', name: 'Lucknow, UP', state: 'Uttar Pradesh (Capital HQ)', icon: '🏛️', popular: true, count: 580 },
-  { id: 'loc-ayodhya', name: 'Ayodhya, UP', state: 'Uttar Pradesh (Branch Campus)', icon: '🚩', popular: true, count: 275 },
+  { id: 'loc-ayodhya', name: 'Ayodhya, UP', state: 'Uttar Pradesh (HQ Campus)', icon: '🚩', popular: true, count: 580 },
+  { id: 'loc-lko', name: 'Lucknow, UP', state: 'Uttar Pradesh', icon: '🏛️', popular: true, count: 275 },
   { id: 'loc-kanpur', name: 'Kanpur, UP', state: 'Uttar Pradesh', icon: '🏬', popular: true, count: 195 },
   { id: 'loc-varanasi', name: 'Varanasi, UP', state: 'Uttar Pradesh', icon: '🛕', popular: true, count: 120 },
   { id: 'loc-1', name: 'Bengaluru, KA', state: 'Karnataka', icon: '📍', popular: true, count: 420 },

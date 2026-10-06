@@ -36,7 +36,7 @@ export const addLead = async (req, res) => {
       leadId: req.body.leadId || newId,
       name: req.body.name || 'Anonymous Student',
       phone: req.body.phone || '',
-      location: req.body.location || 'Lucknow, UP',
+      location: req.body.location || 'Ayodhya, UP',
       course: req.body.course || 'Full Stack Web Development',
       status: req.body.status || 'New',
       notes: req.body.notes || 'Inquired from CodeGuru Portal'

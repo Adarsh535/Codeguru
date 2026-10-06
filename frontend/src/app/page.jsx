@@ -15,8 +15,8 @@ export const metadata = {
   keywords: [
     'CodeGuru Home',
     'IT Training Institute',
-    'Best Full Stack Course Lucknow',
-    'Software Training Lucknow',
+    'Best Full Stack Course Ayodhya',
+    'Software Training Ayodhya',
     'Code Guru Placements',
   ],
   alternates: {

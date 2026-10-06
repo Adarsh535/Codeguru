@@ -34,11 +34,11 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
         {/* HEADING */}
         <div className="flex justify-between items-center px-4 md:px-8 mb-3 sm:mb-4">
           <div className="flex items-center gap-2 sm:gap-2.5">
-            <div className="w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 flex-shrink-0 relative flex items-center justify-center">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 flex-shrink-0 relative flex items-center justify-center -my-2">
               <img
                 src="/images/top-achiever-3d-icon.png"
                 alt="Top Placements Trophy"
-                className="w-full h-full object-contain drop-shadow-sm hover:scale-110 transition-transform duration-300"
+                className="w-full h-full object-contain drop-shadow-md hover:scale-110 transition-transform duration-300"
               />
             </div>
             <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight font-heading">

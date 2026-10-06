@@ -16,8 +16,8 @@ const DEFAULT_NOTIFICATIONS = [
     id: 'n1',
     type: 'visitor',
     title: 'New Student Visitor',
-    message: 'A student from Lucknow, UP is currently active on the Homepage & Full-Stack Course.',
-    city: 'Lucknow, UP',
+    message: 'A student from Ayodhya, UP is currently active on the Homepage & Full-Stack Course.',
+    city: 'Ayodhya, UP',
     time: 'Just now',
     isUnread: true
   },
@@ -26,7 +26,7 @@ const DEFAULT_NOTIFICATIONS = [
     type: 'lead',
     title: 'New Contact Lead Submitted',
     message: 'Saurabh Kumar (+91 9876543210) submitted a course inquiry for Full Stack Web Development.',
-    city: 'Lucknow, UP',
+    city: 'Ayodhya, UP',
     time: '2 mins ago',
     isUnread: true
   },
@@ -170,7 +170,7 @@ export default function Topbar({ onToggleSidebar, searchQuery, setSearchQuery, t
           type: 'lead',
           title: '⚡ Live Student Lead Submission!',
           message: `${detail.name} (+91 ${detail.phone}) submitted an inquiry for ${detail.course}.`,
-          city: detail.location || 'Lucknow, UP',
+          city: detail.location || 'Ayodhya, UP',
           time: 'Just now',
           isUnread: true
         };
