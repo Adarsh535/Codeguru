@@ -278,3 +278,35 @@ html.dark .border-slate-100 {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(to bottom, #d97706, #ea580c);
 }
+
+/* CIRCULAR SKILLS ORBIT ANIMATIONS */
+@keyframes orbitSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orbitCounterSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+.animate-orbit-spin {
+  animation: orbitSpin 18s linear infinite;
+  will-change: transform;
+}
+
+.animate-orbit-counter-spin {
+  animation: orbitCounterSpin 18s linear infinite;
+  will-change: transform;
+}
+
+/* Continuous orbit spin without hover pause */
+

@@ -1,0 +1,288 @@
+/* ============================================================================
+   360-DEGREE CIRCULAR TECH ORBIT STYLES (TechOrbit.css)
+   Ultra Large Showcase Orbit: 700px Wrapper, 370px Center Logo & 70px Badges.
+   ============================================================================ */
+
+/* Root Orbit Wrapper Container */
+.tech-orbit__wrapper {
+  position: relative;
+  width: 700px;
+  height: 700px;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  --orbit-radius: 275px;
+}
+
+/* Ambient Radial Glow */
+.tech-orbit__glow {
+  position: absolute;
+  inset: 0%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.22) 0%, rgba(6, 182, 212, 0.12) 45%, transparent 70%);
+  filter: blur(36px);
+  pointer-events: none;
+}
+
+/* Primary Outer Dashed Orbit Ring Line */
+.tech-orbit__dashed-ring {
+  position: absolute;
+  width: calc(var(--orbit-radius) * 2);
+  height: calc(var(--orbit-radius) * 2);
+  border-radius: 50%;
+  border: 2px dashed rgba(249, 115, 22, 0.75);
+  box-shadow: 0 0 28px rgba(249, 115, 22, 0.28);
+  pointer-events: none;
+  z-index: 2;
+  box-sizing: border-box;
+  animation: orbitSpin360 44s linear infinite;
+}
+
+/* Inner Accent Glow Ring Line */
+.tech-orbit__inner-ring {
+  position: absolute;
+  width: calc(var(--orbit-radius) * 1.58);
+  height: calc(var(--orbit-radius) * 1.58);
+  border-radius: 50%;
+  border: 1.5px dashed rgba(6, 182, 212, 0.45);
+  pointer-events: none;
+  z-index: 1;
+  box-sizing: border-box;
+  animation: orbitCounterSpin360 36s linear infinite;
+}
+
+/* Rotating Orbit Spinner Container */
+.tech-orbit__spinner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  z-index: 10;
+  animation: orbitSpin360 44s linear infinite;
+  box-sizing: border-box;
+}
+
+/* Continuous smooth animation (does not pause on hover) */
+
+/* Positioning each item at its trigonometric coordinate around the circle */
+.tech-orbit__item-position {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 70px;
+  height: 70px;
+  min-width: 70px;
+  min-height: 70px;
+  max-width: 70px;
+  max-height: 70px;
+  margin-top: -35px;
+  margin-left: -35px;
+  transform: translate(
+    calc(var(--x-factor) * var(--orbit-radius)),
+    calc(var(--y-factor) * var(--orbit-radius))
+  );
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+/* Round White Skill Badge Button - counter-rotates so icon stays upright */
+.tech-orbit__badge {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  background: #ffffff;
+  border: 2px solid rgba(0, 0, 0, 0.07);
+  box-shadow: 
+    0 8px 24px -3px rgba(15, 23, 42, 0.18),
+    0 2px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px;
+  cursor: pointer;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  animation: orbitCounterSpin360 44s linear infinite;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.tech-orbit__badge:hover {
+  transform: scale(1.32);
+  border-color: var(--brand-color, #f97316);
+  box-shadow: 
+    0 16px 36px -4px var(--brand-color, rgba(249, 115, 22, 0.55)),
+    0 4px 14px -2px rgba(0, 0, 0, 0.15);
+  z-index: 50;
+}
+
+/* Icon inside badge */
+.tech-orbit__icon {
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
+  pointer-events: none;
+}
+
+/* Tooltip on Hover */
+.tech-orbit__tooltip {
+  position: absolute;
+  bottom: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #0f172a;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 11px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  z-index: 60;
+}
+
+.tech-orbit__badge:hover .tech-orbit__tooltip {
+  opacity: 1;
+}
+
+/* Primary Fixed Center Logo - MASSIVE 370px */
+.tech-orbit__center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 370px;
+  height: 370px;
+  min-width: 370px;
+  min-height: 370px;
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 25;
+  cursor: pointer;
+  box-shadow: 
+    0 22px 65px -4px rgba(249, 115, 22, 0.5),
+    0 0 85px rgba(6, 182, 212, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.2);
+  border: 5px solid #ffffff;
+  background: #0f172a;
+  overflow: hidden;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
+}
+
+.tech-orbit__center:hover {
+  transform: translate(-50%, -50%) scale(1.04);
+  box-shadow: 
+    0 28px 75px -4px rgba(249, 115, 22, 0.7),
+    0 0 100px rgba(6, 182, 212, 0.6),
+    0 10px 28px rgba(0, 0, 0, 0.25);
+}
+
+.tech-orbit__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
+}
+
+/* Keyframe Animations */
+@keyframes orbitSpin360 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orbitCounterSpin360 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+/* Responsiveness */
+@media (max-width: 640px) {
+  .tech-orbit__wrapper {
+    width: 420px;
+    height: 420px;
+    padding: 4px;
+    --orbit-radius: 165px;
+  }
+
+  .tech-orbit__item-position {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    min-height: 46px;
+    max-width: 46px;
+    max-height: 46px;
+    margin-top: -23px;
+    margin-left: -23px;
+  }
+
+  .tech-orbit__badge {
+    padding: 7px;
+  }
+
+  .tech-orbit__center {
+    width: 220px;
+    height: 220px;
+    min-width: 220px;
+    min-height: 220px;
+  }
+
+  .tech-orbit__tooltip {
+    display: none;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .tech-orbit__wrapper {
+    width: 560px;
+    height: 560px;
+    padding: 6px;
+    --orbit-radius: 220px;
+  }
+
+  .tech-orbit__item-position {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+    min-height: 58px;
+    max-width: 58px;
+    max-height: 58px;
+    margin-top: -29px;
+    margin-left: -29px;
+  }
+
+  .tech-orbit__center {
+    width: 300px;
+    height: 300px;
+    min-width: 300px;
+    min-height: 300px;
+  }
+}

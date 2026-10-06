@@ -69,30 +69,30 @@ export default function OurTeamSlider({ onOpenContactModal }) {
   const doubleMembers = [...teamMembers, ...teamMembers, ...teamMembers];
 
   return (
-    <section className="w-full px-3 sm:px-4 pt-0 pb-6 bg-[#f8fafc] overflow-hidden select-none">
-      <div className="max-w-7xl mx-auto border border-slate-200 rounded-[24px] sm:rounded-[32px] bg-white pt-4 pb-4 sm:pt-5 sm:pb-6 shadow-sm relative z-10 w-full overflow-hidden">
+    <section className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-[#f8fafc] overflow-hidden select-none">
+      <div className="max-w-7xl mx-auto border border-slate-200 rounded-[18px] sm:rounded-[24px] bg-white pt-2.5 pb-3 sm:pt-3.5 sm:pb-4 shadow-xs relative z-10 w-full overflow-hidden">
         
         {/* HEADER */}
-        <div className="flex justify-between items-end px-4 sm:px-8 mb-3 sm:mb-4">
-          <h2 className="text-lg sm:text-2xl font-black text-slate-800 tracking-tighter">
+        <div className="flex justify-between items-center px-4 sm:px-6 mb-2 sm:mb-3">
+          <h2 className="text-base sm:text-lg font-bold text-slate-800 tracking-tight">
             Our Team & Mentors
           </h2>
-          <span className="text-slate-400 font-extrabold text-[10px] sm:text-xs uppercase tracking-widest hidden sm:block">
+          <span className="text-slate-400 font-bold text-[9px] sm:text-[10.5px] uppercase tracking-widest hidden sm:block">
             #TEAMCODEGURRU
           </span>
         </div>
 
         {/* MARQUEE ROW */}
-        <div className="w-full overflow-hidden sm:[mask-image:_linear-gradient(to_right,transparent_0,_black_40px,_black_calc(100%-40px),transparent_100%)] px-4">
-          <div className="flex w-max animate-[marquee_18s_linear_infinite] py-1.5 hover:[animation-play-state:paused]">
+        <div className="w-full overflow-hidden sm:[mask-image:_linear-gradient(to_right,transparent_0,_black_30px,_black_calc(100%-30px),transparent_100%)] px-3">
+          <div className="flex w-max animate-[marquee_18s_linear_infinite] py-1 hover:[animation-play-state:paused]">
             {doubleMembers.map((member, idx) => (
               <div
                 key={`${member.id}-${idx}`}
                 onClick={onOpenContactModal}
-                className="w-[220px] xs:w-[240px] sm:w-[260px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] flex flex-col mx-2 relative overflow-hidden group cursor-pointer hover:shadow-md hover:border-blue-300 transition-all select-none"
+                className="w-[160px] xs:w-[175px] sm:w-[190px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[16px] shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col mx-1.5 relative overflow-hidden group cursor-pointer hover:shadow-md hover:border-blue-300 transition-all select-none"
               >
                 {/* TOP PHOTO AREA */}
-                <div className="w-full h-[180px] sm:h-[200px] bg-gradient-to-b from-slate-100/70 via-slate-50 to-white relative overflow-hidden flex items-end justify-center">
+                <div className="w-full h-[125px] sm:h-[140px] bg-gradient-to-b from-slate-100/70 via-slate-50 to-white relative overflow-hidden flex items-end justify-center">
                   <img
                     src={member.photo}
                     alt={member.name}
@@ -101,20 +101,20 @@ export default function OurTeamSlider({ onOpenContactModal }) {
                 </div>
 
                 {/* BOTTOM WHITE CONTENT CONTAINER */}
-                <div className="p-3.5 sm:p-4 bg-white flex flex-col flex-1 justify-between border-t border-slate-100">
+                <div className="p-2.5 sm:p-3 bg-white flex flex-col flex-1 justify-between border-t border-slate-100">
                   <div className="flex flex-col">
-                    <h3 className="font-extrabold text-slate-900 text-[14px] sm:text-[15px] tracking-tight leading-snug mb-1 truncate">
+                    <h3 className="font-extrabold text-slate-900 text-[12px] sm:text-[13px] tracking-tight leading-snug mb-0.5 truncate">
                       {member.name}
                     </h3>
-                    <p className="text-slate-500 text-[10.5px] sm:text-[11px] leading-relaxed font-medium line-clamp-2">
+                    <p className="text-slate-500 text-[9.5px] sm:text-[10px] leading-snug font-medium line-clamp-1">
                       {member.bio}
                     </p>
                   </div>
 
                   {/* FOOTER ROLE ROW WITH ICON */}
-                  <div className="flex items-center gap-1.5 pt-3 mt-3 border-t border-slate-100 w-full">
-                    <Sparkles className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                    <span className="text-[10.5px] sm:text-[11px] font-bold text-slate-700 truncate">
+                  <div className="flex items-center gap-1.5 pt-2 mt-2 border-t border-slate-100 w-full">
+                    <Sparkles className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                    <span className="text-[9.5px] sm:text-[10px] font-bold text-slate-700 truncate">
                       {member.role}
                     </span>
                   </div>
