@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MapPin, Navigation, LogIn, UserPlus, LogOut, User, BookOpen, Layers, GraduationCap, School } from 'lucide-react';
+import { MapPin, LogIn, UserPlus, LogOut, User, BookOpen, Layers, GraduationCap, School } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -108,7 +108,6 @@ export default function Navbar({
                 <span className="font-semibold truncate leading-none">
                   {selectedLocation ? selectedLocation.name : 'Detecting...'}
                 </span>
-                <Navigation className="text-orange-400 animate-pulse flex-shrink-0 w-2 h-2 sm:w-2.5 sm:h-2.5" />
               </div>
             </div>
           </div>

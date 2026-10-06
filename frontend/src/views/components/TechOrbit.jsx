@@ -61,6 +61,7 @@ export default function TechOrbit({
               }}
             >
               <button
+                suppressHydrationWarning
                 onClick={onOpenContactModal}
                 className="tech-orbit__badge"
                 title={skill.name}
@@ -80,6 +81,7 @@ export default function TechOrbit({
 
       {/* Center Master CodeGuru Logo - ENLARGED */}
       <div
+        suppressHydrationWarning
         className="tech-orbit__center"
         onClick={onOpenContactModal}
         title="Click to Inquire with CodeGuru"

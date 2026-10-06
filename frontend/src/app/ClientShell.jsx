@@ -47,35 +47,90 @@ export default function ClientShell({ children }) {
     };
   }, []);
 
-  // Auto-open Inquiry ("Get in Touch") popup modal immediately on site load & every 40 seconds (unless already submitted)
+  // Auto-open Inquiry ("Get in Touch") popup modal:
+  // 1. Immediately on page load
+  // 2. Every 30 seconds
+  // 3. Max 3 times total
+  // 4. Never again if student submits the form
   useEffect(() => {
     const isAlreadySubmitted = () => {
       try {
-        return typeof window !== 'undefined' && localStorage.getItem('codeguru_inquiry_submitted') === 'true';
+        return typeof window !== 'undefined' && (
+          localStorage.getItem('codeguru_inquiry_submitted') === 'true' ||
+          localStorage.getItem('codeguru_contact_submitted') === 'true'
+        );
       } catch (e) {
         return false;
       }
     };
 
-    if (isAlreadySubmitted()) return;
+    const getPopupCount = () => {
+      try {
+        const count = sessionStorage.getItem('codeguru_popup_count');
+        return count ? parseInt(count, 10) : 0;
+      } catch (e) {
+        return 0;
+      }
+    };
 
+    const incrementPopupCount = () => {
+      try {
+        const current = getPopupCount();
+        const next = current + 1;
+        sessionStorage.setItem('codeguru_popup_count', next.toString());
+        return next;
+      } catch (e) {
+        return 1;
+      }
+    };
+
+    if (isAlreadySubmitted() || getPopupCount() >= 3) return;
+
+    // 1. Immediate popup on page load
     const initialTimer = setTimeout(() => {
-      if (!isAlreadySubmitted()) {
+      if (!isAlreadySubmitted() && getPopupCount() < 3) {
         setIsInquiryModalOpen(true);
+        incrementPopupCount();
       }
     }, 600);
 
+    // 2. Recurring 30-second interval (Max 3 times total)
     const recurringInterval = setInterval(() => {
       if (isAlreadySubmitted()) {
         clearInterval(recurringInterval);
-      } else {
-        setIsInquiryModalOpen(true);
+        setIsInquiryModalOpen(false);
+        return;
       }
-    }, 40000);
+
+      const currentCount = getPopupCount();
+      if (currentCount >= 3) {
+        clearInterval(recurringInterval);
+        return;
+      }
+
+      setIsInquiryModalOpen(true);
+      const updatedCount = incrementPopupCount();
+      if (updatedCount >= 3) {
+        clearInterval(recurringInterval);
+      }
+    }, 30000);
+
+    const checkFormSubmitted = () => {
+      if (isAlreadySubmitted()) {
+        clearInterval(recurringInterval);
+        clearTimeout(initialTimer);
+        setIsInquiryModalOpen(false);
+      }
+    };
+
+    window.addEventListener('storage', checkFormSubmitted);
+    window.addEventListener('codeguru_lead_added', checkFormSubmitted);
 
     return () => {
       clearTimeout(initialTimer);
       clearInterval(recurringInterval);
+      window.removeEventListener('storage', checkFormSubmitted);
+      window.removeEventListener('codeguru_lead_added', checkFormSubmitted);
     };
   }, []);
 

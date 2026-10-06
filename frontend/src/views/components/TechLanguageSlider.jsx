@@ -59,7 +59,7 @@ export default function TechLanguageSlider({ onOpenContactModal }) {
   return (
     <div className="w-full flex flex-col gap-2 py-1.5 sm:py-2.5 overflow-hidden bg-white border-b border-t border-slate-100 shadow-xs relative z-10 select-none">
       <div className="w-full inline-flex flex-nowrap overflow-hidden [mask-image:_linear-gradient(to_right,transparent_0,_black_24px,_black_calc(100%-24px),transparent_100%)]">
-        <ul className="flex items-center justify-start [&_li]:mx-1.5 animate-[marquee-reverse_12s_linear_infinite] w-max hover:[animation-play-state:paused]">
+        <ul className="flex items-center justify-start [&_li]:mx-1.5 animate-[marquee-reverse_32s_linear_infinite] md:animate-[marquee-reverse_38s_linear_infinite] w-max hover:[animation-play-state:paused]">
           {doubleTech.map((tech, index) => (
             <li
               key={`${tech.id}-${index}`}

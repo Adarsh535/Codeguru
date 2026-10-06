@@ -76,7 +76,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     },
     {
       id: 'networking',
-      name: 'Networking & Server Administration',
+      name: 'Networking & Server',
       icon: Server,
       img: '/images/categories/networking.png',
       bgColor: 'bg-cyan-50'
@@ -90,14 +90,14 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     },
     {
       id: 'electrical',
-      name: 'Electrical, Electronics & Home Appliance Repair',
+      name: 'Home Appliance Repair',
       icon: Zap,
       img: '/images/categories/electrical.png',
       bgColor: 'bg-emerald-50'
     },
     {
       id: 'marketing',
-      name: 'Digital Marketing & Online Business',
+      name: 'Digital Marketing',
       icon: Globe,
       img: '/images/categories/marketing.png',
       bgColor: 'bg-rose-50'
@@ -276,21 +276,21 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                 title={`Open ${cat.name} Courses`}
               >
                 <div
-                  className={`relative flex items-center justify-center p-2.5 sm:p-4 md:p-4.5 rounded-[14px] sm:rounded-[18px] md:rounded-[24px] transition-all duration-300 w-full max-w-[95px] sm:max-w-[130px] md:max-w-[150px] aspect-square ${
+                  className={`relative flex items-center justify-center p-1.5 sm:p-2.5 md:p-3 rounded-[16px] sm:rounded-[20px] md:rounded-[26px] transition-all duration-300 w-full max-w-[105px] sm:max-w-[145px] md:max-w-[170px] aspect-square ${
                     isCatActive && !isHome
                       ? 'border-2 border-blue-500 shadow-md shadow-blue-500/10 ring-4 ring-blue-50/60 bg-white scale-[1.02]'
-                      : 'border border-slate-200/80 hover:border-blue-300 hover:shadow-sm hover:-translate-y-1 bg-white'
+                      : 'border border-slate-200/80 hover:border-blue-300 hover:shadow-md hover:-translate-y-1 bg-white'
                   }`}
                 >
                   <img
                     src={cat.img}
                     alt={cat.name}
-                    className="w-full h-full max-h-14 sm:max-h-20 md:max-h-24 object-contain relative z-10 transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-110 p-0.5"
                   />
                 </div>
                 <span
-                  className={`text-[10px] sm:text-[11px] md:text-xs font-bold text-center leading-tight px-1 max-w-[140px] transition-colors ${
-                    isCatActive && !isHome ? 'text-blue-600 font-extrabold' : 'text-slate-700 group-hover:text-blue-500'
+                  className={`text-[11.5px] sm:text-[13px] md:text-[14.5px] font-extrabold text-center leading-snug px-0.5 max-w-[155px] tracking-tight transition-colors ${
+                    isCatActive && !isHome ? 'text-blue-600' : 'text-slate-800 group-hover:text-blue-600'
                   }`}
                 >
                   {cat.name}

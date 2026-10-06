@@ -7,6 +7,7 @@ import { apiService } from '../../services/apiService';
 
 export default function TopPlacementSlider({ onOpenContactModal }) {
   const [students, setStudents] = useState(TOP_PLACEMENTS_STUDENTS);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -32,8 +33,14 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
         
         {/* HEADING */}
         <div className="flex justify-between items-center px-4 md:px-8 mb-3 sm:mb-4">
-          <div className="flex items-center gap-2">
-            <Award className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <div className="w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 flex-shrink-0 relative flex items-center justify-center">
+              <img
+                src="/images/top-achiever-3d-icon.png"
+                alt="Top Placements Trophy"
+                className="w-full h-full object-contain drop-shadow-sm hover:scale-110 transition-transform duration-300"
+              />
+            </div>
             <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight font-heading">
               Top Placements & Achievers
             </h2>
@@ -45,11 +52,25 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
 
         {/* MARQUEE CAROUSEL */}
         <div className="w-full overflow-hidden sm:[mask-image:_linear-gradient(to_right,transparent_0,_black_40px,_black_calc(100%-40px),transparent_100%)]">
-          <div className="flex w-max animate-[marquee-reverse_18s_linear_infinite] md:animate-[marquee-reverse_24s_linear_infinite] py-2 hover:[animation-play-state:paused] px-4 md:px-0">
+          <div
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={() => setIsPaused(true)}
+            onTouchEnd={() => setIsPaused(false)}
+            onTouchCancel={() => setIsPaused(false)}
+            style={{ animationPlayState: isPaused ? 'paused' : 'running' }}
+            className="flex w-max animate-[marquee-reverse_36s_linear_infinite] md:animate-[marquee-reverse_48s_linear_infinite] py-2 active:[animation-play-state:paused] hover:[animation-play-state:paused] px-4 md:px-0"
+          >
             {doubleStudents.map((student, idx) => (
               <div
                 key={`${student.id}-${idx}`}
-                onClick={onOpenContactModal}
+                onClick={(e) => {
+                  if (onOpenContactModal) onOpenContactModal();
+                  const contactElem = document.getElementById('contact-section');
+                  if (contactElem) {
+                    contactElem.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
                 className="w-[210px] xs:w-[230px] sm:w-[250px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[18px] sm:rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] flex flex-col mx-2 relative overflow-hidden group cursor-pointer hover:scale-[0.97] hover:shadow-md hover:border-blue-400 transition-all duration-300 ease-out select-none"
               >
                 {/* TOP PORTRAIT PHOTO AREA */}
@@ -100,7 +121,7 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
                         </span>
                       </div>
 
-                      <div className="bg-blue-50 text-blue-700 font-extrabold text-[8px] sm:text-[8.5px] px-2 py-0.5 rounded-md border border-blue-100/90 flex-shrink-0">
+                      <div className="bg-slate-100 text-slate-600 font-extrabold text-[8px] sm:text-[8.5px] px-2 py-0.5 rounded-full border border-slate-200/80 flex-shrink-0 tracking-tight">
                         {student.trainingType || 'Internship Training'}
                       </div>
                     </div>
@@ -112,9 +133,14 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
                       <Check className="w-3 h-3 stroke-[3.5px] text-emerald-600" /> Placed & Verified
                     </span>
                     <button
+                      suppressHydrationWarning
                       onClick={(e) => {
                         e.stopPropagation();
                         if (onOpenContactModal) onOpenContactModal();
+                        const contactElem = document.getElementById('contact-section');
+                        if (contactElem) {
+                          contactElem.scrollIntoView({ behavior: 'smooth' });
+                        }
                       }}
                       className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-[8.5px] sm:text-[9px] px-2.5 py-1 rounded-full shadow-2xs hover:shadow-md hover:scale-105 active:scale-95 transition-all flex items-center gap-1 uppercase tracking-wider cursor-pointer"
                     >

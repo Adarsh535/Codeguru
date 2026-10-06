@@ -46,6 +46,7 @@ const DEFAULT_MEMBERS = [
 
 export default function OurTeamSlider({ onOpenContactModal }) {
   const [teamMembers, setTeamMembers] = useState(DEFAULT_MEMBERS);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -84,7 +85,15 @@ export default function OurTeamSlider({ onOpenContactModal }) {
 
         {/* MARQUEE ROW */}
         <div className="w-full overflow-hidden sm:[mask-image:_linear-gradient(to_right,transparent_0,_black_30px,_black_calc(100%-30px),transparent_100%)] px-3">
-          <div className="flex w-max animate-[marquee_18s_linear_infinite] py-1 hover:[animation-play-state:paused]">
+          <div
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={() => setIsPaused(true)}
+            onTouchEnd={() => setIsPaused(false)}
+            onTouchCancel={() => setIsPaused(false)}
+            style={{ animationPlayState: isPaused ? 'paused' : 'running' }}
+            className="flex w-max animate-[marquee_36s_linear_infinite] md:animate-[marquee_48s_linear_infinite] py-1 active:[animation-play-state:paused] hover:[animation-play-state:paused]"
+          >
             {doubleMembers.map((member, idx) => (
               <div
                 key={`${member.id}-${idx}`}
@@ -111,9 +120,8 @@ export default function OurTeamSlider({ onOpenContactModal }) {
                     </p>
                   </div>
 
-                  {/* FOOTER ROLE ROW WITH ICON */}
-                  <div className="flex items-center gap-1.5 pt-2 mt-2 border-t border-slate-100 w-full">
-                    <Sparkles className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                  {/* FOOTER ROLE ROW */}
+                  <div className="flex items-center pt-2 mt-2 border-t border-slate-100 w-full">
                     <span className="text-[9.5px] sm:text-[10px] font-bold text-slate-700 truncate">
                       {member.role}
                     </span>
