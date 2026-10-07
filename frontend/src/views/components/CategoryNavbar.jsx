@@ -590,30 +590,14 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                       ))}
                     </div>
 
-                    {/* PRICE & VIEW DETAILS ACTION ROW */}
-                    <div className="flex items-center justify-between pt-1 mt-auto">
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-lg sm:text-[21px] font-black text-slate-900 tracking-tight">
-                          {course.price}
-                        </span>
-                        {course.originalPrice && (
-                          <span className="text-[10px] sm:text-xs font-semibold text-slate-400 line-through">
-                            {course.originalPrice}
-                          </span>
-                        )}
-                        {course.discount && (
-                          <span className="text-[10px] sm:text-xs font-bold text-emerald-600">
-                            {course.discount}
-                          </span>
-                        )}
-                      </div>
-
+                    {/* VIEW DETAILS ACTION ROW */}
+                    <div className="pt-2 mt-auto">
                       <button
                         suppressHydrationWarning
                         onClick={handleEnrollClick}
-                        className="bg-[#2463eb] hover:bg-blue-700 text-white px-3.5 sm:px-4 py-2 rounded-xl text-[12px] sm:text-[13px] font-bold flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
+                        className="w-full bg-[#2463eb] hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-[13px] sm:text-sm font-extrabold flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer"
                       >
-                        View Details <ArrowRight className="w-3.5 h-3.5" />
+                        View Details <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
