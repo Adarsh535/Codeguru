@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { usePlacementController } from '../controllers/usePlacementController';
 import DeviceGuard from '../views/components/DeviceGuard';
 import Navbar from '../views/components/Navbar';
@@ -16,6 +17,7 @@ import BatchEnrollModal from '../views/components/BatchEnrollModal';
 import { apiService } from '../services/apiService';
 
 export default function ClientShell({ children }) {
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState('home');
   const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -215,11 +217,13 @@ export default function ClientShell({ children }) {
         </main>
 
         {/* INTERACTIVE FOOTER WITH LIVE LOCATION MAP */}
-        <Footer
-          selectedLocation={selectedLocation}
-          onOpenLocationModal={() => setIsLocationModalOpen(true)}
-          onOpenContactModal={() => setIsContactModalOpen(true)}
-        />
+        {pathname !== '/courses' && (
+          <Footer
+            selectedLocation={selectedLocation}
+            onOpenLocationModal={() => setIsLocationModalOpen(true)}
+            onOpenContactModal={() => setIsContactModalOpen(true)}
+          />
+        )}
 
         {/* RESPONSIVE BOTTOM FOOTER NAVBAR */}
         <BottomNav

@@ -1,7 +1,4 @@
 import CategoryNavbar from '../../views/components/CategoryNavbar';
-import TechLanguageSlider from '../../views/components/TechLanguageSlider';
-import BannerSlider from '../../views/components/BannerSlider';
-import ContactUsSection from '../../views/components/ContactUsSection';
 
 export const metadata = {
   title: 'Courses Catalog | CodeGuru Full Stack, Java, Python & Cloud Courses',
@@ -68,9 +65,6 @@ export default function CoursesPage({ onOpenContactModal, onOpenEnrollModal }) {
       />
       <div className="flex flex-col gap-0 pb-6 bg-slate-50">
         <CategoryNavbar onOpenContactModal={onOpenContactModal} onOpenEnrollModal={onOpenEnrollModal} isHomePage={false} />
-        <TechLanguageSlider onOpenContactModal={onOpenContactModal} />
-        <BannerSlider onOpenContactModal={onOpenContactModal} />
-        <ContactUsSection />
       </div>
     </>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import {
   MapPin,
@@ -12,20 +12,44 @@ import {
   ShieldCheck,
   Award,
   Globe,
-  BookOpen
+  BookOpen,
+  Building2,
+  Landmark,
+  FileCheck,
+  Rocket,
+  Store,
+  CheckCircle2,
+  ExternalLink
 } from 'lucide-react';
+
+const DigitalDIcon = ({ className = "w-4 h-4" }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M5 3.5H12.5C16.6421 3.5 20 6.85786 20 11C20 15.1421 16.6421 18.5 12.5 18.5H5V3.5Z"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M9.5 7.5H12.5C14.433 7.5 16 9.067 16 11C16 12.933 14.433 14.5 12.5 14.5H9.5V7.5Z"
+      fill="currentColor"
+      opacity="0.9"
+    />
+  </svg>
+);
 
 export default function Footer({ selectedLocation, onOpenLocationModal, onOpenContactModal }) {
   const cityName = selectedLocation?.name || 'Ayodhya, UP';
   const encodedCity = encodeURIComponent(cityName);
 
   const certifications = [
-    { title: 'MCA Registered Company', icon: '🏢' },
-    { title: 'Government e-Marketplace (GeM)', icon: '🏛️' },
-    { title: 'ISO 9001:2015 Certified Organization', icon: '📜' },
-    { title: 'Recognized by Startup India', icon: '🚀' },
-    { title: 'Registered under MSME (Udyam)', icon: '🏬' },
-    { title: 'Digital India Initiative', icon: '🇮🇳' }
+    { title: 'MCA Registered Company', icon: Building2, color: 'from-amber-500/20 to-amber-600/10 border-amber-500/30 text-amber-400' },
+    { title: 'Government e-Marketplace (GeM)', icon: Landmark, color: 'from-cyan-500/20 to-blue-600/10 border-cyan-500/30 text-cyan-400' },
+    { title: 'ISO 9001:2015 Certified Org', icon: FileCheck, color: 'from-emerald-500/20 to-teal-600/10 border-emerald-500/30 text-emerald-400' },
+    { title: 'Recognized by Startup India', icon: Rocket, color: 'from-purple-500/20 to-indigo-600/10 border-purple-500/30 text-purple-400' },
+    { title: 'Registered under MSME (Udyam)', icon: Store, color: 'from-blue-500/20 to-indigo-600/10 border-blue-500/30 text-blue-400' },
+    { title: 'Digital India Initiative', icon: DigitalDIcon, color: 'from-orange-500/20 to-amber-600/10 border-orange-500/30 text-orange-400' }
   ];
 
   const quickLinks = [
@@ -112,117 +136,134 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
   ];
 
   return (
-    <footer className="w-full bg-slate-950 text-slate-300 pt-10 sm:pt-14 pb-8 border-t border-slate-800 relative z-20 select-none overflow-hidden">
+    <footer className="w-full bg-gradient-to-b from-[#090d16] via-[#050811] to-[#02040a] text-slate-200 pt-12 sm:pt-16 pb-8 border-t border-slate-800/80 relative z-20 select-none overflow-hidden font-sans">
       
       {/* AMBIENT BACKGROUND GLOW EFFECTS */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-600/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-10 right-1/4 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-blue-600/5 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
         {/* CERTIFICATIONS & RECOGNITION BADGES ROW */}
-        <div className="w-full mb-10 pb-8 border-b border-slate-800/80">
-          <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 text-center md:text-left mb-4 flex items-center gap-2 justify-center md:justify-start">
-            <ShieldCheck className="w-4 h-4 text-amber-500" />
-            <span>Government Accreditations & Certifications</span>
-          </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {certifications.map((cert, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-300 hover:border-slate-700 transition-all shadow-xs"
-              >
-                <span className="text-lg flex-shrink-0">{cert.icon}</span>
-                <span className="text-[10.5px] font-bold leading-snug truncate">
-                  {cert.title}
-                </span>
-              </div>
-            ))}
+        <div className="w-full mb-12 pb-10 border-b border-slate-800/80">
+          <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-3">
+            <h4 className="text-xs font-black uppercase tracking-widest text-amber-400 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-amber-400" />
+              <span>Government Accreditations & Recognitions</span>
+            </h4>
+            <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Verified Legal Entity
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+            {certifications.map((cert, i) => {
+              const IconComponent = cert.icon;
+              return (
+                <div
+                  key={i}
+                  className="group flex items-center gap-3 p-3 rounded-2xl bg-slate-900/70 backdrop-blur-md border border-slate-800/90 hover:border-amber-500/40 hover:bg-slate-800/80 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/5 cursor-default"
+                >
+                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${cert.color} border flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
+                    <IconComponent className="w-4 h-4" />
+                  </div>
+                  <span className="text-[11px] font-bold leading-snug text-slate-200 group-hover:text-white transition-colors line-clamp-2">
+                    {cert.title}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {/* MAIN 4-COLUMN FOOTER GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 sm:gap-10 pb-10 border-b border-slate-800">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-slate-800/80">
           
           {/* COLUMN 1: BRAND & CONTACT INFO (4 cols) */}
-          <div className="lg:col-span-4 flex flex-col gap-4">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={onOpenContactModal}>
-              <img
-                src="/logo.png"
-                alt="CodeGuru Logo"
-                className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
-                onError={(e) => { e.target.src = '/logo-icon.png'; }}
-              />
+          <div className="lg:col-span-4 flex flex-col gap-5">
+            <div className="flex items-center gap-3 cursor-pointer group" onClick={onOpenContactModal}>
+              <div className="p-1 rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-transparent border border-amber-500/30 group-hover:border-amber-400 transition-colors">
+                <img
+                  src="/logo.png"
+                  alt="CodeGuru Logo"
+                  className="w-10 h-10 sm:w-11 sm:h-11 object-contain"
+                  onError={(e) => { e.target.src = '/logo-icon.png'; }}
+                />
+              </div>
               <div className="flex flex-col">
-                <span className="text-xl font-black text-white tracking-wider font-heading">
-                  CODE<span className="text-orange-500">GURRU</span>
+                <span className="text-2xl font-black tracking-wide font-heading text-white flex items-center gap-1">
+                  CODE<span className="bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 bg-clip-text text-transparent">GURRU</span>
                 </span>
-                <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest">
+                <span className="text-[10px] text-amber-400/90 font-bold uppercase tracking-widest">
                   CodeGuru Placement Academy
                 </span>
               </div>
             </div>
 
-            <p className="text-slate-400 text-xs leading-relaxed">
-              Providing top-quality IT training, full stack web development bootcamps, and guaranteed job assistance services to engineering students and software professionals since 2020.
+            <p className="text-slate-300 text-xs leading-relaxed font-normal">
+              Providing industry-leading IT training, full stack web development bootcamps, and guaranteed 100% placement assistance to engineering students & IT job seekers since 2020.
             </p>
 
             {/* FULL CONTACT ADDRESS DETAILS */}
-            <div className="flex flex-col gap-2.5 pt-1 text-xs text-slate-300">
-              <div className="flex items-start gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 flex-shrink-0 mt-0.5">
-                  <MapPin className="w-3.5 h-3.5" />
+            <div className="flex flex-col gap-3 pt-2 text-xs">
+              <div className="flex items-start gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/90 hover:border-slate-700 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-md shadow-orange-500/20">
+                  <MapPin className="w-4 h-4" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-extrabold text-white text-xs">HQ Campus Address:</span>
-                  <span className="text-slate-400 leading-snug">
+                  <span className="font-extrabold text-amber-400 text-xs">HQ Campus Address</span>
+                  <span className="text-slate-200 text-[11.5px] leading-snug font-medium">
                     CodeGuru Tower, Near Naya Ghat Bypass Road, Ayodhya, UP - 224123
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 flex-shrink-0">
-                  <Phone className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/90 hover:border-slate-700 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-500/20">
+                  <Phone className="w-4 h-4" />
                 </div>
-                <div className="flex items-center gap-2 font-semibold">
-                  <a href="tel:9670912923" className="hover:text-white transition-colors">+91-96709-12923</a>
-                  <span>/</span>
-                  <a href="tel:6392361443" className="hover:text-white transition-colors">+91-6392-361-443</a>
+                <div className="flex items-center gap-2 font-bold text-slate-200">
+                  <a href="tel:9670912923" className="hover:text-amber-400 transition-colors">+91-96709-12923</a>
+                  <span className="text-slate-600">/</span>
+                  <a href="tel:6392361443" className="hover:text-amber-400 transition-colors">+91-6392-361-443</a>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
-                  <Mail className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/90 hover:border-slate-700 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-emerald-500/20">
+                  <Mail className="w-4 h-4" />
                 </div>
-                <a href="mailto:contact@codeguru.com" className="hover:text-white transition-colors font-semibold truncate">
+                <a href="mailto:contact@codeguru.com" className="hover:text-emerald-400 font-bold text-slate-200 transition-colors truncate">
                   contact@codeguru.com / support@codeguru.com
                 </a>
               </div>
 
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 flex-shrink-0">
-                  <Clock className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/90 hover:border-slate-700 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-purple-500/20">
+                  <Clock className="w-4 h-4" />
                 </div>
-                <span className="text-slate-300 font-semibold">
-                  Working Hours: Mon - Saturday: 9:00 AM - 7:00 PM
+                <span className="text-slate-200 font-semibold">
+                  Working Hours: Mon - Sat (9:00 AM - 7:00 PM)
                 </span>
               </div>
             </div>
           </div>
 
           {/* COLUMN 2: QUICK LINKS & POLICIES (3 cols) */}
-          <div className="lg:col-span-3 flex flex-col gap-5">
+          <div className="lg:col-span-3 flex flex-col gap-6">
             <div>
-              <h4 className="text-white font-extrabold text-sm uppercase tracking-wider border-b border-slate-800 pb-2 mb-3">
-                Quick Links
-              </h4>
-              <ul className="grid grid-cols-2 gap-2 text-xs text-slate-400 font-medium">
+              <div className="mb-3">
+                <h4 className="text-white font-extrabold text-sm uppercase tracking-wider flex items-center gap-2">
+                  <span>Quick Links</span>
+                </h4>
+                <div className="h-0.5 w-10 bg-gradient-to-r from-orange-500 to-amber-400 rounded-full mt-1.5" />
+              </div>
+              <ul className="grid grid-cols-2 gap-2.5 text-xs font-semibold">
                 {quickLinks.map((link, i) => (
                   <li key={i}>
-                    <Link href={link.href} className="hover:text-orange-400 transition-colors flex items-center gap-1">
-                      <ArrowRight className="w-3 h-3 text-slate-600 flex-shrink-0" />
+                    <Link href={link.href} className="group flex items-center gap-1.5 text-slate-300 hover:text-amber-400 transition-colors">
+                      <ArrowRight className="w-3 h-3 text-amber-500 group-hover:translate-x-1 transition-transform flex-shrink-0" />
                       <span className="truncate">{link.name}</span>
                     </Link>
                   </li>
@@ -231,14 +272,21 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
             </div>
 
             <div>
-              <h4 className="text-white font-extrabold text-sm uppercase tracking-wider border-b border-slate-800 pb-2 mb-3">
-                Policies & Feedback
-              </h4>
-              <ul className="flex flex-col gap-1.5 text-xs text-slate-400 font-medium">
+              <div className="mb-3">
+                <h4 className="text-white font-extrabold text-sm uppercase tracking-wider flex items-center gap-2">
+                  <span>Policies & Feedback</span>
+                </h4>
+                <div className="h-0.5 w-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full mt-1.5" />
+              </div>
+              <ul className="flex flex-col gap-2 text-xs font-semibold">
                 {policyLinks.map((policy, i) => (
                   <li key={i}>
-                    <a href={policy.href} onClick={(e) => { e.preventDefault(); if (onOpenContactModal) onOpenContactModal(); }} className="hover:text-blue-400 transition-colors flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />
+                    <a
+                      href={policy.href}
+                      onClick={(e) => { e.preventDefault(); if (onOpenContactModal) onOpenContactModal(); }}
+                      className="group flex items-center gap-2 text-slate-300 hover:text-cyan-400 transition-colors"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 group-hover:scale-125 transition-transform" />
                       <span>{policy.name}</span>
                     </a>
                   </li>
@@ -248,98 +296,120 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
           </div>
 
           {/* COLUMN 3: POPULAR PROGRAMS (2 cols) */}
-          <div className="lg:col-span-2 flex flex-col gap-3">
-            <h4 className="text-white font-extrabold text-sm uppercase tracking-wider border-b border-slate-800 pb-2">
-              Popular Programs
-            </h4>
-            <ul className="flex flex-col gap-2 text-xs text-slate-400 font-medium">
+          <div className="lg:col-span-2 flex flex-col gap-4">
+            <div>
+              <h4 className="text-white font-extrabold text-sm uppercase tracking-wider">
+                Popular Programs
+              </h4>
+              <div className="h-0.5 w-10 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full mt-1.5 mb-3" />
+            </div>
+            <ul className="flex flex-col gap-2.5 text-xs font-semibold text-slate-300">
               <li>
-                <Link href="/courses?category=coding" className="hover:text-blue-400 transition-colors">
-                  Full Stack MERN Development
+                <Link href="/courses?category=coding" className="hover:text-amber-400 transition-colors flex items-center gap-1.5 group">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 group-hover:scale-125 transition-transform" />
+                  <span>Full Stack MERN</span>
                 </Link>
               </li>
               <li>
-                <Link href="/courses?category=coding" className="hover:text-blue-400 transition-colors">
-                  Python Programming & AI/ML
+                <Link href="/courses?category=coding" className="hover:text-amber-400 transition-colors flex items-center gap-1.5 group">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 group-hover:scale-125 transition-transform" />
+                  <span>Python & AI/ML</span>
                 </Link>
               </li>
               <li>
-                <Link href="/courses?category=coding" className="hover:text-blue-400 transition-colors">
-                  C++ Data Structures & DSA
+                <Link href="/courses?category=coding" className="hover:text-amber-400 transition-colors flex items-center gap-1.5 group">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 group-hover:scale-125 transition-transform" />
+                  <span>C++ & DSA Masterclass</span>
                 </Link>
               </li>
               <li>
-                <Link href="/courses?category=networking" className="hover:text-blue-400 transition-colors">
-                  Networking & Server Admin
+                <Link href="/courses?category=networking" className="hover:text-amber-400 transition-colors flex items-center gap-1.5 group">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 group-hover:scale-125 transition-transform" />
+                  <span>Networking & Server</span>
                 </Link>
               </li>
               <li>
-                <Link href="/courses?category=electrical" className="hover:text-blue-400 transition-colors">
-                  Home Appliance Repair
+                <Link href="/courses?category=electrical" className="hover:text-amber-400 transition-colors flex items-center gap-1.5 group">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 group-hover:scale-125 transition-transform" />
+                  <span>Home Appliance Repair</span>
                 </Link>
               </li>
               <li>
-                <Link href="/courses?category=marketing" className="hover:text-blue-400 transition-colors">
-                  Digital Marketing Training
+                <Link href="/courses?category=marketing" className="hover:text-amber-400 transition-colors flex items-center gap-1.5 group">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 group-hover:scale-125 transition-transform" />
+                  <span>Digital Marketing</span>
                 </Link>
               </li>
             </ul>
           </div>
 
           {/* COLUMN 4: INTERACTIVE LOCATION MAP (3 cols) */}
-          <div className="lg:col-span-3 flex flex-col gap-3">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <h4 className="text-white font-extrabold text-sm uppercase tracking-wider flex items-center gap-1.5">
-                <MapPin className="w-4 h-4 text-orange-500" />
-                <span>Current Location Map</span>
-              </h4>
-              <button
-                suppressHydrationWarning
-                onClick={onOpenLocationModal}
-                className="text-[10px] font-bold text-orange-400 hover:text-orange-300 underline cursor-pointer"
-                title="Change detected location"
-              >
-                Change
-              </button>
+          <div className="lg:col-span-3 flex flex-col gap-4">
+            <div>
+              <div className="flex items-center justify-between">
+                <h4 className="text-white font-extrabold text-sm uppercase tracking-wider flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-orange-400" />
+                  <span>Current Location</span>
+                </h4>
+                <button
+                  suppressHydrationWarning
+                  onClick={onOpenLocationModal}
+                  className="text-[11px] font-extrabold text-amber-400 hover:text-amber-300 underline cursor-pointer"
+                  title="Change detected location"
+                >
+                  Change
+                </button>
+              </div>
+              <div className="h-0.5 w-10 bg-gradient-to-r from-orange-500 to-amber-400 rounded-full mt-1.5" />
             </div>
 
             {/* DETECTED LOCATION DISPLAY PILL */}
             <div
               onClick={onOpenLocationModal}
-              className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-orange-500/60 transition-all"
+              className="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-slate-900/90 to-slate-900/50 border border-slate-800 cursor-pointer hover:border-amber-500/50 transition-all shadow-md group"
               title="Click to select location"
             >
-              <div className="flex items-center gap-2 truncate">
-                <MapPin className="w-4 h-4 text-orange-400 flex-shrink-0" />
+              <div className="flex items-center gap-2.5 truncate">
+                <div className="w-7 h-7 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400 flex-shrink-0 group-hover:scale-110 transition-transform">
+                  <MapPin className="w-3.5 h-3.5" />
+                </div>
                 <span className="text-xs font-bold text-white truncate">
                   {cityName}
                 </span>
               </div>
-              <span className="text-[9px] font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-md uppercase tracking-wider flex-shrink-0">
-                Live GPS
+              <span className="text-[10px] font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center flex-shrink-0">
+                <span className="relative flex h-2 w-2 mr-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                GPS Live
               </span>
             </div>
 
             {/* EMBEDDED INTERACTIVE GOOGLE MAP IFRAME FOR AYODHYA */}
-            <div className="w-full h-36 rounded-xl overflow-hidden border border-slate-800 bg-slate-950 relative shadow-inner group">
+            <div className="w-full h-36 rounded-2xl overflow-hidden border border-slate-800/90 bg-slate-950 relative shadow-xl group">
               <iframe
                 title="CodeGuru Current Location Map"
                 width="100%"
                 height="100%"
-                style={{ border: 0, filter: 'contrast(1.05)' }}
+                style={{ border: 0, filter: 'contrast(1.05) opacity(0.9)' }}
                 loading="lazy"
                 allowFullScreen
                 src={`https://maps.google.com/maps?q=${encodedCity}+Ayodhya&t=&z=13&ie=UTF8&iwloc=&output=embed`}
               />
               <div
                 onClick={onOpenLocationModal}
-                className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/0 transition-colors cursor-pointer"
+                className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/0 transition-colors cursor-pointer flex items-end justify-end p-2"
                 title="Click to expand location map"
-              />
+              >
+                <span className="text-[10px] font-bold bg-slate-900/90 text-slate-200 px-2 py-1 rounded-md border border-slate-700 backdrop-blur-xs flex items-center gap-1">
+                  <ExternalLink className="w-3 h-3 text-amber-400" /> Expand
+                </span>
+              </div>
             </div>
             
-            <p className="text-[10px] text-slate-500 font-medium leading-tight">
-              Showing CodeGuru campus & partner center map for <span className="text-slate-300 font-bold">{cityName}</span>.
+            <p className="text-[10.5px] text-slate-400 font-medium leading-tight">
+              Showing CodeGuru campus & partner center map for <span className="text-amber-400 font-bold">{cityName}</span>.
             </p>
           </div>
 
@@ -351,7 +421,7 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
           {/* SECTION 1: OUR POPULAR TRAINING PROGRAMS IN AYODHYA */}
           <div>
             <h5 className="font-extrabold text-slate-300 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <BookOpen className="w-3.5 h-3.5 text-orange-400" />
+              <BookOpen className="w-3.5 h-3.5 text-amber-400" />
               <span>Our Popular Training Programs in Ayodhya</span>
             </h5>
             <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-slate-400 text-[11px] leading-relaxed">
@@ -366,7 +436,7 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
           {/* SECTION 2: MORE TRAINING LINKS IN AYODHYA */}
           <div>
             <h5 className="font-extrabold text-slate-300 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
               <span>More Training & Skill Links in Ayodhya</span>
             </h5>
             <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-slate-400 text-[11px] leading-relaxed">
@@ -411,40 +481,41 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
         </div>
 
         {/* CORPORATE LEGAL REGISTRATION & INCORPORATION BLOCK */}
-        <div className="py-6 border-b border-slate-800/80 bg-slate-900/50 p-4 sm:p-5 rounded-2xl my-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-          <div className="flex flex-col gap-1 text-center md:text-left">
-            <div className="font-black text-white text-xs sm:text-sm">
+        <div className="py-6 border-b border-slate-800/80 bg-gradient-to-r from-slate-900/90 via-indigo-950/30 to-slate-900/90 border border-slate-700/60 p-5 rounded-2xl my-6 flex flex-col md:flex-row items-center justify-between gap-5 text-xs text-slate-300 shadow-xl hover:border-amber-500/40 transition-all">
+          <div className="flex flex-col gap-1.5 text-center md:text-left">
+            <div className="font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-amber-200 text-sm sm:text-base tracking-wide">
               CodeGuru Technologies Private Limited
             </div>
-            <div className="text-[11px] text-slate-400 leading-normal">
-              <span className="font-bold text-slate-300">Company Type:</span> Private Limited <span className="mx-1">•</span> 
-              <span className="font-bold text-slate-300">CIN:</span> U85499UP2025PTC233762 <span className="mx-1">•</span> 
-              <span className="font-bold text-slate-300">Date of Incorporation:</span> 15-Oct-2025
+            <div className="text-[11.5px] text-slate-300 leading-relaxed font-medium">
+              <span className="font-bold text-amber-400">Company Type:</span> Private Limited <span className="mx-2 text-slate-600">•</span> 
+              <span className="font-bold text-amber-400">CIN:</span> U85499UP2025PTC233762 <span className="mx-2 text-slate-600">•</span> 
+              <span className="font-bold text-amber-400">Date of Incorporation:</span> 15-Oct-2025
             </div>
-            <div className="text-[10.5px] text-slate-500">
-              Registered Office Address: CodeGuru Tower, Near Naya Ghat Bypass Road, Ayodhya, UP - 224123
+            <div className="text-[11px] text-slate-400 font-normal">
+              Registered Office: CodeGuru Tower, Near Naya Ghat Bypass Road, Ayodhya, UP - 224123
             </div>
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-amber-400 font-extrabold text-[11px]">
+            <span className="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 font-black text-xs tracking-wider uppercase shadow-inner flex items-center gap-1.5">
+              <Award className="w-4 h-4 text-amber-400" />
               MSME & Startup India
             </span>
           </div>
         </div>
 
         {/* BOTTOM COPYRIGHT & LEGAL BAR */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 text-xs text-slate-500 font-medium">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 text-xs text-slate-400 font-medium">
           <div className="flex items-center gap-1.5 text-center sm:text-left">
             <span>© {new Date().getFullYear()} CodeGuru Technologies Private Limited. All Rights Reserved.</span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-400 font-semibold text-xs">
-            <span className="hover:text-white cursor-pointer" onClick={onOpenContactModal}>Privacy Policy</span>
-            <span>•</span>
-            <span className="hover:text-white cursor-pointer" onClick={onOpenContactModal}>Terms & Conditions</span>
-            <span>•</span>
-            <span className="hover:text-white cursor-pointer" onClick={onOpenContactModal}>Contact Us</span>
+          <div className="flex items-center gap-4 text-slate-300 font-semibold text-xs">
+            <span className="hover:text-amber-400 cursor-pointer transition-colors" onClick={onOpenContactModal}>Privacy Policy</span>
+            <span className="text-slate-600">•</span>
+            <span className="hover:text-amber-400 cursor-pointer transition-colors" onClick={onOpenContactModal}>Terms & Conditions</span>
+            <span className="text-slate-600">•</span>
+            <span className="hover:text-amber-400 cursor-pointer transition-colors" onClick={onOpenContactModal}>Contact Us</span>
           </div>
         </div>
 
@@ -452,3 +523,4 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
     </footer>
   );
 }
+

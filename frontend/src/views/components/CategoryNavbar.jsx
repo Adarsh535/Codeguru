@@ -12,6 +12,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
   const isHome = isHomePage !== undefined ? isHomePage : pathname === '/';
 
   const [activeCategory, setActiveCategory] = useState('coding');
+  const [activeSubCategory, setActiveSubCategory] = useState('web');
   const [activeFilter, setActiveFilter] = useState('All');
   const [likedCourses, setLikedCourses] = useState({});
   const [customCourses, setCustomCourses] = useState([]);
@@ -40,6 +41,9 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       router.push(`/courses?category=${catId}`);
     } else {
       setActiveCategory(catId);
+      if (catId === 'coding') {
+        setActiveSubCategory('web');
+      }
     }
   };
 
@@ -62,7 +66,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
   const categories = [
     {
       id: 'coding',
-      name: 'Coding & Software Development',
+      name: 'Software Development',
       icon: Code,
       img: '/images/categories/coding.png',
       bgColor: 'bg-blue-50'
@@ -105,32 +109,18 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
   ];
 
   const trainingFilters = [
-    'All',
-    '45 Days Summer Training',
-    '45 Days Winter Training',
-    '6 Month Course',
-    '3 Months Internship',
-    'One Year Course'
+    { label: 'All', value: 'All', matchKeys: ['All'] },
+    { label: '3 Months', value: '3 Months', matchKeys: ['3 Months', '3 Month', 'Internship'] },
+    { label: '45 Days', value: '45 Days', matchKeys: ['45 Days', '45D', 'Summer', 'Winter'] },
+    { label: '6 Months', value: '6 Months', matchKeys: ['6 Month', '6 Months'] },
+    { label: 'One Year', value: 'One Year', matchKeys: ['One Year', '1 Year', 'Year'] }
   ];
 
   const allCourses = [
     {
-      id: 'python-beginners',
-      categoryId: 'coding',
-      title: 'Python Programming for Beginners',
-      duration: '3 Months',
-      level: 'Beginner',
-      mode: 'Live + Record',
-      price: '₹4,999',
-      originalPrice: '₹7,999',
-      discount: '37% OFF',
-      tag: 'BESTSELLER',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-      iconBg: 'bg-blue-50'
-    },
-    {
       id: 'mern-stack',
       categoryId: 'coding',
+      subCategory: 'web',
       title: 'Full-Stack Web Development (MERN)',
       duration: '6 Months',
       level: 'Intermediate',
@@ -138,13 +128,14 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       price: '₹8,999',
       originalPrice: '₹14,000',
       discount: '35% OFF',
-      tag: null,
+      tag: 'BESTSELLER',
       icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
       iconBg: 'bg-cyan-50'
     },
     {
       id: 'react-nextjs',
       categoryId: 'coding',
+      subCategory: 'web',
       title: 'Frontend Masterclass (React & Next.js)',
       duration: '4 Months',
       level: 'Advanced',
@@ -159,6 +150,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     {
       id: 'backend-node',
       categoryId: 'coding',
+      subCategory: 'web',
       title: 'Backend Engineering & REST APIs',
       duration: '4 Months',
       level: 'Intermediate',
@@ -171,22 +163,9 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       iconBg: 'bg-green-50'
     },
     {
-      id: 'swift-ios',
-      categoryId: 'coding',
-      title: 'iOS App Development with Swift',
-      duration: '5 Months',
-      level: 'Beginner',
-      mode: 'Live Classes',
-      price: '₹6,999',
-      originalPrice: '₹11,000',
-      discount: '36% OFF',
-      tag: 'BESTSELLER',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg',
-      iconBg: 'bg-orange-50'
-    },
-    {
       id: 'java-springboot',
       categoryId: 'coding',
+      subCategory: 'web',
       title: 'Java & Spring Boot Enterprise Dev',
       duration: '6 Months',
       level: 'Advanced',
@@ -199,8 +178,99 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       iconBg: 'bg-red-50'
     },
     {
+      id: 'swift-ios',
+      categoryId: 'coding',
+      subCategory: 'app',
+      title: 'iOS App Development with Swift',
+      duration: '5 Months',
+      level: 'Beginner',
+      mode: 'Live Classes',
+      price: '₹6,999',
+      originalPrice: '₹11,000',
+      discount: '36% OFF',
+      tag: 'BESTSELLER',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg',
+      iconBg: 'bg-orange-50'
+    },
+    {
+      id: 'flutter-app',
+      categoryId: 'coding',
+      subCategory: 'app',
+      title: 'Flutter Cross-Platform App Development',
+      duration: '4 Months',
+      level: 'Intermediate',
+      mode: 'Live Classes',
+      price: '₹5,999',
+      originalPrice: '₹9,999',
+      discount: '40% OFF',
+      tag: 'POPULAR',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flutter/flutter-original.svg',
+      iconBg: 'bg-sky-50'
+    },
+    {
+      id: 'android-kotlin',
+      categoryId: 'coding',
+      subCategory: 'app',
+      title: 'Android App Development (Kotlin)',
+      duration: '5 Months',
+      level: 'Beginner',
+      mode: 'Live + Record',
+      price: '₹6,499',
+      originalPrice: '₹10,500',
+      discount: '38% OFF',
+      tag: null,
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kotlin/kotlin-original.svg',
+      iconBg: 'bg-purple-50'
+    },
+    {
+      id: 'python-aiml',
+      categoryId: 'coding',
+      subCategory: 'ai',
+      title: 'Python Programming & AI/ML Masterclass',
+      duration: '4 Months',
+      level: 'Beginner to Advanced',
+      mode: 'Live + Record',
+      price: '₹6,999',
+      originalPrice: '₹11,999',
+      discount: '41% OFF',
+      tag: 'BESTSELLER',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+      iconBg: 'bg-blue-50'
+    },
+    {
+      id: 'machine-learning',
+      categoryId: 'coding',
+      subCategory: 'ai',
+      title: 'Machine Learning & Neural Networks',
+      duration: '6 Months',
+      level: 'Advanced',
+      mode: 'Live Classes',
+      price: '₹8,499',
+      originalPrice: '₹14,999',
+      discount: '43% OFF',
+      tag: 'HOT',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tensorflow/tensorflow-original.svg',
+      iconBg: 'bg-amber-50'
+    },
+    {
+      id: 'data-science',
+      categoryId: 'coding',
+      subCategory: 'ai',
+      title: 'Data Science & Big Data Engineering',
+      duration: '6 Months',
+      level: 'Advanced',
+      mode: 'Live + Project',
+      price: '₹8,999',
+      originalPrice: '₹15,000',
+      discount: '40% OFF',
+      tag: 'FEATURED',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+      iconBg: 'bg-emerald-50'
+    },
+    {
       id: 'robotics-ai',
       categoryId: 'robotics',
+      subCategory: 'robotics',
       title: 'Robotics & Hardware Automation',
       duration: '4 Months',
       level: 'Intermediate',
@@ -215,6 +285,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     {
       id: 'ccna-net',
       categoryId: 'networking',
+      subCategory: 'networking',
       title: 'Networking & Server Admin (CCNA)',
       duration: '3 Months',
       level: 'Beginner',
@@ -230,40 +301,40 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
   const currentCategoryObj = categories.find(c => c.id === activeCategory) || categories[0];
 
+  let headingTitle = `${currentCategoryObj.name} Programs`;
+  if (activeCategory === 'coding') {
+    if (activeSubCategory === 'web') headingTitle = 'Web Development Programs';
+    else if (activeSubCategory === 'app') headingTitle = 'App Development Programs';
+    else if (activeSubCategory === 'ai') headingTitle = 'AI & ML Programs';
+    else headingTitle = 'Software Development Programs';
+  }
+
   const displayedCourses = allCourses.filter(c => {
     const matchesCat = c.categoryId === activeCategory;
-    const matchesFilter = activeFilter === 'All' || c.duration?.includes(activeFilter) || c.title?.includes(activeFilter);
-    return matchesCat && matchesFilter;
+    const matchesSubCat = activeCategory !== 'coding' || activeSubCategory === 'all' || c.subCategory === activeSubCategory;
+    
+    let matchesFilter = activeFilter === 'All';
+    if (!matchesFilter) {
+      const selectedFilterObj = trainingFilters.find(f => f.value === activeFilter || f.label === activeFilter);
+      if (selectedFilterObj) {
+        const keys = selectedFilterObj.matchKeys || [selectedFilterObj.value, selectedFilterObj.label];
+        matchesFilter = keys.some(k => 
+          c.duration?.toLowerCase().includes(k.toLowerCase()) || 
+          c.title?.toLowerCase().includes(k.toLowerCase())
+        );
+      } else {
+        matchesFilter = c.duration?.includes(activeFilter) || c.title?.includes(activeFilter);
+      }
+    }
+    return matchesCat && matchesSubCat && matchesFilter;
   });
 
   return (
-    <section className="w-full px-3 sm:px-4 pt-3 pb-1 sm:pt-4 sm:pb-2 bg-slate-50/50 select-none">
+    <section className="w-full px-3 sm:px-4 pt-[5px] pb-1 bg-slate-50/50 select-none">
       <div className="max-w-7xl mx-auto w-full">
         
-        {/* SECTION TITLE HEADER */}
-        <div className="flex items-center justify-between mb-4 px-2 md:px-0 w-full">
-          <Link
-            href="/courses"
-            className="flex items-center gap-2 group cursor-pointer"
-            title="Open Our Courses Catalog Page"
-          >
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-600 group-hover:scale-150 transition-transform" />
-            <h2 className="text-left text-sm md:text-base font-bold text-slate-600 tracking-widest uppercase group-hover:text-blue-600 transition-colors">
-              Our Courses
-            </h2>
-          </Link>
-
-          <Link
-            href="/courses"
-            className="text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors group"
-          >
-            <span>View All Courses</span>
-            <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-
         {/* CATEGORY SELECTOR CARDS GRID */}
-        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-5 justify-items-center w-full pb-4 md:pb-2 pt-2 px-1 md:mx-0 md:px-0">
+        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-5 justify-items-center w-full pb-3 md:pb-2 pt-0 px-1 md:mx-0 md:px-0">
           {categories.map((cat) => {
             const isCatActive = activeCategory === cat.id;
 
@@ -302,34 +373,77 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
         {/* ON COURSES PAGE ONLY: SHOW FULL CATALOG BELOW CATEGORY CARDS */}
         {!isHome && (
-          <div>
-            {/* ACTIVE CATEGORY HEADING */}
-            <div className="flex items-center justify-start py-5 mt-2 sm:px-2 border-t border-slate-100">
-              <h2 className="text-xl md:text-[26px] font-light text-black tracking-wide truncate">
-                {currentCategoryObj.name} Programs
-              </h2>
-            </div>
+          <div className="pt-2">
+            {/* DOMAIN SUB-CATEGORY TABS (WEB DEV, APP DEV, AI & ML) FOR SOFTWARE DEV - STICKY SEGMENTED CONTROL */}
+            {activeCategory === 'coding' && (
+              <div className="sticky top-[54px] sm:top-[76px] z-30 bg-slate-50/95 backdrop-blur-md pt-3 pb-3 border-t border-b border-slate-200/80 shadow-xs my-3 -mx-3 sm:mx-0 px-3 sm:px-0">
+                <div className="w-full max-w-xl mx-auto bg-slate-200/70 p-1 sm:p-1.5 rounded-2xl flex items-center justify-between gap-1 sm:gap-2 shadow-inner border border-slate-300/50">
+                  {[
+                    { id: 'web', label: 'Web Development' },
+                    { id: 'app', label: 'App Development' },
+                    { id: 'ai', label: 'AI & ML' }
+                  ].map((sub) => {
+                    const isSubActive = activeSubCategory === sub.id;
+                    return (
+                      <button
+                        suppressHydrationWarning
+                        key={sub.id}
+                        onClick={() => setActiveSubCategory(sub.id)}
+                        className={`flex-1 text-center whitespace-nowrap px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-black text-[12px] sm:text-[14px] transition-all duration-300 cursor-pointer ${
+                          isSubActive
+                            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 scale-[1.02]'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
+                        }`}
+                      >
+                        {sub.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
-            {/* TRAINING DURATION FILTER PILLS BAR */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-6 custom-scrollbar px-2 sm:px-0">
-              <span className="font-bold text-slate-700 text-sm whitespace-nowrap pl-1 pr-2">Training:</span>
-              {trainingFilters.slice(1).map((filter) => {
-                const isFilterActive = activeFilter === filter;
-                return (
-                  <button
-                    suppressHydrationWarning
-                    key={filter}
-                    onClick={() => setActiveFilter(isFilterActive ? 'All' : filter)}
-                    className={`flex flex-shrink-0 whitespace-nowrap px-4 py-2 rounded-full font-extrabold text-[13px] transition-all duration-300 cursor-pointer ${
-                      isFilterActive
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    {filter}
-                  </button>
-                );
-              })}
+            {/* TRAINING DURATION FILTER CONTAINER */}
+            <div className="sticky top-[102px] sm:top-[128px] z-20 bg-slate-50/95 backdrop-blur-md py-2 border-b border-slate-200/80 shadow-2xs mb-4">
+              <div className="w-full max-w-7xl mx-auto px-3 sm:px-4">
+                <div className="bg-slate-100/90 p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 shadow-inner flex flex-col gap-2">
+                  <div className="flex items-center justify-between px-1 pt-0.5">
+                    <h4 className="text-[11px] sm:text-xs font-black text-slate-800 uppercase tracking-wider">
+                      Training Duration
+                    </h4>
+                    <button
+                      suppressHydrationWarning
+                      onClick={() => setActiveFilter('All')}
+                      className={`px-3 py-1 rounded-xl text-[10.5px] sm:text-[12px] font-extrabold tracking-tight transition-all duration-200 cursor-pointer ${
+                        activeFilter === 'All'
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 scale-[1.02]'
+                          : 'bg-white text-slate-700 border border-slate-200/90 shadow-2xs hover:bg-slate-50 hover:border-blue-300'
+                      }`}
+                    >
+                      All
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between gap-1.5 sm:gap-2.5">
+                    {trainingFilters.slice(1).map((filter) => {
+                      const isFilterActive = activeFilter === filter.value;
+                      return (
+                        <button
+                          suppressHydrationWarning
+                          key={filter.value}
+                          onClick={() => setActiveFilter(isFilterActive ? 'All' : filter.value)}
+                          className={`flex-1 min-w-0 text-center whitespace-nowrap px-1.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl font-extrabold text-[10.5px] min-[360px]:text-[11.5px] sm:text-[13.5px] tracking-tight transition-all duration-200 cursor-pointer ${
+                            isFilterActive
+                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 scale-[1.02]'
+                              : 'bg-white text-slate-700 border border-slate-200/90 shadow-2xs hover:bg-slate-50 hover:border-blue-300'
+                          }`}
+                        >
+                          {filter.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* COURSE CARDS GRID */}
@@ -413,15 +527,17 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
             </div>
 
             {/* VIEW MORE BUTTON */}
-            <div className="flex justify-center mt-2 pb-8">
-              <button
-                suppressHydrationWarning
-                onClick={onOpenContactModal}
-                className="bg-slate-900 hover:bg-gray-800 text-white px-8 py-3 rounded-full text-sm font-bold shadow-lg transition-transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2 cursor-pointer"
-              >
-                View More <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
+            {isHome && (
+              <div className="flex justify-center mt-2 pb-8">
+                <button
+                  suppressHydrationWarning
+                  onClick={onOpenContactModal}
+                  className="bg-slate-900 hover:bg-gray-800 text-white px-8 py-3 rounded-full text-sm font-bold shadow-lg transition-transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2 cursor-pointer"
+                >
+                  View More <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         )}
 
