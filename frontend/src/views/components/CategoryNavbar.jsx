@@ -447,155 +447,116 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
             </div>
 
             {/* COURSE CARDS GRID */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 pb-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-10">
               {displayedCourses.map((course) => {
                 const isLiked = !!likedCourses[course.id];
+                const titleLower = (course.title || '').toLowerCase();
+                const isMern = course.id === 'mern-stack' || titleLower.includes('mern');
 
-                const getCourseHighlights = (c) => {
-                  if (c.highlights && Array.isArray(c.highlights)) {
-                    return c.highlights;
-                  }
-                  
-                  const titleLower = (c.title || '').toLowerCase();
-                  const durationLower = (c.duration || '').toLowerCase();
+                // 2x2 Pills Grid Data
+                const gridPills = [
+                  { val: course.duration || '6 Months', label: '' },
+                  { val: '5', label: 'Internships' },
+                  { val: '5', label: 'Mock Tests' },
+                  { val: '5', label: 'Projects' }
+                ];
 
-                  // Highlights specifically for 6 Months duration courses
-                  if (durationLower.includes('6 month') || durationLower.includes('6-month')) {
-                    let techStack = 'MongoDB, Express, React, Node.js';
-                    if (titleLower.includes('java')) techStack = 'Core Java, Spring Boot, Microservices';
-                    else if (titleLower.includes('python')) techStack = 'Python, Data Science & AI/ML';
-                    else if (!titleLower.includes('mern')) techStack = `${c.title} Core Stack`;
-
-                    return [
-                      `${techStack} (5 Projects)`,
-                      '6 Mock Interviews (AI + Human)',
-                      '5 Interview Opportunities Guarantee',
-                      'Job & Placement Opportunities'
-                    ];
-                  }
-                  
-                  if (c.id === 'mern-stack' || titleLower.includes('mern')) {
-                    return [
-                      'MongoDB, Express, React, Node.js',
-                      'Build Real Full-Stack Projects',
-                      'Live Classes + Recording',
-                      'Certificate + Placement Support'
-                    ];
-                  }
-                  if (c.id === 'react-nextjs' || titleLower.includes('frontend')) {
-                    return [
-                      'React 19, Next.js, Tailwind CSS',
-                      'Modern Responsive Web Apps',
-                      'Live + Self-Paced Modules',
-                      'Certificate + Portfolio Support'
-                    ];
-                  }
-                  if (c.id === 'backend-node' || titleLower.includes('backend')) {
-                    return [
-                      'Node.js, Express & REST APIs',
-                      'Database Architecture & Security',
-                      'Live Doubt Resolution',
-                      'Certificate + Placement Support'
-                    ];
-                  }
-                  if (c.id === 'java-springboot' || titleLower.includes('java')) {
-                    return [
-                      'Core Java, Spring Boot, Microservices',
-                      'Enterprise Real-world Projects',
-                      'Live Mentorship Sessions',
-                      'Certificate + Job Assistance'
-                    ];
-                  }
-                  if (titleLower.includes('python') || titleLower.includes('data')) {
-                    return [
-                      'Python, Data Science & AI/ML',
-                      'Hands-on Machine Learning Models',
-                      'Live + Recorded Sessions',
-                      'Certificate + Career Guidance'
-                    ];
-                  }
-
-                  return [
-                    `${c.title} Core Stack`,
-                    'Build Industry Grade Projects',
-                    c.mode || 'Live Classes + Recording',
-                    'Certificate + Placement Support'
-                  ];
-                };
+                // Checkmark Features List Data
+                const checkmarkFeatures = isMern ? [
+                  'MongoDB, Express, React, Node.js',
+                  'Frontend and Backend: React + Express',
+                  'Database: MongoDB'
+                ] : titleLower.includes('java') ? [
+                  'Core Java, Spring Boot, Microservices',
+                  'Enterprise Architecture & REST APIs',
+                  'Database: MySQL & PostgreSQL'
+                ] : titleLower.includes('python') ? [
+                  'Python, Data Science & AI/ML',
+                  'Data Pipelines & Neural Networks',
+                  'Database & Cloud: SQL + AWS'
+                ] : [
+                  `${course.title} Core Stack`,
+                  'Frontend and Backend Integration',
+                  'Database & Cloud Deployment'
+                ];
 
                 return (
                   <div
                     key={course.id}
-                    className="group relative flex flex-col p-4 sm:p-5 bg-white border border-slate-200/90 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] rounded-[20px] hover:shadow-[0_12px_32px_-6px_rgba(0,0,0,0.12)] hover:border-blue-200 transition-all duration-300 w-full justify-between gap-3"
+                    className="group relative flex flex-col bg-white border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] rounded-[24px] p-5 sm:p-6 transition-all duration-300 hover:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.12)] hover:border-blue-200 justify-between gap-4"
                   >
-                    {/* TOP BAR: TAG & HEART */}
-                    <div className="flex items-center justify-between">
-                      {course.tag ? (
-                        <div className="px-2.5 py-0.5 bg-[#e5fcf1] text-[#00a86b] text-[10px] font-extrabold rounded-md uppercase tracking-wider">
-                          {course.tag}
+                    {/* ATTACHED BESTSELLER / TOP BADGE */}
+                    {course.tag && (
+                      <div className="absolute -top-3 left-6 px-3 py-0.5 bg-[#fde047] border border-[#facc15] text-[#713f12] font-black text-[10.5px] rounded-lg shadow-2xs tracking-wider uppercase z-10">
+                        {course.tag}
+                      </div>
+                    )}
+
+                    {/* TOP ROW: ICON + TITLE + 2x2 PILLS GRID */}
+                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 items-start">
+                      {/* TECH LOGO CONTAINER (M E R N 4-box grid OR Course Icon) */}
+                      {isMern ? (
+                        <div className="w-22 h-22 sm:w-26 sm:h-26 bg-slate-50/90 border border-slate-200/80 rounded-2xl p-2 sm:p-2.5 flex-shrink-0 shadow-2xs">
+                          <div className="grid grid-cols-2 gap-1.5 w-full h-full">
+                            <div className="bg-[#10b981] text-white font-black rounded-lg flex items-center justify-center text-xs sm:text-sm">M</div>
+                            <div className="bg-[#1e293b] text-white font-black rounded-lg flex items-center justify-center text-xs sm:text-sm">E</div>
+                            <div className="bg-[#06b6d4] text-white font-black rounded-lg flex items-center justify-center text-xs sm:text-sm">R</div>
+                            <div className="bg-[#84cc16] text-white font-black rounded-lg flex items-center justify-center text-xs sm:text-sm">N</div>
+                          </div>
                         </div>
                       ) : (
-                        <div />
+                        <div className={`w-22 h-22 sm:w-26 sm:h-26 rounded-2xl flex items-center justify-center flex-shrink-0 border border-slate-200/80 shadow-2xs ${course.iconBg || 'bg-slate-50'}`}>
+                          <img
+                            src={course.icon}
+                            alt={course.title}
+                            className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                          />
+                        </div>
                       )}
 
-                      {/* HEART BOOKMARK BUTTON */}
-                      <button
-                        suppressHydrationWarning
-                        onClick={(e) => toggleHeart(e, course.id)}
-                        className="text-slate-300 hover:text-rose-500 transition-colors cursor-pointer"
-                        title="Save course"
-                      >
-                        <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
-                      </button>
-                    </div>
-
-                    {/* TOP HEADER: ICON + TITLE + BADGES */}
-                    <div className="flex gap-3 sm:gap-4">
-                      {/* ICON THUMBNAIL */}
-                      <div className={`w-13 h-13 sm:w-15 sm:h-15 rounded-2xl flex items-center justify-center flex-shrink-0 border border-slate-100/80 shadow-2xs ${course.iconBg || 'bg-slate-50'}`}>
-                        <img
-                          src={course.icon}
-                          alt={course.title}
-                          className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
-                        />
-                      </div>
-
-                      {/* TITLE & PILLS */}
-                      <div className="flex flex-col min-w-0 justify-center">
-                        <h3 className="font-extrabold text-slate-900 text-[14px] sm:text-[16px] leading-snug mb-1.5 line-clamp-2">
+                      {/* TITLE & 2x2 PILLS GRID */}
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <h3 className="font-extrabold text-slate-900 text-[17px] sm:text-[19px] leading-snug mb-3">
                           {course.title}
                         </h3>
 
-                        {/* DURATION & LEVEL PILLS */}
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                            <Clock className="w-3 h-3 text-emerald-600 flex-shrink-0" />
-                            {course.duration}
-                          </span>
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200/80">
-                            <Layers className="w-3 h-3 text-blue-600 flex-shrink-0" />
-                            {course.level}
-                          </span>
+                        {/* 2x2 PILLS GRID */}
+                        <div className="grid grid-cols-2 gap-2 w-full">
+                          {gridPills.map((pill, idx) => (
+                            <div
+                              key={idx}
+                              className="bg-[#f0f6ff] border border-[#dbeafe] text-slate-600 px-3 py-1.5 rounded-xl text-[11px] sm:text-[12px] font-medium flex items-center gap-1.5 whitespace-nowrap truncate"
+                            >
+                              <span className="font-black text-slate-900">{pill.val}</span>
+                              {pill.label && <span>{pill.label}</span>}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
 
-                    {/* FEATURES BULLET LIST */}
-                    <div className="py-2.5 my-0.5 border-t border-b border-slate-100 flex flex-col gap-1.5">
-                      {getCourseHighlights(course).map((highlight, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-[11px] sm:text-[12.5px] font-medium text-slate-700">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-                          <span className="truncate">{highlight}</span>
-                        </div>
-                      ))}
-                    </div>
+                    {/* DIVIDER LINE */}
+                    <div className="w-full h-px bg-slate-100 my-0.5" />
 
-                    {/* VIEW DETAILS ACTION ROW */}
-                    <div className="pt-2 mt-auto">
+                    {/* BOTTOM ROW: CHECKMARK FEATURES & CTA BUTTON */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 pt-0.5 mt-auto">
+                      {/* CHECKMARK BULLETS */}
+                      <div className="flex flex-col gap-2 min-w-0 flex-1">
+                        {checkmarkFeatures.map((feat, idx) => (
+                          <div key={idx} className="flex items-center gap-2 text-[12px] sm:text-[13px] font-semibold text-slate-700">
+                            <span className="w-4 h-4 rounded bg-blue-50 border border-blue-200/80 text-blue-600 font-extrabold text-[10px] flex items-center justify-center flex-shrink-0">
+                              ✓
+                            </span>
+                            <span className="truncate">{feat}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* VIEW DETAILS BUTTON (RIGHT ALIGNED) */}
                       <button
                         suppressHydrationWarning
                         onClick={handleEnrollClick}
-                        className="w-full bg-[#2463eb] hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-[13px] sm:text-sm font-extrabold flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer"
+                        className="w-full sm:w-auto bg-[#2463eb] hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap"
                       >
                         View Details <ArrowRight className="w-4 h-4" />
                       </button>
