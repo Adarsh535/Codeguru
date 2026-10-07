@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Heart, Clock, ArrowRight, Code, Cpu, Server, Wrench, Zap, Globe, ExternalLink } from 'lucide-react';
+import { Heart, Clock, ArrowRight, Code, Cpu, Server, Wrench, Zap, Globe, ExternalLink, CheckCircle2, Layers } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { apiService } from '../../services/apiService';
@@ -447,78 +447,157 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
             </div>
 
             {/* COURSE CARDS GRID */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 pb-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 pb-10">
               {displayedCourses.map((course) => {
                 const isLiked = !!likedCourses[course.id];
+
+                const getCourseHighlights = (c) => {
+                  if (c.highlights && Array.isArray(c.highlights)) {
+                    return c.highlights;
+                  }
+                  
+                  const titleLower = (c.title || '').toLowerCase();
+                  
+                  if (c.id === 'mern-stack' || titleLower.includes('mern')) {
+                    return [
+                      'MongoDB, Express, React, Node.js',
+                      'Build Real Full-Stack Projects',
+                      'Live Classes + Recording',
+                      'Certificate + Placement Support'
+                    ];
+                  }
+                  if (c.id === 'react-nextjs' || titleLower.includes('frontend')) {
+                    return [
+                      'React 19, Next.js, Tailwind CSS',
+                      'Modern Responsive Web Apps',
+                      'Live + Self-Paced Modules',
+                      'Certificate + Portfolio Support'
+                    ];
+                  }
+                  if (c.id === 'backend-node' || titleLower.includes('backend')) {
+                    return [
+                      'Node.js, Express & REST APIs',
+                      'Database Architecture & Security',
+                      'Live Doubt Resolution',
+                      'Certificate + Placement Support'
+                    ];
+                  }
+                  if (c.id === 'java-springboot' || titleLower.includes('java')) {
+                    return [
+                      'Core Java, Spring Boot, Microservices',
+                      'Enterprise Real-world Projects',
+                      'Live Mentorship Sessions',
+                      'Certificate + Job Assistance'
+                    ];
+                  }
+                  if (titleLower.includes('python') || titleLower.includes('data')) {
+                    return [
+                      'Python, Data Science & AI/ML',
+                      'Hands-on Machine Learning Models',
+                      'Live + Recorded Sessions',
+                      'Certificate + Career Guidance'
+                    ];
+                  }
+
+                  return [
+                    `${c.title} Core Stack`,
+                    'Build Industry Grade Projects',
+                    c.mode || 'Live Classes + Recording',
+                    'Certificate + Placement Support'
+                  ];
+                };
 
                 return (
                   <div
                     key={course.id}
-                    className="group relative flex flex-col p-3.5 sm:p-5 bg-white border border-slate-100 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.06)] rounded-[16px] sm:rounded-[20px] hover:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1)] hover:border-blue-100 transition-all duration-300 w-full"
+                    className="group relative flex flex-col p-4 sm:p-5 bg-white border border-slate-200/90 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] rounded-[20px] hover:shadow-[0_12px_32px_-6px_rgba(0,0,0,0.12)] hover:border-blue-200 transition-all duration-300 w-full justify-between gap-3"
                   >
-                    {/* HEART BOOKMARK BUTTON */}
-                    <button
-                      suppressHydrationWarning
-                      onClick={(e) => toggleHeart(e, course.id)}
-                      className="absolute top-3 right-3 sm:top-4 sm:right-4 text-slate-300 hover:text-rose-500 transition-colors cursor-pointer"
-                      title="Save course"
-                    >
-                      <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
-                    </button>
+                    {/* TOP BAR: TAG & HEART */}
+                    <div className="flex items-center justify-between">
+                      {course.tag ? (
+                        <div className="px-2.5 py-0.5 bg-[#e5fcf1] text-[#00a86b] text-[10px] font-extrabold rounded-md uppercase tracking-wider">
+                          {course.tag}
+                        </div>
+                      ) : (
+                        <div />
+                      )}
 
-                    {/* TOP HEADER DETAILS */}
-                    <div className="flex gap-2.5 sm:gap-4 mb-2.5 sm:mb-4 pr-5 sm:pr-6">
-                      <div className={`w-11 h-11 sm:w-15 sm:h-15 rounded-[12px] sm:rounded-[14px] flex items-center justify-center flex-shrink-0 ${course.iconBg}`}>
+                      {/* HEART BOOKMARK BUTTON */}
+                      <button
+                        suppressHydrationWarning
+                        onClick={(e) => toggleHeart(e, course.id)}
+                        className="text-slate-300 hover:text-rose-500 transition-colors cursor-pointer"
+                        title="Save course"
+                      >
+                        <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
+                      </button>
+                    </div>
+
+                    {/* TOP HEADER: ICON + TITLE + BADGES */}
+                    <div className="flex gap-3 sm:gap-4">
+                      {/* ICON THUMBNAIL */}
+                      <div className={`w-13 h-13 sm:w-15 sm:h-15 rounded-2xl flex items-center justify-center flex-shrink-0 border border-slate-100/80 shadow-2xs ${course.iconBg || 'bg-slate-50'}`}>
                         <img
                           src={course.icon}
                           alt={course.title}
-                          className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
+                          className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
                         />
                       </div>
-                      <div className="flex flex-col pt-0.5 min-w-0">
-                        {course.tag ? (
-                          <div className="mb-1 w-max px-1.5 py-0.5 bg-[#e5fcf1] text-[#00a86b] text-[9px] sm:text-[10px] font-bold rounded leading-none uppercase tracking-wide">
-                            {course.tag}
-                          </div>
-                        ) : (
-                          <div className="mb-1 w-max px-1.5 py-0.5 text-[9px] opacity-0 leading-none">-</div>
-                        )}
-                        <h3 className="font-extrabold text-slate-900 text-[14px] sm:text-[17px] leading-snug mb-1 sm:mb-1.5 truncate">
+
+                      {/* TITLE & PILLS */}
+                      <div className="flex flex-col min-w-0 justify-center">
+                        <h3 className="font-extrabold text-slate-900 text-[14px] sm:text-[16px] leading-snug mb-1.5 line-clamp-2">
                           {course.title}
                         </h3>
-                        <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[12px] text-slate-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
-                          <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400 flex-shrink-0" />
-                          <span>{course.duration}</span>
-                          <span className="w-1 h-1 rounded-full bg-slate-300 flex-shrink-0" />
-                          <span>{course.level}</span>
-                          <span className="w-1 h-1 rounded-full bg-slate-300 flex-shrink-0" />
-                          <span>{course.mode}</span>
+
+                        {/* DURATION & LEVEL PILLS */}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                            <Clock className="w-3 h-3 text-emerald-600 flex-shrink-0" />
+                            {course.duration}
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200/80">
+                            <Layers className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                            {course.level}
+                          </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="w-full h-px bg-slate-100 my-2.5 sm:my-3" />
+                    {/* FEATURES BULLET LIST */}
+                    <div className="py-2.5 my-0.5 border-t border-b border-slate-100 flex flex-col gap-1.5">
+                      {getCourseHighlights(course).map((highlight, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-[11px] sm:text-[12.5px] font-medium text-slate-700">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                          <span className="truncate">{highlight}</span>
+                        </div>
+                      ))}
+                    </div>
 
-                    {/* PRICE & ENROLL ACTION ROW */}
-                    <div className="flex flex-row items-center justify-between pt-0.5 sm:pt-1 mt-auto">
-                      <div className="flex items-baseline gap-1 sm:gap-2">
-                        <span className="text-lg sm:text-[22px] font-black text-slate-900 tracking-tight">
+                    {/* PRICE & VIEW DETAILS ACTION ROW */}
+                    <div className="flex items-center justify-between pt-1 mt-auto">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-lg sm:text-[21px] font-black text-slate-900 tracking-tight">
                           {course.price}
                         </span>
-                        <span className="text-[10px] sm:text-xs font-semibold text-slate-400 line-through">
-                          {course.originalPrice}
-                        </span>
-                        <span className="text-[10px] sm:text-xs font-bold text-emerald-500">
-                          {course.discount}
-                        </span>
+                        {course.originalPrice && (
+                          <span className="text-[10px] sm:text-xs font-semibold text-slate-400 line-through">
+                            {course.originalPrice}
+                          </span>
+                        )}
+                        {course.discount && (
+                          <span className="text-[10px] sm:text-xs font-bold text-emerald-600">
+                            {course.discount}
+                          </span>
+                        )}
                       </div>
 
                       <button
                         suppressHydrationWarning
                         onClick={handleEnrollClick}
-                        className="bg-[#2463eb] hover:bg-blue-700 text-white px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-md sm:rounded-lg text-[12px] sm:text-sm font-bold flex items-center justify-center gap-1 shadow-sm transition-transform active:scale-95 cursor-pointer"
+                        className="bg-[#2463eb] hover:bg-blue-700 text-white px-3.5 sm:px-4 py-2 rounded-xl text-[12px] sm:text-[13px] font-bold flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
                       >
-                        View Details <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 -mr-0.5 sm:-mr-1" />
+                        View Details <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
