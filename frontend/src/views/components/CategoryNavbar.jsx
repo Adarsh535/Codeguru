@@ -518,7 +518,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                         onClick={handleEnrollClick}
                         className="bg-[#2463eb] hover:bg-blue-700 text-white px-2.5 sm:px-4 py-1.5 sm:py-2.5 rounded-md sm:rounded-lg text-[12px] sm:text-sm font-bold flex items-center justify-center gap-1 shadow-sm transition-transform active:scale-95 cursor-pointer"
                       >
-                        Enroll Now <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 -mr-0.5 sm:-mr-1" />
+                        View Details <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 -mr-0.5 sm:-mr-1" />
                       </button>
                     </div>
                   </div>
