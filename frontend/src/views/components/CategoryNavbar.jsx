@@ -483,52 +483,52 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                 return (
                   <div
                     key={course.id}
-                    className="group relative flex flex-col bg-white border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] rounded-[24px] p-5 sm:p-6 transition-all duration-300 hover:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.12)] hover:border-blue-200 justify-between gap-4"
+                    className="group relative flex flex-col bg-white border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] rounded-[20px] sm:rounded-[24px] p-3.5 min-[400px]:p-4 sm:p-6 transition-all duration-300 hover:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.12)] hover:border-blue-200 justify-between gap-3 sm:gap-4"
                   >
                     {/* ATTACHED BESTSELLER / TOP BADGE */}
                     {course.tag && (
-                      <div className="absolute -top-3 left-6 px-3 py-0.5 bg-[#fde047] border border-[#facc15] text-[#713f12] font-black text-[10.5px] rounded-lg shadow-2xs tracking-wider uppercase z-10">
+                      <div className="absolute -top-3 left-4 sm:left-6 px-2.5 sm:px-3 py-0.5 bg-[#fde047] border border-[#facc15] text-[#713f12] font-black text-[9.5px] sm:text-[10.5px] rounded-lg shadow-2xs tracking-wider uppercase z-10">
                         {course.tag}
                       </div>
                     )}
 
                     {/* TOP ROW: ICON + TITLE + 2x2 PILLS GRID */}
-                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 items-start">
+                    <div className="flex flex-row gap-2.5 min-[400px]:gap-3.5 sm:gap-5 items-start">
                       {/* TECH LOGO CONTAINER (M E R N 4-box grid OR Course Icon) */}
                       {isMern ? (
-                        <div className="w-22 h-22 sm:w-26 sm:h-26 bg-slate-50/90 border border-slate-200/80 rounded-2xl p-2 sm:p-2.5 flex-shrink-0 shadow-2xs">
-                          <div className="grid grid-cols-2 gap-1.5 w-full h-full">
-                            <div className="bg-[#10b981] text-white font-black rounded-lg flex items-center justify-center text-xs sm:text-sm">M</div>
-                            <div className="bg-[#1e293b] text-white font-black rounded-lg flex items-center justify-center text-xs sm:text-sm">E</div>
-                            <div className="bg-[#06b6d4] text-white font-black rounded-lg flex items-center justify-center text-xs sm:text-sm">R</div>
-                            <div className="bg-[#84cc16] text-white font-black rounded-lg flex items-center justify-center text-xs sm:text-sm">N</div>
+                        <div className="w-16 h-16 min-[400px]:w-20 min-[400px]:h-20 sm:w-26 sm:h-26 bg-slate-50/90 border border-slate-200/80 rounded-xl sm:rounded-2xl p-1.5 min-[400px]:p-2 sm:p-2.5 flex-shrink-0 shadow-2xs">
+                          <div className="grid grid-cols-2 gap-1 min-[400px]:gap-1.5 w-full h-full">
+                            <div className="bg-[#10b981] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">M</div>
+                            <div className="bg-[#1e293b] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">E</div>
+                            <div className="bg-[#06b6d4] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">R</div>
+                            <div className="bg-[#84cc16] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">N</div>
                           </div>
                         </div>
                       ) : (
-                        <div className={`w-22 h-22 sm:w-26 sm:h-26 rounded-2xl flex items-center justify-center flex-shrink-0 border border-slate-200/80 shadow-2xs ${course.iconBg || 'bg-slate-50'}`}>
+                        <div className={`w-16 h-16 min-[400px]:w-20 min-[400px]:h-20 sm:w-26 sm:h-26 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 border border-slate-200/80 shadow-2xs ${course.iconBg || 'bg-slate-50'}`}>
                           <img
                             src={course.icon}
                             alt={course.title}
-                            className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                            className="w-8 h-8 min-[400px]:w-10 min-[400px]:h-10 sm:w-12 sm:h-12 object-contain"
                           />
                         </div>
                       )}
 
                       {/* TITLE & 2x2 PILLS GRID */}
                       <div className="flex flex-col min-w-0 flex-1">
-                        <h3 className="font-extrabold text-slate-900 text-[17px] sm:text-[19px] leading-snug mb-3">
+                        <h3 className="font-extrabold text-slate-900 text-[14px] min-[400px]:text-[16px] sm:text-[19px] leading-tight mb-2 sm:mb-3 line-clamp-2">
                           {course.title}
                         </h3>
 
                         {/* 2x2 PILLS GRID */}
-                        <div className="grid grid-cols-2 gap-2 w-full">
+                        <div className="grid grid-cols-2 gap-1 sm:gap-2 w-full">
                           {gridPills.map((pill, idx) => (
                             <div
                               key={idx}
-                              className="bg-[#f0f6ff] border border-[#dbeafe] text-slate-600 px-3 py-1.5 rounded-xl text-[11px] sm:text-[12px] font-medium flex items-center gap-1.5 whitespace-nowrap truncate"
+                              className="bg-[#f0f6ff] border border-[#dbeafe] text-slate-600 px-1.5 min-[400px]:px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[9.5px] min-[400px]:text-[10.5px] sm:text-[12px] font-semibold flex items-center gap-1 sm:gap-1.5 whitespace-nowrap truncate"
                             >
                               <span className="font-black text-slate-900">{pill.val}</span>
-                              {pill.label && <span>{pill.label}</span>}
+                              {pill.label && <span className="truncate">{pill.label}</span>}
                             </div>
                           ))}
                         </div>
@@ -539,12 +539,12 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                     <div className="w-full h-px bg-slate-100 my-0.5" />
 
                     {/* BOTTOM ROW: CHECKMARK FEATURES & CTA BUTTON */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 pt-0.5 mt-auto">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-3 sm:gap-4 pt-0.5 mt-auto">
                       {/* CHECKMARK BULLETS */}
-                      <div className="flex flex-col gap-2 min-w-0 flex-1">
+                      <div className="flex flex-col gap-1.5 sm:gap-2 min-w-0 flex-1">
                         {checkmarkFeatures.map((feat, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-[12px] sm:text-[13px] font-semibold text-slate-700">
-                            <span className="w-4 h-4 rounded bg-blue-50 border border-blue-200/80 text-blue-600 font-extrabold text-[10px] flex items-center justify-center flex-shrink-0">
+                          <div key={idx} className="flex items-center gap-1.5 sm:gap-2 text-[11px] min-[400px]:text-[12px] sm:text-[13px] font-semibold text-slate-700">
+                            <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded bg-blue-50 border border-blue-200/80 text-blue-600 font-extrabold text-[9px] sm:text-[10px] flex items-center justify-center flex-shrink-0">
                               ✓
                             </span>
                             <span className="truncate">{feat}</span>
@@ -552,13 +552,13 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                         ))}
                       </div>
 
-                      {/* VIEW DETAILS BUTTON (RIGHT ALIGNED) */}
+                      {/* VIEW DETAILS BUTTON (RIGHT ALIGNED ON DESKTOP, FULL WIDTH ON MOBILE) */}
                       <button
                         suppressHydrationWarning
                         onClick={handleEnrollClick}
-                        className="w-full sm:w-auto bg-[#2463eb] hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap"
+                        className="w-full sm:w-auto bg-[#2463eb] hover:bg-blue-700 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[12.5px] sm:text-sm font-extrabold flex items-center justify-center gap-1.5 sm:gap-2 shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap"
                       >
-                        View Details <ArrowRight className="w-4 h-4" />
+                        View Details <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </button>
                     </div>
                   </div>
