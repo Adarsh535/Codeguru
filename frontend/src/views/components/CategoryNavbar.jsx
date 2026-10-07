@@ -457,6 +457,22 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                   }
                   
                   const titleLower = (c.title || '').toLowerCase();
+                  const durationLower = (c.duration || '').toLowerCase();
+
+                  // Highlights specifically for 6 Months duration courses
+                  if (durationLower.includes('6 month') || durationLower.includes('6-month')) {
+                    let techStack = 'MongoDB, Express, React, Node.js';
+                    if (titleLower.includes('java')) techStack = 'Core Java, Spring Boot, Microservices';
+                    else if (titleLower.includes('python')) techStack = 'Python, Data Science & AI/ML';
+                    else if (!titleLower.includes('mern')) techStack = `${c.title} Core Stack`;
+
+                    return [
+                      `${techStack} (5 Projects)`,
+                      '6 Mock Interviews (AI + Human)',
+                      '5 Interview Opportunities Guarantee',
+                      'Job & Placement Opportunities'
+                    ];
+                  }
                   
                   if (c.id === 'mern-stack' || titleLower.includes('mern')) {
                     return [
