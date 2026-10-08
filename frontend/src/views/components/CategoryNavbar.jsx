@@ -17,6 +17,20 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
   const [likedCourses, setLikedCourses] = useState({});
   const [customCourses, setCustomCourses] = useState([]);
 
+  const scrollToCatalogSection = (delay = 60) => {
+    setTimeout(() => {
+      if (typeof window === 'undefined') return;
+      const catalogElem = document.getElementById('course-catalog-section');
+      if (catalogElem) {
+        const isMobile = window.innerWidth < 640;
+        const yOffset = isMobile ? -52 : -72;
+        const rect = catalogElem.getBoundingClientRect();
+        const targetY = rect.top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: targetY, behavior: 'smooth' });
+      }
+    }, delay);
+  };
+
   useEffect(() => {
     let isMounted = true;
     apiService.getCourses().then(dynamicData => {
@@ -34,14 +48,8 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
         if (subList && subList.length > 0) {
           setActiveSubCategory(subList[0].id);
         }
-        setTimeout(() => {
-          const catalogElem = document.getElementById('course-catalog-section');
-          if (catalogElem) {
-            const yOffset = -55;
-            const y = catalogElem.getBoundingClientRect().top + window.pageYOffset + yOffset;
-            window.scrollTo({ top: y, behavior: 'smooth' });
-          }
-        }, 300);
+        scrollToCatalogSection(100);
+        scrollToCatalogSection(300);
       }
     }
 
@@ -88,15 +96,19 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       if (subList && subList.length > 0) {
         setActiveSubCategory(subList[0].id);
       }
-      setTimeout(() => {
-        const catalogElem = document.getElementById('course-catalog-section');
-        if (catalogElem) {
-          const yOffset = -55;
-          const y = catalogElem.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          window.scrollTo({ top: y, behavior: 'smooth' });
-        }
-      }, 50);
+      scrollToCatalogSection(40);
+      scrollToCatalogSection(120);
     }
+  };
+
+  const handleSubCategoryClick = (subId) => {
+    setActiveSubCategory(subId);
+    scrollToCatalogSection(30);
+  };
+
+  const handleFilterClick = (filterVal) => {
+    setActiveFilter(prev => prev === filterVal ? 'All' : filterVal);
+    scrollToCatalogSection(30);
   };
 
   const handleEnrollClick = (e) => {
@@ -625,7 +637,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                       <button
                         suppressHydrationWarning
                         key={sub.id}
-                        onClick={() => setActiveSubCategory(sub.id)}
+                        onClick={() => handleSubCategoryClick(sub.id)}
                         className={`flex-1 min-w-max text-center whitespace-nowrap px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-extrabold text-[11px] min-[360px]:text-[12px] sm:text-[13.5px] transition-all duration-200 cursor-pointer ${
                           isSubActive
                             ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 scale-[1.02]'
@@ -650,7 +662,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                     </h4>
                     <button
                       suppressHydrationWarning
-                      onClick={() => setActiveFilter('All')}
+                      onClick={() => handleFilterClick('All')}
                       className={`px-3 py-1 rounded-xl text-[10.5px] sm:text-[12px] font-extrabold tracking-tight transition-all duration-200 cursor-pointer ${
                         activeFilter === 'All'
                           ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 scale-[1.02]'
@@ -667,7 +679,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                         <button
                           suppressHydrationWarning
                           key={filter.value}
-                          onClick={() => setActiveFilter(isFilterActive ? 'All' : filter.value)}
+                          onClick={() => handleFilterClick(filter.value)}
                           className={`flex-1 min-w-0 text-center whitespace-nowrap px-1.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl font-extrabold text-[10.5px] min-[360px]:text-[11.5px] sm:text-[13.5px] tracking-tight transition-all duration-200 cursor-pointer ${
                             isFilterActive
                               ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 scale-[1.02]'
