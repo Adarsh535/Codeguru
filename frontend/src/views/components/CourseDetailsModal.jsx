@@ -252,70 +252,73 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
 
         {/* INNER CONTAINER WITH COMPACT SCROLLING */}
         <div className="flex-1 overflow-y-auto px-2.5 sm:px-3 py-2 space-y-2 scrollbar-thin">
-          
-          {/* DARK HERO CARD (COMPACT & SLEEK) */}
-          <div className="relative w-full bg-[#181a20] border border-slate-800 rounded-xl p-3 sm:p-3.5 flex flex-col items-center text-center shadow-md overflow-hidden">
+                 {/* DARK HERO CARD (PERFECTLY PROPORTIONED & STUNNING) */}
+          <div className="relative w-full bg-[#14161d] border border-slate-800 rounded-2xl p-3.5 sm:p-4 flex flex-col items-center text-center shadow-lg overflow-hidden">
+            {/* BACKGROUND GLOW BLOBS */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
+
             {/* TECH STACK LOGOS / FLOW ROW */}
             {isMern ? (
-              <div className="flex items-center justify-center gap-1 sm:gap-2 mb-0.5">
+              <div className="relative z-10 flex items-center justify-center gap-1.5 sm:gap-2.5 mb-1">
                 {/* M - MongoDB */}
                 <div className="flex flex-col items-center">
-                  <div className="w-9.5 h-9.5 sm:w-10 sm:h-10 rounded-xl bg-[#252830] border border-slate-700/60 flex items-center justify-center text-[#10b981] font-black text-sm sm:text-base shadow-xs">
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#10b981] font-black text-sm sm:text-base shadow-xs flex-shrink-0">
                     M
                   </div>
-                  <span className="text-[9.5px] sm:text-[10px] font-medium text-slate-400 mt-1">
+                  <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5">
                     MongoDB
                   </span>
                 </div>
 
-                <ChevronRight className="w-3 h-3 text-slate-600 mb-3.5 flex-shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-slate-600 mb-4 flex-shrink-0" />
 
                 {/* E - Express */}
                 <div className="flex flex-col items-center">
-                  <div className="w-9.5 h-9.5 sm:w-10 sm:h-10 rounded-xl bg-[#252830] border border-slate-700/60 flex items-center justify-center text-white font-black text-sm sm:text-base shadow-xs">
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-white font-black text-sm sm:text-base shadow-xs flex-shrink-0">
                     E
                   </div>
-                  <span className="text-[9.5px] sm:text-[10px] font-medium text-slate-400 mt-1">
+                  <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5">
                     Express
                   </span>
                 </div>
 
-                <ChevronRight className="w-3 h-3 text-slate-600 mb-3.5 flex-shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-slate-600 mb-4 flex-shrink-0" />
 
                 {/* R - React */}
                 <div className="flex flex-col items-center">
-                  <div className="w-9.5 h-9.5 sm:w-10 sm:h-10 rounded-xl bg-[#252830] border border-slate-700/60 flex items-center justify-center text-[#f59e0b] font-black text-sm sm:text-base shadow-xs">
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#f59e0b] font-black text-sm sm:text-base shadow-xs flex-shrink-0">
                     R
                   </div>
-                  <span className="text-[9.5px] sm:text-[10px] font-medium text-slate-400 mt-1">
+                  <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5">
                     React
                   </span>
                 </div>
 
-                <ChevronRight className="w-3 h-3 text-slate-600 mb-3.5 flex-shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-slate-600 mb-4 flex-shrink-0" />
 
                 {/* N - Node.js */}
                 <div className="flex flex-col items-center">
-                  <div className="w-9.5 h-9.5 sm:w-10 sm:h-10 rounded-xl bg-[#252830] border border-slate-700/60 flex items-center justify-center text-[#84cc16] font-black text-sm sm:text-base shadow-xs">
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#84cc16] font-black text-sm sm:text-base shadow-xs flex-shrink-0">
                     N
                   </div>
-                  <span className="text-[9.5px] sm:text-[10px] font-medium text-slate-400 mt-1">
+                  <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5">
                     Node.js
                   </span>
                 </div>
               </div>
             ) : (
-              <div className="w-10 h-10 rounded-xl bg-[#252830] border border-slate-700/60 p-2 flex items-center justify-center shadow-xs mb-1.5">
+              <div className="relative z-10 w-11 h-11 sm:w-12 sm:h-12 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 p-2.5 flex items-center justify-center shadow-xs mb-1.5 flex-shrink-0">
                 <img src={course.icon} alt={course.title} className="w-full h-full object-contain" />
               </div>
             )}
 
             {/* TITLE & SUBTITLE */}
-            <div className="text-center space-y-0.5 max-w-sm mx-auto mt-1.5">
-              <h1 className="text-sm sm:text-base font-black text-white tracking-tight leading-tight">
+            <div className="relative z-10 text-center space-y-1 max-w-sm mx-auto mt-2">
+              <h1 className="text-base sm:text-lg font-black text-white tracking-tight leading-tight">
                 {course.title}
               </h1>
-              <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium">
+              <p className="text-[11px] sm:text-xs text-slate-400 font-medium">
                 Learn to build real-world web applications from scratch
               </p>
             </div>
@@ -323,9 +326,9 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
             {/* WATCH INTRO VIDEO BUTTON */}
             <button
               onClick={() => setShowVideoModal(true)}
-              className="w-full bg-[#f59e0b] hover:bg-[#e08e00] text-slate-950 font-black text-xs py-2 px-3.5 rounded-full flex items-center justify-center gap-1.5 shadow-sm shadow-amber-500/20 active:scale-[0.99] transition-all cursor-pointer mt-2.5"
+              className="relative z-10 w-full bg-[#f59e0b] hover:bg-[#e08e00] text-slate-950 font-black text-xs sm:text-sm py-2.5 px-4 rounded-full flex items-center justify-center gap-2 shadow-md shadow-amber-500/20 active:scale-[0.99] transition-all cursor-pointer mt-3"
             >
-              <Play className="w-3 h-3 fill-slate-950 text-slate-950 translate-x-0.5" />
+              <Play className="w-3.5 h-3.5 fill-slate-950 text-slate-950 translate-x-0.5" />
               <span>Watch Intro Video</span>
             </button>
           </div>

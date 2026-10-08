@@ -701,7 +701,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
             </div>
 
             {/* COURSE CARDS GRID - SCROLLABLE CONTAINER FOR ALL CATEGORIES */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 pb-10 max-h-[68vh] sm:max-h-[72vh] overflow-y-auto pr-1.5 pt-1 scrollbar-thin">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 pb-10 max-h-[68vh] sm:max-h-[72vh] overflow-y-auto pr-1.5 pt-4 sm:pt-5 scrollbar-thin">
               {displayedCourses.map((course) => {
                 const isLiked = !!likedCourses[course.id];
                 const titleLower = (course.title || '').toLowerCase();
@@ -761,7 +761,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                   >
                     {/* ATTACHED BESTSELLER / TOP BADGE */}
                     {course.tag && (
-                      <div className="absolute -top-3 left-4 sm:left-6 px-2.5 sm:px-3 py-0.5 bg-[#fde047] border border-[#facc15] text-[#713f12] font-black text-[9.5px] sm:text-[10.5px] rounded-lg shadow-2xs tracking-wider uppercase z-10">
+                      <div className="absolute top-0 -translate-y-1/2 left-4 sm:left-6 px-2.5 sm:px-3 py-0.5 bg-[#fde047] border border-[#facc15] text-[#713f12] font-black text-[9.5px] sm:text-[10.5px] rounded-lg shadow-2xs tracking-wider uppercase z-10">
                         {course.tag}
                       </div>
                     )}
