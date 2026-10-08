@@ -5,6 +5,7 @@ import { Heart, Clock, ArrowRight, Code, Cpu, Server, Wrench, Zap, Globe, Extern
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { apiService } from '../../services/apiService';
+import CourseDetailsModal from './CourseDetailsModal';
 
 export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, isHomePage }) {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
   const [activeFilter, setActiveFilter] = useState('All');
   const [likedCourses, setLikedCourses] = useState({});
   const [customCourses, setCustomCourses] = useState([]);
+  const [selectedCourseForDetails, setSelectedCourseForDetails] = useState(null);
 
   const scrollToCatalogSection = (delay = 40) => {
     setTimeout(() => {
@@ -108,12 +110,10 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
   const handleSubCategoryClick = (subId) => {
     setActiveSubCategory(subId);
-    scrollToCatalogSection(30);
   };
 
   const handleFilterClick = (filterVal) => {
     setActiveFilter(prev => prev === filterVal ? 'All' : filterVal);
-    scrollToCatalogSection(30);
   };
 
   const handleEnrollClick = (e) => {
@@ -631,7 +631,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
         {/* ON COURSES PAGE ONLY: SHOW FULL CATALOG BELOW CATEGORY CARDS */}
         {!isHome && (
-          <div id="course-catalog-section" className="pt-2 min-h-[90vh] pb-32">
+          <div id="course-catalog-section" className="pt-2 min-h-[120vh] pb-[60vh]">
             {/* DOMAIN SUB-CATEGORY TABS FOR ALL CATEGORIES - STICKY SEGMENTED CONTROL */}
             {SUB_CATEGORIES[activeCategory] && SUB_CATEGORIES[activeCategory].length > 0 && (
               <div className="sticky top-[52px] sm:top-[74px] z-30 bg-slate-50/95 backdrop-blur-md py-1.5 sm:py-2 border-t border-b border-slate-200/80 shadow-xs my-1 sm:my-2 -mx-3 sm:mx-0 px-3 sm:px-0">
@@ -829,7 +829,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                       {/* VIEW DETAILS BUTTON (COMPACT & RIGHT ALIGNED) */}
                       <button
                         suppressHydrationWarning
-                        onClick={handleEnrollClick}
+                        onClick={() => setSelectedCourseForDetails(course)}
                         className="w-auto bg-[#2463eb] hover:bg-blue-700 text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl text-[11.5px] sm:text-xs md:text-sm font-extrabold flex items-center justify-center gap-1 sm:gap-1.5 shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap flex-shrink-0 self-end"
                       >
                         View Details <ArrowRight className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
@@ -856,6 +856,21 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
         )}
 
       </div>
+
+      {/* COURSE DETAILS MODAL */}
+      <CourseDetailsModal
+        isOpen={!!selectedCourseForDetails}
+        onClose={() => setSelectedCourseForDetails(null)}
+        course={selectedCourseForDetails}
+        onEnroll={(crs) => {
+          setSelectedCourseForDetails(null);
+          if (onOpenEnrollModal) {
+            onOpenEnrollModal(crs);
+          } else if (onOpenContactModal) {
+            onOpenContactModal();
+          }
+        }}
+      />
     </section>
   );
 }
