@@ -17,15 +17,20 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
   const [likedCourses, setLikedCourses] = useState({});
   const [customCourses, setCustomCourses] = useState([]);
 
-  const scrollToCatalogSection = (delay = 60) => {
+  const scrollToCatalogSection = (delay = 40) => {
     setTimeout(() => {
       if (typeof window === 'undefined') return;
       const catalogElem = document.getElementById('course-catalog-section');
       if (catalogElem) {
         const isMobile = window.innerWidth < 640;
-        const yOffset = isMobile ? -52 : -72;
-        const rect = catalogElem.getBoundingClientRect();
-        const targetY = rect.top + window.pageYOffset + yOffset;
+        const headerHeight = isMobile ? 54 : 76;
+        let absTop = catalogElem.offsetTop;
+        let el = catalogElem.offsetParent;
+        while (el) {
+          absTop += el.offsetTop;
+          el = el.offsetParent;
+        }
+        const targetY = Math.max(0, absTop - headerHeight);
         window.scrollTo({ top: targetY, behavior: 'smooth' });
       }
     }, delay);
@@ -626,7 +631,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
         {/* ON COURSES PAGE ONLY: SHOW FULL CATALOG BELOW CATEGORY CARDS */}
         {!isHome && (
-          <div id="course-catalog-section" className="pt-2">
+          <div id="course-catalog-section" className="pt-2 min-h-[90vh] pb-32">
             {/* DOMAIN SUB-CATEGORY TABS FOR ALL CATEGORIES - STICKY SEGMENTED CONTROL */}
             {SUB_CATEGORIES[activeCategory] && SUB_CATEGORIES[activeCategory].length > 0 && (
               <div className="sticky top-[52px] sm:top-[72px] z-30 bg-slate-50/95 backdrop-blur-md py-2 sm:py-2.5 border-t border-b border-slate-200/80 shadow-xs my-2 sm:my-3 -mx-3 sm:mx-0 px-3 sm:px-0">
