@@ -30,6 +30,18 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       const catParam = params.get('category');
       if (catParam) {
         setActiveCategory(catParam);
+        const subList = SUB_CATEGORIES[catParam];
+        if (subList && subList.length > 0) {
+          setActiveSubCategory(subList[0].id);
+        }
+        setTimeout(() => {
+          const catalogElem = document.getElementById('course-catalog-section');
+          if (catalogElem) {
+            const yOffset = -55;
+            const y = catalogElem.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          }
+        }, 300);
       }
     }
 
@@ -76,46 +88,16 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       if (subList && subList.length > 0) {
         setActiveSubCategory(subList[0].id);
       }
-    }
-  };
-
-  const handleSubCategoryClick = (subId) => {
-    setActiveSubCategory(subId);
-    const elem = document.getElementById(`subcat-${activeCategory}-${subId}`);
-    if (elem) {
-      const yOffset = -150;
-      const y = elem.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }
-  };
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || isHome) return;
-
-    const handleScroll = () => {
-      const subList = SUB_CATEGORIES[activeCategory] || [];
-      const scrollPosition = window.scrollY + 220;
-
-      for (let i = subList.length - 1; i >= 0; i--) {
-        const sub = subList[i];
-        const elem = document.getElementById(`subcat-${activeCategory}-${sub.id}`);
-        if (elem) {
-          const top = elem.offsetTop;
-          if (scrollPosition >= top) {
-            setActiveSubCategory(sub.id);
-            const subBtn = document.getElementById(`subtab-btn-${sub.id}`);
-            if (subBtn) {
-              subBtn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-            }
-            break;
-          }
+      setTimeout(() => {
+        const catalogElem = document.getElementById('course-catalog-section');
+        if (catalogElem) {
+          const yOffset = -55;
+          const y = catalogElem.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
         }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [activeCategory, isHome]);
+      }, 50);
+    }
+  };
 
   const handleEnrollClick = (e) => {
     if (e) e.preventDefault();
@@ -632,7 +614,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
         {/* ON COURSES PAGE ONLY: SHOW FULL CATALOG BELOW CATEGORY CARDS */}
         {!isHome && (
-          <div className="pt-2">
+          <div id="course-catalog-section" className="pt-2">
             {/* DOMAIN SUB-CATEGORY TABS FOR ALL CATEGORIES - STICKY SEGMENTED CONTROL */}
             {SUB_CATEGORIES[activeCategory] && SUB_CATEGORIES[activeCategory].length > 0 && (
               <div className="sticky top-[52px] sm:top-[72px] z-30 bg-slate-50/95 backdrop-blur-md py-2 sm:py-2.5 border-t border-b border-slate-200/80 shadow-xs my-2 sm:my-3 -mx-3 sm:mx-0 px-3 sm:px-0">
@@ -642,9 +624,8 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                     return (
                       <button
                         suppressHydrationWarning
-                        id={`subtab-btn-${sub.id}`}
                         key={sub.id}
-                        onClick={() => handleSubCategoryClick(sub.id)}
+                        onClick={() => setActiveSubCategory(sub.id)}
                         className={`flex-1 min-w-max text-center whitespace-nowrap px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-extrabold text-[11px] min-[360px]:text-[12px] sm:text-[13.5px] transition-all duration-200 cursor-pointer ${
                           isSubActive
                             ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 scale-[1.02]'
@@ -702,186 +683,140 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
               </div>
             </div>
 
-            {/* CONTINUOUS SUB-CATEGORY COURSE SECTIONS WITH AUTO SCROLLSPY */}
-            <div className="space-y-10 pb-10">
-              {(SUB_CATEGORIES[activeCategory] || []).map((sub) => {
-                const subCourses = allCourses.filter(c => {
-                  const matchesCat = c.categoryId === activeCategory;
-                  const courseSub = (c.subCategory || c.subCat || '').toLowerCase();
-                  const courseTitle = (c.title || '').toLowerCase();
-                  const matchesSubCat = courseSub === sub.id.toLowerCase() || 
-                                        courseSub.includes(sub.id.toLowerCase()) || 
-                                        courseTitle.includes(sub.id.toLowerCase());
+            {/* COURSE CARDS GRID */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-10">
+              {displayedCourses.map((course) => {
+                const isLiked = !!likedCourses[course.id];
+                const titleLower = (course.title || '').toLowerCase();
+                const isMern = course.id === 'mern-stack' || titleLower.includes('mern');
 
-                  let matchesFilter = activeFilter === 'All';
-                  if (!matchesFilter) {
-                    const selectedFilterObj = trainingFilters.find(f => f.value === activeFilter || f.label === activeFilter);
-                    if (selectedFilterObj) {
-                      const keys = selectedFilterObj.matchKeys || [selectedFilterObj.value, selectedFilterObj.label];
-                      matchesFilter = keys.some(k => 
-                        c.duration?.toLowerCase().includes(k.toLowerCase()) || 
-                        c.title?.toLowerCase().includes(k.toLowerCase())
-                      );
-                    } else {
-                      matchesFilter = c.duration?.includes(activeFilter) || c.title?.includes(activeFilter);
-                    }
-                  }
-                  return matchesCat && matchesSubCat && matchesFilter;
-                });
+                // 2x2 Pills Grid Data
+                const gridPills = [
+                  { val: course.duration || '6 Months', label: '' },
+                  { val: '5', label: 'Internships' },
+                  { val: '5', label: 'Mock Tests' },
+                  { val: '5', label: 'Projects' }
+                ];
 
-                if (subCourses.length === 0 && activeFilter !== 'All') return null;
+                // Checkmark Features List Data
+                const checkmarkFeatures = isMern ? [
+                  'MongoDB, Express, React, Node.js',
+                  'Frontend and Backend: React + Express',
+                  'Database: MongoDB'
+                ] : titleLower.includes('java') ? [
+                  'Core Java, Spring Boot, Microservices',
+                  'Enterprise Architecture & REST APIs',
+                  'Database: MySQL & PostgreSQL'
+                ] : titleLower.includes('python') || titleLower.includes('data') || titleLower.includes('learning') ? [
+                  'Python, Data Science & AI/ML',
+                  'Data Pipelines & Neural Networks',
+                  'Database & Cloud: SQL + AWS'
+                ] : titleLower.includes('repair') || titleLower.includes('chip') || titleLower.includes('mobile') || titleLower.includes('laptop') || titleLower.includes('bga') ? [
+                  'Practical Hardware & Schematics Diagnosis',
+                  'Motherboard Micro-Soldering & IC Work',
+                  '100% Practical Lab Training'
+                ] : titleLower.includes('ac') || titleLower.includes('pcb') || titleLower.includes('appliance') || titleLower.includes('fridge') ? [
+                  'Inverter AC & PCB Circuit Repair',
+                  'Component Level Troubleshooting',
+                  'Job Ready Practical Field Training'
+                ] : titleLower.includes('marketing') || titleLower.includes('seo') || titleLower.includes('ads') ? [
+                  'Google Ads, Meta Ads & Funnel Setup',
+                  'SEO Optimization & Social Media Growth',
+                  'Live Campaign & Ad Budget Management'
+                ] : titleLower.includes('robotics') || titleLower.includes('iot') || titleLower.includes('arduino') || titleLower.includes('embedded') ? [
+                  'Hardware Programming & Microcontrollers',
+                  'Sensors, Actuators & Wireless IoT Modules',
+                  'Practical Electronics Project Building'
+                ] : titleLower.includes('networking') || titleLower.includes('ccna') || titleLower.includes('cloud') || titleLower.includes('hacking') || titleLower.includes('cyber') ? [
+                  'Cisco CCNA, Cloud & Server Admin',
+                  'Ethical Hacking & Network Security',
+                  'Live Router, Switch & Cloud Labs'
+                ] : [
+                  `${course.title} Core Track`,
+                  'Hands-on Practical & Project Training',
+                  'Certification & Job Assistance'
+                ];
 
                 return (
-                  <div key={sub.id} id={`subcat-${activeCategory}-${sub.id}`} className="scroll-mt-36">
-                    {/* SUB-CATEGORY SECTION HEADER */}
-                    <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-200/80">
-                      <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse" />
-                      <h3 className="text-base sm:text-lg font-black text-slate-900 font-heading tracking-tight">
-                        {sub.label} Programs
-                      </h3>
-                      <span className="text-xs font-extrabold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 ml-auto">
-                        {subCourses.length} {subCourses.length === 1 ? 'Course' : 'Courses'}
-                      </span>
+                  <div
+                    key={course.id}
+                    className="group relative flex flex-col bg-white border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] rounded-[20px] sm:rounded-[24px] p-3.5 min-[400px]:p-4 sm:p-6 transition-all duration-300 hover:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.12)] hover:border-blue-200 justify-between gap-3 sm:gap-4"
+                  >
+                    {/* ATTACHED BESTSELLER / TOP BADGE */}
+                    {course.tag && (
+                      <div className="absolute -top-3 left-4 sm:left-6 px-2.5 sm:px-3 py-0.5 bg-[#fde047] border border-[#facc15] text-[#713f12] font-black text-[9.5px] sm:text-[10.5px] rounded-lg shadow-2xs tracking-wider uppercase z-10">
+                        {course.tag}
+                      </div>
+                    )}
+
+                    {/* TOP ROW: ICON + TITLE + 2x2 PILLS GRID */}
+                    <div className="flex flex-row gap-2.5 min-[400px]:gap-3.5 sm:gap-5 items-start">
+                      {/* TECH LOGO CONTAINER (M E R N 4-box grid OR Course Icon) */}
+                      {isMern ? (
+                        <div className="w-16 h-16 min-[400px]:w-20 min-[400px]:h-20 sm:w-26 sm:h-26 bg-slate-50/90 border border-slate-200/80 rounded-xl sm:rounded-2xl p-1.5 min-[400px]:p-2 sm:p-2.5 flex-shrink-0 shadow-2xs mt-[8px]">
+                          <div className="grid grid-cols-2 gap-1 min-[400px]:gap-1.5 w-full h-full">
+                            <div className="bg-[#10b981] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">M</div>
+                            <div className="bg-[#1e293b] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">E</div>
+                            <div className="bg-[#06b6d4] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">R</div>
+                            <div className="bg-[#84cc16] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">N</div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={`w-16 h-16 min-[400px]:w-20 min-[400px]:h-20 sm:w-26 sm:h-26 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 border border-slate-200/80 shadow-2xs mt-[8px] ${course.iconBg || 'bg-slate-50'}`}>
+                          <img
+                            src={course.icon}
+                            alt={course.title}
+                            className="w-8 h-8 min-[400px]:w-10 min-[400px]:h-10 sm:w-12 sm:h-12 object-contain"
+                          />
+                        </div>
+                      )}
+
+                      {/* TITLE & 2x2 PILLS GRID */}
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <h3 className="font-extrabold text-slate-900 text-[14px] min-[400px]:text-[16px] sm:text-[19px] leading-tight mb-2 sm:mb-3 line-clamp-2">
+                          {course.title}
+                        </h3>
+
+                        {/* 2x2 PILLS GRID */}
+                        <div className="grid grid-cols-2 gap-1 sm:gap-2 w-full">
+                          {gridPills.map((pill, idx) => (
+                            <div
+                              key={idx}
+                              className="bg-[#f0f6ff] border border-[#dbeafe] text-slate-600 px-1.5 min-[400px]:px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[9.5px] min-[400px]:text-[10.5px] sm:text-[12px] font-semibold flex items-center gap-1 sm:gap-1.5 whitespace-nowrap truncate"
+                            >
+                              <span className="font-black text-slate-900">{pill.val}</span>
+                              {pill.label && <span className="truncate">{pill.label}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
-                    {/* COURSE CARDS GRID FOR THIS SUB-CATEGORY */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {subCourses.map((course) => {
-                        const isLiked = !!likedCourses[course.id];
-                        const titleLower = (course.title || '').toLowerCase();
-                        const isMern = course.id === 'mern-stack' || titleLower.includes('mern');
+                    {/* DIVIDER LINE */}
+                    <div className="w-full h-px bg-slate-100 my-0.5" />
 
-                        // 2x2 Pills Grid Data
-                        const gridPills = [
-                          { val: course.duration || '6 Months', label: '' },
-                          { val: '5', label: 'Internships' },
-                          { val: '5', label: 'Mock Tests' },
-                          { val: '5', label: 'Projects' }
-                        ];
-
-                        // Checkmark Features List Data
-                        const checkmarkFeatures = isMern ? [
-                          'MongoDB, Express, React, Node.js',
-                          'Frontend and Backend: React + Express',
-                          'Database: MongoDB'
-                        ] : titleLower.includes('java') ? [
-                          'Core Java, Spring Boot, Microservices',
-                          'Enterprise Architecture & REST APIs',
-                          'Database: MySQL & PostgreSQL'
-                        ] : titleLower.includes('python') || titleLower.includes('data') || titleLower.includes('learning') ? [
-                          'Python, Data Science & AI/ML',
-                          'Data Pipelines & Neural Networks',
-                          'Database & Cloud: SQL + AWS'
-                        ] : titleLower.includes('repair') || titleLower.includes('chip') || titleLower.includes('mobile') || titleLower.includes('laptop') || titleLower.includes('bga') ? [
-                          'Practical Hardware & Schematics Diagnosis',
-                          'Motherboard Micro-Soldering & IC Work',
-                          '100% Practical Lab Training'
-                        ] : titleLower.includes('ac') || titleLower.includes('pcb') || titleLower.includes('appliance') || titleLower.includes('fridge') ? [
-                          'Inverter AC & PCB Circuit Repair',
-                          'Component Level Troubleshooting',
-                          'Job Ready Practical Field Training'
-                        ] : titleLower.includes('marketing') || titleLower.includes('seo') || titleLower.includes('ads') ? [
-                          'Google Ads, Meta Ads & Funnel Setup',
-                          'SEO Optimization & Social Media Growth',
-                          'Live Campaign & Ad Budget Management'
-                        ] : titleLower.includes('robotics') || titleLower.includes('iot') || titleLower.includes('arduino') || titleLower.includes('embedded') ? [
-                          'Hardware Programming & Microcontrollers',
-                          'Sensors, Actuators & Wireless IoT Modules',
-                          'Practical Electronics Project Building'
-                        ] : titleLower.includes('networking') || titleLower.includes('ccna') || titleLower.includes('cloud') || titleLower.includes('hacking') || titleLower.includes('cyber') ? [
-                          'Cisco CCNA, Cloud & Server Admin',
-                          'Ethical Hacking & Network Security',
-                          'Live Router, Switch & Cloud Labs'
-                        ] : [
-                          `${course.title} Core Track`,
-                          'Hands-on Practical & Project Training',
-                          'Certification & Job Assistance'
-                        ];
-
-                        return (
-                          <div
-                            key={course.id}
-                            className="group relative flex flex-col bg-white border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] rounded-[20px] sm:rounded-[24px] p-3.5 min-[400px]:p-4 sm:p-6 transition-all duration-300 hover:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.12)] hover:border-blue-200 justify-between gap-3 sm:gap-4"
-                          >
-                            {/* ATTACHED BESTSELLER / TOP BADGE */}
-                            {course.tag && (
-                              <div className="absolute -top-3 left-4 sm:left-6 px-2.5 sm:px-3 py-0.5 bg-[#fde047] border border-[#facc15] text-[#713f12] font-black text-[9.5px] sm:text-[10.5px] rounded-lg shadow-2xs tracking-wider uppercase z-10">
-                                {course.tag}
-                              </div>
-                            )}
-
-                            {/* TOP ROW: ICON + TITLE + 2x2 PILLS GRID */}
-                            <div className="flex flex-row gap-2.5 min-[400px]:gap-3.5 sm:gap-5 items-start">
-                              {/* TECH LOGO CONTAINER (M E R N 4-box grid OR Course Icon) */}
-                              {isMern ? (
-                                <div className="w-16 h-16 min-[400px]:w-20 min-[400px]:h-20 sm:w-26 sm:h-26 bg-slate-50/90 border border-slate-200/80 rounded-xl sm:rounded-2xl p-1.5 min-[400px]:p-2 sm:p-2.5 flex-shrink-0 shadow-2xs mt-[8px]">
-                                  <div className="grid grid-cols-2 gap-1 min-[400px]:gap-1.5 w-full h-full">
-                                    <div className="bg-[#10b981] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">M</div>
-                                    <div className="bg-[#1e293b] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">E</div>
-                                    <div className="bg-[#06b6d4] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">R</div>
-                                    <div className="bg-[#84cc16] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">N</div>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className={`w-16 h-16 min-[400px]:w-20 min-[400px]:h-20 sm:w-26 sm:h-26 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 border border-slate-200/80 shadow-2xs mt-[8px] ${course.iconBg || 'bg-slate-50'}`}>
-                                  <img
-                                    src={course.icon}
-                                    alt={course.title}
-                                    className="w-8 h-8 min-[400px]:w-10 min-[400px]:h-10 sm:w-12 sm:h-12 object-contain"
-                                  />
-                                </div>
-                              )}
-
-                              {/* TITLE & 2x2 PILLS GRID */}
-                              <div className="flex flex-col min-w-0 flex-1">
-                                <h3 className="font-extrabold text-slate-900 text-[14px] min-[400px]:text-[16px] sm:text-[19px] leading-tight mb-2 sm:mb-3 line-clamp-2">
-                                  {course.title}
-                                </h3>
-
-                                {/* 2x2 PILLS GRID */}
-                                <div className="grid grid-cols-2 gap-1 sm:gap-2 w-full">
-                                  {gridPills.map((pill, idx) => (
-                                    <div
-                                      key={idx}
-                                      className="bg-[#f0f6ff] border border-[#dbeafe] text-slate-600 px-1.5 min-[400px]:px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[9.5px] min-[400px]:text-[10.5px] sm:text-[12px] font-semibold flex items-center gap-1 sm:gap-1.5 whitespace-nowrap truncate"
-                                    >
-                                      <span className="font-black text-slate-900">{pill.val}</span>
-                                      {pill.label && <span className="truncate">{pill.label}</span>}
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* DIVIDER LINE */}
-                            <div className="w-full h-px bg-slate-100 my-0.5" />
-
-                            {/* BOTTOM ROW: CHECKMARK FEATURES & CTA BUTTON */}
-                            <div className="flex flex-row items-end justify-between gap-2 sm:gap-4 pt-0.5 mt-auto">
-                              {/* CHECKMARK BULLETS */}
-                              <div className="flex flex-col gap-1.5 sm:gap-2 min-w-0 flex-1">
-                                {checkmarkFeatures.map((feat, idx) => (
-                                  <div key={idx} className="flex items-center gap-1.5 sm:gap-2 text-[11px] min-[400px]:text-[12px] sm:text-[13px] font-semibold text-slate-700">
-                                    <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded bg-blue-50 border border-blue-200/80 text-blue-600 font-extrabold text-[9px] sm:text-[10px] flex items-center justify-center flex-shrink-0">
-                                      ✓
-                                    </span>
-                                    <span className="truncate">{feat}</span>
-                                  </div>
-                                ))}
-                              </div>
-
-                              {/* VIEW DETAILS BUTTON (COMPACT & RIGHT ALIGNED) */}
-                              <button
-                                suppressHydrationWarning
-                                onClick={handleEnrollClick}
-                                className="w-auto bg-[#2463eb] hover:bg-blue-700 text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl text-[11.5px] sm:text-xs md:text-sm font-extrabold flex items-center justify-center gap-1 sm:gap-1.5 shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap flex-shrink-0 self-end"
-                              >
-                                View Details <ArrowRight className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
-                              </button>
-                            </div>
+                    {/* BOTTOM ROW: CHECKMARK FEATURES & CTA BUTTON */}
+                    <div className="flex flex-row items-end justify-between gap-2 sm:gap-4 pt-0.5 mt-auto">
+                      {/* CHECKMARK BULLETS */}
+                      <div className="flex flex-col gap-1.5 sm:gap-2 min-w-0 flex-1">
+                        {checkmarkFeatures.map((feat, idx) => (
+                          <div key={idx} className="flex items-center gap-1.5 sm:gap-2 text-[11px] min-[400px]:text-[12px] sm:text-[13px] font-semibold text-slate-700">
+                            <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded bg-blue-50 border border-blue-200/80 text-blue-600 font-extrabold text-[9px] sm:text-[10px] flex items-center justify-center flex-shrink-0">
+                              ✓
+                            </span>
+                            <span className="truncate">{feat}</span>
                           </div>
-                        );
-                      })}
+                        ))}
+                      </div>
+
+                      {/* VIEW DETAILS BUTTON (COMPACT & RIGHT ALIGNED) */}
+                      <button
+                        suppressHydrationWarning
+                        onClick={handleEnrollClick}
+                        className="w-auto bg-[#2463eb] hover:bg-blue-700 text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl text-[11.5px] sm:text-xs md:text-sm font-extrabold flex items-center justify-center gap-1 sm:gap-1.5 shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap flex-shrink-0 self-end"
+                      >
+                        View Details <ArrowRight className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
+                      </button>
                     </div>
                   </div>
                 );
