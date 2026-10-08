@@ -57,7 +57,9 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
   const isMern = course.id === 'mern-stack' || titleLower.includes('mern');
 
   const courseDuration = course.duration || '3 Months';
-  const courseLevel = course.level || 'Intermediate Level';
+  const rawLevel = course.level || 'Intermediate';
+  const displayLevel = rawLevel.toLowerCase().includes('begin') ? 'Beginner' : rawLevel.toLowerCase().includes('master') ? 'Master' : 'Intermediate';
+  const courseLevel = displayLevel;
   const coursePrice = course.price || '₹7,999';
   const courseOriginalPrice = course.originalPrice || '₹12,999';
   const courseDiscount = course.discount || '38% OFF';
@@ -213,8 +215,15 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
 
           {/* CODE GURRU LOGO HEADER */}
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-xs shadow-xs">
-              CG
+            <div className="w-8 h-8 rounded-full border border-slate-200 bg-white p-0.5 shadow-2xs overflow-hidden flex-shrink-0 flex items-center justify-center">
+              <img
+                src="/logo-icon.png"
+                alt="CodeGuru Logo"
+                className="w-full h-full object-contain rounded-full"
+                onError={(e) => {
+                  e.target.src = '/logo.png';
+                }}
+              />
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-slate-900 text-xs sm:text-sm tracking-tight leading-none flex items-center gap-1">
@@ -311,7 +320,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               <span className="w-5.5 h-5.5 rounded-md bg-amber-100 text-amber-600 flex items-center justify-center text-[10px] font-bold">
                 <BarChart3 className="w-3.5 h-3.5" />
               </span>
-              <span className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-none truncate max-w-full">{courseLevel}</span>
+              <span className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-none">{displayLevel}</span>
               <span className="text-[9px] font-semibold text-slate-500 leading-none">Level</span>
             </div>
 
@@ -319,7 +328,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               <span className="w-5.5 h-5.5 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold">
                 <Video className="w-3.5 h-3.5" />
               </span>
-              <span className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-none truncate max-w-full">Live Classes</span>
+              <span className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-none">Live Classes</span>
               <span className="text-[9px] font-semibold text-slate-500 leading-none">& Recording</span>
             </div>
 
@@ -327,7 +336,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               <span className="w-5.5 h-5.5 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold">
                 <Award className="w-3.5 h-3.5" />
               </span>
-              <span className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-none truncate max-w-full">Certificate</span>
+              <span className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-none">Certificate</span>
               <span className="text-[9px] font-semibold text-slate-500 leading-none">Provided</span>
             </div>
 
@@ -335,7 +344,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               <span className="w-5.5 h-5.5 rounded-md bg-purple-100 text-purple-600 flex items-center justify-center text-[10px] font-bold">
                 <Briefcase className="w-3.5 h-3.5" />
               </span>
-              <span className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-none truncate max-w-full">Real Projects</span>
+              <span className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-none">Real Projects</span>
               <span className="text-[9px] font-semibold text-slate-500 leading-none">(2-3)</span>
             </div>
 
@@ -343,7 +352,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               <span className="w-5.5 h-5.5 rounded-md bg-rose-100 text-rose-600 flex items-center justify-center text-[10px] font-bold">
                 <GraduationCap className="w-3.5 h-3.5" />
               </span>
-              <span className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-none truncate max-w-full">Placement</span>
+              <span className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-none">Placement</span>
               <span className="text-[9px] font-semibold text-slate-500 leading-none">Support</span>
             </div>
           </div>
@@ -380,16 +389,6 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
             >
               Projects
             </button>
-            <button
-              onClick={() => setActiveTab('reviews')}
-              className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
-                activeTab === 'reviews'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Reviews
-            </button>
           </div>
 
           {/* COMPACT TAB CONTENT PANELS */}
@@ -397,8 +396,8 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
             <div className="space-y-3 animate-in fade-in duration-200">
               {/* WHAT YOU WILL LEARN */}
               <div className="bg-white rounded-xl border border-slate-200/80 p-3 shadow-2xs">
-                <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-2 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-blue-600" /> What You Will Learn
+                <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-2">
+                  What You Will Learn
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                   {getWhatYouWillLearn().map((item, idx) => (
@@ -414,8 +413,8 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
 
               {/* BATCH DETAILS */}
               <div className="bg-white rounded-xl border border-slate-200/80 p-3 shadow-2xs">
-                <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-2 flex items-center gap-1.5">
-                  <BookOpen className="w-3.5 h-3.5 text-blue-600" /> Batch Details
+                <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-2">
+                  Batch Details
                 </h3>
                 <div className="grid grid-cols-2 gap-1.5 text-[10.5px]">
                   <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-slate-50 border border-slate-100">
@@ -524,31 +523,16 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
         </div>
 
         {/* COMPACT FIXED BOTTOM BAR */}
-        <div className="bg-white border-t border-slate-100 px-3.5 py-2.5 flex items-center justify-between gap-3 shadow-lg flex-shrink-0">
-          {/* PRICE SECTION */}
-          <div className="flex flex-col">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
-                {coursePrice}
-              </span>
-              <span className="text-xs font-bold text-slate-400 line-through">
-                {courseOriginalPrice}
-              </span>
-            </div>
-            <span className="text-[10.5px] font-extrabold text-emerald-600 leading-none">
-              {courseDiscount}
-            </span>
-          </div>
-
-          {/* ENROLL NOW BUTTON */}
+        <div className="bg-white border-t border-slate-100 px-3.5 py-2.5 flex items-center justify-center shadow-lg flex-shrink-0">
+          {/* ENROLL NOW BUTTON (FULL WIDTH) */}
           <button
             onClick={() => {
               onClose();
               if (onEnroll) onEnroll(course);
             }}
-            className="w-auto bg-[#ff4d00] hover:bg-[#e04400] text-white px-5 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 shadow-md shadow-orange-500/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap"
+            className="w-full bg-[#ff4d00] hover:bg-[#e04400] text-white py-3 rounded-xl text-sm sm:text-base font-extrabold flex items-center justify-center gap-1.5 shadow-md shadow-orange-500/20 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer whitespace-nowrap"
           >
-            Enroll Now <ChevronRight className="w-4 h-4 stroke-[3]" />
+            Enroll Now <ChevronRight className="w-5 h-5 stroke-[3]" />
           </button>
         </div>
 
