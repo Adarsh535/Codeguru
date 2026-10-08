@@ -634,7 +634,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
           <div id="course-catalog-section" className="pt-2 min-h-[90vh] pb-32">
             {/* DOMAIN SUB-CATEGORY TABS FOR ALL CATEGORIES - STICKY SEGMENTED CONTROL */}
             {SUB_CATEGORIES[activeCategory] && SUB_CATEGORIES[activeCategory].length > 0 && (
-              <div className="sticky top-[52px] sm:top-[72px] z-30 bg-slate-50/95 backdrop-blur-md py-2 sm:py-2.5 border-t border-b border-slate-200/80 shadow-xs my-2 sm:my-3 -mx-3 sm:mx-0 px-3 sm:px-0">
+              <div className="sticky top-[52px] sm:top-[74px] z-30 bg-slate-50/95 backdrop-blur-md py-1.5 sm:py-2 border-t border-b border-slate-200/80 shadow-xs my-1 sm:my-2 -mx-3 sm:mx-0 px-3 sm:px-0">
                 <div className="w-full max-w-xl mx-auto bg-slate-200/80 p-1 rounded-xl sm:rounded-2xl flex items-center justify-between gap-1 shadow-inner border border-slate-300/50 overflow-x-auto scrollbar-none [ms-overflow-style:none] [scrollbar-width:none]">
                   {SUB_CATEGORIES[activeCategory].map((sub) => {
                     const isSubActive = activeSubCategory === sub.id;
@@ -657,9 +657,9 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
               </div>
             )}
 
-            {/* TRAINING DURATION FILTER CONTAINER */}
-            <div className="sticky top-[102px] sm:top-[128px] z-20 bg-slate-50/95 backdrop-blur-md py-2 border-b border-slate-200/80 shadow-2xs mb-4">
-              <div className="w-full max-w-7xl mx-auto px-3 sm:px-4">
+            {/* TRAINING DURATION FILTER CONTAINER - STICKY BELOW SUB-CATEGORY TABS */}
+            <div className="sticky top-[102px] sm:top-[126px] z-20 bg-slate-50/95 backdrop-blur-md py-1.5 border-b border-slate-200/80 shadow-2xs mb-3">
+              <div className="w-full max-w-7xl mx-auto px-1 sm:px-4">
                 <div className="bg-slate-100/90 p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 shadow-inner flex flex-col gap-2">
                   <div className="flex items-center justify-between px-1 pt-0.5">
                     <h4 className="text-[11px] sm:text-xs font-black text-slate-800 uppercase tracking-wider">
@@ -677,7 +677,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                       All
                     </button>
                   </div>
-                  <div className="flex items-center justify-between gap-1.5 sm:gap-2.5">
+                  <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 overflow-x-auto scrollbar-none [ms-overflow-style:none] [scrollbar-width:none] pb-0.5">
                     {trainingFilters.slice(1).map((filter) => {
                       const isFilterActive = activeFilter === filter.value;
                       return (
@@ -685,7 +685,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                           suppressHydrationWarning
                           key={filter.value}
                           onClick={() => handleFilterClick(filter.value)}
-                          className={`flex-1 min-w-0 text-center whitespace-nowrap px-1.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl font-extrabold text-[10.5px] min-[360px]:text-[11.5px] sm:text-[13.5px] tracking-tight transition-all duration-200 cursor-pointer ${
+                          className={`flex-1 min-w-[70px] sm:min-w-0 text-center whitespace-nowrap px-1.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl font-extrabold text-[10.5px] min-[360px]:text-[11.5px] sm:text-[13.5px] tracking-tight transition-all duration-200 cursor-pointer ${
                             isFilterActive
                               ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 scale-[1.02]'
                               : 'bg-white text-slate-700 border border-slate-200/90 shadow-2xs hover:bg-slate-50 hover:border-blue-300'
@@ -700,8 +700,8 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
               </div>
             </div>
 
-            {/* COURSE CARDS GRID */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-10">
+            {/* COURSE CARDS GRID - SCROLLABLE CONTAINER FOR ALL CATEGORIES */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 pb-10 max-h-[68vh] sm:max-h-[72vh] overflow-y-auto pr-1.5 pt-1 scrollbar-thin">
               {displayedCourses.map((course) => {
                 const isLiked = !!likedCourses[course.id];
                 const titleLower = (course.title || '').toLowerCase();
