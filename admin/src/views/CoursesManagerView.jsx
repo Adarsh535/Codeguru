@@ -13,12 +13,14 @@ import { enrollmentModel } from '../models/enrollmentModel';
 import { leadModel } from '../models/leadModel';
 
 const CATEGORY_OPTIONS = [
-  { label: 'Coding - Web Development', category: 'coding', subCat: 'web' },
-  { label: 'Coding - App Development', category: 'coding', subCat: 'app' },
-  { label: 'Coding - Software Development', category: 'coding', subCat: 'software' },
-  { label: 'Engineering & Core Tech', category: 'engineering', subCat: '' },
-  { label: 'Networking, Cloud & Cyber Security', category: 'networking', subCat: '' },
-  { label: 'Robotics & Industrial IoT', category: 'robotics', subCat: '' }
+  { label: 'Software Development - Web', category: 'coding', subCat: 'web' },
+  { label: 'Software Development - App', category: 'coding', subCat: 'app' },
+  { label: 'Software Development - AI & ML', category: 'coding', subCat: 'ai' },
+  { label: 'Robotics & IoT', category: 'robotics', subCat: 'robotics' },
+  { label: 'Networking & Server', category: 'networking', subCat: 'networking' },
+  { label: 'Computer & Mobile Repair', category: 'repair', subCat: 'repair' },
+  { label: 'Home Appliance Repair', category: 'electrical', subCat: 'electrical' },
+  { label: 'Digital Marketing', category: 'marketing', subCat: 'marketing' }
 ];
 
 const getCourseTechStack = (title = '', description = '') => {
@@ -40,6 +42,15 @@ const getCourseTechStack = (title = '', description = '') => {
   }
   if (text.includes('robotics') || text.includes('c++')) {
     return ['C++', 'Embedded C', 'Arduino/IoT'];
+  }
+  if (text.includes('repair') || text.includes('chip') || text.includes('mobile') || text.includes('laptop')) {
+    return ['Micro-Soldering', 'Schematics', 'BGA IC', 'Multimeter'];
+  }
+  if (text.includes('ac') || text.includes('pcb') || text.includes('fridge') || text.includes('electrical')) {
+    return ['PCB Repair', 'Inverter Circuit', 'Microcontroller', 'Testing'];
+  }
+  if (text.includes('marketing') || text.includes('seo') || text.includes('ads')) {
+    return ['Google Ads', 'Meta Ads', 'SEO', 'Analytics'];
   }
   return ['HTML5', 'CSS3', 'JavaScript', 'Git'];
 };
@@ -101,13 +112,15 @@ export default function CoursesManagerView() {
 
   const getCategoryDisplayLabel = (course) => {
     if (course.category === 'coding') {
-      if (course.subCat === 'app') return 'Coding - App Dev';
-      if (course.subCat === 'software') return 'Coding - Software Dev';
-      return 'Coding - Web Dev';
+      if (course.subCat === 'app') return 'Software Dev - App';
+      if (course.subCat === 'ai') return 'Software Dev - AI & ML';
+      return 'Software Dev - Web';
     }
-    if (course.category === 'engineering') return 'Engineering & Core Tech';
-    if (course.category === 'networking') return 'Networking & Cyber Security';
-    if (course.category === 'robotics') return 'Robotics & IIoT';
+    if (course.category === 'robotics') return 'Robotics & IoT';
+    if (course.category === 'networking') return 'Networking & Server';
+    if (course.category === 'repair') return 'Computer & Mobile Repair';
+    if (course.category === 'electrical') return 'Home Appliance Repair';
+    if (course.category === 'marketing') return 'Digital Marketing';
     return 'Professional Track';
   };
 

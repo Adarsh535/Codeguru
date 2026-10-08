@@ -36,13 +36,45 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     return () => { isMounted = false; };
   }, []);
 
+  const SUB_CATEGORIES = {
+    coding: [
+      { id: 'web', label: 'Web Dev' },
+      { id: 'app', label: 'App Dev' },
+      { id: 'ai', label: 'AI & ML' }
+    ],
+    robotics: [
+      { id: 'hardware', label: 'Robotics' },
+      { id: 'iot', label: 'IoT' },
+      { id: 'embedded', label: 'Embedded' }
+    ],
+    networking: [
+      { id: 'server', label: 'Server & CCNA' },
+      { id: 'cloud', label: 'Cloud & AWS' },
+      { id: 'cyber', label: 'Cyber Security' }
+    ],
+    repair: [
+      { id: 'mobile', label: 'Mobile Repair' },
+      { id: 'laptop', label: 'Laptop & PC' },
+      { id: 'bga', label: 'BGA IC' }
+    ],
+    electrical: [
+      { id: 'ac', label: 'AC & Fridge' },
+      { id: 'pcb', label: 'PCB Repair' }
+    ],
+    marketing: [
+      { id: 'ads', label: 'Performance Ads' },
+      { id: 'seo', label: 'SEO & Media' }
+    ]
+  };
+
   const handleCategoryClick = (catId) => {
     if (isHome) {
       router.push(`/courses?category=${catId}`);
     } else {
       setActiveCategory(catId);
-      if (catId === 'coding') {
-        setActiveSubCategory('web');
+      const subList = SUB_CATEGORIES[catId];
+      if (subList && subList.length > 0) {
+        setActiveSubCategory(subList[0].id);
       }
     }
   };
@@ -116,7 +148,8 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     { label: 'One Year', value: 'One Year', matchKeys: ['One Year', '1 Year', 'Year'] }
   ];
 
-  const allCourses = [
+  const INITIAL_COURSES = [
+    // 1. SOFTWARE DEVELOPMENT (coding)
     {
       id: 'mern-stack',
       categoryId: 'coding',
@@ -267,8 +300,10 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
       iconBg: 'bg-emerald-50'
     },
+
+    // 2. ROBOTICS & IOT (robotics)
     {
-      id: 'robotics-ai',
+      id: 'robotics-automation',
       categoryId: 'robotics',
       subCategory: 'robotics',
       title: 'Robotics & Hardware Automation',
@@ -279,9 +314,41 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       originalPrice: '₹12,000',
       discount: '33% OFF',
       tag: 'BESTSELLER',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg',
       iconBg: 'bg-indigo-50'
     },
+    {
+      id: 'arduino-iot',
+      categoryId: 'robotics',
+      subCategory: 'robotics',
+      title: 'Arduino & Raspberry Pi Industrial IoT',
+      duration: '3 Months',
+      level: 'Beginner',
+      mode: 'Hands-on Workshop',
+      price: '₹5,499',
+      originalPrice: '₹8,999',
+      discount: '38% OFF',
+      tag: 'POPULAR',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/arduino/arduino-original.svg',
+      iconBg: 'bg-teal-50'
+    },
+    {
+      id: 'embedded-systems',
+      categoryId: 'robotics',
+      subCategory: 'robotics',
+      title: 'Embedded Systems & Microcontroller Dev',
+      duration: '6 Months',
+      level: 'Advanced',
+      mode: 'Live + Lab Kit',
+      price: '₹9,999',
+      originalPrice: '₹16,000',
+      discount: '37% OFF',
+      tag: 'FEATURED',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg',
+      iconBg: 'bg-blue-50'
+    },
+
+    // 3. NETWORKING & SERVER (networking)
     {
       id: 'ccna-net',
       categoryId: 'networking',
@@ -296,22 +363,176 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       tag: 'POPULAR',
       icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg',
       iconBg: 'bg-cyan-50'
+    },
+    {
+      id: 'cloud-aws-devops',
+      categoryId: 'networking',
+      subCategory: 'networking',
+      title: 'Cloud Engineering & AWS DevOps',
+      duration: '6 Months',
+      level: 'Advanced',
+      mode: 'Live + Cloud Lab',
+      price: '₹8,999',
+      originalPrice: '₹14,999',
+      discount: '40% OFF',
+      tag: 'BESTSELLER',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg',
+      iconBg: 'bg-amber-50'
+    },
+    {
+      id: 'ethical-hacking-cyber',
+      categoryId: 'networking',
+      subCategory: 'networking',
+      title: 'Cyber Security & Ethical Hacking',
+      duration: '4 Months',
+      level: 'Intermediate',
+      mode: 'Live + Lab',
+      price: '₹6,999',
+      originalPrice: '₹11,500',
+      discount: '39% OFF',
+      tag: 'HOT',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg',
+      iconBg: 'bg-slate-100'
+    },
+
+    // 4. COMPUTER & MOBILE REPAIR (repair)
+    {
+      id: 'mobile-chip-repair',
+      categoryId: 'repair',
+      subCategory: 'repair',
+      title: 'Chip-Level Mobile Hardware Repairing',
+      duration: '3 Months',
+      level: 'Beginner to Pro',
+      mode: 'Practical Workshop',
+      price: '₹4,999',
+      originalPrice: '₹8,999',
+      discount: '44% OFF',
+      tag: 'BESTSELLER',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/android/android-original.svg',
+      iconBg: 'bg-emerald-50'
+    },
+    {
+      id: 'laptop-chip-repair',
+      categoryId: 'repair',
+      subCategory: 'repair',
+      title: 'Laptop & Desktop Motherboard Chip-Level Repair',
+      duration: '4 Months',
+      level: 'Intermediate',
+      mode: 'Practical Lab',
+      price: '₹6,499',
+      originalPrice: '₹11,000',
+      discount: '41% OFF',
+      tag: 'POPULAR',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/windows8/windows8-original.svg',
+      iconBg: 'bg-blue-50'
+    },
+    {
+      id: 'smartphone-bga-ic',
+      categoryId: 'repair',
+      subCategory: 'repair',
+      title: 'Advanced Smartphone BGA IC & CPU Reballing',
+      duration: '6 Months',
+      level: 'Master Class',
+      mode: 'Practical Lab',
+      price: '₹8,499',
+      originalPrice: '₹14,500',
+      discount: '41% OFF',
+      tag: 'FEATURED',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apple/apple-original.svg',
+      iconBg: 'bg-slate-100'
+    },
+
+    // 5. HOME APPLIANCE REPAIR (electrical)
+    {
+      id: 'ac-fridge-repair',
+      categoryId: 'electrical',
+      subCategory: 'electrical',
+      title: 'AC, Refrigerator & Washing Machine Master Course',
+      duration: '3 Months',
+      level: 'Beginner',
+      mode: 'Field Practical',
+      price: '₹5,299',
+      originalPrice: '₹9,000',
+      discount: '41% OFF',
+      tag: 'BESTSELLER',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/raspberrypi/raspberrypi-original.svg',
+      iconBg: 'bg-rose-50'
+    },
+    {
+      id: 'inverter-pcb-repair',
+      categoryId: 'electrical',
+      subCategory: 'electrical',
+      title: 'Inverter AC & PCB Micro-Circuit Repairing',
+      duration: '4 Months',
+      level: 'Intermediate',
+      mode: 'Lab Practical',
+      price: '₹6,999',
+      originalPrice: '₹12,000',
+      discount: '41% OFF',
+      tag: 'HOT',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/electron/electron-original.svg',
+      iconBg: 'bg-amber-50'
+    },
+
+    // 6. DIGITAL MARKETING (marketing)
+    {
+      id: 'digital-marketing-ads',
+      categoryId: 'marketing',
+      subCategory: 'marketing',
+      title: 'Master Digital Marketing & Performance Ads',
+      duration: '3 Months',
+      level: 'Beginner',
+      mode: 'Live Projects',
+      price: '₹4,999',
+      originalPrice: '₹8,500',
+      discount: '41% OFF',
+      tag: 'BESTSELLER',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg',
+      iconBg: 'bg-blue-50'
+    },
+    {
+      id: 'seo-social-media',
+      categoryId: 'marketing',
+      subCategory: 'marketing',
+      title: 'SEO, Social Media & Content Growth Hacking',
+      duration: '4 Months',
+      level: 'Intermediate',
+      mode: 'Live + Case Study',
+      price: '₹5,999',
+      originalPrice: '₹9,999',
+      discount: '40% OFF',
+      tag: 'POPULAR',
+      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg',
+      iconBg: 'bg-indigo-50'
     }
+  ];
+
+  const allCourses = [
+    ...customCourses,
+    ...INITIAL_COURSES.filter(ic => !customCourses.some(cc => (cc.id === ic.id || (cc.title && cc.title.toLowerCase() === ic.title.toLowerCase()))))
   ];
 
   const currentCategoryObj = categories.find(c => c.id === activeCategory) || categories[0];
 
   let headingTitle = `${currentCategoryObj.name} Programs`;
-  if (activeCategory === 'coding') {
-    if (activeSubCategory === 'web') headingTitle = 'Web Development Programs';
-    else if (activeSubCategory === 'app') headingTitle = 'App Development Programs';
-    else if (activeSubCategory === 'ai') headingTitle = 'AI & ML Programs';
-    else headingTitle = 'Software Development Programs';
+  const currentSubList = SUB_CATEGORIES[activeCategory] || [];
+  const currentSubObj = currentSubList.find(s => s.id === activeSubCategory);
+  if (currentSubObj && currentSubObj.id !== 'all') {
+    headingTitle = `${currentSubObj.label} Programs`;
   }
 
   const displayedCourses = allCourses.filter(c => {
     const matchesCat = c.categoryId === activeCategory;
-    const matchesSubCat = activeCategory !== 'coding' || activeSubCategory === 'all' || c.subCategory === activeSubCategory;
+    
+    let matchesSubCat = true;
+    if (activeSubCategory && activeSubCategory !== 'all') {
+      const subLower = activeSubCategory.toLowerCase();
+      const courseSub = (c.subCategory || c.subCat || '').toLowerCase();
+      const courseTitle = (c.title || '').toLowerCase();
+      matchesSubCat = courseSub === subLower || 
+                      courseSub.includes(subLower) || 
+                      courseTitle.includes(subLower);
+    }
     
     let matchesFilter = activeFilter === 'All';
     if (!matchesFilter) {
@@ -374,25 +595,21 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
         {/* ON COURSES PAGE ONLY: SHOW FULL CATALOG BELOW CATEGORY CARDS */}
         {!isHome && (
           <div className="pt-2">
-            {/* DOMAIN SUB-CATEGORY TABS (WEB DEV, APP DEV, AI & ML) FOR SOFTWARE DEV - STICKY SEGMENTED CONTROL */}
-            {activeCategory === 'coding' && (
-              <div className="sticky top-[54px] sm:top-[76px] z-30 bg-slate-50/95 backdrop-blur-md pt-3 pb-3 border-t border-b border-slate-200/80 shadow-xs my-3 -mx-3 sm:mx-0 px-3 sm:px-0">
-                <div className="w-full max-w-xl mx-auto bg-slate-200/70 p-1 sm:p-1.5 rounded-2xl flex items-center justify-between gap-1 sm:gap-2 shadow-inner border border-slate-300/50">
-                  {[
-                    { id: 'web', label: 'Web Development' },
-                    { id: 'app', label: 'App Development' },
-                    { id: 'ai', label: 'AI & ML' }
-                  ].map((sub) => {
+            {/* DOMAIN SUB-CATEGORY TABS FOR ALL CATEGORIES - STICKY SEGMENTED CONTROL */}
+            {SUB_CATEGORIES[activeCategory] && SUB_CATEGORIES[activeCategory].length > 0 && (
+              <div className="sticky top-[52px] sm:top-[72px] z-30 bg-slate-50/95 backdrop-blur-md py-2 sm:py-2.5 border-t border-b border-slate-200/80 shadow-xs my-2 sm:my-3 -mx-3 sm:mx-0 px-3 sm:px-0">
+                <div className="w-full max-w-xl mx-auto bg-slate-200/80 p-1 rounded-xl sm:rounded-2xl flex items-center justify-between gap-1 shadow-inner border border-slate-300/50 overflow-x-auto scrollbar-none [ms-overflow-style:none] [scrollbar-width:none]">
+                  {SUB_CATEGORIES[activeCategory].map((sub) => {
                     const isSubActive = activeSubCategory === sub.id;
                     return (
                       <button
                         suppressHydrationWarning
                         key={sub.id}
                         onClick={() => setActiveSubCategory(sub.id)}
-                        className={`flex-1 text-center whitespace-nowrap px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-black text-[12px] sm:text-[14px] transition-all duration-300 cursor-pointer ${
+                        className={`flex-1 min-w-max text-center whitespace-nowrap px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-extrabold text-[11px] min-[360px]:text-[12px] sm:text-[13.5px] transition-all duration-200 cursor-pointer ${
                           isSubActive
                             ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 scale-[1.02]'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-bold'
+                            : 'text-slate-700 hover:text-slate-900 hover:bg-white/70 font-extrabold'
                         }`}
                       >
                         {sub.label}
@@ -470,14 +687,34 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                   'Core Java, Spring Boot, Microservices',
                   'Enterprise Architecture & REST APIs',
                   'Database: MySQL & PostgreSQL'
-                ] : titleLower.includes('python') ? [
+                ] : titleLower.includes('python') || titleLower.includes('data') || titleLower.includes('learning') ? [
                   'Python, Data Science & AI/ML',
                   'Data Pipelines & Neural Networks',
                   'Database & Cloud: SQL + AWS'
+                ] : titleLower.includes('repair') || titleLower.includes('chip') || titleLower.includes('mobile') || titleLower.includes('laptop') || titleLower.includes('bga') ? [
+                  'Practical Hardware & Schematics Diagnosis',
+                  'Motherboard Micro-Soldering & IC Work',
+                  '100% Practical Lab Training'
+                ] : titleLower.includes('ac') || titleLower.includes('pcb') || titleLower.includes('appliance') || titleLower.includes('fridge') ? [
+                  'Inverter AC & PCB Circuit Repair',
+                  'Component Level Troubleshooting',
+                  'Job Ready Practical Field Training'
+                ] : titleLower.includes('marketing') || titleLower.includes('seo') || titleLower.includes('ads') ? [
+                  'Google Ads, Meta Ads & Funnel Setup',
+                  'SEO Optimization & Social Media Growth',
+                  'Live Campaign & Ad Budget Management'
+                ] : titleLower.includes('robotics') || titleLower.includes('iot') || titleLower.includes('arduino') || titleLower.includes('embedded') ? [
+                  'Hardware Programming & Microcontrollers',
+                  'Sensors, Actuators & Wireless IoT Modules',
+                  'Practical Electronics Project Building'
+                ] : titleLower.includes('networking') || titleLower.includes('ccna') || titleLower.includes('cloud') || titleLower.includes('hacking') || titleLower.includes('cyber') ? [
+                  'Cisco CCNA, Cloud & Server Admin',
+                  'Ethical Hacking & Network Security',
+                  'Live Router, Switch & Cloud Labs'
                 ] : [
-                  `${course.title} Core Stack`,
-                  'Frontend and Backend Integration',
-                  'Database & Cloud Deployment'
+                  `${course.title} Core Track`,
+                  'Hands-on Practical & Project Training',
+                  'Certification & Job Assistance'
                 ];
 
                 return (
@@ -496,7 +733,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                     <div className="flex flex-row gap-2.5 min-[400px]:gap-3.5 sm:gap-5 items-start">
                       {/* TECH LOGO CONTAINER (M E R N 4-box grid OR Course Icon) */}
                       {isMern ? (
-                        <div className="w-16 h-16 min-[400px]:w-20 min-[400px]:h-20 sm:w-26 sm:h-26 bg-slate-50/90 border border-slate-200/80 rounded-xl sm:rounded-2xl p-1.5 min-[400px]:p-2 sm:p-2.5 flex-shrink-0 shadow-2xs">
+                        <div className="w-16 h-16 min-[400px]:w-20 min-[400px]:h-20 sm:w-26 sm:h-26 bg-slate-50/90 border border-slate-200/80 rounded-xl sm:rounded-2xl p-1.5 min-[400px]:p-2 sm:p-2.5 flex-shrink-0 shadow-2xs mt-[8px]">
                           <div className="grid grid-cols-2 gap-1 min-[400px]:gap-1.5 w-full h-full">
                             <div className="bg-[#10b981] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">M</div>
                             <div className="bg-[#1e293b] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">E</div>
@@ -505,7 +742,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                           </div>
                         </div>
                       ) : (
-                        <div className={`w-16 h-16 min-[400px]:w-20 min-[400px]:h-20 sm:w-26 sm:h-26 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 border border-slate-200/80 shadow-2xs ${course.iconBg || 'bg-slate-50'}`}>
+                        <div className={`w-16 h-16 min-[400px]:w-20 min-[400px]:h-20 sm:w-26 sm:h-26 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 border border-slate-200/80 shadow-2xs mt-[8px] ${course.iconBg || 'bg-slate-50'}`}>
                           <img
                             src={course.icon}
                             alt={course.title}
@@ -539,7 +776,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                     <div className="w-full h-px bg-slate-100 my-0.5" />
 
                     {/* BOTTOM ROW: CHECKMARK FEATURES & CTA BUTTON */}
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-3 sm:gap-4 pt-0.5 mt-auto">
+                    <div className="flex flex-row items-end justify-between gap-2 sm:gap-4 pt-0.5 mt-auto">
                       {/* CHECKMARK BULLETS */}
                       <div className="flex flex-col gap-1.5 sm:gap-2 min-w-0 flex-1">
                         {checkmarkFeatures.map((feat, idx) => (
@@ -552,13 +789,13 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                         ))}
                       </div>
 
-                      {/* VIEW DETAILS BUTTON (RIGHT ALIGNED ON DESKTOP, FULL WIDTH ON MOBILE) */}
+                      {/* VIEW DETAILS BUTTON (COMPACT & RIGHT ALIGNED) */}
                       <button
                         suppressHydrationWarning
                         onClick={handleEnrollClick}
-                        className="w-full sm:w-auto bg-[#2463eb] hover:bg-blue-700 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[12.5px] sm:text-sm font-extrabold flex items-center justify-center gap-1.5 sm:gap-2 shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap"
+                        className="w-auto bg-[#2463eb] hover:bg-blue-700 text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl text-[11.5px] sm:text-xs md:text-sm font-extrabold flex items-center justify-center gap-1 sm:gap-1.5 shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap flex-shrink-0 self-end"
                       >
-                        View Details <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        View Details <ArrowRight className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
                       </button>
                     </div>
                   </div>

@@ -24,17 +24,20 @@ export const courseModel = {
       if (data.success && Array.isArray(data.data) && data.data.length > 0) {
         return data.data.map((item, idx) => ({
           id: item._id || item.id || idx,
+          categoryId: item.category || 'coding',
+          subCategory: item.subCat || 'web',
           title: item.title,
           name: item.title,
-          sub: item.description || item.sub || 'Comprehensive Certification & Hands-on Project Track',
-          category: item.category || 'coding',
-          subCat: item.subCat || 'web',
           duration: item.duration || '6 Months',
-          price: item.price ? (String(item.price).startsWith('₹') ? item.price : `₹${item.price}`) : '₹24,999',
-          original: item.original ? (String(item.original).startsWith('₹') ? item.original : `₹${item.original}`) : '₹34,999',
-          rating: item.rating || 4.9,
-          badge: item.badge || 'BESTSELLER',
-          logoUrl: item.logoUrl || item.mediaUrl || 'https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg'
+          level: item.level || 'Intermediate',
+          mode: item.mode || 'Live Classes',
+          price: item.price ? (String(item.price).startsWith('₹') ? item.price : `₹${item.price}`) : '₹14,999',
+          originalPrice: item.originalPrice || item.original || '₹24,999',
+          discount: item.discount || '35% OFF',
+          tag: item.badge || item.tag || null,
+          icon: item.logoUrl || item.icon || 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
+          iconBg: 'bg-blue-50',
+          description: item.description || ''
         }));
       }
     } catch (err) {
