@@ -332,16 +332,36 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
 
           {/* NEW HIGHLIGHTS CARD */}
           <div className="bg-white border border-slate-200/80 rounded-2xl p-3 space-y-2.5 shadow-2xs">
-            {/* TOP ROW: DURATION CARD */}
+            {/* TOP ROW: DURATION CARD (MATCHING USER CIRCULAR PROGRESS RING DESIGN) */}
             <div className="bg-[#f8fafc] border border-slate-100 rounded-xl p-3 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                <Clock className="w-5 h-5 stroke-[2.2]" />
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center flex-shrink-0">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                  <path
+                    className="text-slate-200"
+                    strokeWidth="3.8"
+                    stroke="currentColor"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                  <path
+                    className="text-[#047857]"
+                    strokeDasharray="68, 100"
+                    strokeWidth="3.8"
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                </svg>
+                <span className="absolute font-black text-slate-900 text-xs sm:text-sm leading-none">
+                  {(courseDuration.match(/\d+/) || ['6'])[0]}
+                </span>
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="font-extrabold text-slate-900 text-sm leading-tight truncate">
+                <span className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight truncate">
                   {courseDuration}
                 </span>
-                <span className="text-xs font-semibold text-slate-400 leading-tight">
+                <span className="text-xs font-medium text-slate-400 leading-tight">
                   Duration
                 </span>
               </div>
