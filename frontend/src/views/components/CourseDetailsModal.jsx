@@ -251,90 +251,90 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
         </div>
 
         {/* INNER CONTAINER WITH COMPACT SCROLLING */}
-        <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 space-y-3 scrollbar-thin">
+        <div className="flex-1 overflow-y-auto px-2.5 sm:px-3 py-2 space-y-2 scrollbar-thin">
           
-          {/* DARK HERO CARD (MATCHING EXACT USER SCREENSHOT COLOR COMBINATION) */}
-          <div className="relative w-full bg-[#181a20] border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col items-center text-center shadow-lg overflow-hidden">
+          {/* DARK HERO CARD (COMPACT & SLEEK) */}
+          <div className="relative w-full bg-[#181a20] border border-slate-800 rounded-xl p-3 sm:p-3.5 flex flex-col items-center text-center shadow-md overflow-hidden">
             {/* TECH STACK LOGOS / FLOW ROW */}
             {isMern ? (
-              <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 mb-1">
+              <div className="flex items-center justify-center gap-1 sm:gap-2 mb-0.5">
                 {/* M - MongoDB */}
                 <div className="flex flex-col items-center">
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#252830] border border-slate-700/60 flex items-center justify-center text-[#10b981] font-black text-base sm:text-lg shadow-xs">
+                  <div className="w-9.5 h-9.5 sm:w-10 sm:h-10 rounded-xl bg-[#252830] border border-slate-700/60 flex items-center justify-center text-[#10b981] font-black text-sm sm:text-base shadow-xs">
                     M
                   </div>
-                  <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5">
+                  <span className="text-[9.5px] sm:text-[10px] font-medium text-slate-400 mt-1">
                     MongoDB
                   </span>
                 </div>
 
-                <ChevronRight className="w-3.5 h-3.5 text-slate-600 mb-4 flex-shrink-0" />
+                <ChevronRight className="w-3 h-3 text-slate-600 mb-3.5 flex-shrink-0" />
 
                 {/* E - Express */}
                 <div className="flex flex-col items-center">
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#252830] border border-slate-700/60 flex items-center justify-center text-white font-black text-base sm:text-lg shadow-xs">
+                  <div className="w-9.5 h-9.5 sm:w-10 sm:h-10 rounded-xl bg-[#252830] border border-slate-700/60 flex items-center justify-center text-white font-black text-sm sm:text-base shadow-xs">
                     E
                   </div>
-                  <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5">
+                  <span className="text-[9.5px] sm:text-[10px] font-medium text-slate-400 mt-1">
                     Express
                   </span>
                 </div>
 
-                <ChevronRight className="w-3.5 h-3.5 text-slate-600 mb-4 flex-shrink-0" />
+                <ChevronRight className="w-3 h-3 text-slate-600 mb-3.5 flex-shrink-0" />
 
                 {/* R - React */}
                 <div className="flex flex-col items-center">
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#252830] border border-slate-700/60 flex items-center justify-center text-[#f59e0b] font-black text-base sm:text-lg shadow-xs">
+                  <div className="w-9.5 h-9.5 sm:w-10 sm:h-10 rounded-xl bg-[#252830] border border-slate-700/60 flex items-center justify-center text-[#f59e0b] font-black text-sm sm:text-base shadow-xs">
                     R
                   </div>
-                  <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5">
+                  <span className="text-[9.5px] sm:text-[10px] font-medium text-slate-400 mt-1">
                     React
                   </span>
                 </div>
 
-                <ChevronRight className="w-3.5 h-3.5 text-slate-600 mb-4 flex-shrink-0" />
+                <ChevronRight className="w-3 h-3 text-slate-600 mb-3.5 flex-shrink-0" />
 
                 {/* N - Node.js */}
                 <div className="flex flex-col items-center">
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#252830] border border-slate-700/60 flex items-center justify-center text-[#84cc16] font-black text-base sm:text-lg shadow-xs">
+                  <div className="w-9.5 h-9.5 sm:w-10 sm:h-10 rounded-xl bg-[#252830] border border-slate-700/60 flex items-center justify-center text-[#84cc16] font-black text-sm sm:text-base shadow-xs">
                     N
                   </div>
-                  <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5">
+                  <span className="text-[9.5px] sm:text-[10px] font-medium text-slate-400 mt-1">
                     Node.js
                   </span>
                 </div>
               </div>
             ) : (
-              <div className="w-12 h-12 rounded-2xl bg-[#252830] border border-slate-700/60 p-2.5 flex items-center justify-center shadow-xs mb-2">
+              <div className="w-10 h-10 rounded-xl bg-[#252830] border border-slate-700/60 p-2 flex items-center justify-center shadow-xs mb-1.5">
                 <img src={course.icon} alt={course.title} className="w-full h-full object-contain" />
               </div>
             )}
 
             {/* TITLE & SUBTITLE */}
-            <div className="text-center space-y-1 max-w-sm mx-auto mt-2.5">
-              <h1 className="text-base sm:text-lg font-black text-white tracking-tight leading-tight">
+            <div className="text-center space-y-0.5 max-w-sm mx-auto mt-1.5">
+              <h1 className="text-sm sm:text-base font-black text-white tracking-tight leading-tight">
                 {course.title}
               </h1>
-              <p className="text-[11px] sm:text-xs text-slate-400 font-medium">
+              <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium">
                 Learn to build real-world web applications from scratch
               </p>
             </div>
 
-            {/* WATCH INTRO VIDEO BUTTON (BRIGHT AMBER / GOLDEN ORANGE) */}
+            {/* WATCH INTRO VIDEO BUTTON */}
             <button
               onClick={() => setShowVideoModal(true)}
-              className="w-full bg-[#f59e0b] hover:bg-[#e08e00] text-slate-950 font-black text-xs sm:text-sm py-2.5 px-4 rounded-full flex items-center justify-center gap-2 shadow-md shadow-amber-500/20 active:scale-[0.99] transition-all cursor-pointer mt-3.5"
+              className="w-full bg-[#f59e0b] hover:bg-[#e08e00] text-slate-950 font-black text-xs py-2 px-3.5 rounded-full flex items-center justify-center gap-1.5 shadow-sm shadow-amber-500/20 active:scale-[0.99] transition-all cursor-pointer mt-2.5"
             >
-              <Play className="w-3.5 h-3.5 fill-slate-950 text-slate-950 translate-x-0.5" />
+              <Play className="w-3 h-3 fill-slate-950 text-slate-950 translate-x-0.5" />
               <span>Watch Intro Video</span>
             </button>
           </div>
 
           {/* NEW HIGHLIGHTS CARD */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-3 space-y-2.5 shadow-2xs">
-            {/* TOP ROW: DURATION CARD (MATCHING USER CIRCULAR PROGRESS RING DESIGN) */}
-            <div className="bg-[#f8fafc] border border-slate-100 rounded-xl p-3 flex items-center gap-3">
-              <div className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center flex-shrink-0">
+          <div className="bg-white border border-slate-200/80 rounded-xl p-2.5 space-y-2 shadow-2xs">
+            {/* TOP ROW: DURATION CARD */}
+            <div className="bg-[#f8fafc] border border-slate-100 rounded-lg p-2 flex items-center gap-2.5">
+              <div className="relative w-8 h-8 flex items-center justify-center flex-shrink-0">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                   <path
                     className="text-slate-200"
@@ -353,49 +353,49 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   />
                 </svg>
-                <span className="absolute font-black text-slate-900 text-xs sm:text-sm leading-none">
+                <span className="absolute font-black text-slate-900 text-xs leading-none">
                   {(courseDuration.match(/\d+/) || ['6'])[0]}
                 </span>
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight truncate">
+                <span className="font-extrabold text-slate-900 text-xs sm:text-sm leading-tight truncate">
                   {courseDuration}
                 </span>
-                <span className="text-xs font-medium text-slate-400 leading-tight">
+                <span className="text-[10px] font-medium text-slate-400 leading-tight">
                   Duration
                 </span>
               </div>
             </div>
 
             {/* BOTTOM ROW: 2x2 GRID ROUNDED PILLS */}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-white border border-slate-200/90 rounded-full px-3 py-1.5 flex items-center gap-2 text-xs font-bold text-slate-700 shadow-2xs">
-                <Video className="w-4 h-4 text-slate-600 flex-shrink-0" />
+            <div className="grid grid-cols-2 gap-1.5">
+              <div className="bg-white border border-slate-200/90 rounded-full px-2.5 py-1 flex items-center gap-1.5 text-[10.5px] font-bold text-slate-700 shadow-2xs">
+                <Video className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
                 <span className="truncate">Live + recordings</span>
               </div>
 
-              <div className="bg-white border border-slate-200/90 rounded-full px-3 py-1.5 flex items-center gap-2 text-xs font-bold text-slate-700 shadow-2xs">
-                <Award className="w-4 h-4 text-slate-600 flex-shrink-0" />
+              <div className="bg-white border border-slate-200/90 rounded-full px-2.5 py-1 flex items-center gap-1.5 text-[10.5px] font-bold text-slate-700 shadow-2xs">
+                <Award className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
                 <span className="truncate">Certificate</span>
               </div>
 
-              <div className="bg-white border border-slate-200/90 rounded-full px-3 py-1.5 flex items-center gap-2 text-xs font-bold text-slate-700 shadow-2xs">
-                <Briefcase className="w-4 h-4 text-slate-600 flex-shrink-0" />
+              <div className="bg-white border border-slate-200/90 rounded-full px-2.5 py-1 flex items-center gap-1.5 text-[10.5px] font-bold text-slate-700 shadow-2xs">
+                <Briefcase className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
                 <span className="truncate">2 to 3 projects</span>
               </div>
 
-              <div className="bg-white border border-slate-200/90 rounded-full px-3 py-1.5 flex items-center gap-2 text-xs font-bold text-slate-700 shadow-2xs">
-                <Headphones className="w-4 h-4 text-slate-600 flex-shrink-0" />
+              <div className="bg-white border border-slate-200/90 rounded-full px-2.5 py-1 flex items-center gap-1.5 text-[10.5px] font-bold text-slate-700 shadow-2xs">
+                <Headphones className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
                 <span className="truncate">Placement support</span>
               </div>
             </div>
           </div>
 
           {/* COMPACT SEGMENTED TABS BAR */}
-          <div className="flex items-center justify-between bg-slate-100/90 p-1 rounded-xl border border-slate-200/80 text-[11px] font-extrabold">
+          <div className="flex items-center justify-between bg-slate-100/90 p-0.5 rounded-lg border border-slate-200/80 text-[10.5px] font-extrabold">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
+              className={`flex-1 py-1 rounded-md text-center transition-all cursor-pointer ${
                 activeTab === 'overview'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -405,7 +405,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
             </button>
             <button
               onClick={() => setActiveTab('syllabus')}
-              className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
+              className={`flex-1 py-1 rounded-md text-center transition-all cursor-pointer ${
                 activeTab === 'syllabus'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -415,7 +415,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
             </button>
             <button
               onClick={() => setActiveTab('projects')}
-              className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
+              className={`flex-1 py-1 rounded-md text-center transition-all cursor-pointer ${
                 activeTab === 'projects'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
@@ -427,16 +427,16 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
 
           {/* COMPACT TAB CONTENT PANELS */}
           {activeTab === 'overview' && (
-            <div className="space-y-3 animate-in fade-in duration-200">
+            <div className="space-y-2 animate-in fade-in duration-200">
               {/* WHAT YOU WILL LEARN */}
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3 shadow-2xs">
-                <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-2">
+              <div className="bg-white rounded-xl border border-slate-200/80 p-2.5 shadow-2xs">
+                <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-1.5">
                   What You Will Learn
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                   {getWhatYouWillLearn().map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-700">
-                      <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] font-black flex-shrink-0 shadow-2xs">
+                    <div key={idx} className="flex items-center gap-1.5 text-[10.5px] font-semibold text-slate-700">
+                      <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8.5px] font-black flex-shrink-0 shadow-2xs">
                         ✓
                       </span>
                       <span className="truncate">{item}</span>
@@ -446,35 +446,64 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               </div>
 
               {/* BATCH DETAILS */}
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3 shadow-2xs">
+              <div className="bg-white rounded-xl border border-slate-200/80 p-2.5 sm:p-3 shadow-2xs">
                 <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-2">
                   Batch Details
                 </h3>
-                <div className="grid grid-cols-2 gap-1.5 text-[10.5px]">
-                  <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-slate-50 border border-slate-100">
-                    <Calendar className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                    <span className="truncate"><strong className="text-slate-900">Duration:</strong> {courseDuration}</span>
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-xs">
+                  {/* DURATION */}
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                    <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                      <Calendar className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+                    </div>
+                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                      <strong className="font-extrabold text-slate-900">Duration:</strong>{' '}
+                      <span className="text-slate-600 font-normal">{courseDuration}</span>
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-slate-50 border border-slate-100">
-                    <Video className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                    <span className="truncate"><strong className="text-slate-900">Classes:</strong> Live + Recorded</span>
+                  {/* CLASSES */}
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                    <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                      <Video className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+                    </div>
+                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                      <strong className="font-extrabold text-slate-900">Classes:</strong>{' '}
+                      <span className="text-slate-600 font-normal">Live + Recorded</span>
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-slate-50 border border-slate-100">
-                    <Clock className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                    <span className="truncate"><strong className="text-slate-900">Batch:</strong> Morning/Evening</span>
+                  {/* BATCH */}
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                    <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                      <Clock className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+                    </div>
+                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                      <strong className="font-extrabold text-slate-900">Batch:</strong>{' '}
+                      <span className="text-slate-600 font-normal">Morning/Evening</span>
+                    </span>
                   </div>
 
-
-                  <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-slate-50 border border-slate-100">
-                    <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                    <span className="truncate"><strong className="text-slate-900">Mode:</strong> {courseMode}</span>
+                  {/* MODE */}
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                    <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                      <MapPin className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+                    </div>
+                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                      <strong className="font-extrabold text-slate-900">Mode:</strong>{' '}
+                      <span className="text-slate-600 font-normal">{courseMode}</span>
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-slate-50 border border-slate-100">
-                    <ShieldCheck className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                    <span className="truncate"><strong className="text-slate-900">Certificate:</strong> Provided</span>
+                  {/* CERTIFICATE */}
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                    <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                      <ShieldCheck className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+                    </div>
+                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                      <strong className="font-extrabold text-slate-900">Certificate:</strong>{' '}
+                      <span className="text-slate-600 font-normal">Provided</span>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -553,16 +582,16 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
         </div>
 
         {/* COMPACT FIXED BOTTOM BAR */}
-        <div className="bg-white border-t border-slate-100 px-3.5 py-2.5 flex items-center justify-center shadow-lg flex-shrink-0">
+        <div className="bg-white border-t border-slate-100 px-3 py-2 flex items-center justify-center shadow-md flex-shrink-0">
           {/* ENROLL NOW BUTTON (FULL WIDTH ROYAL BLUE PILL) */}
           <button
             onClick={() => {
               onClose();
               if (onEnroll) onEnroll(course);
             }}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-full text-sm sm:text-base font-extrabold flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/25 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer whitespace-nowrap"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-full text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/25 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer whitespace-nowrap"
           >
-            Enroll Now <ChevronRight className="w-5 h-5 stroke-[3]" />
+            Enroll Now <ChevronRight className="w-4 h-4 stroke-[3]" />
           </button>
         </div>
 
