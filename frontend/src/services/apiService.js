@@ -12,6 +12,7 @@ import { courseModel } from '../models/courseModel';
 import { leadModel } from '../models/leadModel';
 import { enrollmentModel } from '../models/enrollmentModel';
 import { userModel } from '../models/userModel';
+import { categoryModel } from '../models/categoryModel';
 
 export const apiService = {
   /**
@@ -19,6 +20,12 @@ export const apiService = {
    * @route GET http://localhost:5000/api/banners
    */
   getBanners: () => bannerModel.getBanners(),
+
+  /**
+   * API: Fetch Course Categories
+   * @route GET http://localhost:5000/api/categories
+   */
+  getCategories: () => categoryModel.getCategories(),
 
   /**
    * API: Fetch Student Placement Posters

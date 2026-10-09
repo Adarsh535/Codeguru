@@ -23,9 +23,11 @@ export const courseModel = {
       const data = await res.json();
       if (data.success && Array.isArray(data.data) && data.data.length > 0) {
         return data.data.map((item, idx) => ({
+          ...item,
           id: item._id || item.id || idx,
           categoryId: item.category || 'coding',
           subCategory: item.subCat || 'web',
+          subCategories: Array.isArray(item.subCategories) && item.subCategories.length > 0 ? item.subCategories : [item.subCat || 'web'],
           title: item.title,
           name: item.title,
           duration: item.duration || '6 Months',
@@ -37,7 +39,14 @@ export const courseModel = {
           tag: item.badge || item.tag || null,
           icon: item.logoUrl || item.icon || 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
           iconBg: 'bg-blue-50',
-          description: item.description || ''
+          description: item.description || '',
+          showPrice: item.showPrice !== false,
+          internships: item.internships || '5 Internships',
+          mockTests: item.mockTests || '5 Mock Tests',
+          projects: item.projects || '5 Projects',
+          highlights: Array.isArray(item.highlights) ? item.highlights : [],
+          isDiscountActive: item.isDiscountActive !== false,
+          discountPercent: item.discountPercent || 0
         }));
       }
     } catch (err) {

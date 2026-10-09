@@ -36,6 +36,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 import mongoose from 'mongoose';
+import { switchDatabaseMode, currentDbMode, CLOUD_MONGODB_URI, LOCAL_MONGODB_URI } from './config/db.js';
 
 /**
  * @api GET /api/health
@@ -45,31 +46,52 @@ app.get('/api/health', (req, res) => {
   const isConnected = mongoose.connection.readyState === 1;
   const host = mongoose.connection.host || 'Disconnected';
   const dbName = mongoose.connection.name || 'codeguru_db';
-  const isAtlas = host.includes('mongodb.net') || host.includes('cluster');
+  const isAtlas = host.includes('mongodb.net') || host.includes('cluster') || currentDbMode === 'cloud';
   
-  let dbUriDisplay = 'mongodb://127.0.0.1:27017/codeguru_db';
-  if (isAtlas) {
-    dbUriDisplay = `mongodb+srv://Adarshverma:adarshverma@3213@cluster0.illbds4.mongodb.net/${dbName}`;
-  } else if (process.env.MONGODB_URI) {
-    dbUriDisplay = process.env.MONGODB_URI;
-  }
+  const cloudUri = 'mongodb+srv://Adarshverma:adarshverma@3213@cluster0.illbds4.mongodb.net/codeguru_db';
+  const localUri = LOCAL_MONGODB_URI;
+  const activeUri = isAtlas ? cloudUri : localUri;
 
   res.json({
     success: true,
     status: 'CodeGuru Backend API is running cleanly',
     database: {
       connected: isConnected,
+      mode: isAtlas ? 'cloud' : 'local',
       host,
       name: dbName,
       isAtlas,
-      uri: dbUriDisplay,
+      cloudUri,
+      localUri,
+      uri: activeUri,
       provider: isAtlas ? 'MongoDB Atlas Cloud Cluster' : 'Local MongoDB Compass',
       connectionText: isConnected 
-        ? `Connected to ${isAtlas ? 'MongoDB Atlas Cloud (cluster0.illbds4.mongodb.net)' : 'Local MongoDB Compass (codeguru_db)'}` 
+        ? `Connected to ${isAtlas ? 'MongoDB Atlas Cloud (cluster0.illbds4.mongodb.net)' : 'Local MongoDB Compass (127.0.0.1:27017)'}` 
         : 'Disconnected'
     },
     timestamp: new Date().toISOString()
   });
+});
+
+/**
+ * @api POST /api/health/switch-db
+ * @desc Switch runtime database connection between Cloud Atlas and Local Compass
+ */
+app.post('/api/health/switch-db', async (req, res) => {
+  const { mode } = req.body; // 'cloud' | 'local'
+  const result = await switchDatabaseMode(mode);
+  if (result.success) {
+    return res.json({
+      success: true,
+      message: `Switched database connection to ${mode === 'cloud' ? 'MongoDB Atlas Cloud' : 'Local MongoDB Compass'}!`,
+      database: result
+    });
+  } else {
+    return res.status(500).json({
+      success: false,
+      message: result.message || 'Failed to switch database connection'
+    });
+  }
 });
 
 

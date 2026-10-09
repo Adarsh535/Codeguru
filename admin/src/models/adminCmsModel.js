@@ -150,7 +150,7 @@ export const adminCmsModel = {
    */
   getCourses: async () => {
     try {
-      const res = await fetch(`${API_BASE}/courses`);
+      const res = await fetch(`${API_BASE}/courses?all=true`);
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         return data.data.map(item => ({
@@ -448,5 +448,142 @@ export const adminCmsModel = {
       topSearchedCourses: [],
       cityBreakdown: []
     };
+  },
+
+  /**
+   * --------------------------------------------------------------------------
+   * API: Get Course Categories
+   * --------------------------------------------------------------------------
+   * @route   GET http://localhost:5000/api/categories
+   * @desc    Saare course categories fetch karta hai.
+   * @access  Public / Admin
+   * @returns {Promise<Array>} List of category objects
+   */
+  getCategories: async () => {
+    let apiList = [];
+    try {
+      const res = await fetch(`${API_BASE}/categories`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        apiList = data.data.map(item => ({
+          ...item,
+          id: item._id || item.id
+        }));
+      }
+    } catch (err) {
+      console.warn('[adminCmsModel API Warning] Categories API call error:', err);
+    }
+    
+    // Merge localStorage categories fallback
+    try {
+      const local = JSON.parse(localStorage.getItem('codeguru_custom_categories') || '[]');
+      const combined = [...apiList];
+      local.forEach(loc => {
+        if (!combined.some(c => c.category === loc.category || c.id === loc.id)) {
+          combined.push(loc);
+        }
+      });
+      return combined;
+    } catch {
+      return apiList;
+    }
+  },
+
+  /**
+   * --------------------------------------------------------------------------
+   * API: Add New Course Category
+   * --------------------------------------------------------------------------
+   * @route   POST http://localhost:5000/api/categories
+   * @desc    Nayi course category save karta hai with localStorage fallback.
+   * @param   {Object} payload - { label, category, subCat, subCategories, badge, icon, bgColor }
+   * @returns {Promise<Object>} { success: boolean, data?: Object, message?: string }
+   */
+  addCategory: async (payload) => {
+    try {
+      const res = await fetch(`${API_BASE}/categories`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        const item = data.data;
+        return { success: true, data: { ...item, id: item._id || item.id } };
+      }
+    } catch (err) {
+      console.warn('[adminCmsModel API Warning] Backend addCategory failed, saving to localStorage:', err);
+    }
+
+    // Fallback: save locally so user operation never fails!
+    const newLocalCat = {
+      ...payload,
+      id: 'cat-' + Date.now(),
+      _id: 'cat-' + Date.now(),
+      createdAt: new Date().toISOString()
+    };
+    try {
+      const local = JSON.parse(localStorage.getItem('codeguru_custom_categories') || '[]');
+      local.push(newLocalCat);
+      localStorage.setItem('codeguru_custom_categories', JSON.stringify(local));
+      return { success: true, data: newLocalCat };
+    } catch (e) {
+      return { success: false, message: e.message || 'Storage error' };
+    }
+  },
+
+  /**
+   * --------------------------------------------------------------------------
+   * API: Update Course Category
+   * --------------------------------------------------------------------------
+   * @route   PUT http://localhost:5000/api/categories/:id
+   * @desc    Course category update karta hai.
+   * @param   {string} id - Category ID
+   * @param   {Object} payload
+   * @returns {Promise<Object|null>} Updated category object
+   */
+  updateCategory: async (id, payload) => {
+    try {
+      const res = await fetch(`${API_BASE}/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        const item = data.data;
+        return { ...item, id: item._id || item.id };
+      }
+    } catch (err) {
+      console.error('[adminCmsModel API Error] Error updating category:', err);
+    }
+    try {
+      const local = JSON.parse(localStorage.getItem('codeguru_custom_categories') || '[]');
+      const updated = local.map(c => (c.id === id || c._id === id || c.category === id) ? { ...c, ...payload } : c);
+      localStorage.setItem('codeguru_custom_categories', JSON.stringify(updated));
+    } catch {}
+    return { id, ...payload };
+  },
+
+  /**
+   * --------------------------------------------------------------------------
+   * API: Delete Course Category
+   * --------------------------------------------------------------------------
+   * @route   DELETE http://localhost:5000/api/categories/:id
+   * @desc    Course category delete karta hai.
+   * @param   {string} id - Category MongoDB _id or local id
+   * @returns {Promise<void>}
+   */
+  deleteCategory: async (id) => {
+    try {
+      await fetch(`${API_BASE}/categories/${id}`, { method: 'DELETE' });
+    } catch (err) {
+      console.error('[adminCmsModel API Error] Error deleting category:', err);
+    }
+    // Also remove from localStorage if present
+    try {
+      const local = JSON.parse(localStorage.getItem('codeguru_custom_categories') || '[]');
+      const filtered = local.filter(c => c.id !== id && c._id !== id);
+      localStorage.setItem('codeguru_custom_categories', JSON.stringify(filtered));
+    } catch {}
   }
 };

@@ -54,13 +54,60 @@ export const getSanitizedUri = (rawUri) => {
   return rawUri;
 };
 
-const rawTargetUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/codeguru_db';
-const MONGODB_URI = getSanitizedUri(rawTargetUri);
-const LOCAL_MONGODB_URI = 'mongodb://127.0.0.1:27017/codeguru_db';
+const rawTargetUri = process.env.MONGODB_URI || 'mongodb+srv://Adarshverma:adarshverma%403213@cluster0.illbds4.mongodb.net/codeguru_db?retryWrites=true&w=majority';
+export const CLOUD_MONGODB_URI = getSanitizedUri(rawTargetUri);
+export const LOCAL_MONGODB_URI = 'mongodb://127.0.0.1:27017/codeguru_db';
+export let currentDbMode = 'cloud';
 
+export const switchDatabaseMode = async (targetMode) => {
+  const mode = targetMode === 'local' ? 'local' : 'cloud';
+  const targetUri = mode === 'local' ? LOCAL_MONGODB_URI : CLOUD_MONGODB_URI;
+  const isAtlas = mode === 'cloud';
+
+  try {
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+
+    const conn = await mongoose.connect(targetUri, {
+      serverSelectionTimeoutMS: 8000
+    });
+
+    currentDbMode = mode;
+
+    console.log(`================================================`);
+    console.log(`🍃 Switched Database Connection to: ${isAtlas ? 'MongoDB Atlas Cloud' : 'Local MongoDB Compass'}`);
+    console.log(`📍 Host: ${conn.connection.host}`);
+    console.log(`================================================`);
+
+    return {
+      success: true,
+      mode: currentDbMode,
+      host: conn.connection.host,
+      name: conn.connection.name,
+      isAtlas,
+      provider: isAtlas ? 'MongoDB Atlas Cloud Cluster' : 'Local MongoDB Compass',
+      uri: isAtlas ? CLOUD_MONGODB_URI : LOCAL_MONGODB_URI,
+      connectionText: `Connected to ${isAtlas ? 'MongoDB Atlas Cloud (cluster0.illbds4.mongodb.net)' : 'Local MongoDB Compass (127.0.0.1:27017)'}`
+    };
+  } catch (err) {
+    console.error(`⚠️ Switch Database Failed (${mode}):`, err.message);
+    try {
+      if (mongoose.connection.readyState === 0) {
+        await mongoose.connect(CLOUD_MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
+        currentDbMode = 'cloud';
+      }
+    } catch (reconnErr) {}
+
+    return {
+      success: false,
+      message: `Failed to connect to ${mode === 'cloud' ? 'MongoDB Atlas Cloud' : 'Local MongoDB Compass'}: ${err.message}`
+    };
+  }
+};
 
 export const connectDB = async () => {
-  let activeUri = MONGODB_URI;
+  let activeUri = CLOUD_MONGODB_URI;
   let isAtlas = activeUri.includes('mongodb+srv://') || activeUri.includes('.mongodb.net');
   let conn;
 
@@ -68,6 +115,7 @@ export const connectDB = async () => {
     conn = await mongoose.connect(activeUri, {
       serverSelectionTimeoutMS: 5000
     });
+    currentDbMode = 'cloud';
   } catch (primaryErr) {
     console.warn(`================================================`);
     console.warn(`⚠️ Primary MongoDB Connection Failed (${primaryErr.message})`);
@@ -80,6 +128,7 @@ export const connectDB = async () => {
         conn = await mongoose.connect(activeUri, {
           serverSelectionTimeoutMS: 5000
         });
+        currentDbMode = 'local';
       } catch (fallbackErr) {
         console.warn(`================================================`);
         console.warn(`⚠️ Local MongoDB Connection Error (${fallbackErr.message})`);
@@ -109,9 +158,9 @@ export const connectDB = async () => {
   console.log(`================================================`);
 
   try {
-    // 1. Initialize 'admins' collection
-    const existingAdmin = await Admin.findOne({ email: 'admin@codeguru.com' });
-    if (!existingAdmin) {
+    // 1. Initialize 'admins' collection (only if collection is empty)
+    const adminCount = await Admin.countDocuments();
+    if (adminCount === 0) {
       await Admin.create({
         name: 'Super Admin',
         email: 'admin@codeguru.com',

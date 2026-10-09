@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
@@ -22,6 +22,25 @@ export default function TeamManagerView() {
     handleCreateTeamMember: handleSubmit,
     handleDeleteTeamMember: handleDelete
   } = useTeamController();
+
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: null
+  });
+
+  const triggerDeleteWithConfirm = (memberId, name) => {
+    setConfirmModal({
+      isOpen: true,
+      title: `Delete Team Member "${name || 'Member'}"?`,
+      message: `Are you sure you want to delete team profile for "${name || ''}"? This action will remove it from website faculty roster and cannot be undone.`,
+      onConfirm: async () => {
+        await handleDelete(memberId);
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      }
+    });
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -58,7 +77,7 @@ export default function TeamManagerView() {
                     <EditOutlinedIcon className="!w-4 !h-4" />
                   </button>
                   <button
-                    onClick={() => handleDelete(memberId)}
+                    onClick={() => triggerDeleteWithConfirm(memberId, member.name)}
                     className="p-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
                     title="Delete Member"
                   >
@@ -70,7 +89,7 @@ export default function TeamManagerView() {
                   <img
                     src={member.photoUrl || member.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
                     alt={member.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-top"
                   />
                 </div>
 
@@ -192,6 +211,51 @@ export default function TeamManagerView() {
 
             </form>
 
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* CONFIRMATION POPUP MODAL */}
+      {confirmModal.isOpen && createPortal(
+        <div className="fixed inset-0 z-[999999] bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-md border border-slate-200 shadow-2xl p-6 space-y-5 animate-scale-up">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0 text-xl font-bold shadow-2xs">
+                🗑️
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900 font-heading">
+                  {confirmModal.title || 'Delete Confirmation'}
+                </h3>
+                <p className="text-xs font-semibold text-slate-500 mt-0.5">
+                  Warning: Permanent Action
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-rose-50/50 border border-rose-100 text-xs font-bold text-rose-900 leading-relaxed">
+              {confirmModal.message}
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-black transition-all cursor-pointer active:scale-95"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirmModal.onConfirm) confirmModal.onConfirm();
+                }}
+                className="px-5 py-2.5 rounded-xl text-white text-xs font-black bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 shadow-md shadow-rose-600/20 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
+              >
+                <span>Yes, Delete Profile</span>
+              </button>
+            </div>
           </div>
         </div>,
         document.body

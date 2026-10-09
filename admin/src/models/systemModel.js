@@ -52,5 +52,20 @@ export const systemModel = {
       console.warn('[systemModel API Warning] Update settings failed:', err);
       return { success: false, message: 'Failed to update settings on server' };
     }
+  },
+
+  switchDatabase: async (targetMode) => {
+    try {
+      const res = await fetch(`${API_BASE}/health/switch-db`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: targetMode })
+      });
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.warn('[systemModel API Warning] Switch database failed:', err);
+      return { success: false, message: 'Failed to connect to backend server' };
+    }
   }
 };

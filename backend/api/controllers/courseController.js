@@ -14,7 +14,9 @@ import { Course } from '../../models/Course.js';
  */
 export const getCourses = async (req, res) => {
   try {
-    const courses = await Course.find().sort({ createdAt: -1 });
+    const isAll = req.query.all === 'true' || req.query.admin === 'true';
+    const filter = isAll ? {} : { isActive: { $ne: false } };
+    const courses = await Course.find(filter).sort({ createdAt: -1 });
     return res.json({ success: true, data: courses });
   } catch (err) {
     console.error('[courseController Error]:', err.message);
@@ -29,16 +31,32 @@ export const getCourses = async (req, res) => {
  */
 export const addCourse = async (req, res) => {
   try {
+    const selectedSubCats = Array.isArray(req.body.subCategories) && req.body.subCategories.length > 0
+      ? req.body.subCategories
+      : [req.body.subCat || 'web'];
+
     const course = await Course.create({
       title: req.body.title || 'New Tech Course',
       category: req.body.category || 'coding',
-      subCat: req.body.subCat || 'web',
+      subCat: selectedSubCats[0] || req.body.subCat || 'web',
+      subCategories: selectedSubCats,
       duration: req.body.duration || '6 Months',
       price: req.body.price || '₹ 24,999',
       level: req.body.level || 'Beginner to Advanced',
       badge: req.body.badge || 'Job Guarantee Batch',
       description: req.body.description || '',
-      technologies: Array.isArray(req.body.technologies) ? req.body.technologies : ['React', 'Node.js']
+      technologies: Array.isArray(req.body.technologies) ? req.body.technologies : ['React', 'Node.js'],
+      icon: req.body.icon || req.body.logoUrl || '',
+      logoUrl: req.body.logoUrl || req.body.icon || '',
+      isActive: req.body.isActive !== undefined ? Boolean(req.body.isActive) : true,
+      showPrice: req.body.showPrice !== undefined ? Boolean(req.body.showPrice) : true,
+      discountPercent: Number(req.body.discountPercent || 0),
+      originalPrice: req.body.originalPrice || '',
+      isDiscountActive: req.body.isDiscountActive !== undefined ? Boolean(req.body.isDiscountActive) : false,
+      internships: req.body.internships || '5 Internships',
+      mockTests: req.body.mockTests || '5 Mock Tests',
+      projects: req.body.projects || '5 Projects',
+      highlights: Array.isArray(req.body.highlights) ? req.body.highlights : []
     });
 
     return res.status(201).json({ success: true, message: 'Course added to MongoDB Atlas', data: course });
@@ -55,7 +73,11 @@ export const addCourse = async (req, res) => {
  */
 export const updateCourse = async (req, res) => {
   try {
-    const course = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const payload = { ...req.body };
+    if (Array.isArray(req.body.subCategories) && req.body.subCategories.length > 0) {
+      payload.subCat = req.body.subCategories[0];
+    }
+    const course = await Course.findByIdAndUpdate(req.params.id, payload, { new: true });
     if (course) return res.json({ success: true, message: 'Course updated in MongoDB Atlas', data: course });
     return res.status(404).json({ success: false, message: 'Course not found' });
   } catch (err) {

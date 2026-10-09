@@ -17,6 +17,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
   const [activeFilter, setActiveFilter] = useState('All');
   const [likedCourses, setLikedCourses] = useState({});
   const [customCourses, setCustomCourses] = useState([]);
+  const [apiCategories, setApiCategories] = useState([]);
   const [selectedCourseForDetails, setSelectedCourseForDetails] = useState(null);
 
   const scrollToCatalogSection = (delay = 40) => {
@@ -40,9 +41,13 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
   useEffect(() => {
     let isMounted = true;
-    apiService.getCourses().then(dynamicData => {
-      if (isMounted && dynamicData && dynamicData.length > 0) {
-        setCustomCourses(dynamicData);
+    Promise.all([
+      apiService.getCourses().catch(() => []),
+      apiService.getCategories().catch(() => [])
+    ]).then(([coursesData, catData]) => {
+      if (isMounted) {
+        if (coursesData && coursesData.length > 0) setCustomCourses(coursesData);
+        if (catData && catData.length > 0) setApiCategories(catData);
       }
     });
 
@@ -63,7 +68,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     return () => { isMounted = false; };
   }, []);
 
-  const SUB_CATEGORIES = {
+  const DEFAULT_SUB_CATEGORIES = {
     coding: [
       { id: 'web', label: 'Web Dev' },
       { id: 'app', label: 'App Dev' },
@@ -132,7 +137,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     setLikedCourses(prev => ({ ...prev, [courseId]: !prev[courseId] }));
   };
 
-  const categories = [
+  const defaultCategories = [
     {
       id: 'coding',
       name: 'Software Development',
@@ -176,6 +181,73 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       bgColor: 'bg-rose-50'
     }
   ];
+
+  const resolveCategoryLogo = (catId = '', label = '', customIcon = '') => {
+    if (customIcon && (customIcon.startsWith('http') || customIcon.startsWith('data:image') || customIcon.includes('/uploads/'))) {
+      return customIcon;
+    }
+    const slug = (catId || '').toLowerCase().trim();
+    const name = (label || '').toLowerCase().trim();
+
+    // 1. Exact Slug Match
+    if (slug === 'coding' || slug.includes('coding') || slug.includes('software')) return '/images/categories/coding.png';
+    if (slug === 'robotics' || slug.includes('robot') || slug.includes('iot')) return '/images/categories/robotics.png';
+    if (slug === 'networking' || slug.includes('network') || slug.includes('server')) return '/images/categories/networking.png';
+    if (slug === 'electrical' || slug.includes('electric') || slug.includes('appliance')) return '/images/categories/electrical.png';
+    if (slug === 'repair' || slug === 'mobile' || slug.includes('repair')) return '/images/categories/repair.png';
+    if (slug === 'marketing' || slug.includes('market') || slug.includes('seo')) return '/images/categories/marketing.png';
+
+    // 2. Name Keyword Match
+    if (name.includes('appliance') || name.includes('electric') || name.includes('ac') || name.includes('fridge')) return '/images/categories/electrical.png';
+    if (name.includes('robot') || name.includes('iot') || name.includes('hardware')) return '/images/categories/robotics.png';
+    if (name.includes('network') || name.includes('server') || name.includes('ccna')) return '/images/categories/networking.png';
+    if (name.includes('market') || name.includes('seo') || name.includes('ads')) return '/images/categories/marketing.png';
+    if (name.includes('mobile') || name.includes('laptop') || name.includes('bga') || name.includes('chip')) return '/images/categories/repair.png';
+
+    return '/images/categories/coding.png';
+  };
+
+  const categories = (apiCategories.length > 0
+    ? apiCategories.filter(ac => ac.isActive !== false).map(ac => {
+        const catId = ac.category || ac.id;
+        const foundDefault = defaultCategories.find(dc => dc.id === catId || dc.id === ac.id);
+        return {
+          id: catId,
+          name: ac.label,
+          icon: foundDefault ? foundDefault.icon : Layers,
+          img: resolveCategoryLogo(catId, ac.label, ac.icon),
+          bgColor: ac.bgColor || foundDefault?.bgColor || 'bg-blue-50',
+          isActive: ac.isActive !== false
+        };
+      })
+    : defaultCategories).filter(c => c.isActive !== false);
+
+  const SUB_CATEGORIES = {};
+  categories.forEach(cat => {
+    const foundApi = apiCategories.find(ac => ac.category === cat.id);
+    let rawList = [];
+    if (foundApi && Array.isArray(foundApi.subCategories) && foundApi.subCategories.length > 0) {
+      rawList = foundApi.subCategories;
+    } else if (DEFAULT_SUB_CATEGORIES[cat.id]) {
+      rawList = DEFAULT_SUB_CATEGORIES[cat.id];
+    } else {
+      rawList = [{ id: 'all', label: 'All Courses' }];
+    }
+
+    const uniqueSubs = [];
+    const seen = new Set();
+    rawList.forEach(item => {
+      const subId = typeof item === 'object' ? (item.id || item.label) : String(item);
+      const subLabel = typeof item === 'object' ? (item.label || item.id) : String(item);
+      const normId = (subId || '').toLowerCase().replace(/[^a-z0-9]/g, '') || 'sub';
+      if (normId && !seen.has(normId)) {
+        seen.add(normId);
+        uniqueSubs.push({ id: normId, label: subLabel });
+      }
+    });
+
+    SUB_CATEGORIES[cat.id] = uniqueSubs.length > 0 ? uniqueSubs : [{ id: 'all', label: 'All Courses' }];
+  });
 
   const trainingFilters = [
     { label: 'All', value: 'All', matchKeys: ['All'] },
@@ -549,25 +621,40 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     ...INITIAL_COURSES.filter(ic => !customCourses.some(cc => (cc.id === ic.id || (cc.title && cc.title.toLowerCase() === ic.title.toLowerCase()))))
   ];
 
-  const currentCategoryObj = categories.find(c => c.id === activeCategory) || categories[0];
+  const currentCategoryObj = categories.find(c => c.id === activeCategory) || categories[0] || { name: 'Featured', id: 'all' };
 
-  let headingTitle = `${currentCategoryObj.name} Programs`;
-  const currentSubList = SUB_CATEGORIES[activeCategory] || [];
+  let headingTitle = `${currentCategoryObj?.name || 'Featured'} Programs`;
+  if (headingTitle.endsWith('Programs Programs')) {
+    headingTitle = headingTitle.replace('Programs Programs', 'Programs');
+  }
+  const currentSubList = SUB_CATEGORIES[activeCategory] || (categories[0]?.id ? SUB_CATEGORIES[categories[0].id] : []);
   const currentSubObj = currentSubList.find(s => s.id === activeSubCategory);
   if (currentSubObj && currentSubObj.id !== 'all') {
     headingTitle = `${currentSubObj.label} Programs`;
   }
 
   const displayedCourses = allCourses.filter(c => {
-    const matchesCat = c.categoryId === activeCategory;
+    const activeCatSlug = (activeCategory || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const courseCatSlug = (c.categoryId || c.category || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const courseCatRaw = (c.categoryId || c.category || '').toLowerCase();
+    const activeCatRaw = (activeCategory || '').toLowerCase();
+
+    const matchesCat = !activeCategory || 
+                       courseCatSlug === activeCatSlug || 
+                       courseCatRaw === activeCatRaw || 
+                       (courseCatSlug && activeCatSlug && (courseCatSlug.includes(activeCatSlug) || activeCatSlug.includes(courseCatSlug)));
     
     let matchesSubCat = true;
     if (activeSubCategory && activeSubCategory !== 'all') {
-      const subLower = activeSubCategory.toLowerCase();
+      const subLower = activeSubCategory.toLowerCase().replace(/[^a-z0-9]/g, '');
       const courseSub = (c.subCategory || c.subCat || '').toLowerCase();
+      const courseSubs = (Array.isArray(c.subCategories) && c.subCategories.length > 0 ? c.subCategories : courseSub.split(','))
+        .map(s => String(s).toLowerCase().replace(/[^a-z0-9]/g, ''))
+        .filter(Boolean);
+      
       const courseTitle = (c.title || '').toLowerCase();
-      matchesSubCat = courseSub === subLower || 
-                      courseSub.includes(subLower) || 
+      matchesSubCat = courseSubs.length === 0 || 
+                      courseSubs.some(s => s === subLower || s.includes(subLower) || subLower.includes(s)) || 
                       courseTitle.includes(subLower);
     }
     
@@ -592,7 +679,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       <div className="max-w-7xl mx-auto w-full">
         
         {/* CATEGORY SELECTOR CARDS GRID */}
-        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 md:gap-5 justify-items-center w-full pb-3 md:pb-2 pt-0 px-1 md:mx-0 md:px-0">
+        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-3.5 sm:gap-5 md:gap-6 justify-items-center w-full pb-4 md:pb-3 pt-1 px-1 md:mx-0 md:px-0">
           {categories.map((cat) => {
             const isCatActive = activeCategory === cat.id;
 
@@ -601,25 +688,32 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                 suppressHydrationWarning
                 key={cat.id}
                 onClick={() => handleCategoryClick(cat.id)}
-                className="group flex flex-col items-center justify-start w-full gap-2 sm:gap-2.5 cursor-pointer"
+                className="group flex flex-col items-center justify-start w-full gap-2.5 sm:gap-3 cursor-pointer"
                 title={`Open ${cat.name} Courses`}
               >
+                {/* SMOOTH ROUNDED CARD CONTAINER */}
                 <div
-                  className={`relative flex items-center justify-center p-1.5 sm:p-2.5 md:p-3 rounded-[16px] sm:rounded-[20px] md:rounded-[26px] transition-all duration-300 w-full max-w-[105px] sm:max-w-[145px] md:max-w-[170px] aspect-square ${
+                  className={`relative flex items-center justify-center p-3 sm:p-4 md:p-5 rounded-[24px] sm:rounded-[32px] md:rounded-[36px] transition-all duration-300 w-full max-w-[120px] sm:max-w-[155px] md:max-w-[180px] aspect-square ${
                     isCatActive && !isHome
-                      ? 'border-2 border-blue-500 shadow-md shadow-blue-500/10 ring-4 ring-blue-50/60 bg-white scale-[1.02]'
-                      : 'border border-slate-200/80 hover:border-blue-300 hover:shadow-md hover:-translate-y-1 bg-white'
+                      ? 'border-2 border-blue-600 shadow-xl shadow-blue-500/15 ring-4 ring-blue-100/70 bg-white scale-[1.03]'
+                      : 'border border-blue-100/90 shadow-[0_6px_24px_-6px_rgba(0,0,0,0.06)] hover:border-blue-400 hover:shadow-lg hover:-translate-y-1 bg-white'
                   }`}
                 >
                   <img
-                    src={cat.img}
+                    src={cat.img || '/images/categories/coding.png'}
                     alt={cat.name}
-                    className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-110 p-0.5"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = '/images/categories/coding.png';
+                    }}
+                    className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-105 p-0.5"
                   />
                 </div>
+
+                {/* CATEGORY NAME TEXT BELOW CARD */}
                 <span
-                  className={`text-[11.5px] sm:text-[13px] md:text-[14.5px] font-extrabold text-center leading-snug px-0.5 max-w-[155px] tracking-tight transition-colors ${
-                    isCatActive && !isHome ? 'text-blue-600' : 'text-slate-800 group-hover:text-blue-600'
+                  className={`text-[12.5px] sm:text-[14.5px] md:text-[16px] font-black text-center leading-tight tracking-tight px-0.5 max-w-[160px] transition-colors ${
+                    isCatActive && !isHome ? 'text-blue-600' : 'text-[#0f172a] group-hover:text-blue-600'
                   }`}
                 >
                   {cat.name}
@@ -636,12 +730,12 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
             {SUB_CATEGORIES[activeCategory] && SUB_CATEGORIES[activeCategory].length > 0 && (
               <div className="sticky top-[52px] sm:top-[74px] z-30 bg-slate-50/95 backdrop-blur-md py-1.5 sm:py-2 border-t border-b border-slate-200/80 shadow-xs my-1 sm:my-2 -mx-3 sm:mx-0 px-3 sm:px-0">
                 <div className="w-full max-w-xl mx-auto bg-slate-200/80 p-1 rounded-xl sm:rounded-2xl flex items-center justify-between gap-1 shadow-inner border border-slate-300/50 overflow-x-auto scrollbar-none [ms-overflow-style:none] [scrollbar-width:none]">
-                  {SUB_CATEGORIES[activeCategory].map((sub) => {
+                  {SUB_CATEGORIES[activeCategory].map((sub, sIdx) => {
                     const isSubActive = activeSubCategory === sub.id;
                     return (
                       <button
                         suppressHydrationWarning
-                        key={sub.id}
+                        key={`${sub.id}-${sIdx}`}
                         onClick={() => handleSubCategoryClick(sub.id)}
                         className={`flex-1 min-w-max text-center whitespace-nowrap px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-extrabold text-[11px] min-[360px]:text-[12px] sm:text-[13.5px] transition-all duration-200 cursor-pointer ${
                           isSubActive
@@ -707,16 +801,31 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                 const titleLower = (course.title || '').toLowerCase();
                 const isMern = course.id === 'mern-stack' || titleLower.includes('mern');
 
-                // 2x2 Pills Grid Data
+                const parseStatPill = (valStr, defaultVal = '', defaultLabel = '') => {
+                  if (!valStr) return { val: defaultVal, label: defaultLabel };
+                  const trimmed = String(valStr).trim();
+                  const match = trimmed.match(/^([\d\+\-]+)\s*(.*)$/);
+                  if (match) {
+                    const numPart = match[1];
+                    const restPart = match[2];
+                    if (restPart) {
+                      return { val: numPart, label: restPart };
+                    }
+                    return { val: numPart, label: defaultLabel };
+                  }
+                  return { val: trimmed, label: '' };
+                };
+
+                // Dynamic 2x2 Pills Grid Data (From Admin Backend or Fallback)
                 const gridPills = [
-                  { val: course.duration || '6 Months', label: '' },
-                  { val: '5', label: 'Internships' },
-                  { val: '5', label: 'Mock Tests' },
-                  { val: '5', label: 'Projects' }
+                  parseStatPill(course.duration, '6', 'Months'),
+                  parseStatPill(course.internships, '5', 'Internships'),
+                  parseStatPill(course.mockTests, '5', 'Mock Tests'),
+                  parseStatPill(course.projects, '5', 'Projects')
                 ];
 
-                // Checkmark Features List Data
-                const checkmarkFeatures = isMern ? [
+                // Dynamic Checkmark Features List Data (From Admin Backend or Smart Category Fallback)
+                const checkmarkFeatures = (Array.isArray(course.highlights) && course.highlights.length > 0) ? course.highlights : (isMern ? [
                   'MongoDB, Express, React, Node.js',
                   'Frontend and Backend: React + Express',
                   'Database: MongoDB'
@@ -752,24 +861,52 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                   `${course.title} Core Track`,
                   'Hands-on Practical & Project Training',
                   'Certification & Job Assistance'
-                ];
+                ]);
 
                 return (
                   <div
                     key={course.id}
                     className="group relative flex flex-col bg-white border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] rounded-[20px] sm:rounded-[24px] p-3.5 min-[400px]:p-4 sm:p-6 transition-all duration-300 hover:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.12)] hover:border-blue-200 justify-between gap-3 sm:gap-4"
                   >
-                    {/* ATTACHED BESTSELLER / TOP BADGE */}
-                    {course.tag && (
-                      <div className="absolute top-0 -translate-y-1/2 left-4 sm:left-6 px-2.5 sm:px-3 py-0.5 bg-[#fde047] border border-[#facc15] text-[#713f12] font-black text-[9.5px] sm:text-[10.5px] rounded-lg shadow-2xs tracking-wider uppercase z-10">
-                        {course.tag}
-                      </div>
-                    )}
+                    {/* ATTACHED BESTSELLER / TOP BADGE + PRICE TAG */}
+                    <div className="flex items-center justify-between gap-2 absolute top-0 -translate-y-1/2 left-4 sm:left-6 right-4 sm:right-6 z-10 pointer-events-none">
+                      {course.tag ? (
+                        <div className="px-2.5 sm:px-3 py-0.5 bg-[#fde047] border border-[#facc15] text-[#713f12] font-black text-[9.5px] sm:text-[10.5px] rounded-lg shadow-2xs tracking-wider uppercase">
+                          {course.tag}
+                        </div>
+                      ) : <div />}
+                      {course.showPrice !== false && course.price && (
+                        <div className="px-2.5 sm:px-3 py-0.5 bg-emerald-500 border border-emerald-600 text-white font-black text-[10px] sm:text-[11.5px] rounded-lg shadow-sm flex items-center gap-1.5">
+                          {course.isDiscountActive !== false && (course.discountPercent > 0 || course.originalPrice) ? (
+                            <span className="flex items-center gap-1.5">
+                              {course.originalPrice && (
+                                <span className="line-through text-emerald-100/90 font-medium text-[10px]">{course.originalPrice}</span>
+                              )}
+                              <span>{course.price}</span>
+                              <span className="bg-rose-500 text-white font-black text-[9px] px-1.5 py-0.2 rounded-md shadow-2xs">
+                                {course.discountPercent ? `${course.discountPercent}% OFF` : 'OFFER'}
+                              </span>
+                            </span>
+                          ) : (
+                            <span>{course.price}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
 
                     {/* TOP ROW: ICON + TITLE + 2x2 PILLS GRID */}
                     <div className="flex flex-row gap-2.5 min-[400px]:gap-3.5 sm:gap-5 items-start">
-                      {/* TECH LOGO CONTAINER (M E R N 4-box grid OR Course Icon) */}
-                      {isMern ? (
+                      {/* TECH LOGO CONTAINER (Custom Uploaded Icon OR M E R N 4-box grid OR Fallback) */}
+                      {(course.icon || course.logoUrl) ? (
+                        <div className={`w-16 h-16 min-[400px]:w-20 min-[400px]:h-20 sm:w-26 sm:h-26 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 border border-slate-200/80 shadow-2xs mt-[8px] p-2 ${course.iconBg || 'bg-slate-50'}`}>
+                          <img
+                            src={course.icon || course.logoUrl}
+                            alt={course.title}
+                            className="w-full h-full object-contain"
+                            onError={(e) => { e.target.src = '/images/categories/coding.png'; }}
+                          />
+                        </div>
+                      ) : isMern ? (
                         <div className="w-16 h-16 min-[400px]:w-20 min-[400px]:h-20 sm:w-26 sm:h-26 bg-slate-50/90 border border-slate-200/80 rounded-xl sm:rounded-2xl p-1.5 min-[400px]:p-2 sm:p-2.5 flex-shrink-0 shadow-2xs mt-[8px]">
                           <div className="grid grid-cols-2 gap-1 min-[400px]:gap-1.5 w-full h-full">
                             <div className="bg-[#10b981] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">M</div>
@@ -781,9 +918,10 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                       ) : (
                         <div className={`w-16 h-16 min-[400px]:w-20 min-[400px]:h-20 sm:w-26 sm:h-26 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 border border-slate-200/80 shadow-2xs mt-[8px] ${course.iconBg || 'bg-slate-50'}`}>
                           <img
-                            src={course.icon}
+                            src={course.icon || '/images/categories/coding.png'}
                             alt={course.title}
                             className="w-8 h-8 min-[400px]:w-10 min-[400px]:h-10 sm:w-12 sm:h-12 object-contain"
+                            onError={(e) => { e.target.src = '/images/categories/coding.png'; }}
                           />
                         </div>
                       )}

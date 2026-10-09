@@ -73,12 +73,12 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
                 }}
                 className="w-[210px] xs:w-[230px] sm:w-[250px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[18px] sm:rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] flex flex-col mx-2 relative overflow-hidden group cursor-pointer hover:scale-[0.97] hover:shadow-md hover:border-blue-400 transition-all duration-300 ease-out select-none"
               >
-                {/* TOP PORTRAIT PHOTO AREA */}
-                <div className="w-full h-[145px] sm:h-[160px] bg-slate-100 relative overflow-hidden flex items-end justify-center">
+                {/* TOP PORTRAIT PHOTO AREA - EDGE TO EDGE FULL COVER FIT */}
+                <div className="w-full h-[190px] sm:h-[210px] bg-slate-100 relative overflow-hidden flex items-center justify-center">
                   <img
                     src={student.photo}
                     alt={student.name}
-                    className="w-full h-full object-cover object-center group-hover:scale-[1.22] transition-transform duration-500 ease-out"
+                    className="w-full h-full object-cover object-top transition-transform duration-300 ease-out group-hover:scale-105"
                   />
 
                   {/* GREEN DIAGONAL CORNER RIBBON: PLACED */}

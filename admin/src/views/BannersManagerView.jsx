@@ -34,6 +34,25 @@ export default function BannersManagerView() {
   };
 
 
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: null
+  });
+
+  const triggerDeleteWithConfirm = (bannerId, bannerTitle) => {
+    setConfirmModal({
+      isOpen: true,
+      title: `Delete Banner "${bannerTitle || 'Banner'}"?`,
+      message: `Are you sure you want to delete banner poster "${bannerTitle || ''}"? This action will remove it from website slider and cannot be undone.`,
+      onConfirm: async () => {
+        await handleDelete(bannerId);
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      }
+    });
+  };
+
   return (
     <div className="flex flex-col gap-6 animate-fade-in pb-8 select-none">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -104,7 +123,7 @@ export default function BannersManagerView() {
                       <EditOutlinedIcon className="!w-4 !h-4" />
                     </button>
                     <button
-                      onClick={() => handleDelete(bannerId)}
+                      onClick={() => triggerDeleteWithConfirm(bannerId, banner.title)}
                       className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer"
                       title="Delete Banner"
                     >
@@ -304,6 +323,51 @@ export default function BannersManagerView() {
 
             </form>
 
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* CONFIRMATION POPUP MODAL */}
+      {confirmModal.isOpen && createPortal(
+        <div className="fixed inset-0 z-[999999] bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-md border border-slate-200 shadow-2xl p-6 space-y-5 animate-scale-up">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0 text-xl font-bold shadow-2xs">
+                🗑️
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900 font-heading">
+                  {confirmModal.title || 'Delete Confirmation'}
+                </h3>
+                <p className="text-xs font-semibold text-slate-500 mt-0.5">
+                  Warning: Permanent Action
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-rose-50/50 border border-rose-100 text-xs font-bold text-rose-900 leading-relaxed">
+              {confirmModal.message}
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-black transition-all cursor-pointer active:scale-95"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirmModal.onConfirm) confirmModal.onConfirm();
+                }}
+                className="px-5 py-2.5 rounded-xl text-white text-xs font-black bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 shadow-md shadow-rose-600/20 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
+              >
+                <span>Yes, Delete Banner</span>
+              </button>
+            </div>
           </div>
         </div>,
         document.body

@@ -29,6 +29,25 @@ export default function PlacementsManagerView() {
 
 
 
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: null
+  });
+
+  const triggerDeleteWithConfirm = (itemId, name) => {
+    setConfirmModal({
+      isOpen: true,
+      title: `Delete Placement Poster "${name || 'Student'}"?`,
+      message: `Are you sure you want to delete placement poster for "${name || ''}"? This action will remove it from website hall of fame and cannot be undone.`,
+      onConfirm: async () => {
+        await handleDelete(itemId);
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      }
+    });
+  };
+
   return (
     <div className="flex flex-col gap-6 animate-fade-in pb-8 select-none">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -50,45 +69,96 @@ export default function PlacementsManagerView() {
         </button>
       </div>
 
-      {/* PLACEMENT POSTERS GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {/* PLACEMENT POSTERS GRID - MATCHES FRONTEND STYLING EXACTLY */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
         {placements.map((item, idx) => {
           const itemId = item._id || item.id || idx;
-          return (
-            <div key={itemId} className="bg-[#292e26] rounded-2xl p-4 border border-amber-500/30 text-white shadow-xl flex flex-col gap-3 relative overflow-hidden group">
-              <div className="h-48 w-full bg-slate-900 rounded-xl overflow-hidden relative">
-                <img src={item.photo} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                {item.verified && (
-                  <span className="absolute top-2.5 right-2.5 bg-emerald-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <VerifiedIcon className="!w-3 !h-3" /> VERIFIED
-                  </span>
-                )}
-              </div>
+          const photoUrl = item.photo || item.avatarUrl || item.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+          const companyLogo = item.companyLogo || item.logo || 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg';
 
-              <div className="flex flex-col gap-1">
-                <span className="text-amber-400 font-black text-sm">{item.name}</span>
-                <span className="text-[11px] text-slate-300 font-medium truncate">{item.college}</span>
-                <div className="mt-1 p-2 rounded-lg bg-white/10 flex items-center justify-between">
-                  <span className="text-xs font-extrabold text-cyan-300">{item.company}</span>
-                  <span className="text-xs font-extrabold text-amber-400">₹ {item.package}</span>
+          return (
+            <div
+              key={itemId}
+              className="bg-white border border-slate-200/90 rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] flex flex-col relative overflow-hidden group hover:shadow-md hover:border-blue-400 transition-all duration-300 select-none"
+            >
+              {/* TOP PORTRAIT PHOTO AREA - EDGE TO EDGE FULL COVER FIT */}
+              <div className="w-full h-[220px] bg-slate-100 relative overflow-hidden flex items-center justify-center">
+                <img
+                  src={photoUrl}
+                  alt={item.name}
+                  className="w-full h-full object-cover object-top transition-transform duration-300 ease-out group-hover:scale-105"
+                />
+
+                {/* GREEN DIAGONAL CORNER RIBBON: PLACED */}
+                <div className="absolute top-0 right-0 w-[72px] h-[72px] overflow-hidden pointer-events-none z-20">
+                  <div className="absolute top-[12px] -right-[22px] w-[95px] transform rotate-45 bg-emerald-600 text-white font-black text-[9px] uppercase tracking-widest text-center py-0.5 shadow-sm">
+                    PLACED
+                  </div>
+                </div>
+                
+                {/* SLEEK PACKAGE BADGE ON BOTTOM LEFT */}
+                <div className="absolute bottom-2.5 left-2.5 z-20 bg-slate-900/90 text-white font-black text-[10px] px-2.5 py-0.5 rounded-lg shadow-sm border border-slate-700/80">
+                  {item.package ? (item.package.includes('LPA') || item.package.includes('₹') ? item.package : `₹ ${item.package}`) : '6.5 LPA'}
                 </div>
               </div>
 
-              <div className="self-end flex items-center gap-1">
-                <button
-                  onClick={() => handleEdit(item)}
-                  className="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/20 transition-colors cursor-pointer"
-                  title="Edit Poster"
-                >
-                  <EditOutlinedIcon className="!w-4 !h-4" />
-                </button>
-                <button
-                  onClick={() => handleDelete(itemId)}
-                  className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
-                  title="Delete Poster"
-                >
-                  <DeleteOutlineIcon className="!w-4 !h-4" />
-                </button>
+              {/* CARD CONTENT */}
+              <div className="p-3.5 bg-white flex flex-col flex-1 justify-between gap-3">
+                <div>
+                  {/* STUDENT NAME & ROLE */}
+                  <div className="flex items-center gap-1.5 min-w-0 w-full truncate mb-0.5">
+                    <h3 className="font-black text-slate-900 text-[14px] tracking-tight truncate flex-shrink-0 max-w-[60%]">
+                      {item.name}
+                    </h3>
+                    <span className="text-slate-400 font-medium text-[10px] flex-shrink-0">•</span>
+                    <span className="text-slate-500 font-semibold text-[11px] truncate flex-1">
+                      {item.role || 'Software Engineer'}
+                    </span>
+                  </div>
+
+                  {/* COMPANY BRANDING & TRAINING TYPE ROW */}
+                  <div className="flex items-center justify-between gap-1.5 mt-2 pt-2 border-t border-slate-100 w-full">
+                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                      <img
+                        src={companyLogo}
+                        alt={item.company}
+                        className="w-4 h-4 object-contain flex-shrink-0"
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                      <span className="font-bold text-slate-800 text-[12px] truncate">
+                        {item.company}
+                      </span>
+                    </div>
+
+                    <div className="bg-slate-100 text-slate-600 font-extrabold text-[9px] px-2 py-0.5 rounded-full border border-slate-200/80 flex-shrink-0 tracking-tight">
+                      {item.trainingType || 'Internship Training'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* FOOTER ROW: VERIFIED BADGE + EDIT/DELETE ACTION BUTTONS */}
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 w-full">
+                  <span className="text-[10px] font-extrabold text-emerald-700 flex items-center gap-1">
+                    <VerifiedIcon className="!w-3.5 !h-3.5 text-emerald-600" /> Placed & Verified
+                  </span>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleEdit(item)}
+                      className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                      title="Edit Poster"
+                    >
+                      <EditOutlinedIcon className="!w-4 !h-4" />
+                    </button>
+                    <button
+                      onClick={() => triggerDeleteWithConfirm(itemId, item.name)}
+                      className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer"
+                      title="Delete Poster"
+                    >
+                      <DeleteOutlineIcon className="!w-4 !h-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           );
@@ -227,6 +297,51 @@ export default function PlacementsManagerView() {
 
             </form>
 
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* CONFIRMATION POPUP MODAL */}
+      {confirmModal.isOpen && createPortal(
+        <div className="fixed inset-0 z-[999999] bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-md border border-slate-200 shadow-2xl p-6 space-y-5 animate-scale-up">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0 text-xl font-bold shadow-2xs">
+                🗑️
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900 font-heading">
+                  {confirmModal.title || 'Delete Confirmation'}
+                </h3>
+                <p className="text-xs font-semibold text-slate-500 mt-0.5">
+                  Warning: Permanent Action
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-rose-50/50 border border-rose-100 text-xs font-bold text-rose-900 leading-relaxed">
+              {confirmModal.message}
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-black transition-all cursor-pointer active:scale-95"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirmModal.onConfirm) confirmModal.onConfirm();
+                }}
+                className="px-5 py-2.5 rounded-xl text-white text-xs font-black bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 shadow-md shadow-rose-600/20 transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
+              >
+                <span>Yes, Delete Poster</span>
+              </button>
+            </div>
           </div>
         </div>,
         document.body

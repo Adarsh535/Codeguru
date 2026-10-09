@@ -1,277 +1,292 @@
 /**
  * ============================================================================
- * API CONTROLLER: AUTHENTICATION CONTROLLER (authController.js)
+ * CONTROLLER: AUTHENTICATION CONTROLLER (authController.js)
  * ============================================================================
- * Handles master admin authentication, login validation, JWT tokens,
- * and security credentials updates in MongoDB database.
+ * Manages Master Admin & Student registration, authentication and profile security.
  */
 
 import bcrypt from 'bcryptjs';
 import { Admin } from '../../models/Admin.js';
 import { Student } from '../../models/Student.js';
-import { Lead } from '../../models/Lead.js';
 
 /**
- * --------------------------------------------------------------------------
- * API ENDPOINT: Admin Master Login
- * --------------------------------------------------------------------------
  * @route   POST /api/auth/login
- * @desc    Authenticates admin user against MongoDB 'admins' collection.
- *          Creates initial super admin if collection is empty.
- * @access  Public / Login
- * @param   {Object} req.body - { email, password }
- * @param   {Object} res - Express JSON response object
- * @returns {JSON} { success: boolean, token?: string, user?: Object, message: string }
+ * @desc    Master Admin Login authentication (Strict Database Lookup)
+ * @access  Public
+ * @param   {string} email
+ * @param   {string} password
+ * @returns {Object} { success, token, user, message }
  */
 export const loginAdmin = async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ success: false, message: 'Email and password are required.' });
-  }
-
   try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide both email and password'
+      });
+    }
+
     const cleanEmail = email.toLowerCase().trim();
+
+    // 1. Query MongoDB Atlas Database for Admin account matching cleanEmail
     let admin = await Admin.findOne({ email: cleanEmail });
 
-    // Fallback: If not found by email, check if there is an admin record in database
+    // Fallback: If DB has no admin records at all, auto-create initial Master Admin
     if (!admin) {
-      const existingAdmins = await Admin.find({});
-      if (existingAdmins.length === 0) {
-        // Seed initial admin account
-        const hashedPassword = await bcrypt.hash(password || 'admin123', 10);
-        admin = await Admin.create({
+      const totalAdmins = await Admin.countDocuments();
+      if (totalAdmins === 0) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        admin = new Admin({
           name: 'Super Admin',
           email: cleanEmail,
           password: hashedPassword,
           role: 'Master Admin'
         });
-      } else if (cleanEmail === 'admin@codeguru.com') {
-        admin = existingAdmins[0];
-      }
-    }
-
-    let isMatch = false;
-    if (admin) {
-      isMatch = await bcrypt.compare(password, admin.password);
-      // Fallback for plain text password match if any legacy record
-      if (!isMatch && admin.password === password) {
-        isMatch = true;
-        // Upgrade password to bcrypt hash
-        admin.password = await bcrypt.hash(password, 10);
         await admin.save();
       }
     }
 
-    if (admin && isMatch) {
-      return res.json({
-        success: true,
-        message: 'Admin login successful (authenticated via MongoDB Atlas)',
-        token: `jwt_token_${admin._id}_${Date.now()}`,
-        user: {
-          id: admin._id,
-          name: admin.name,
-          email: admin.email,
-          role: admin.role
-        }
+    // 2. If no admin account exists in MongoDB Atlas for this email
+    if (!admin) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
       });
     }
 
-    return res.status(401).json({
-      success: false,
-      message: 'Invalid Admin Email or Password'
+    // 3. Verify password directly against the stored hash/password in MongoDB Atlas
+    let isMatch = false;
+    if (admin.password) {
+      if (admin.password.startsWith('$2a$') || admin.password.startsWith('$2b$')) {
+        isMatch = await bcrypt.compare(password, admin.password);
+      } else {
+        isMatch = (admin.password === password);
+        if (isMatch) {
+          admin.password = await bcrypt.hash(password, 10);
+          await admin.save();
+        }
+      }
+    }
+
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    return res.json({
+      success: true,
+      token: `cg-admin-jwt-${Date.now()}`,
+      user: {
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role
+      },
+      message: 'Master Admin login successful'
     });
-  } catch (err) {
-    console.error('[authController Error] Auth Error:', err);
-    return res.status(500).json({ success: false, message: 'Database Auth Error: ' + err.message });
+  } catch (error) {
+    console.error('[authController loginAdmin Error]:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Internal server authentication error'
+    });
   }
 };
 
 /**
- * --------------------------------------------------------------------------
- * API ENDPOINT: Update Admin Credentials
- * --------------------------------------------------------------------------
  * @route   POST /api/auth/update-credentials
- * @desc    Updates master admin email address or security password in MongoDB.
+ * @desc    Update Master Admin Email & Password credentials directly in Database
  * @access  Admin Private
- * @param   {Object} req.body - { currentEmail, newEmail, newPassword }
- * @param   {Object} res - Express JSON response object
- * @returns {JSON} { success: boolean, message: string, user?: Object }
+ * @param   {string} currentEmail
+ * @param   {string} newEmail
+ * @param   {string} newPassword
+ * @returns {Object} { success, message }
  */
 export const updateCredentials = async (req, res) => {
-  const { currentEmail, newEmail, newPassword } = req.body;
-
   try {
-    const targetEmail = (currentEmail || 'admin@codeguru.com').toLowerCase().trim();
-    let admin = await Admin.findOne({ email: targetEmail });
-    
-    // Fallback: If not found by email, pick the first admin record in database
+    const { currentEmail, newEmail, newPassword } = req.body;
+
+    const queryEmail = (currentEmail || '').toLowerCase().trim();
+    let admin = await Admin.findOne({ email: queryEmail });
+
+    // Fallback: If not found by currentEmail, find the single master admin in database
     if (!admin) {
       admin = await Admin.findOne();
     }
 
-    // If still no admin exists, create one
     if (!admin) {
-      const initialPassword = (newPassword && newPassword.trim().length >= 4)
-        ? await bcrypt.hash(newPassword.trim(), 10)
-        : await bcrypt.hash('admin123', 10);
-
-      admin = await Admin.create({
-        name: 'Super Admin',
-        email: (newEmail || 'admin@codeguru.com').toLowerCase().trim(),
-        password: initialPassword,
-        role: 'Master Admin'
-      });
-
-      return res.json({
-        success: true,
-        message: 'Admin account created and credentials saved to MongoDB Atlas',
-        user: { id: admin._id, name: admin.name, email: admin.email, role: admin.role }
+      return res.status(404).json({
+        success: false,
+        message: 'Admin account record not found in MongoDB database'
       });
     }
 
-    if (newEmail && newEmail.trim().length > 0) {
-      const cleanNewEmail = newEmail.toLowerCase().trim();
-      if (cleanNewEmail !== admin.email) {
-        const existingOther = await Admin.findOne({ email: cleanNewEmail, _id: { $ne: admin._id } });
-        if (existingOther) {
-          return res.status(400).json({ success: false, message: 'An admin account with this email address already exists.' });
-        }
-        admin.email = cleanNewEmail;
-      }
+    if (newEmail) {
+      admin.email = newEmail.toLowerCase().trim();
     }
 
-    if (newPassword && newPassword.trim().length > 0) {
-      if (newPassword.trim().length < 4) {
-        return res.status(400).json({ success: false, message: 'New password must be at least 4 characters long.' });
-      }
-      admin.password = await bcrypt.hash(newPassword.trim(), 10);
+    if (newPassword) {
+      admin.password = await bcrypt.hash(newPassword, 10);
     }
 
     await admin.save();
 
-    res.json({
+    console.log(`✅ Admin credentials updated in MongoDB Atlas: Email = ${admin.email}`);
+
+    return res.json({
       success: true,
-      message: 'Admin credentials updated in MongoDB Atlas successfully',
-      user: { id: admin._id, name: admin.name, email: admin.email, role: admin.role }
+      user: {
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role
+      },
+      message: 'Admin credentials updated successfully in MongoDB Atlas'
     });
-  } catch (err) {
-    console.error('[authController Error] Failed to update credentials:', err);
-    if (err.code === 11000) {
-      return res.status(400).json({ success: false, message: 'Email address is already in use by another admin.' });
-    }
-    res.status(500).json({ success: false, message: 'Database Error: ' + err.message });
+  } catch (error) {
+    console.error('[authController updateCredentials Error]:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Error updating credentials'
+    });
   }
 };
 
-
 /**
- * --------------------------------------------------------------------------
- * API ENDPOINT: Student Account Registration
- * --------------------------------------------------------------------------
  * @route   POST /api/auth/student/register
- * @desc    Registers new student account and saves credentials to MongoDB 'students' collection with bcrypt hash.
+ * @desc    Register a new student account
  * @access  Public
- * @param   {Object} req.body - { name, email, password, phone }
+ * @param   {string} name
+ * @param   {string} email
+ * @param   {string} password
+ * @param   {string} phone
+ * @returns {Object} { success, token, student, message }
  */
 export const registerStudent = async (req, res) => {
-  const { name, email, password, phone } = req.body;
-
-  if (!name || !email || !password) {
-    return res.status(400).json({ success: false, message: 'Name, email, and password are required.' });
-  }
-
   try {
+    const { name, email, password, phone } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, email, and password are required'
+      });
+    }
+
     const cleanEmail = email.toLowerCase().trim();
+
     const existingStudent = await Student.findOne({ email: cleanEmail });
     if (existingStudent) {
-      return res.status(400).json({ success: false, message: 'Account with this email already exists. Please login instead.' });
+      return res.status(400).json({
+        success: false,
+        message: 'Account with this email already exists'
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newStudent = await Student.create({
+    const newStudent = new Student({
       name: name.trim(),
       email: cleanEmail,
       password: hashedPassword,
-      phone: phone || ''
+      phone: phone || '',
+      role: 'Student'
     });
 
-    // Save registration inquiry as Lead for Admin visibility
-    try {
-      await Lead.create({
-        name: newStudent.name,
-        phone: newStudent.phone || newStudent.email,
-        course: 'Full Stack Web Development (Registered Student)',
-        status: 'New',
-        notes: `New Student Account Registered (${newStudent.email})`
-      });
-    } catch (leadErr) {
-      console.warn('[registerStudent Warning] Could not auto-create lead:', leadErr);
-    }
+    await newStudent.save();
 
     return res.status(201).json({
       success: true,
-      message: 'Registration successful! Encrypted student credentials saved to MongoDB database.',
-      token: `jwt_student_${newStudent._id}_${Date.now()}`,
-      user: {
+      token: `cg-student-jwt-${Date.now()}`,
+      student: {
         id: newStudent._id,
         name: newStudent.name,
         email: newStudent.email,
         phone: newStudent.phone,
         role: newStudent.role
-      }
+      },
+      message: 'Student account registered successfully'
     });
-  } catch (err) {
-    console.error('[authController Error] Registration error:', err);
-    return res.status(500).json({ success: false, message: 'Failed to register student in database.' });
+  } catch (error) {
+    console.error('[authController registerStudent Error]:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Error registering student account'
+    });
   }
 };
 
 /**
- * --------------------------------------------------------------------------
- * API ENDPOINT: Student Account Login
- * --------------------------------------------------------------------------
  * @route   POST /api/auth/student/login
- * @desc    Authenticates student against MongoDB 'students' collection via bcrypt comparison.
+ * @desc    Authenticate student account login
  * @access  Public
- * @param   {Object} req.body - { email, password }
+ * @param   {string} email
+ * @param   {string} password
+ * @returns {Object} { success, token, student, message }
  */
 export const loginStudent = async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ success: false, message: 'Email and password are required.' });
-  }
-
   try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password are required'
+      });
+    }
+
     const cleanEmail = email.toLowerCase().trim();
     const student = await Student.findOne({ email: cleanEmail });
 
     if (!student) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password.' });
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
     }
 
-    const isMatch = await bcrypt.compare(password, student.password) || student.password === password;
+    let isMatch = false;
+    if (student.password) {
+      if (student.password.startsWith('$2a$') || student.password.startsWith('$2b$')) {
+        isMatch = await bcrypt.compare(password, student.password);
+      } else {
+        isMatch = (student.password === password);
+        if (isMatch) {
+          student.password = await bcrypt.hash(password, 10);
+          await student.save();
+        }
+      }
+    }
+
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password.' });
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
     }
 
     return res.json({
       success: true,
-      message: 'Student login successful!',
-      token: `jwt_student_${student._id}_${Date.now()}`,
-      user: {
+      token: `cg-student-jwt-${Date.now()}`,
+      student: {
         id: student._id,
         name: student.name,
         email: student.email,
         phone: student.phone,
         role: student.role
-      }
+      },
+      message: 'Student login successful'
     });
-  } catch (err) {
-    console.error('[authController Error] Student Login error:', err);
-    return res.status(500).json({ success: false, message: 'Database Auth Error' });
+  } catch (error) {
+    console.error('[authController loginStudent Error]:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Server error during student login'
+    });
   }
 };
 

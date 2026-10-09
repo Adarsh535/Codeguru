@@ -18,6 +18,13 @@ export function useSystemController(user, updateUser) {
   const [dbProvider, setDbProvider] = useState('MongoDB Atlas Cloud Cluster & REST API Endpoint');
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState(null);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [updatedEmailInfo, setUpdatedEmailInfo] = useState('');
+
+  const [activeDbMode, setActiveDbMode] = useState('cloud');
+  const [isSwitchingDb, setIsSwitchingDb] = useState(false);
+
+  const closeSuccessModal = () => setIsSuccessModalOpen(false);
 
   useEffect(() => {
     if (user?.email) {
@@ -29,16 +36,45 @@ export function useSystemController(user, updateUser) {
     systemModel.checkHealth()
       .then(data => {
         if (data.success && data.database) {
-          setDbStatus(data.database.connectionText || 'Connected to MongoDB Atlas Cloud (cluster0.illbds4.mongodb.net)');
+          const mode = data.database.mode || (data.database.isAtlas ? 'cloud' : 'local');
+          setActiveDbMode(mode);
+          setDbStatus(data.database.connectionText || 'Connected to MongoDB Atlas Cloud');
           setDbUri(data.database.uri || 'mongodb+srv://Adarshverma:adarshverma@3213@cluster0.illbds4.mongodb.net/codeguru_db');
-          setDbProvider(data.database.provider ? `${data.database.provider} & REST API Endpoint` : 'MongoDB Atlas Cloud Cluster & REST API Endpoint');
+          setDbProvider(data.database.provider ? `${data.database.provider} & REST API Endpoint` : 'MongoDB Atlas Cloud Cluster');
         }
       })
       .catch(() => {
-        setDbStatus('Connected to MongoDB Atlas Cloud (cluster0.illbds4.mongodb.net)');
+        setDbStatus('Connected to MongoDB Atlas Cloud');
         setDbUri('mongodb+srv://Adarshverma:adarshverma@3213@cluster0.illbds4.mongodb.net/codeguru_db');
       });
   }, []);
+
+  const handleSwitchDatabase = async (targetMode) => {
+    setIsSwitchingDb(true);
+    setMessage(null);
+
+    const res = await systemModel.switchDatabase(targetMode);
+    setIsSwitchingDb(false);
+
+    if (res.success) {
+      setActiveDbMode(targetMode);
+      if (res.database) {
+        setDbStatus(res.database.connectionText);
+        setDbUri(res.database.uri);
+        setDbProvider(res.database.provider ? `${res.database.provider} & REST API Endpoint` : 'MongoDB');
+      }
+      setMessage({
+        type: 'success',
+        text: `Switched database connection to ${targetMode === 'cloud' ? 'MongoDB Atlas Cloud' : 'Local MongoDB Compass'}! ⚡`
+      });
+      window.dispatchEvent(new Event('codeguru_refresh_all'));
+    } else {
+      setMessage({
+        type: 'error',
+        text: res.message || `Failed to connect to ${targetMode === 'cloud' ? 'MongoDB Atlas Cloud' : 'Local MongoDB Compass'}`
+      });
+    }
+  };
 
 
   const handleUpdatePassword = async (e) => {
@@ -75,6 +111,8 @@ export function useSystemController(user, updateUser) {
       if (updateUser) {
         updateUser({ email: updatedEmail });
       }
+      setUpdatedEmailInfo(updatedEmail);
+      setIsSuccessModalOpen(true);
       setMessage({ type: 'success', text: `Admin credentials updated successfully in MongoDB database! Active Email: ${updatedEmail}` });
       setNewPassword('');
       setConfirmPassword('');
@@ -140,8 +178,9 @@ export function useSystemController(user, updateUser) {
     dbStatus,
     dbUri,
     dbProvider,
-    isSaving,
-    message,
+    activeDbMode,
+    isSwitchingDb,
+    handleSwitchDatabase,
     handleUpdatePassword,
     handleSaveSettings
   };

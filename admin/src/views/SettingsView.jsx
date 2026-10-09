@@ -31,15 +31,20 @@ export default function SettingsView() {
     dbStatus,
     dbUri,
     dbProvider,
+    activeDbMode,
+    isSwitchingDb,
+    handleSwitchDatabase,
     isSaving,
     message,
+    isSuccessModalOpen,
+    updatedEmailInfo,
+    closeSuccessModal,
     handleUpdatePassword,
     handleSaveSettings
   } = useSystemController(user, updateUser);
 
-
   return (
-    <div className="flex flex-col gap-6 animate-fade-in pb-8 select-none max-w-4xl mx-auto">
+    <div className="flex flex-col gap-6 animate-fade-in pb-8 select-none max-w-4xl mx-auto relative">
       
       {/* HEADER */}
       <div>
@@ -48,7 +53,7 @@ export default function SettingsView() {
           <span>Admin System Settings</span>
         </h1>
         <p className="text-xs font-semibold text-slate-500 mt-1">
-          Manage master admin login credentials, inquiry notification phone numbers, and check MongoDB database status.
+          Manage master admin login credentials, inquiry notification phone numbers, and switch MongoDB database engines.
         </p>
       </div>
 
@@ -56,7 +61,7 @@ export default function SettingsView() {
         <div className={`p-4 rounded-xl text-xs font-bold flex items-center gap-2 border ${
           message.type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200'
         }`}>
-          <CheckCircleIcon className="!w-4 !h-4" />
+          <CheckCircleIcon className="!w-4 !h-4 shrink-0" />
           <span>{message.text}</span>
         </div>
       )}
@@ -126,8 +131,8 @@ export default function SettingsView() {
         </form>
       </div>
 
-      {/* DATABASE STATUS CARD */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-metoxi flex flex-col gap-4">
+      {/* DYNAMIC DUAL DATABASE SWITCHER CONTAINER */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-metoxi flex flex-col gap-5">
         <div className="flex items-center justify-between border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
@@ -135,24 +140,148 @@ export default function SettingsView() {
             </div>
             <div>
               <h3 className="text-sm font-bold text-slate-900 font-heading">Database & System Health</h3>
-              <p className="text-xs text-slate-500">{dbProvider || 'MongoDB Atlas Cloud Cluster & REST API Endpoint'}</p>
+              <p className="text-xs text-slate-500">Switch runtime database engines between MongoDB Atlas Cloud & Local Compass</p>
             </div>
           </div>
-          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Active
-          </span>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full">
+              {activeDbMode === 'cloud' ? '☁️ Cloud Atlas Mode' : '💻 Local Compass Mode'}
+            </span>
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Active Live
+            </span>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex flex-col gap-1 overflow-hidden">
-            <span className="text-[11px] text-slate-400 font-extrabold uppercase">Database URI</span>
-            <span className="text-slate-800 font-mono font-bold break-all">{dbUri || 'mongodb+srv://Adarshverma:adarshverma@3213@cluster0.illbds4.mongodb.net/codeguru_db'}</span>
+        {/* DUAL DATABASE CARDS WITH DIRECT SWITCH BUTTONS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          
+          {/* CARD 1: MONGODB ATLAS CLOUD CLUSTER */}
+          <div className={`p-5 rounded-3xl border transition-all duration-300 flex flex-col justify-between gap-4 relative overflow-hidden ${
+            activeDbMode === 'cloud' 
+              ? 'bg-gradient-to-b from-blue-50/90 via-indigo-50/50 to-white border-2 border-blue-500 shadow-md ring-4 ring-blue-500/10' 
+              : 'bg-white border-slate-200/90 hover:border-blue-300 shadow-2xs hover:shadow-sm'
+          }`}>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs sm:text-sm font-black text-slate-900 font-heading flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">
+                    ☁️
+                  </span>
+                  <span>MongoDB Atlas Cloud Cluster</span>
+                </span>
+                
+                <span className={`text-[10.5px] font-black px-3 py-1 rounded-full border shadow-2xs flex items-center gap-1.5 shrink-0 ${
+                  activeDbMode === 'cloud'
+                    ? 'bg-emerald-500 text-white border-emerald-600'
+                    : 'bg-slate-100 text-slate-500 border-slate-200'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${activeDbMode === 'cloud' ? 'bg-white animate-pulse' : 'bg-slate-400'}`} />
+                  <span>{activeDbMode === 'cloud' ? 'CONNECTED LIVE' : 'INACTIVE'}</span>
+                </span>
+              </div>
+
+              {/* MONOSPACE URI BOX */}
+              <div className="p-3 rounded-2xl bg-slate-900 text-slate-100 border border-slate-800 font-mono text-[11px] font-bold break-all leading-relaxed shadow-xs relative group">
+                <div className="text-[9px] font-black uppercase text-blue-400 mb-1 tracking-wider block">CLOUD ATLAS URI</div>
+                mongodb+srv://Adarshverma:adarshverma@3213@cluster0.illbds4.mongodb.net/codeguru_db
+              </div>
+
+              <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                Remote Cloud Atlas MongoDB database cluster (<strong className="text-slate-700">cluster0.illbds4.mongodb.net</strong>). Syncs live with website production catalog.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              disabled={isSwitchingDb || activeDbMode === 'cloud'}
+              onClick={() => handleSwitchDatabase('cloud')}
+              className={`w-full py-3 px-4 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 shadow-sm ${
+                activeDbMode === 'cloud'
+                  ? 'bg-emerald-500 text-white cursor-default shadow-emerald-500/20'
+                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-600/25 active:scale-95 cursor-pointer'
+              }`}
+            >
+              {isSwitchingDb && activeDbMode !== 'cloud' ? (
+                <span>Connecting to Cloud Atlas...</span>
+              ) : activeDbMode === 'cloud' ? (
+                <>
+                  <span className="text-sm">✓</span>
+                  <span>Currently Connected & Active</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-sm">⚡</span>
+                  <span>Switch to Cloud DB</span>
+                </>
+              )}
+            </button>
           </div>
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex flex-col gap-1">
-            <span className="text-[11px] text-slate-400 font-extrabold uppercase">Connection Status</span>
-            <span className="text-emerald-700 font-bold">{dbStatus}</span>
+
+          {/* CARD 2: LOCAL MONGODB COMPASS */}
+          <div className={`p-5 rounded-3xl border transition-all duration-300 flex flex-col justify-between gap-4 relative overflow-hidden ${
+            activeDbMode === 'local' 
+              ? 'bg-gradient-to-b from-emerald-50/90 via-teal-50/50 to-white border-2 border-emerald-500 shadow-md ring-4 ring-emerald-500/10' 
+              : 'bg-white border-slate-200/90 hover:border-emerald-300 shadow-2xs hover:shadow-sm'
+          }`}>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs sm:text-sm font-black text-slate-900 font-heading flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs shrink-0">
+                    💻
+                  </span>
+                  <span>Local MongoDB Compass</span>
+                </span>
+                
+                <span className={`text-[10.5px] font-black px-3 py-1 rounded-full border shadow-2xs flex items-center gap-1.5 shrink-0 ${
+                  activeDbMode === 'local'
+                    ? 'bg-emerald-500 text-white border-emerald-600'
+                    : 'bg-slate-100 text-slate-500 border-slate-200'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${activeDbMode === 'local' ? 'bg-white animate-pulse' : 'bg-slate-400'}`} />
+                  <span>{activeDbMode === 'local' ? 'CONNECTED LIVE' : 'INACTIVE'}</span>
+                </span>
+              </div>
+
+              {/* MONOSPACE URI BOX */}
+              <div className="p-3 rounded-2xl bg-slate-900 text-slate-100 border border-slate-800 font-mono text-[11px] font-bold break-all leading-relaxed shadow-xs">
+                <div className="text-[9px] font-black uppercase text-emerald-400 mb-1 tracking-wider block">LOCAL COMPASS URI</div>
+                mongodb://127.0.0.1:27017/codeguru_db
+              </div>
+
+              <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                Local PC MongoDB Compass server running at <strong className="text-slate-700">127.0.0.1:27017</strong>. Ideal for local development & offline database testing.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              disabled={isSwitchingDb || activeDbMode === 'local'}
+              onClick={() => handleSwitchDatabase('local')}
+              className={`w-full py-3 px-4 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 shadow-sm ${
+                activeDbMode === 'local'
+                  ? 'bg-emerald-500 text-white cursor-default shadow-emerald-500/20'
+                  : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md shadow-emerald-600/25 active:scale-95 cursor-pointer'
+              }`}
+            >
+              {isSwitchingDb && activeDbMode !== 'local' ? (
+                <span>Connecting to Local Compass...</span>
+              ) : activeDbMode === 'local' ? (
+                <>
+                  <span className="text-sm">✓</span>
+                  <span>Currently Connected & Active</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-sm">💻</span>
+                  <span>Switch to Local Compass</span>
+                </>
+              )}
+            </button>
           </div>
+
         </div>
       </div>
 
@@ -235,6 +364,51 @@ export default function SettingsView() {
           </div>
         </form>
       </div>
+
+      {/* SUCCESS CONFIRMATION POPUP MODAL FOR CREDENTIAL UPDATE */}
+      {isSuccessModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 select-none animate-backdrop-in">
+          <div className="w-full max-w-sm bg-white rounded-3xl p-6 sm:p-7 border border-emerald-100 shadow-2xl flex flex-col items-center text-center gap-4 animate-modal-slide-up relative overflow-hidden">
+            
+            {/* Ambient emerald radial glow */}
+            <div className="absolute -top-12 -left-12 w-40 h-40 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none" />
+            
+            {/* ANIMATED ICON BADGE */}
+            <div className="w-20 h-20 rounded-full bg-emerald-50 border-4 border-emerald-100 flex items-center justify-center text-emerald-600 shadow-lg relative">
+              <CheckCircleIcon className="!w-12 !h-12 text-emerald-500 animate-pulse" />
+              <div className="absolute inset-0 rounded-full border-2 border-emerald-400 animate-ping opacity-25" />
+            </div>
+
+            {/* CONFIRMATION TEXTS */}
+            <div className="flex flex-col gap-1.5 z-10">
+              <h3 className="text-xl font-black text-slate-900 font-heading tracking-tight">
+                Credentials Updated!
+              </h3>
+              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 self-center">
+                ● MongoDB Atlas Saved Successfully
+              </span>
+              <p className="text-xs font-semibold text-slate-600 mt-1">
+                Your Admin Email & Password have been changed successfully.
+              </p>
+              {updatedEmailInfo && (
+                <div className="mt-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold text-slate-800 break-all">
+                  🔑 Active Email: {updatedEmailInfo}
+                </div>
+              )}
+            </div>
+
+            {/* CLOSE BUTTON */}
+            <button
+              type="button"
+              onClick={closeSuccessModal}
+              className="w-full mt-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs uppercase tracking-wider py-3 rounded-xl shadow-md transition-all active:scale-[0.99] cursor-pointer"
+            >
+              OK, Got it!
+            </button>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

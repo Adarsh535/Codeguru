@@ -18,6 +18,7 @@ import trafficRoutes from './routes/trafficRoutes.js';
 import navMenuRoutes from './routes/navMenuRoutes.js';
 import enrollmentRoutes from './routes/enrollmentRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
 
 const apiRouter = express.Router();
 
@@ -25,6 +26,7 @@ const apiRouter = express.Router();
 apiRouter.use('/auth', authRoutes);
 apiRouter.use('/banners', bannerRoutes);
 apiRouter.use('/courses', courseRoutes);
+apiRouter.use('/categories', categoryRoutes);
 apiRouter.use('/placements', placementRoutes);
 apiRouter.use('/team', teamRoutes);
 apiRouter.use('/branches', branchRoutes);
