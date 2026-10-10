@@ -6,6 +6,7 @@
  */
 
 import { Team } from '../../models/Team.js';
+import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
 
 /**
  * @route   GET /api/team
@@ -37,6 +38,8 @@ export const addTeamMember = async (req, res) => {
       bio: req.body.bio || 'CodeGuru Master Educator'
     });
 
+    broadcastRealtimeEvent('team', member);
+
     return res.status(201).json({ success: true, message: 'Team member added to MongoDB Atlas', data: member });
   } catch (err) {
     console.error('[teamController Error]:', err.message);
@@ -52,7 +55,10 @@ export const addTeamMember = async (req, res) => {
 export const updateTeamMember = async (req, res) => {
   try {
     const member = await Team.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (member) return res.json({ success: true, message: 'Team member updated in MongoDB Atlas', data: member });
+    if (member) {
+      broadcastRealtimeEvent('team', member);
+      return res.json({ success: true, message: 'Team member updated in MongoDB Atlas', data: member });
+    }
     return res.status(404).json({ success: false, message: 'Team member not found' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -67,6 +73,7 @@ export const updateTeamMember = async (req, res) => {
 export const deleteTeamMember = async (req, res) => {
   try {
     await Team.findByIdAndDelete(req.params.id);
+    broadcastRealtimeEvent('team', { id: req.params.id, deleted: true });
     return res.json({ success: true, message: 'Team member profile deleted successfully' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });

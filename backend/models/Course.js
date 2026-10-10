@@ -28,9 +28,27 @@ const courseSchema = new mongoose.Schema({
   internships: { type: String, default: '5 Internships' },
   mockTests: { type: String, default: '5 Mock Tests' },
   projects: { type: String, default: '5 Projects' },
-  highlights: [{ type: String }]
+  highlights: [{ type: String }],
+  subtitle: { type: String, default: '' },
+  videoUrl: { type: String, default: '' },
+  featurePills: [{ type: String }],
+  whatYouWillLearn: [{ type: String }],
+  syllabusModules: [{
+    title: { type: String },
+    desc: { type: String }
+  }],
+  projectsList: [{
+    name: { type: String },
+    tech: { type: String },
+    desc: { type: String }
+  }],
+  batchClasses: { type: String, default: 'Live + Recorded' },
+  batchTimings: { type: String, default: 'Morning/Evening' },
+  batchMode: { type: String, default: 'Online / Offline' },
+  certificateProvided: { type: String, default: 'Provided' }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 export const Course = mongoose.models.Course || mongoose.model('Course', courseSchema);

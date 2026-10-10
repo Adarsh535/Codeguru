@@ -30,8 +30,23 @@ export function useBannersController() {
   useEffect(() => {
     loadBanners();
     const handleRefresh = () => loadBanners();
+
     window.addEventListener('codeguru_refresh_all', handleRefresh);
-    return () => window.removeEventListener('codeguru_refresh_all', handleRefresh);
+    window.addEventListener('codeguru_refresh_banners', handleRefresh);
+    window.addEventListener('focus', handleRefresh);
+
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        loadBanners();
+      }
+    }, 3000);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('codeguru_refresh_all', handleRefresh);
+      window.removeEventListener('codeguru_refresh_banners', handleRefresh);
+      window.removeEventListener('focus', handleRefresh);
+    };
   }, [loadBanners]);
 
   const handleOpenAddModal = () => {

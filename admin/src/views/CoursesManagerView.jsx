@@ -9,6 +9,32 @@ import CodeIcon from '@mui/icons-material/Code';
 import GroupIcon from '@mui/icons-material/Group';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import CategoryIcon from '@mui/icons-material/Category';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
+import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined';
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
+import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
+import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
+import CheckIcon from '@mui/icons-material/Check';
+import {
+  ArrowLeft as LucideArrowLeft,
+  Share2 as LucideShare2,
+  Play as LucidePlay,
+  Clock as LucideClock,
+  Video as LucideVideo,
+  Award as LucideAward,
+  Briefcase as LucideBriefcase,
+  GraduationCap as LucideGraduationCap,
+  Calendar as LucideCalendar,
+  MapPin as LucideMapPin,
+  ShieldCheck as LucideShieldCheck,
+  Star as LucideStar,
+  ChevronRight as LucideChevronRight,
+  Sparkles as LucideSparkles,
+  Headphones as LucideHeadphones,
+  X as LucideX
+} from 'lucide-react';
 import { useCoursesController } from '../controllers/useCoursesController';
 import { enrollmentModel } from '../models/enrollmentModel';
 import { leadModel } from '../models/leadModel';
@@ -197,6 +223,194 @@ export default function CoursesManagerView() {
 
   const [enrollments, setEnrollments] = useState([]);
   const [leads, setLeads] = useState([]);
+  const [selectedCourseForView, setSelectedCourseForView] = useState(null);
+  const [adminDetailsTab, setAdminDetailsTab] = useState('overview');
+  const [adminShowVideoModal, setAdminShowVideoModal] = useState(false);
+  const [coursePreviewMode, setCoursePreviewMode] = useState('card'); // 'card' | 'details'
+  const [formPreviewDetailsTab, setFormPreviewDetailsTab] = useState('overview'); // 'overview' | 'syllabus' | 'projects'
+  const [courseFormTab, setCourseFormTab] = useState('all');
+  const [customSubCategoryInput, setCustomSubCategoryInput] = useState('');
+  const [customTechInput, setCustomTechInput] = useState('');
+  const [newHighlightPointInput, setNewHighlightPointInput] = useState('');
+  const [useRawHighlightsText, setUseRawHighlightsText] = useState(false);
+
+  useEffect(() => {
+    if (courseFormTab === 'detailsPage') {
+      setCoursePreviewMode('details');
+    }
+  }, [courseFormTab]);
+
+  const getLivePills = () => {
+    if (formData.featurePillsText && String(formData.featurePillsText).trim()) {
+      const parsed = String(formData.featurePillsText).split(',').map(s => s.trim()).filter(Boolean);
+      if (parsed.length > 0) return parsed;
+    }
+    return ['Live + recordings', 'Certificate', '2 to 3 projects', 'Placement support'];
+  };
+
+  const getLiveWhatYouWillLearn = () => {
+    if (formData.whatYouWillLearnText && String(formData.whatYouWillLearnText).trim()) {
+      const parsed = String(formData.whatYouWillLearnText).split('\n').map(s => s.trim()).filter(Boolean);
+      if (parsed.length > 0) return parsed;
+    }
+    return getCourseDetailsWhatYouWillLearn({ title: formData.title, id: editingCourseId });
+  };
+
+  const getLiveSyllabusModules = () => {
+    if (formData.syllabusModulesText && String(formData.syllabusModulesText).trim()) {
+      const lines = String(formData.syllabusModulesText).split('\n').map(s => s.trim()).filter(Boolean);
+      const parsed = lines.map(line => {
+        const parts = line.split('|').map(s => s.trim());
+        return { title: parts[0] || line, desc: parts[1] || '' };
+      });
+      if (parsed.length > 0) return parsed;
+    }
+    return getCourseDetailsSyllabusModules({ title: formData.title, id: editingCourseId });
+  };
+
+  const getLiveProjectsList = () => {
+    if (formData.projectsListText && String(formData.projectsListText).trim()) {
+      const lines = String(formData.projectsListText).split('\n').map(s => s.trim()).filter(Boolean);
+      const parsed = lines.map(line => {
+        const parts = line.split('|').map(s => s.trim());
+        return { name: parts[0] || line, tech: parts[1] || '', desc: parts[2] || '' };
+      });
+      if (parsed.length > 0) return parsed;
+    }
+    return getCourseDetailsProjectsList({ title: formData.title, id: editingCourseId });
+  };
+
+  const getEmbedVideoUrl = (rawUrl) => {
+    if (!rawUrl) return 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1';
+    if (rawUrl.includes('embed/')) return rawUrl.includes('autoplay=1') ? rawUrl : `${rawUrl}?autoplay=1`;
+    const match = rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+    return match && match[1] ? `https://www.youtube.com/embed/${match[1]}?autoplay=1` : rawUrl;
+  };
+
+  const getCourseDetailsWhatYouWillLearn = (course) => {
+    if (!course) return [];
+    if (Array.isArray(course.whatYouWillLearn) && course.whatYouWillLearn.length > 0) {
+      return course.whatYouWillLearn;
+    }
+    const titleLower = (course.title || '').toLowerCase();
+    if (course.id === 'mern-stack' || titleLower.includes('mern')) {
+      return [
+        'HTML, CSS, JavaScript (Advance)',
+        'React.js (Frontend)',
+        'Node.js & Express.js (Backend)',
+        'MongoDB (Database)',
+        'Build Real Projects (Portfolio + Live)',
+        'Deployment & Hosting',
+        'Resume & Interview Preparation'
+      ];
+    } else if (titleLower.includes('java')) {
+      return [
+        'Core Java Fundamentals & OOPs Concepts',
+        'Spring Boot Framework & RESTful APIs',
+        'Microservices Architecture & API Gateway',
+        'Hibernate, JPA & Database (MySQL/PostgreSQL)',
+        'Docker & CI/CD Deployment Basics',
+        'Enterprise Project Development',
+        'System Design & Interview Preparation'
+      ];
+    } else if (titleLower.includes('python') || titleLower.includes('data') || titleLower.includes('ai')) {
+      return [
+        'Python Programming & Advanced Data Structures',
+        'Data Analysis with Pandas, NumPy & Matplotlib',
+        'Machine Learning Algorithms & Scikit-Learn',
+        'Deep Learning & Neural Networks with TensorFlow',
+        'Generative AI & LLM Integration Basics',
+        'Real-world AI & Data Science Projects',
+        'Portfolio Building & Interview Assistance'
+      ];
+    } else if (titleLower.includes('repair') || titleLower.includes('chip') || titleLower.includes('mobile') || titleLower.includes('laptop')) {
+      return [
+        'Motherboard Circuit & Schematic Diagram Reading',
+        'Micro-Soldering & BGA IC Reballing Techniques',
+        'Power IC, CPU & RAM Replacement Masterclass',
+        'Short Circuit & Leakage Diagnostics with DC Power',
+        'BIOS Flashing & Firmware Programming',
+        '100% Practical Lab Training with Live Devices',
+        'Shop Setup Guidance & Lifetime Tech Support'
+      ];
+    } else if (titleLower.includes('ac') || titleLower.includes('fridge') || titleLower.includes('electrical')) {
+      return [
+        'Inverter AC PCB Circuit Repairing',
+        'Gas Charging, Vacuuming & Leak Testing',
+        'Compressor Wiring & Capacitor Diagnostics',
+        'Single & Double Door Refrigerator Maintenance',
+        'Washing Machine Motor & PCB Repair',
+        'Field Practical Work & Customer Site Exposure',
+        'Self-Employment & Technician Certification'
+      ];
+    } else if (titleLower.includes('marketing') || titleLower.includes('seo')) {
+      return [
+        'Digital Marketing Strategy & Sales Funnel Design',
+        'Google Search & Display Ads Campaign Management',
+        'Meta (Facebook & Instagram) Ads & Pixel Tracking',
+        'Search Engine Optimization (SEO) & Keyword Strategy',
+        'Content Marketing & Social Media Growth',
+        'Live Campaign Budget Allocation & ROAS Optimization',
+        'Freelancing & Client Acquisition Masterclass'
+      ];
+    } else {
+      return [
+        `${course.title} Comprehensive Core Concepts`,
+        'Hands-on Practical Training with Industry Experts',
+        'Real-world Live Projects for Portfolio',
+        'Problem Solving & Architecture Design',
+        'Industry Standard Tools & Workflow',
+        'Certification of Completion Provided',
+        '100% Placement Assistance & Interview Prep'
+      ];
+    }
+  };
+
+  const getCourseDetailsSyllabusModules = (course) => {
+    if (!course) return [];
+    if (Array.isArray(course.syllabusModules) && course.syllabusModules.length > 0) {
+      return course.syllabusModules;
+    }
+    const titleLower = (course.title || '').toLowerCase();
+    if (course.id === 'mern-stack' || titleLower.includes('mern')) {
+      return [
+        { title: 'Module 1: Web Fundamentals', desc: 'HTML5, CSS3, Flexbox, Grid, Responsive Design, Git & GitHub' },
+        { title: 'Module 2: Advanced JavaScript (ES6+)', desc: 'DOM, Async/Await, Promises, Closures, APIs & ES6 Modules' },
+        { title: 'Module 3: Frontend Development with React.js', desc: 'Components, State, Props, Hooks, Router & Redux Toolkit' },
+        { title: 'Module 4: Backend Engineering with Node & Express', desc: 'REST APIs, Middleware, JWT Authentication, File Uploads' },
+        { title: 'Module 5: Database Mastery with MongoDB', desc: 'CRUD operations, Schema Design, Aggregation Framework & Mongoose' },
+        { title: 'Module 6: Capstone Project & Cloud Deployment', desc: 'Full Stack App, AWS/Vercel Deployment & Portfolio' }
+      ];
+    } else {
+      return [
+        { title: 'Module 1: Foundations & Core Concepts', desc: 'Basic fundamentals, setup environment, essential tools & workflows' },
+        { title: 'Module 2: Intermediate Concepts & Practical Application', desc: 'Hands-on practice, deep dive into core methodologies' },
+        { title: 'Module 3: Advanced Techniques & Optimization', desc: 'Industry level practices, error handling & performance tuning' },
+        { title: 'Module 4: Live Capstone Project & Deployment', desc: 'Building end-to-end real world project, testing & certification' }
+      ];
+    }
+  };
+
+  const getCourseDetailsProjectsList = (course) => {
+    if (!course) return [];
+    if (Array.isArray(course.projectsList) && course.projectsList.length > 0) {
+      return course.projectsList;
+    }
+    return [
+      { name: 'Full-Scale E-Commerce Application', tech: 'React, Node, Express, MongoDB', desc: 'Complete store with cart, user auth, admin panel & payment gateway.' },
+      { name: 'Real-Time Chat & Collaboration Tool', tech: 'WebSockets, Socket.io, React', desc: 'Instant messaging app with room creation & online media sharing.' },
+      { name: 'LMS Student Learning Portal', tech: 'MERN Stack, JWT, Cloudinary', desc: 'Multi-role portal for students & instructors with video streaming.' }
+    ];
+  };
+
+  const getCourseDetailsPills = (course) => {
+    if (!course) return ['Live + recordings', 'Certificate', '2 to 3 projects', 'Placement support'];
+    if (Array.isArray(course.featurePills) && course.featurePills.length > 0) {
+      return course.featurePills;
+    }
+    return ['Live + recordings', 'Certificate', '2 to 3 projects', 'Placement support'];
+  };
+
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
     title: '',
@@ -458,6 +672,18 @@ export default function CoursesManagerView() {
   const currentSelectedMainCat = mergedCategories.find(c => c.id === formData.category) || mergedCategories[0];
   const availableSubCategories = currentSelectedMainCat.subCategories || [];
 
+  // Dynamic combined list of subcategory options (standard + any custom ones selected)
+  const allSubCategoryOptions = [...availableSubCategories];
+  (formData.subCategories || []).forEach(subId => {
+    if (subId && !allSubCategoryOptions.some(s => s.id?.toLowerCase() === String(subId).toLowerCase() || s.label?.toLowerCase() === String(subId).toLowerCase())) {
+      allSubCategoryOptions.push({
+        id: subId,
+        label: String(subId).charAt(0).toUpperCase() + String(subId).slice(1),
+        isCustom: true
+      });
+    }
+  });
+
   const handleMainCategoryChange = (e) => {
     const mainId = e.target.value;
     const foundMain = mergedCategories.find(c => c.id === mainId) || mergedCategories[0];
@@ -488,6 +714,79 @@ export default function CoursesManagerView() {
         subCat: updatedSubs[0] || subId
       };
     });
+  };
+
+  const handleAddCustomSubCategory = () => {
+    const trimmed = customSubCategoryInput.trim();
+    if (!trimmed) return;
+    const currentSubs = Array.isArray(formData.subCategories) ? [...formData.subCategories] : [];
+    if (!currentSubs.some(s => s.toLowerCase() === trimmed.toLowerCase())) {
+      const nextSubs = [...currentSubs, trimmed];
+      setFormData(prev => ({
+        ...prev,
+        subCategories: nextSubs,
+        subCat: nextSubs[0] || trimmed
+      }));
+    }
+    setCustomSubCategoryInput('');
+  };
+
+  const handleRemoveSubCategory = (subId) => {
+    setFormData(prev => {
+      const currentSubs = Array.isArray(prev.subCategories) ? prev.subCategories : [];
+      const updated = currentSubs.filter(s => s !== subId);
+      return {
+        ...prev,
+        subCategories: updated.length > 0 ? updated : ['web'],
+        subCat: updated[0] || 'web'
+      };
+    });
+  };
+
+  // Technologies List Helpers
+  const currentTechList = Array.isArray(formData.technologies)
+    ? formData.technologies
+    : (formData.technologies || '').split(',').map(t => t.trim()).filter(Boolean);
+
+  const handleAddTechChip = (techName) => {
+    const trimmed = (techName || customTechInput).trim();
+    if (!trimmed) return;
+    const current = [...currentTechList];
+    if (!current.some(t => t.toLowerCase() === trimmed.toLowerCase())) {
+      current.push(trimmed);
+      setFormData(prev => ({ ...prev, technologies: current.join(', ') }));
+    }
+    setCustomTechInput('');
+  };
+
+  const handleRemoveTechChip = (techToRemove) => {
+    const updated = currentTechList.filter(t => t.toLowerCase() !== techToRemove.toLowerCase());
+    setFormData(prev => ({ ...prev, technologies: updated.join(', ') }));
+  };
+
+  // Syllabus Checklist Helpers
+  const currentHighlightPoints = (formData.highlightsText || '')
+    .split('\n')
+    .map(h => h.trim())
+    .filter(Boolean);
+
+  const handleAddHighlightPoint = () => {
+    const trimmed = newHighlightPointInput.trim();
+    if (!trimmed) return;
+    const current = [...currentHighlightPoints, trimmed];
+    setFormData(prev => ({ ...prev, highlightsText: current.join('\n') }));
+    setNewHighlightPointInput('');
+  };
+
+  const handleRemoveHighlightPoint = (idxToRemove) => {
+    const updated = currentHighlightPoints.filter((_, idx) => idx !== idxToRemove);
+    setFormData(prev => ({ ...prev, highlightsText: updated.join('\n') }));
+  };
+
+  const handleUpdateHighlightPoint = (idxToUpdate, val) => {
+    const updated = [...currentHighlightPoints];
+    updated[idxToUpdate] = val;
+    setFormData(prev => ({ ...prev, highlightsText: updated.join('\n') }));
   };
 
   const getCourseCategoryDisplay = (course) => {
@@ -942,49 +1241,71 @@ export default function CoursesManagerView() {
                   </div>
                 </div>
 
-                {/* BOTTOM ACTION BAR */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs">
-                  <div className="flex items-center gap-2 font-bold text-slate-600 shrink-0">
-                    <span className="text-[11px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100 flex items-center gap-1.5">
-                      <GroupIcon className="!w-3.5 !h-3.5 text-blue-600" />
-                      <span>{studentCount} Students</span>
+                {/* BOTTOM ACTION BAR (CONTAINED & ZERO OVERFLOW) */}
+                <div className="pt-3 border-t border-slate-100 flex flex-col gap-2.5">
+                  {/* STUDENTS COUNT & DURATION META ROW */}
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-2 font-bold text-slate-600 min-w-0">
+                      <span className="text-[11px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100 flex items-center gap-1.5 shadow-2xs shrink-0">
+                        <GroupIcon className="!w-3.5 !h-3.5 text-blue-600" />
+                        <span>{studentCount} Students</span>
+                      </span>
+                      <span className="text-slate-400 font-semibold truncate">• {course.duration}</span>
+                    </div>
+
+                    <span className="text-[10px] font-extrabold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200 shrink-0">
+                      Active Batch
                     </span>
-                    <span className="text-slate-400 font-semibold">• {course.duration}</span>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                  {/* 4 ACTION BUTTONS GRID: 100% CONTAINED WITHIN CARD, ZERO OVERFLOW */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCourseForView(course)}
+                      className="w-full px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100 border border-indigo-200/90 shadow-2xs transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 truncate"
+                      title="View Course Details"
+                    >
+                      <VisibilityOutlinedIcon className="!w-3.5 !h-3.5 text-indigo-600 shrink-0" />
+                      <span className="truncate">View Details</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => handleOpenQuickDiscountModal(course)}
-                      className={`px-3 py-1.5 rounded-xl text-[11px] font-black border transition-all cursor-pointer active:scale-95 flex items-center gap-1.5 shadow-2xs ${
+                      className={`w-full px-2.5 py-1.5 rounded-xl text-[11px] font-black border transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 shadow-2xs truncate ${
                         course.isDiscountActive !== false && ((course.discountPercent || 0) > 0 || !!course.originalPrice)
                           ? 'bg-amber-500 text-white border-amber-600 hover:bg-amber-600'
                           : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
                       }`}
                       title="Add or Manage Course Discount Offer"
                     >
-                      <span>🏷️</span>
-                      <span>{course.isDiscountActive !== false && ((course.discountPercent || 0) > 0 || !!course.originalPrice) ? `${course.discountPercent || 0}% OFF (Manage)` : '+ Add Discount'}</span>
+                      <span className="shrink-0">🏷️</span>
+                      <span className="truncate">
+                        {course.isDiscountActive !== false && ((course.discountPercent || 0) > 0 || !!course.originalPrice)
+                          ? `${course.discountPercent || 0}% OFF`
+                          : '+ Discount'}
+                      </span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => handleEdit(course)}
-                      className="px-3 py-1.5 rounded-xl text-[11px] font-extrabold text-blue-700 bg-white hover:bg-blue-50 border border-blue-200 shadow-2xs transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
+                      className="w-full px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold text-blue-700 bg-blue-50/70 hover:bg-blue-100 border border-blue-200/90 shadow-2xs transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 truncate"
                       title="Edit Course Track"
                     >
-                      <EditOutlinedIcon className="!w-3.5 !h-3.5 text-blue-600" />
-                      <span>Edit</span>
+                      <EditOutlinedIcon className="!w-3.5 !h-3.5 text-blue-600 shrink-0" />
+                      <span className="truncate">Edit</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => triggerDeleteCourseWithConfirm(courseId, course.title)}
-                      className="px-3 py-1.5 rounded-xl text-[11px] font-extrabold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 shadow-2xs transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
+                      className="w-full px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold text-rose-700 bg-rose-50/70 hover:bg-rose-100 border border-rose-200/90 shadow-2xs transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5 truncate"
                       title="Delete Course Track"
                     >
-                      <DeleteOutlineIcon className="!w-3.5 !h-3.5 text-rose-600" />
-                      <span>Delete</span>
+                      <DeleteOutlineIcon className="!w-3.5 !h-3.5 text-rose-600 shrink-0" />
+                      <span className="truncate">Delete</span>
                     </button>
                   </div>
                 </div>
@@ -995,16 +1316,26 @@ export default function CoursesManagerView() {
         </div>
       </div>
 
-      {/* ADD / EDIT COURSE MODAL WITH LIVE PREVIEW */}
+      {/* ADD / EDIT COURSE MODAL WITH CATEGORIZED SECTIONS & LIVE PREVIEW */}
       {showAddModal && createPortal(
         <div className="fixed inset-0 z-[99999] bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-6xl border border-slate-200 shadow-2xl flex flex-col my-auto max-h-[92vh] overflow-hidden animate-fade-in">
+          <div className="bg-white rounded-2xl w-full max-w-7xl border border-slate-200 shadow-2xl flex flex-col my-auto max-h-[94vh] overflow-hidden animate-fade-in">
             
             {/* STICKY MODAL HEADER */}
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 sticky top-0 z-10">
-              <h3 className="text-base font-black text-slate-900 font-heading">
-                {editingCourseId ? 'Edit Course Certification Track' : 'Add Course Certification Track'}
-              </h3>
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/90 sticky top-0 z-20">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md">
+                  <CategoryIcon className="!w-5 !h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900 font-heading">
+                    {editingCourseId ? 'Edit Course Certification Track' : 'Add Course Certification Track'}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    Categorized Course Builder • Customize track, fee, badges, tech stack & syllabus
+                  </p>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
@@ -1015,715 +1346,1904 @@ export default function CoursesManagerView() {
               </button>
             </div>
 
-            {/* MODAL BODY: FORM (LEFT) + LIVE COURSE CARD PREVIEW (RIGHT) */}
-            <div className="p-6 overflow-y-auto flex-1">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* MODAL BODY: CATEGORIZED FORM (LEFT) + LIVE COURSE CARD PREVIEW (RIGHT) */}
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8 items-start">
                 
-                {/* LEFT SIDE: FORM CONTROLS */}
-                <div className="lg:col-span-6">
-                  <form id="courseForm" onSubmit={onCourseFormSubmit} className="flex flex-col gap-3.5">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-bold text-slate-700">Course Title <span className="text-rose-500">*</span></label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.title}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        placeholder="e.g. Full Stack Web Development (MERN)"
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500"
-                      />
-                    </div>
-
-                    {/* COURSE ICON UPLOAD SECTION */}
-                    <div className="flex flex-col gap-2 p-3.5 rounded-2xl bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border border-blue-100 shadow-2xs">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                          <span>Course Logo / Icon</span>
-                          <span className="text-[10px] font-black text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-full border border-blue-200">
-                            Upload from PC 💻
-                          </span>
-                        </label>
-                        {(formData.icon || formData.logoUrl) && (
+                {/* LEFT SIDE: CATEGORIZED FORM CONTROLS */}
+                <div className="lg:col-span-7 flex flex-col gap-4">
+                  
+                  {/* CATEGORY TABS NAVIGATION BAR */}
+                  <div className="bg-slate-50/90 p-1.5 rounded-2xl border border-slate-200 shadow-2xs">
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+                      {[
+                        { id: 'all', label: 'All Sections', icon: '📋' },
+                        { id: 'basic', label: '1. Basic Info', icon: '📌' },
+                        { id: 'category', label: '2. Category & Track', icon: '🗂️' },
+                        { id: 'pricing', label: '3. Fees & Discount', icon: '💰' },
+                        { id: 'deliverables', label: '4. 2x2 Badges', icon: '📊' },
+                        { id: 'tech', label: '5. Tech Stack', icon: '⚡' },
+                        { id: 'syllabus', label: '6. Syllabus Points', icon: '🎯' },
+                        { id: 'detailsPage', label: '7. Details Page & Media', icon: '✨' },
+                        { id: 'settings', label: '8. Visibility', icon: '⚙️' }
+                      ].map((tab) => {
+                        const isActive = courseFormTab === tab.id;
+                        return (
                           <button
+                            key={tab.id}
                             type="button"
-                            onClick={() => setFormData({ ...formData, icon: '', logoUrl: '' })}
-                            className="text-[10px] font-extrabold text-rose-600 hover:underline cursor-pointer"
+                            onClick={() => setCourseFormTab(tab.id)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
+                              isActive
+                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs font-black'
+                                : 'bg-white text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 border border-slate-200/70'
+                            }`}
                           >
-                            Clear Icon
+                            <span>{tab.icon}</span>
+                            <span>{tab.label}</span>
                           </button>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        {/* Preview Box */}
-                        <div className="w-12 h-12 rounded-xl bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center p-1 shrink-0 overflow-hidden relative">
-                          {formData.icon || formData.logoUrl ? (
-                            <img
-                              src={formData.icon || formData.logoUrl}
-                              alt="Course Icon"
-                              className="w-full h-full object-contain"
-                              onError={(e) => { e.target.src = '/images/categories/coding.png'; }}
-                            />
-                          ) : (
-                            <SchoolIcon className="!w-6 !h-6 text-slate-400" />
-                          )}
-                        </div>
-
-                        {/* Choose File Button from PC */}
-                        <div className="flex-1 flex flex-col gap-1.5">
-                          <input
-                            type="file"
-                            id="courseIconFileInput"
-                            accept="image/*"
-                            onChange={handleCourseIconFileSelect}
-                            className="hidden"
-                          />
-                          <label
-                            htmlFor="courseIconFileInput"
-                            className="px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-black text-slate-700 hover:bg-slate-100 hover:border-blue-400 transition-all cursor-pointer flex items-center justify-center gap-2 shadow-2xs text-center active:scale-95"
-                          >
-                            {uploadingCourseIcon ? (
-                              <span className="text-blue-600 font-extrabold animate-pulse">Uploading Icon...</span>
-                            ) : (
-                              <>
-                                <span>📁 Choose Course Icon from PC</span>
-                              </>
-                            )}
-                          </label>
-                        </div>
-                      </div>
-
-                      {/* Quick Tech Icon Presets */}
-                      <div className="flex flex-col gap-1 pt-1">
-                        <span className="text-[10.5px] font-extrabold text-slate-500">Or pick popular Tech Badge icons:</span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {[
-                            { label: 'React', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
-                            { label: 'Node.js', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' },
-                            { label: 'Python', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
-                            { label: 'Flutter', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flutter/flutter-original.svg' },
-                            { label: 'Java', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' },
-                            { label: 'C++', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg' },
-                            { label: 'Android', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/android/android-original.svg' },
-                            { label: 'AWS', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg' }
-                          ].map((preset, pIdx) => (
-                            <button
-                              type="button"
-                              key={pIdx}
-                              onClick={() => setFormData({ ...formData, icon: preset.url, logoUrl: preset.url })}
-                              className={`px-2 py-1 rounded-lg text-[10.5px] font-bold border transition-all cursor-pointer flex items-center gap-1 bg-white hover:border-blue-400 active:scale-95 ${
-                                formData.icon === preset.url ? 'border-blue-600 bg-blue-50 text-blue-700 font-black' : 'border-slate-200 text-slate-600'
-                              }`}
-                            >
-                              <img src={preset.url} alt="" className="w-3.5 h-3.5 object-contain" />
-                              <span>{preset.label}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Custom Image URL text fallback */}
-                      <input
-                        type="text"
-                        value={formData.icon || ''}
-                        onChange={(e) => setFormData({ ...formData, icon: e.target.value, logoUrl: e.target.value })}
-                        placeholder="Or paste image URL (https://...)"
-                        className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-[11px] font-medium outline-none bg-white focus:border-blue-500"
-                      />
+                        );
+                      })}
                     </div>
+                  </div>
 
-                    {/* 1. MAIN CATEGORY DROPDOWN */}
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
-                        <span>1. Main Category <span className="text-rose-500">*</span></span>
-                        <span className="text-[10px] text-purple-600 font-extrabold">Logo & Title</span>
-                      </label>
-                      <select
-                        value={formData.category || 'coding'}
-                        onChange={handleMainCategoryChange}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500 bg-white cursor-pointer"
-                      >
-                        {mergedCategories.map((mainCat) => (
-                          <option key={mainCat.id} value={mainCat.id}>
-                            {mainCat.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* 2. MULTI-SELECT SUB CATEGORIES INTERACTIVE TAGS */}
-                    <div className="flex flex-col gap-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 shadow-2xs">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                          <span>2. Select Sub-Categories</span>
-                          <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-300">
-                            Multi-Select Enabled ✨
-                          </span>
-                        </label>
-                        <span className="text-[10.5px] font-black text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
-                          {(formData.subCategories || []).length} Selected
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 font-medium">
-                        Select one or more sub-categories to list this course under multiple domains:
-                      </p>
-
-                      <div className="flex flex-wrap gap-2 pt-0.5">
-                        {availableSubCategories.map((sub) => {
-                          const isSelected = (formData.subCategories || []).includes(sub.id);
-                          return (
-                            <button
-                              type="button"
-                              key={sub.id}
-                              onClick={() => handleToggleSubCategory(sub.id)}
-                              className={`px-3 py-1.5 rounded-xl text-xs font-black border transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
-                                isSelected
-                                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-600 shadow-xs scale-[1.02]'
-                                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
-                              }`}
-                            >
-                              <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-black ${isSelected ? 'bg-white text-blue-600' : 'bg-slate-200 text-slate-600'}`}>
-                                {isSelected ? '✓' : '+'}
-                              </span>
-                              <span>{sub.label}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-bold text-slate-700">Course Base Fee / Price <span className="text-rose-500">*</span></label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.originalPrice || formData.price}
-                        onChange={(e) => {
-                          const newBasePrice = e.target.value;
-                          const pct = Number(formData.discountPercent) || 0;
-                          const baseFeeNum = parseInt(newBasePrice.replace(/[^0-9]/g, '')) || 0;
-                          let finalPrice = newBasePrice;
-                          if (formData.isDiscountActive && pct > 0 && baseFeeNum > 0) {
-                            const finalNum = Math.round(baseFeeNum * (1 - pct / 100));
-                            finalPrice = '₹ ' + finalNum.toLocaleString('en-IN');
-                          }
-                          setFormData(prev => ({
-                            ...prev,
-                            originalPrice: formData.isDiscountActive && pct > 0 ? newBasePrice : '',
-                            price: finalPrice
-                          }));
-                        }}
-                        placeholder="e.g. ₹ 25,000"
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500 font-mono"
-                      />
-                    </div>
-
-                    {/* DISCOUNT OFFER MANAGEMENT SYSTEM BOX */}
-                    <div className="flex flex-col gap-3 p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 shadow-2xs">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-black text-amber-950 flex items-center gap-1.5">
-                          <span>🏷️ Course Discount Offer System</span>
-                        </label>
-                        
-                        {/* DISCOUNT ON/OFF TOGGLE SWITCH BUTTON */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const nextState = !formData.isDiscountActive;
-                            const baseStr = formData.originalPrice || formData.price;
-                            const pct = Number(formData.discountPercent) || 0;
-                            const baseNum = parseInt(baseStr.replace(/[^0-9]/g, '')) || 0;
-                            
-                            let finalStr = baseStr;
-                            if (nextState && pct > 0 && baseNum > 0) {
-                              const finalNum = Math.round(baseNum * (1 - pct / 100));
-                              finalStr = '₹ ' + finalNum.toLocaleString('en-IN');
-                            }
-
-                            setFormData(prev => ({
-                              ...prev,
-                              isDiscountActive: nextState,
-                              originalPrice: nextState && pct > 0 ? baseStr : '',
-                              price: finalStr
-                            }));
-                          }}
-                          className={`px-3 py-1 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 border ${
-                            formData.isDiscountActive
-                              ? 'bg-amber-600 text-white border-amber-700 shadow-2xs'
-                              : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'
-                          }`}
-                        >
-                          <div className={`w-4.5 h-2.5 rounded-full p-0.5 transition-all flex items-center ${
-                            formData.isDiscountActive ? 'bg-amber-900 justify-end' : 'bg-slate-300 justify-start'
-                          }`}>
-                            <div className="w-1.5 h-1.5 rounded-full bg-white shadow-xs" />
+                  {/* MAIN FORM */}
+                  <form id="courseForm" onSubmit={onCourseFormSubmit} className="flex flex-col gap-5">
+                    
+                    {/* SECTION 1: BASIC INFO & BRANDING */}
+                    {(courseFormTab === 'all' || courseFormTab === 'basic') && (
+                      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-blue-50/40 to-white border border-blue-100/90 shadow-2xs space-y-4 animate-fade-in">
+                        <div className="flex items-center justify-between border-b border-blue-100/80 pb-3">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xs font-black shadow-2xs">
+                              1
+                            </span>
+                            <div>
+                              <h4 className="text-xs font-black text-slate-900 font-heading">
+                                Basic Information & Branding
+                              </h4>
+                              <p className="text-[10.5px] text-slate-500 font-medium">
+                                Title, logo icon, level, and badge
+                              </p>
+                            </div>
                           </div>
-                          <span>{formData.isDiscountActive ? 'Discount ON' : 'Discount OFF'}</span>
-                        </button>
-                      </div>
+                          <span className="text-[10px] font-black text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200">
+                            Section 1
+                          </span>
+                        </div>
 
-                      {formData.isDiscountActive ? (
-                        <div className="grid grid-cols-2 gap-3 pt-1 animate-fade-in">
-                          {/* DISCOUNT PERCENTAGE (%) */}
-                          <div className="flex flex-col gap-1">
-                            <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
-                              <span>Discount Percent (%)</span>
-                              {formData.discountPercent > 0 && (
-                                <span className="text-[10px] font-black text-rose-600 bg-rose-100 px-1.5 py-0.2 rounded-md">
-                                  {formData.discountPercent}% OFF
-                                </span>
+                        {/* Title Input */}
+                        <div className="flex flex-col gap-1">
+                          <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                            <span>Course Title <span className="text-rose-500">*</span></span>
+                            <span className="text-[10px] text-slate-400 font-semibold">Track name</span>
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={formData.title}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                            placeholder="e.g. Full Stack AI Web Development Track"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500 bg-white shadow-2xs transition-all"
+                          />
+                        </div>
+
+                        {/* Logo / Icon Uploader */}
+                        <div className="flex flex-col gap-2.5 p-3.5 rounded-2xl bg-white border border-blue-100 shadow-2xs">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                              <span>Course Logo / Icon</span>
+                              <span className="text-[10px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                                Upload from PC 💻
+                              </span>
+                            </label>
+                            {(formData.icon || formData.logoUrl) && (
+                              <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, icon: '', logoUrl: '' })}
+                                className="text-[10px] font-extrabold text-rose-600 hover:underline cursor-pointer"
+                              >
+                                Clear Icon
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 shadow-2xs flex items-center justify-center p-1.5 shrink-0 overflow-hidden relative">
+                              {formData.icon || formData.logoUrl ? (
+                                <img
+                                  src={formData.icon || formData.logoUrl}
+                                  alt="Course Icon"
+                                  className="w-full h-full object-contain"
+                                  onError={(e) => { e.target.src = '/images/categories/coding.png'; }}
+                                />
+                              ) : (
+                                <SchoolIcon className="!w-6 !h-6 text-slate-400" />
                               )}
+                            </div>
+
+                            <div className="flex-1 flex flex-col gap-1.5">
+                              <input
+                                type="file"
+                                id="courseIconFileInput"
+                                accept="image/*"
+                                onChange={handleCourseIconFileSelect}
+                                className="hidden"
+                              />
+                              <label
+                                htmlFor="courseIconFileInput"
+                                className="px-3 py-2 rounded-xl bg-blue-50/70 border border-blue-200 text-xs font-black text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition-all cursor-pointer flex items-center justify-center gap-2 shadow-2xs text-center active:scale-95"
+                              >
+                                {uploadingCourseIcon ? (
+                                  <span className="text-blue-600 font-extrabold animate-pulse">Uploading Icon...</span>
+                                ) : (
+                                  <>
+                                    <span>📁 Choose Course Icon from PC</span>
+                                  </>
+                                )}
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Quick Tech Icon Presets */}
+                          <div className="flex flex-col gap-1 pt-1">
+                            <span className="text-[10.5px] font-extrabold text-slate-500">Or pick popular Tech Badge icons:</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {[
+                                { label: 'React', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
+                                { label: 'Node.js', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' },
+                                { label: 'Python', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
+                                { label: 'Flutter', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flutter/flutter-original.svg' },
+                                { label: 'Java', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' },
+                                { label: 'C++', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg' },
+                                { label: 'Android', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/android/android-original.svg' },
+                                { label: 'AWS', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg' }
+                              ].map((preset, pIdx) => (
+                                <button
+                                  type="button"
+                                  key={pIdx}
+                                  onClick={() => setFormData({ ...formData, icon: preset.url, logoUrl: preset.url })}
+                                  className={`px-2 py-1 rounded-lg text-[10.5px] font-bold border transition-all cursor-pointer flex items-center gap-1 bg-white hover:border-blue-400 active:scale-95 ${
+                                    formData.icon === preset.url ? 'border-blue-600 bg-blue-50 text-blue-700 font-black' : 'border-slate-200 text-slate-600'
+                                  }`}
+                                >
+                                  <img src={preset.url} alt="" className="w-3.5 h-3.5 object-contain" />
+                                  <span>{preset.label}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <input
+                            type="text"
+                            value={formData.icon || ''}
+                            onChange={(e) => setFormData({ ...formData, icon: e.target.value, logoUrl: e.target.value })}
+                            placeholder="Or paste image URL (https://...)"
+                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-[11px] font-medium outline-none bg-white focus:border-blue-500"
+                          />
+                        </div>
+
+                        {/* Level & Badge */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-bold text-slate-700">Course Level</label>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {['Beginner', 'Intermediate', 'Advanced', 'Beginner to Advanced'].map((lvl) => (
+                                <button
+                                  key={lvl}
+                                  type="button"
+                                  onClick={() => setFormData({ ...formData, level: lvl })}
+                                  className={`px-2 py-1.5 rounded-xl text-[10.5px] font-bold border transition-all cursor-pointer text-center active:scale-95 truncate ${
+                                    formData.level === lvl
+                                      ? 'bg-blue-600 text-white border-blue-600 shadow-2xs font-black'
+                                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                                  }`}
+                                >
+                                  {lvl}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                              <span>Badge Label</span>
+                              <span className="text-[10px] text-blue-600 font-semibold">Catalog tag</span>
                             </label>
                             <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={formData.discountPercent || ''}
-                              onChange={(e) => {
-                                const pct = Math.min(Math.max(Number(e.target.value) || 0, 0), 100);
-                                const baseStr = formData.originalPrice || formData.price;
-                                const baseNum = parseInt(baseStr.replace(/[^0-9]/g, '')) || 0;
-                                let finalPriceStr = baseStr;
-                                let origStr = '';
-                                if (pct > 0 && baseNum > 0) {
-                                  const finalNum = Math.round(baseNum * (1 - pct / 100));
-                                  finalPriceStr = '₹ ' + finalNum.toLocaleString('en-IN');
-                                  origStr = baseStr;
-                                }
-                                setFormData(prev => ({
-                                  ...prev,
-                                  discountPercent: pct,
-                                  price: finalPriceStr,
-                                  originalPrice: origStr
-                                }));
-                              }}
-                              placeholder="e.g. 20"
-                              className="w-full px-3.5 py-2 rounded-xl border border-amber-300 text-xs font-bold outline-none focus:border-amber-600 bg-white"
-                            />
-                          </div>
-
-                          {/* DISCOUNTED FINAL PRICE */}
-                          <div className="flex flex-col gap-1">
-                            <label className="text-xs font-bold text-slate-800">Discounted Fee (Student Pays)</label>
-                            <input
                               type="text"
-                              value={formData.price || ''}
-                              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                              placeholder="Auto-calculated (e.g. ₹ 20,000)"
-                              className="w-full px-3.5 py-2 rounded-xl border border-amber-300 text-xs font-extrabold outline-none focus:border-amber-600 bg-white font-mono text-emerald-700"
+                              value={formData.badge}
+                              onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
+                              placeholder="e.g. Job Guaranteed Batch"
+                              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500 bg-white"
                             />
-                          </div>
-
-                          {formData.discountPercent > 0 && formData.originalPrice && (
-                            <div className="col-span-2 p-2.5 bg-amber-100/70 rounded-xl border border-amber-200 text-xs font-bold text-slate-800 flex items-center justify-between">
-                              <span className="flex items-center gap-1.5">
-                                <span>Preview Price Tag:</span>
-                                <span className="line-through text-slate-400 font-mono">{formData.originalPrice}</span>
-                                <span className="text-emerald-700 font-black text-sm">{formData.price}</span>
-                              </span>
-                              <span className="bg-rose-600 text-white font-black text-[10px] px-2 py-0.5 rounded-full shadow-2xs">
-                                🏷️ {formData.discountPercent}% OFF
-                              </span>
+                            <div className="flex flex-wrap gap-1">
+                              {['Job Guaranteed Batch', 'Bestseller', 'Hot 🔥', 'Trending', 'Fast-Track'].map((bText, bIdx) => (
+                                <button
+                                  key={bIdx}
+                                  type="button"
+                                  onClick={() => setFormData({ ...formData, badge: bText })}
+                                  className={`px-2 py-0.5 rounded-lg text-[9.5px] font-bold border transition-all cursor-pointer ${
+                                    formData.badge === bText ? 'bg-indigo-100 text-indigo-700 border-indigo-300 font-black' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                                  }`}
+                                >
+                                  {bText}
+                                </button>
+                              ))}
                             </div>
-                          )}
+                          </div>
                         </div>
-                      ) : (
-                        <p className="text-[11px] text-amber-800 font-medium">
-                          Turn ON to set a discount offer. Regular price will be shown on website without strikethrough.
-                        </p>
-                      )}
-                    </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {/* TRAINING DURATION SELECTOR WITH PRESETS */}
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
-                          <span>Training Duration <span className="text-rose-500">*</span></span>
-                          <span className="text-[10px] font-extrabold text-blue-600">Select or Type</span>
-                        </label>
-
-                        <div className="flex items-center gap-1.5">
-                          <select
-                            value={['45 Days', '3 Months', '6 Months', '1 Year', 'One Year'].includes(formData.duration) ? formData.duration : 'custom'}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              if (val !== 'custom') {
-                                setFormData({ ...formData, duration: val });
-                              }
-                            }}
-                            className="px-2.5 py-2 rounded-xl border border-slate-200 text-xs font-bold outline-none focus:border-blue-500 bg-white cursor-pointer shrink-0"
-                          >
-                            <option value="45 Days">45 Days</option>
-                            <option value="3 Months">3 Months</option>
-                            <option value="6 Months">6 Months</option>
-                            <option value="1 Year">1 Year</option>
-                            <option value="One Year">One Year</option>
-                            <option value="custom">Custom...</option>
-                          </select>
-
-                          <input
-                            type="text"
-                            value={formData.duration}
-                            onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                            placeholder="e.g. 6 Months"
-                            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500 bg-white"
+                        {/* Description */}
+                        <div className="flex flex-col gap-1">
+                          <label className="text-xs font-bold text-slate-700">Course Overview Description</label>
+                          <textarea
+                            rows={2}
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            placeholder="Brief 1-2 sentence overview shown under the course title..."
+                            className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500 bg-white leading-relaxed"
                           />
                         </div>
 
-                        {/* QUICK PRESET DURATION PILLS */}
-                        <div className="flex flex-wrap gap-1.5 pt-0.5">
-                          {['45 Days', '3 Months', '6 Months', '1 Year'].map((durOpt, dIdx) => (
+                        {courseFormTab !== 'all' && (
+                          <div className="pt-2 flex justify-end">
                             <button
                               type="button"
-                              key={dIdx}
-                              onClick={() => setFormData({ ...formData, duration: durOpt })}
-                              className={`px-2.5 py-1 rounded-lg text-[10.5px] font-bold border transition-all cursor-pointer flex items-center gap-1 active:scale-95 ${
-                                formData.duration === durOpt
-                                  ? 'bg-blue-600 text-white border-blue-600 shadow-2xs font-black scale-[1.02]'
-                                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                              onClick={() => setCourseFormTab('category')}
+                              className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 shadow-2xs transition-all flex items-center gap-1.5"
+                            >
+                              <span>Next: Category & Track</span>
+                              <span>→</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* SECTION 2: CATEGORY & DOMAIN TRACK */}
+                    {(courseFormTab === 'all' || courseFormTab === 'category') && (
+                      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-purple-50/40 to-white border border-purple-100/90 shadow-2xs space-y-4 animate-fade-in">
+                        <div className="flex items-center justify-between border-b border-purple-100/80 pb-3">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-7 h-7 rounded-xl bg-purple-600 text-white flex items-center justify-center text-xs font-black shadow-2xs">
+                              2
+                            </span>
+                            <div>
+                              <h4 className="text-xs font-black text-slate-900 font-heading">
+                                Category & Domain Track
+                              </h4>
+                              <p className="text-[10.5px] text-slate-500 font-medium">
+                                Primary course track and multi-select sub-categories
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-black text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full border border-purple-200">
+                            Section 2
+                          </span>
+                        </div>
+
+                        {/* 1. Primary Category Visual Grid */}
+                        <div className="flex flex-col gap-2">
+                          <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+                            <span>1. Choose Primary Category <span className="text-rose-500">*</span></span>
+                            <span className="text-[10.5px] text-purple-700 font-bold">
+                              Selected: {currentSelectedMainCat.label}
+                            </span>
+                          </label>
+
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {mergedCategories.map((mainCat) => {
+                              const isSelected = formData.category === mainCat.id;
+                              return (
+                                <button
+                                  type="button"
+                                  key={mainCat.id}
+                                  onClick={() => {
+                                    const firstSubId = mainCat.subCategories?.[0]?.id || 'web';
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      category: mainCat.id,
+                                      subCat: firstSubId,
+                                      subCategories: [firstSubId]
+                                    }));
+                                  }}
+                                  className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer active:scale-95 ${
+                                    isSelected
+                                      ? 'bg-purple-50 border-purple-500 ring-2 ring-purple-200 shadow-2xs'
+                                      : 'bg-white border-slate-200 hover:bg-slate-50'
+                                  }`}
+                                >
+                                  <img
+                                    src={mainCat.icon}
+                                    alt=""
+                                    className="w-5 h-5 object-contain shrink-0"
+                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                  />
+                                  <div className="min-w-0 flex-1">
+                                    <div className={`text-[11px] font-black truncate ${isSelected ? 'text-purple-900' : 'text-slate-800'}`}>
+                                      {mainCat.label}
+                                    </div>
+                                    <div className="text-[9.5px] text-slate-400 font-medium truncate">
+                                      {mainCat.subCategories?.length || 0} sub-tracks
+                                    </div>
+                                  </div>
+                                  {isSelected && (
+                                    <span className="w-4 h-4 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px] font-black shrink-0">
+                                      ✓
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* 2. Multi-Select Sub-Categories + Custom Adder */}
+                        <div className="flex flex-col gap-2.5 p-3.5 rounded-2xl bg-white border border-purple-100 shadow-2xs">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                              <span>2. Sub-Categories (Multi-Select)</span>
+                              <span className="text-[10px] font-black text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">
+                                Multi-Select Enabled ✨
+                              </span>
+                            </label>
+                            <span className="text-[10.5px] font-black text-purple-700 bg-purple-100 px-2 py-0.5 rounded-md">
+                              {(formData.subCategories || []).length} Selected
+                            </span>
+                          </div>
+
+                          <p className="text-[11px] text-slate-500 font-medium">
+                            Click to toggle which sub-categories this course track appears under:
+                          </p>
+
+                          {/* Sub Category Chips */}
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {allSubCategoryOptions.map((sub) => {
+                              const isSelected = (formData.subCategories || []).includes(sub.id);
+                              return (
+                                <div key={sub.id} className="flex items-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleSubCategory(sub.id)}
+                                    className={`px-3 py-1.5 rounded-xl text-xs font-black border transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
+                                      isSelected
+                                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-600 shadow-xs'
+                                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
+                                    }`}
+                                  >
+                                    <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-black ${
+                                      isSelected ? 'bg-white text-purple-600' : 'bg-slate-200 text-slate-600'
+                                    }`}>
+                                      {isSelected ? '✓' : '+'}
+                                    </span>
+                                    <span>{sub.label}</span>
+                                  </button>
+                                  {sub.isCustom && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveSubCategory(sub.id)}
+                                      className="ml-1 text-slate-400 hover:text-rose-600 text-xs px-1 cursor-pointer"
+                                      title="Remove custom sub-category"
+                                    >
+                                      ×
+                                    </button>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* Custom Sub-Category Creator Tag Input */}
+                          <div className="pt-2 border-t border-purple-100/70 flex flex-col gap-1.5">
+                            <span className="text-[10.5px] font-bold text-slate-600">
+                              ➕ Add Custom Sub-Category Tag:
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={customSubCategoryInput}
+                                onChange={(e) => setCustomSubCategoryInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleAddCustomSubCategory();
+                                  }
+                                }}
+                                placeholder="Type custom sub-category (e.g. AI & ML, Cloud Ops, Full Stack)..."
+                                className="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium outline-none focus:border-purple-500 bg-white"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleAddCustomSubCategory}
+                                className="px-3 py-1.5 rounded-xl text-xs font-black bg-purple-600 text-white hover:bg-purple-700 transition-all cursor-pointer shadow-2xs whitespace-nowrap active:scale-95"
+                              >
+                                + Add Tag
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {courseFormTab !== 'all' && (
+                          <div className="pt-2 flex justify-between items-center">
+                            <button
+                              type="button"
+                              onClick={() => setCourseFormTab('basic')}
+                              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-all"
+                            >
+                              ← Previous: Basic Info
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setCourseFormTab('pricing')}
+                              className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white hover:bg-purple-700 shadow-2xs transition-all flex items-center gap-1.5"
+                            >
+                              <span>Next: Fees & Discount</span>
+                              <span>→</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* SECTION 3: FEES & DISCOUNT OFFER SYSTEM */}
+                    {(courseFormTab === 'all' || courseFormTab === 'pricing') && (
+                      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-amber-50/40 to-white border border-amber-200/90 shadow-2xs space-y-4 animate-fade-in">
+                        <div className="flex items-center justify-between border-b border-amber-200/80 pb-3">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-7 h-7 rounded-xl bg-amber-600 text-white flex items-center justify-center text-xs font-black shadow-2xs">
+                              3
+                            </span>
+                            <div>
+                              <h4 className="text-xs font-black text-slate-900 font-heading">
+                                Fees & Discount Offer System
+                              </h4>
+                              <p className="text-[10.5px] text-slate-500 font-medium">
+                                Base course price, interactive discount engine, and fee tag visibility
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-black text-amber-900 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
+                            Section 3
+                          </span>
+                        </div>
+
+                        {/* Base Price */}
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                            <span>Course Base Fee / Price <span className="text-rose-500">*</span></span>
+                            <span className="text-[10px] text-amber-700 font-bold">Standard Student Fee</span>
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={formData.originalPrice || formData.price}
+                            onChange={(e) => {
+                              const newBasePrice = e.target.value;
+                              const pct = Number(formData.discountPercent) || 0;
+                              const baseFeeNum = parseInt(newBasePrice.replace(/[^0-9]/g, '')) || 0;
+                              let finalPrice = newBasePrice;
+                              if (formData.isDiscountActive && pct > 0 && baseFeeNum > 0) {
+                                const finalNum = Math.round(baseFeeNum * (1 - pct / 100));
+                                finalPrice = '₹ ' + finalNum.toLocaleString('en-IN');
+                              }
+                              setFormData(prev => ({
+                                ...prev,
+                                originalPrice: formData.isDiscountActive && pct > 0 ? newBasePrice : '',
+                                price: finalPrice
+                              }));
+                            }}
+                            placeholder="e.g. ₹ 49,998"
+                            className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold outline-none focus:border-amber-500 bg-white font-mono"
+                          />
+
+                          {/* Quick Fee Presets */}
+                          <div className="flex flex-wrap gap-1.5 pt-0.5">
+                            <span className="text-[10px] font-bold text-slate-400 self-center">Presets:</span>
+                            {['₹ 14,999', '₹ 19,999', '₹ 24,999', '₹ 29,999', '₹ 49,998'].map((fPreset, fIdx) => (
+                              <button
+                                type="button"
+                                key={fIdx}
+                                onClick={() => {
+                                  const pct = Number(formData.discountPercent) || 0;
+                                  const baseFeeNum = parseInt(fPreset.replace(/[^0-9]/g, '')) || 0;
+                                  let finalPrice = fPreset;
+                                  if (formData.isDiscountActive && pct > 0 && baseFeeNum > 0) {
+                                    const finalNum = Math.round(baseFeeNum * (1 - pct / 100));
+                                    finalPrice = '₹ ' + finalNum.toLocaleString('en-IN');
+                                  }
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    originalPrice: formData.isDiscountActive && pct > 0 ? fPreset : '',
+                                    price: finalPrice
+                                  }));
+                                }}
+                                className="px-2 py-0.5 rounded-lg text-[10.5px] font-bold bg-white text-slate-700 border border-slate-200 hover:border-amber-400 cursor-pointer active:scale-95 shadow-2xs font-mono"
+                              >
+                                {fPreset}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Interactive Discount Offer Box */}
+                        <div className="flex flex-col gap-3 p-4 rounded-2xl bg-white border border-amber-200 shadow-2xs">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-black text-amber-950 flex items-center gap-1.5">
+                              <span>🏷️ Course Discount Offer System</span>
+                            </label>
+                            
+                            {/* Toggle Button */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const nextState = !formData.isDiscountActive;
+                                const baseStr = formData.originalPrice || formData.price;
+                                const pct = Number(formData.discountPercent) || 0;
+                                const baseNum = parseInt(baseStr.replace(/[^0-9]/g, '')) || 0;
+                                
+                                let finalStr = baseStr;
+                                if (nextState && pct > 0 && baseNum > 0) {
+                                  const finalNum = Math.round(baseNum * (1 - pct / 100));
+                                  finalStr = '₹ ' + finalNum.toLocaleString('en-IN');
+                                }
+
+                                setFormData(prev => ({
+                                  ...prev,
+                                  isDiscountActive: nextState,
+                                  originalPrice: nextState && pct > 0 ? baseStr : '',
+                                  price: finalStr
+                                }));
+                              }}
+                              className={`px-3 py-1 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 border ${
+                                formData.isDiscountActive
+                                  ? 'bg-amber-600 text-white border-amber-700 shadow-2xs'
+                                  : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'
                               }`}
                             >
-                              <span>⏱️</span>
-                              <span>{durOpt}</span>
+                              <div className={`w-4.5 h-2.5 rounded-full p-0.5 transition-all flex items-center ${
+                                formData.isDiscountActive ? 'bg-amber-900 justify-end' : 'bg-slate-300 justify-start'
+                              }`}>
+                                <div className="w-1.5 h-1.5 rounded-full bg-white shadow-xs" />
+                              </div>
+                              <span>{formData.isDiscountActive ? 'Discount ON' : 'Discount OFF'}</span>
                             </button>
-                          ))}
+                          </div>
+
+                          {formData.isDiscountActive ? (
+                            <div className="flex flex-col gap-3 pt-1 animate-fade-in">
+                              <div className="grid grid-cols-2 gap-3">
+                                {/* Discount % */}
+                                <div className="flex flex-col gap-1">
+                                  <label className="text-xs font-bold text-slate-800 flex items-center justify-between">
+                                    <span>Discount Percent (%)</span>
+                                    {formData.discountPercent > 0 && (
+                                      <span className="text-[10px] font-black text-rose-600 bg-rose-100 px-1.5 py-0.2 rounded-md">
+                                        {formData.discountPercent}% OFF
+                                      </span>
+                                    )}
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={formData.discountPercent || ''}
+                                    onChange={(e) => {
+                                      const pct = Math.min(Math.max(Number(e.target.value) || 0, 0), 100);
+                                      const baseStr = formData.originalPrice || formData.price;
+                                      const baseNum = parseInt(baseStr.replace(/[^0-9]/g, '')) || 0;
+                                      let finalPriceStr = baseStr;
+                                      let origStr = '';
+                                      if (pct > 0 && baseNum > 0) {
+                                        const finalNum = Math.round(baseNum * (1 - pct / 100));
+                                        finalPriceStr = '₹ ' + finalNum.toLocaleString('en-IN');
+                                        origStr = baseStr;
+                                      }
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        discountPercent: pct,
+                                        price: finalPriceStr,
+                                        originalPrice: origStr
+                                      }));
+                                    }}
+                                    placeholder="e.g. 20"
+                                    className="w-full px-3.5 py-2 rounded-xl border border-amber-300 text-xs font-bold outline-none focus:border-amber-600 bg-white"
+                                  />
+                                </div>
+
+                                {/* Discounted Fee */}
+                                <div className="flex flex-col gap-1">
+                                  <label className="text-xs font-bold text-slate-800">Final Fee (Student Pays)</label>
+                                  <input
+                                    type="text"
+                                    value={formData.price || ''}
+                                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                    placeholder="Auto-calculated (e.g. ₹ 20,000)"
+                                    className="w-full px-3.5 py-2 rounded-xl border border-amber-300 text-xs font-extrabold outline-none focus:border-amber-600 bg-white font-mono text-emerald-700"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Quick Discount % Presets */}
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-[10px] font-bold text-slate-500">Quick Offer:</span>
+                                {[10, 15, 20, 25, 30, 40, 50].map((pct) => (
+                                  <button
+                                    type="button"
+                                    key={pct}
+                                    onClick={() => {
+                                      const baseStr = formData.originalPrice || formData.price;
+                                      const baseNum = parseInt(baseStr.replace(/[^0-9]/g, '')) || 0;
+                                      let finalPriceStr = baseStr;
+                                      if (baseNum > 0) {
+                                        const finalNum = Math.round(baseNum * (1 - pct / 100));
+                                        finalPriceStr = '₹ ' + finalNum.toLocaleString('en-IN');
+                                      }
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        discountPercent: pct,
+                                        price: finalPriceStr,
+                                        originalPrice: baseStr
+                                      }));
+                                    }}
+                                    className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
+                                      Number(formData.discountPercent) === pct
+                                        ? 'bg-rose-600 text-white border-rose-600 font-black'
+                                        : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
+                                    }`}
+                                  >
+                                    {pct}% OFF
+                                  </button>
+                                ))}
+                              </div>
+
+                              {formData.discountPercent > 0 && formData.originalPrice && (
+                                <div className="p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-xs font-bold text-slate-800 flex items-center justify-between">
+                                  <span className="flex items-center gap-2">
+                                    <span>Live Price Tag:</span>
+                                    <span className="line-through text-slate-400 font-mono text-xs">{formData.originalPrice}</span>
+                                    <span className="text-emerald-700 font-black text-sm">{formData.price}</span>
+                                  </span>
+                                  <span className="bg-rose-600 text-white font-black text-[10px] px-2 py-0.5 rounded-full shadow-2xs">
+                                    🏷️ {formData.discountPercent}% OFF
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-[11px] text-amber-800 font-medium">
+                              Turn ON to set an attractive discount offer. Regular price will be shown without strikethrough.
+                            </p>
+                          )}
                         </div>
-                      </div>
 
-                      <div className="flex flex-col gap-1">
-                        <label className="text-xs font-bold text-slate-700">Badge Label</label>
-                        <input
-                          type="text"
-                          value={formData.badge}
-                          onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
-                          placeholder="Bestseller / Hot"
-                          className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
+                        {/* Price Visibility Switch */}
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200">
+                          <div>
+                            <div className="text-xs font-bold text-slate-900">Show Price Tag on Website</div>
+                            <div className="text-[10.5px] text-slate-500">Uncheck to hide price and show "Inquire Now" only</div>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={formData.showPrice !== false}
+                            onChange={(e) => setFormData({ ...formData, showPrice: e.target.checked })}
+                            className="w-4 h-4 accent-emerald-600 cursor-pointer"
+                          />
+                        </div>
 
-                    {/* DYNAMIC 2x2 STAT PILLS GRID FORM SECTION */}
-                    <div className="flex flex-col gap-2.5 p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100 shadow-2xs">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                          <span>3. Dynamic 2x2 Stat Pills (Card Badges Grid)</span>
-                          <span className="text-[10px] font-black text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200">
-                            Dynamic Admin Badges 🏷️
+                        {courseFormTab !== 'all' && (
+                          <div className="pt-2 flex justify-between items-center">
+                            <button
+                              type="button"
+                              onClick={() => setCourseFormTab('category')}
+                              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-all"
+                            >
+                              ← Previous: Category
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setCourseFormTab('deliverables')}
+                              className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 shadow-2xs transition-all flex items-center gap-1.5"
+                            >
+                              <span>Next: 2x2 Badges</span>
+                              <span>→</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* SECTION 4: 2x2 DELIVERABLE BADGES */}
+                    {(courseFormTab === 'all' || courseFormTab === 'deliverables') && (
+                      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-emerald-50/40 to-white border border-emerald-100/90 shadow-2xs space-y-4 animate-fade-in">
+                        <div className="flex items-center justify-between border-b border-emerald-100/80 pb-3">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs font-black shadow-2xs">
+                              4
+                            </span>
+                            <div>
+                              <h4 className="text-xs font-black text-slate-900 font-heading">
+                                2x2 Deliverable Badges (Card Stats Grid)
+                              </h4>
+                              <p className="text-[10.5px] text-slate-500 font-medium">
+                                The 4 prominent metric pills displayed on the course card
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200">
+                            Section 4
                           </span>
-                        </label>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                          {/* Pill 1: Duration */}
+                          <div className="p-3 rounded-xl bg-white border border-emerald-100 shadow-2xs flex flex-col gap-1.5">
+                            <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                              <span>Pill 1: Duration <span className="text-rose-500">*</span></span>
+                              <span className="text-[10px] font-extrabold text-emerald-700">⏱️ Training Time</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.duration || ''}
+                              onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                              placeholder="e.g. 6 Months"
+                              className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold outline-none focus:border-emerald-500 bg-white"
+                            />
+                            <div className="flex flex-wrap gap-1">
+                              {['45 Days', '3 Months', '6 Months', '1 Year'].map((durOpt, dIdx) => (
+                                <button
+                                  type="button"
+                                  key={dIdx}
+                                  onClick={() => setFormData({ ...formData, duration: durOpt })}
+                                  className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
+                                    formData.duration === durOpt
+                                      ? 'bg-emerald-600 text-white border-emerald-600 font-black'
+                                      : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                                  }`}
+                                >
+                                  {durOpt}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Pill 2: Internships */}
+                          <div className="p-3 rounded-xl bg-white border border-emerald-100 shadow-2xs flex flex-col gap-1.5">
+                            <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                              <span>Pill 2: Internships</span>
+                              <span className="text-[10px] font-extrabold text-emerald-700">💼 Work Exp</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.internships || ''}
+                              onChange={(e) => setFormData({ ...formData, internships: e.target.value })}
+                              placeholder="e.g. 5 Internships"
+                              className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold outline-none focus:border-emerald-500 bg-white"
+                            />
+                            <div className="flex flex-wrap gap-1">
+                              {['1 Internship', '2 Internships', '3 Internships', '5 Internships'].map((intOpt, iIdx) => (
+                                <button
+                                  type="button"
+                                  key={iIdx}
+                                  onClick={() => setFormData({ ...formData, internships: intOpt })}
+                                  className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
+                                    formData.internships === intOpt
+                                      ? 'bg-emerald-600 text-white border-emerald-600 font-black'
+                                      : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                                  }`}
+                                >
+                                  {intOpt}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Pill 3: Mock Tests */}
+                          <div className="p-3 rounded-xl bg-white border border-emerald-100 shadow-2xs flex flex-col gap-1.5">
+                            <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                              <span>Pill 3: Mock Tests</span>
+                              <span className="text-[10px] font-extrabold text-emerald-700">📝 Exam Prep</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.mockTests || ''}
+                              onChange={(e) => setFormData({ ...formData, mockTests: e.target.value })}
+                              placeholder="e.g. 5 Mock Tests"
+                              className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold outline-none focus:border-emerald-500 bg-white"
+                            />
+                            <div className="flex flex-wrap gap-1">
+                              {['3 Mock Tests', '5 Mock Tests', '10 Mock Tests', '15 Mock Tests'].map((mOpt, mIdx) => (
+                                <button
+                                  type="button"
+                                  key={mIdx}
+                                  onClick={() => setFormData({ ...formData, mockTests: mOpt })}
+                                  className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
+                                    formData.mockTests === mOpt
+                                      ? 'bg-emerald-600 text-white border-emerald-600 font-black'
+                                      : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                                  }`}
+                                >
+                                  {mOpt}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Pill 4: Projects */}
+                          <div className="p-3 rounded-xl bg-white border border-emerald-100 shadow-2xs flex flex-col gap-1.5">
+                            <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                              <span>Pill 4: Projects</span>
+                              <span className="text-[10px] font-extrabold text-emerald-700">🚀 Live Builds</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.projects || ''}
+                              onChange={(e) => setFormData({ ...formData, projects: e.target.value })}
+                              placeholder="e.g. 5 Projects"
+                              className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold outline-none focus:border-emerald-500 bg-white"
+                            />
+                            <div className="flex flex-wrap gap-1">
+                              {['3 Projects', '5 Projects', '8 Projects', '10 Projects'].map((pOpt, pIdx) => (
+                                <button
+                                  type="button"
+                                  key={pIdx}
+                                  onClick={() => setFormData({ ...formData, projects: pOpt })}
+                                  className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
+                                    formData.projects === pOpt
+                                      ? 'bg-emerald-600 text-white border-emerald-600 font-black'
+                                      : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                                  }`}
+                                >
+                                  {pOpt}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {courseFormTab !== 'all' && (
+                          <div className="pt-2 flex justify-between items-center">
+                            <button
+                              type="button"
+                              onClick={() => setCourseFormTab('pricing')}
+                              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-all"
+                            >
+                              ← Previous: Fees & Discount
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setCourseFormTab('tech')}
+                              className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-2xs transition-all flex items-center gap-1.5"
+                            >
+                              <span>Next: Tech Stack</span>
+                              <span>→</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
+                    )}
 
-                      <div className="grid grid-cols-2 gap-2.5">
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-bold text-slate-700">Pill 1: Duration</label>
-                          <input
-                            type="text"
-                            value={formData.duration || ''}
-                            onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                            placeholder="e.g. 3 Months"
-                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold outline-none focus:border-blue-500 bg-white"
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-bold text-slate-700">Pill 2: Internships</label>
-                          <input
-                            type="text"
-                            value={formData.internships || ''}
-                            onChange={(e) => setFormData({ ...formData, internships: e.target.value })}
-                            placeholder="e.g. 5 Internships"
-                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold outline-none focus:border-blue-500 bg-white"
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-bold text-slate-700">Pill 3: Mock Tests</label>
-                          <input
-                            type="text"
-                            value={formData.mockTests || ''}
-                            onChange={(e) => setFormData({ ...formData, mockTests: e.target.value })}
-                            placeholder="e.g. 5 Mock Tests"
-                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold outline-none focus:border-blue-500 bg-white"
-                          />
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-bold text-slate-700">Pill 4: Projects</label>
-                          <input
-                            type="text"
-                            value={formData.projects || ''}
-                            onChange={(e) => setFormData({ ...formData, projects: e.target.value })}
-                            placeholder="e.g. 5 Projects"
-                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold outline-none focus:border-blue-500 bg-white"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* CUSTOM FEATURE HIGHLIGHTS / CHECKLIST POINTS SECTION */}
-                    <div className="flex flex-col gap-2 p-3.5 rounded-2xl bg-indigo-50/50 border border-indigo-100 shadow-2xs">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                          <span>4. Syllabus Highlights & Checklist Points (✓)</span>
-                          <span className="text-[10px] font-black text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full border border-indigo-200">
-                            Checkmark Bullet Points
+                    {/* SECTION 5: TECH STACK & TECHNOLOGIES */}
+                    {(courseFormTab === 'all' || courseFormTab === 'tech') && (
+                      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-cyan-50/40 to-white border border-cyan-100/90 shadow-2xs space-y-4 animate-fade-in">
+                        <div className="flex items-center justify-between border-b border-cyan-100/80 pb-3">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-7 h-7 rounded-xl bg-cyan-600 text-white flex items-center justify-center text-xs font-black shadow-2xs">
+                              5
+                            </span>
+                            <div>
+                              <h4 className="text-xs font-black text-slate-900 font-heading">
+                                Technologies Taught & Tech Stack
+                              </h4>
+                              <p className="text-[10.5px] text-slate-500 font-medium">
+                                Interactive tech chips displayed on course cards and syllabus details
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-black text-cyan-800 bg-cyan-100 px-2 py-0.5 rounded-full border border-cyan-200">
+                            Section 5
                           </span>
-                        </label>
-                      </div>
+                        </div>
 
-                      <textarea
-                        rows={3}
-                        value={formData.highlightsText || ''}
-                        onChange={(e) => setFormData({ ...formData, highlightsText: e.target.value })}
-                        placeholder="Enter each feature point on a new line:&#10;Cisco CCNA, Cloud & Server Admin&#10;Ethical Hacking & Network Security&#10;Live Router, Switch & Cloud Labs"
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-indigo-500 bg-white font-mono leading-relaxed"
-                      />
-                      <span className="text-[10.5px] text-slate-500 font-medium">
-                        Each line will be displayed as a checkmark bullet point (✓) on the website course card.
-                      </span>
+                        {/* Current Tech Chips Display */}
+                        <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-white border border-cyan-100 shadow-2xs">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-bold text-slate-800">
+                              Selected Technologies ({currentTechList.length}):
+                            </label>
+                            {currentTechList.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, technologies: '' })}
+                                className="text-[10px] font-extrabold text-rose-600 hover:underline cursor-pointer"
+                              >
+                                Clear All
+                              </button>
+                            )}
+                          </div>
 
-                      {/* QUICK PRESET CHIPS TO INSERT COMMON POINTS */}
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        <span className="text-[10.5px] font-bold text-slate-500">Presets:</span>
-                        {[
-                          {
-                            label: 'Networking',
-                            text: 'Cisco CCNA, Cloud & Server Admin\nEthical Hacking & Network Security\nLive Router, Switch & Cloud Labs'
-                          },
-                          {
-                            label: 'MERN Web',
-                            text: 'MongoDB, Express, React, Node.js\nFrontend and Backend: React + Express\nDatabase: MongoDB'
-                          },
-                          {
-                            label: 'Java Spring',
-                            text: 'Core Java, Spring Boot, Microservices\nEnterprise Architecture & REST APIs\nDatabase: MySQL & PostgreSQL'
-                          },
-                          {
-                            label: 'Python AI',
-                            text: 'Python, Data Science & AI/ML\nData Pipelines & Neural Networks\nDatabase & Cloud: SQL + AWS'
-                          },
-                          {
-                            label: 'Hardware Repair',
-                            text: 'Practical Hardware & Schematics Diagnosis\nMotherboard Micro-Soldering & IC Work\n100% Practical Lab Training'
-                          }
-                        ].map((preset, pIdx) => (
+                          <div className="flex flex-wrap gap-1.5 min-h-[36px] items-center p-2 rounded-xl bg-slate-50 border border-slate-200/80">
+                            {currentTechList.length > 0 ? (
+                              currentTechList.map((tech, tIdx) => (
+                                <span
+                                  key={tIdx}
+                                  className="px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-50 text-cyan-900 border border-cyan-300 flex items-center gap-1.5 shadow-2xs animate-fade-in"
+                                >
+                                  <span>{tech}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveTechChip(tech)}
+                                    className="text-cyan-600 hover:text-rose-600 font-black cursor-pointer text-xs"
+                                    title={`Remove ${tech}`}
+                                  >
+                                    ×
+                                  </button>
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-xs text-slate-400 italic">No technologies added yet. Pick presets below or type one!</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Add Custom Tech Input */}
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={customTechInput}
+                            onChange={(e) => setCustomTechInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddTechChip();
+                              }
+                            }}
+                            placeholder="Type a technology (e.g. Next.js, Docker, AWS, Flutter)..."
+                            className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-cyan-500 bg-white"
+                          />
                           <button
                             type="button"
-                            key={pIdx}
-                            onClick={() => setFormData({ ...formData, highlightsText: preset.text })}
-                            className="px-2 py-0.5 rounded-lg text-[10.5px] font-bold bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition-all cursor-pointer active:scale-95 shadow-2xs"
+                            onClick={() => handleAddTechChip()}
+                            className="px-3.5 py-2 rounded-xl text-xs font-black bg-cyan-600 text-white hover:bg-cyan-700 transition-all cursor-pointer shadow-2xs whitespace-nowrap active:scale-95"
                           >
-                            + {preset.label}
+                            + Add Tech
                           </button>
-                        ))}
-                      </div>
-                    </div>
+                        </div>
 
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-bold text-slate-700">Course Description</label>
-                      <textarea
-                        rows={2}
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Comprehensive course syllabus description..."
-                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500"
-                      />
-                    </div>
+                        {/* Popular Presets */}
+                        <div className="flex flex-col gap-1.5 pt-1">
+                          <span className="text-[10.5px] font-bold text-slate-500">Popular Tech Presets (Click to add):</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {[
+                              'React.js', 'Node.js', 'Python', 'Java', 'Flutter', 'Next.js',
+                              'AWS', 'Docker', 'MongoDB', 'PostgreSQL', 'C++', 'Micro-Soldering',
+                              'CCNA', 'Cyber Security', 'SEO', 'Kubernetes', 'Kotlin', 'Express'
+                            ].map((techName, tIdx) => {
+                              const isAdded = currentTechList.some(t => t.toLowerCase() === techName.toLowerCase());
+                              return (
+                                <button
+                                  type="button"
+                                  key={tIdx}
+                                  onClick={() => {
+                                    if (isAdded) {
+                                      handleRemoveTechChip(techName);
+                                    } else {
+                                      handleAddTechChip(techName);
+                                    }
+                                  }}
+                                  className={`px-2 py-1 rounded-lg text-[10.5px] font-bold border transition-all cursor-pointer flex items-center gap-1 active:scale-95 ${
+                                    isAdded
+                                      ? 'bg-cyan-600 text-white border-cyan-600 font-black shadow-2xs'
+                                      : 'bg-white text-slate-700 border-slate-200 hover:border-cyan-400'
+                                  }`}
+                                >
+                                  <span>{isAdded ? '✓' : '+'}</span>
+                                  <span>{techName}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
 
-                    <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                      <div>
-                        <div className="text-xs font-bold text-slate-900">Show on Website Frontend</div>
-                        <div className="text-[11px] text-slate-500">Enable to make this course visible to website students</div>
+                        {courseFormTab !== 'all' && (
+                          <div className="pt-2 flex justify-between items-center">
+                            <button
+                              type="button"
+                              onClick={() => setCourseFormTab('deliverables')}
+                              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-all"
+                            >
+                              ← Previous: 2x2 Badges
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setCourseFormTab('syllabus')}
+                              className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 text-white hover:bg-cyan-700 shadow-2xs transition-all flex items-center gap-1.5"
+                            >
+                              <span>Next: Syllabus Points</span>
+                              <span>→</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      <input
-                        type="checkbox"
-                        checked={formData.isActive !== false}
-                        onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                        className="w-4 h-4 accent-blue-600 cursor-pointer"
-                      />
-                    </div>
+                    )}
 
-                    <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                      <div>
-                        <div className="text-xs font-bold text-slate-900">Show Price Tag on Website</div>
-                        <div className="text-[11px] text-slate-500">Enable to display fee tag on website frontend</div>
+                    {/* SECTION 6: SYLLABUS HIGHLIGHTS & CHECKLIST (✓) */}
+                    {(courseFormTab === 'all' || courseFormTab === 'syllabus') && (
+                      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-indigo-50/40 to-white border border-indigo-100/90 shadow-2xs space-y-4 animate-fade-in">
+                        <div className="flex items-center justify-between border-b border-indigo-100/80 pb-3">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-black shadow-2xs">
+                              6
+                            </span>
+                            <div>
+                              <h4 className="text-xs font-black text-slate-900 font-heading">
+                                Syllabus Highlights & Checklist (✓)
+                              </h4>
+                              <p className="text-[10.5px] text-slate-500 font-medium">
+                                The bullet points with checkmarks (✓) displayed on the website course card
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setUseRawHighlightsText(!useRawHighlightsText)}
+                            className="text-[10.5px] font-bold text-indigo-700 bg-white hover:bg-indigo-50 px-2.5 py-1 rounded-xl border border-indigo-200 transition-colors cursor-pointer shadow-2xs"
+                          >
+                            {useRawHighlightsText ? '✨ Itemized Mode' : '📝 Raw Textarea'}
+                          </button>
+                        </div>
+
+                        {useRawHighlightsText ? (
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-bold text-slate-700">Enter each point on a new line:</label>
+                            <textarea
+                              rows={4}
+                              value={formData.highlightsText || ''}
+                              onChange={(e) => setFormData({ ...formData, highlightsText: e.target.value })}
+                              placeholder="Cisco CCNA, Cloud & Server Admin&#10;Ethical Hacking & Network Security&#10;Live Router, Switch & Cloud Labs"
+                              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-indigo-500 bg-white font-mono leading-relaxed"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-2.5">
+                            {/* Interactive Checklist Point Rows */}
+                            <div className="flex flex-col gap-2">
+                              {currentHighlightPoints.map((point, pIdx) => (
+                                <div key={pIdx} className="flex items-center gap-2 p-2 rounded-xl bg-white border border-indigo-100 shadow-2xs group">
+                                  <span className="w-5 h-5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center text-xs font-black shrink-0">
+                                    ✓
+                                  </span>
+                                  <input
+                                    type="text"
+                                    value={point}
+                                    onChange={(e) => handleUpdateHighlightPoint(pIdx, e.target.value)}
+                                    className="flex-1 text-xs font-bold text-slate-800 outline-none bg-transparent"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveHighlightPoint(pIdx)}
+                                    className="text-slate-400 hover:text-rose-600 transition-colors p-1 cursor-pointer shrink-0"
+                                    title="Delete point"
+                                  >
+                                    <DeleteOutlineIcon className="!w-4 !h-4" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Add New Point Input */}
+                            <div className="flex items-center gap-2 pt-1">
+                              <input
+                                type="text"
+                                value={newHighlightPointInput}
+                                onChange={(e) => setNewHighlightPointInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleAddHighlightPoint();
+                                  }
+                                }}
+                                placeholder="Type a new syllabus feature point..."
+                                className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-indigo-500 bg-white"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleAddHighlightPoint}
+                                className="px-3.5 py-2 rounded-xl text-xs font-black bg-indigo-600 text-white hover:bg-indigo-700 transition-all cursor-pointer shadow-2xs whitespace-nowrap active:scale-95"
+                              >
+                                + Add Point
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Quick Presets by Track */}
+                        <div className="flex flex-col gap-1.5 pt-1">
+                          <span className="text-[10.5px] font-bold text-slate-500">1-Click Syllabus Presets:</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {[
+                              {
+                                label: 'Networking',
+                                text: 'Cisco CCNA, Cloud & Server Admin\nEthical Hacking & Network Security\nLive Router, Switch & Cloud Labs'
+                              },
+                              {
+                                label: 'MERN Web',
+                                text: 'MongoDB, Express, React, Node.js\nFrontend and Backend: React + Express\nDatabase: MongoDB'
+                              },
+                              {
+                                label: 'Java Spring',
+                                text: 'Core Java, Spring Boot, Microservices\nEnterprise Architecture & REST APIs\nDatabase: MySQL & PostgreSQL'
+                              },
+                              {
+                                label: 'Python AI',
+                                text: 'Python, Data Science & AI/ML\nData Pipelines & Neural Networks\nDatabase & Cloud: SQL + AWS'
+                              },
+                              {
+                                label: 'Mobile Repair',
+                                text: 'Practical Hardware & Schematics Diagnosis\nMotherboard Micro-Soldering & IC Work\n100% Practical Lab Training'
+                              },
+                              {
+                                label: 'Appliance & PCB',
+                                text: 'Inverter AC & PCB Circuit Repair\nComponent Level Troubleshooting\nJob Ready Practical Field Training'
+                              },
+                              {
+                                label: 'Digital Marketing',
+                                text: 'Google Ads, Meta Ads & Funnel Setup\nSEO Optimization & Social Media Growth\nLive Campaign & Ad Budget Management'
+                              }
+                            ].map((preset, pIdx) => (
+                              <button
+                                type="button"
+                                key={pIdx}
+                                onClick={() => setFormData({ ...formData, highlightsText: preset.text })}
+                                className="px-2.5 py-1 rounded-lg text-[10.5px] font-bold bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 transition-all cursor-pointer active:scale-95 shadow-2xs"
+                              >
+                                + {preset.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {courseFormTab !== 'all' && (
+                          <div className="pt-2 flex justify-between items-center">
+                            <button
+                              type="button"
+                              onClick={() => setCourseFormTab('tech')}
+                              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-all"
+                            >
+                              ← Previous: Tech Stack
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setCourseFormTab('detailsPage')}
+                              className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 shadow-2xs transition-all flex items-center gap-1.5"
+                            >
+                              <span>Next: Details Page</span>
+                              <span>→</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      <input
-                        type="checkbox"
-                        checked={formData.showPrice !== false}
-                        onChange={(e) => setFormData({ ...formData, showPrice: e.target.checked })}
-                        className="w-4 h-4 accent-emerald-600 cursor-pointer"
-                      />
-                    </div>
+                    )}
+
+                    {/* SECTION 7: COURSE DETAILS PAGE & MEDIA (VIEW DETAILS CONFIG) */}
+                    {(courseFormTab === 'all' || courseFormTab === 'detailsPage') && (
+                      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-amber-50/30 to-white border border-amber-200/90 shadow-2xs space-y-4 animate-fade-in">
+                        <div className="flex items-center justify-between border-b border-amber-200/70 pb-3">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-7 h-7 rounded-xl bg-amber-600 text-white flex items-center justify-center text-xs font-black shadow-2xs">
+                              7
+                            </span>
+                            <div>
+                              <h4 className="text-xs font-black text-slate-900 font-heading">
+                                Course Details Page & Media (View Details)
+                              </h4>
+                              <p className="text-[10.5px] text-slate-500 font-medium">
+                                Configure the high-impact modal students see when clicking "View Details"
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-black text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200">
+                            Section 7
+                          </span>
+                        </div>
+
+                        {/* SUBTITLE / TAGLINE */}
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                            <span>Subtitle / Hero Tagline</span>
+                            <span className="text-slate-400 font-normal">(displayed below course title)</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.subtitle || ''}
+                            onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                            placeholder="Learn to build real-world web applications from scratch"
+                            className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-amber-500 bg-white"
+                          />
+                        </div>
+
+                        {/* INTRO VIDEO URL */}
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                            <span>Intro Video URL (YouTube)</span>
+                            <span className="text-slate-400 font-normal">(Watch Intro Video button)</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.videoUrl || ''}
+                            onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+                            placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                            className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-amber-500 bg-white"
+                          />
+                          <p className="text-[10px] text-slate-400">
+                            Supports standard YouTube links (youtube.com/watch?v=...), youtu.be, or embed links.
+                          </p>
+                        </div>
+
+                        {/* 4 FEATURE PILLS / ROUNDED BADGES */}
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                            <span>Feature Badges (4 Rounded Pills)</span>
+                            <span className="text-slate-400 font-normal">(comma-separated)</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.featurePillsText || ''}
+                            onChange={(e) => setFormData({ ...formData, featurePillsText: e.target.value })}
+                            placeholder="Live + recordings, Certificate, 2 to 3 projects, Placement support"
+                            className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-amber-500 bg-white"
+                          />
+                        </div>
+
+                        {/* WHAT YOU WILL LEARN CHECKLIST */}
+                        <div className="flex flex-col gap-1.5">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-bold text-slate-700">
+                              What You Will Learn (Checklist ✓)
+                            </label>
+                            <span className="text-[10px] text-slate-400 font-medium">1 point per line</span>
+                          </div>
+                          <textarea
+                            rows={5}
+                            value={formData.whatYouWillLearnText || ''}
+                            onChange={(e) => setFormData({ ...formData, whatYouWillLearnText: e.target.value })}
+                            placeholder="Digital Marketing Strategy & Sales Funnel Design&#10;Google Search & Display Ads Campaign Management&#10;Meta (Facebook & Instagram) Ads & Pixel Tracking&#10;Search Engine Optimization (SEO) & Keyword Strategy&#10;Content Marketing & Social Media Growth&#10;Live Campaign Budget Allocation & ROAS Optimization&#10;Freelancing & Client Acquisition Masterclass"
+                            className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-amber-500 bg-white font-mono leading-relaxed"
+                          />
+                        </div>
+
+
+                        {/* BATCH DETAILS SPECIFICATIONS (2x2 GRID) */}
+                        <div className="space-y-2 pt-1 border-t border-amber-100">
+                          <label className="text-xs font-bold text-slate-800 block">
+                            Batch Details Specifications:
+                          </label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="flex flex-col gap-1">
+                              <label className="text-[11px] font-semibold text-slate-600">Classes Mode</label>
+                              <input
+                                type="text"
+                                value={formData.batchClasses || ''}
+                                onChange={(e) => setFormData({ ...formData, batchClasses: e.target.value })}
+                                placeholder="Live + Recorded"
+                                className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-amber-500 bg-white"
+                              />
+                            </div>
+
+                            <div className="flex flex-col gap-1">
+                              <label className="text-[11px] font-semibold text-slate-600">Batch Timing</label>
+                              <input
+                                type="text"
+                                value={formData.batchTimings || ''}
+                                onChange={(e) => setFormData({ ...formData, batchTimings: e.target.value })}
+                                placeholder="Morning/Evening"
+                                className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-amber-500 bg-white"
+                              />
+                            </div>
+
+                            <div className="flex flex-col gap-1">
+                              <label className="text-[11px] font-semibold text-slate-600">Attendance Mode</label>
+                              <input
+                                type="text"
+                                value={formData.batchMode || ''}
+                                onChange={(e) => setFormData({ ...formData, batchMode: e.target.value })}
+                                placeholder="Online / Offline"
+                                className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-amber-500 bg-white"
+                              />
+                            </div>
+
+                            <div className="flex flex-col gap-1">
+                              <label className="text-[11px] font-semibold text-slate-600">Certificate</label>
+                              <input
+                                type="text"
+                                value={formData.certificateProvided || ''}
+                                onChange={(e) => setFormData({ ...formData, certificateProvided: e.target.value })}
+                                placeholder="Provided"
+                                className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-amber-500 bg-white"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {courseFormTab !== 'all' && (
+                          <div className="pt-2 flex justify-between items-center">
+                            <button
+                              type="button"
+                              onClick={() => setCourseFormTab('syllabus')}
+                              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-all"
+                            >
+                              ← Previous: Syllabus Points
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setCourseFormTab('settings')}
+                              className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 shadow-2xs transition-all flex items-center gap-1.5"
+                            >
+                              <span>Next: Visibility</span>
+                              <span>→</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* SECTION 8: VISIBILITY & PUBLISHING SETTINGS */}
+                    {(courseFormTab === 'all' || courseFormTab === 'settings') && (
+                      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-slate-50 to-white border border-slate-200 shadow-2xs space-y-3.5 animate-fade-in">
+                        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-7 h-7 rounded-xl bg-slate-700 text-white flex items-center justify-center text-xs font-black shadow-2xs">
+                              8
+                            </span>
+                            <div>
+                              <h4 className="text-xs font-black text-slate-900 font-heading">
+                                Visibility & Publishing Status
+                              </h4>
+                              <p className="text-[10.5px] text-slate-500 font-medium">
+                                Control live visibility across website and catalog
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-black text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                            Section 8
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                          <div>
+                            <div className="text-xs font-bold text-slate-900">Show on Website Frontend</div>
+                            <div className="text-[11px] text-slate-500">Enable to make this course track visible to prospective students</div>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={formData.isActive !== false}
+                            onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                            className="w-4 h-4 accent-blue-600 cursor-pointer"
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                          <div>
+                            <div className="text-xs font-bold text-slate-900">Show Price Tag on Website</div>
+                            <div className="text-[11px] text-slate-500">Enable to display the fee tag directly on the course card</div>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={formData.showPrice !== false}
+                            onChange={(e) => setFormData({ ...formData, showPrice: e.target.checked })}
+                            className="w-4 h-4 accent-emerald-600 cursor-pointer"
+                          />
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-blue-50/80 border border-blue-200 text-[11px] text-blue-900 font-semibold flex items-center gap-2">
+                          <span className="text-base">⚡</span>
+                          <span>Live updates sync instantly across student screens without page refresh.</span>
+                        </div>
+
+                        {courseFormTab !== 'all' && (
+                          <div className="pt-2 flex justify-between items-center">
+                            <button
+                              type="button"
+                              onClick={() => setCourseFormTab('detailsPage')}
+                              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-all"
+                            >
+                              ← Previous: Details Page
+                            </button>
+                            <span className="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+                              ✓ All Sections Configured
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                   </form>
                 </div>
 
-                {/* RIGHT SIDE: REAL-TIME COURSE CARD LIVE PREVIEW */}
-                <div className="lg:col-span-6 flex flex-col gap-3.5 sticky top-0">
-                  <div className="flex items-center justify-between border-b border-blue-100 pb-2">
-                    <span className="text-xs font-black text-slate-900 flex items-center gap-1.5 font-heading">
-                      <span>👁️ Real-Time Card Preview</span>
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    </span>
-                    <span className="text-[10px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
-                      Live Catalog Card
-                    </span>
-                  </div>
-
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    This is exactly how this course card will look on your website & catalog:
-                  </p>
-
-                  {/* PREVIEW CARD */}
-                  <div className={`bg-white rounded-3xl p-5 border shadow-md flex flex-col justify-between gap-4 transition-all ${
-                    formData.isActive !== false ? 'border-slate-200/90' : 'border-amber-200 bg-amber-50/20'
-                  }`}>
-                    {/* TOP HEADER: CATEGORY BADGE & LIVE STATUS */}
-                    <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                      <span className="text-[11px] font-extrabold text-blue-800 bg-blue-50/90 px-3 py-1 rounded-xl border border-blue-200/80 flex items-center gap-1.5 shadow-2xs">
-                        <img src={currentSelectedMainCat.icon} alt="" className="w-3.5 h-3.5 object-contain shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />
-                        <span>{currentSelectedMainCat.label}</span>
-                        <span className="text-slate-300 font-normal shrink-0">•</span>
-                        <span className="text-purple-700 font-extrabold">
-                          {(formData.subCategories || []).map(sId => {
-                            const foundSub = availableSubCategories.find(sub => sub.id === sId);
-                            return foundSub ? foundSub.label : sId;
-                          }).join(', ') || 'Web Dev'}
-                        </span>
-                      </span>
-
-                      <div className={`text-[10.5px] font-black px-2.5 py-1 rounded-xl flex items-center gap-1.5 whitespace-nowrap border ${
-                        formData.isActive !== false
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                          : 'bg-slate-100 text-slate-600 border-slate-300'
-                      }`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${formData.isActive !== false ? 'bg-emerald-600' : 'bg-slate-400'}`} />
-                        <span>{formData.isActive !== false ? 'Live on Website' : 'Hidden'}</span>
-                      </div>
+                {/* RIGHT SIDE: REAL-TIME COURSE PREVIEW (CARD & DETAILS PAGE SWITCHER) */}
+                <div className="lg:col-span-5 flex flex-col gap-3 sticky top-0">
+                  {/* PREVIEW MODE TOGGLE HEADER */}
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2.5 gap-2 flex-wrap">
+                    <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+                      <button
+                        type="button"
+                        onClick={() => setCoursePreviewMode('card')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                          coursePreviewMode === 'card'
+                            ? 'bg-white text-blue-700 shadow-2xs border border-blue-100'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        <span>🎴</span>
+                        <span>Card Preview</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCoursePreviewMode('details')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                          coursePreviewMode === 'details'
+                            ? 'bg-blue-600 text-white shadow-2xs'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        <span>📱</span>
+                        <span>Details Page Preview</span>
+                      </button>
                     </div>
 
-                    {/* MIDDLE CONTENT: TITLE & PRICE */}
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between gap-2 flex-wrap">
-                        <h3 className="text-base font-black text-slate-900 font-heading flex items-center gap-2 flex-1 min-w-[180px]">
-                          {formData.icon || formData.logoUrl ? (
-                            <img
-                              src={formData.icon || formData.logoUrl}
-                              alt=""
-                              className="w-6 h-6 object-contain rounded-lg shrink-0 border border-slate-200 p-0.5 bg-slate-50"
-                              onError={(e) => { e.target.style.display = 'none'; }}
-                            />
-                          ) : (
-                            <SchoolIcon className="!w-5 !h-5 text-blue-600 shrink-0" />
-                          )}
-                          <span className="leading-snug">{formData.title || 'Course Title Preview'}</span>
-                        </h3>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        Live Sync
+                      </span>
+                    </div>
+                  </div>
 
-                        {/* PRICE TAG PREVIEW */}
-                        {formData.showPrice !== false ? (
-                          <div className="text-xs font-black px-3 py-1.5 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 flex items-center gap-1.5 shadow-2xs">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                            {formData.isDiscountActive && (Number(formData.discountPercent) > 0 || formData.originalPrice) ? (
-                              <span className="flex items-center gap-1.5">
-                                {formData.originalPrice && (
-                                  <span className="line-through text-slate-400 text-[11px] font-semibold">{formData.originalPrice}</span>
-                                )}
-                                <span className="text-emerald-700 font-extrabold text-xs">{formData.price || '₹ 19,999'}</span>
-                                <span className="bg-rose-600 text-white font-black text-[9.5px] px-1.5 py-0.2 rounded-full shadow-2xs">
-                                  {formData.discountPercent}% OFF
-                                </span>
-                              </span>
-                            ) : (
-                              <span>{formData.price || '₹ 24,999'}</span>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-xs font-black px-2.5 py-1 rounded-xl border border-slate-300 bg-slate-100 text-slate-400">
-                            Price Hidden 👁️‍🗨️
-                          </span>
-                        )}
-                      </div>
-
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2">
-                        {formData.description || 'Comprehensive course syllabus description preview will be displayed here...'}
+                  {/* PREVIEW MODE 1: CATALOG CARD PREVIEW */}
+                  {coursePreviewMode === 'card' && (
+                    <div className="space-y-3 animate-fade-in">
+                      <p className="text-[11px] text-slate-500 font-medium">
+                        This is how the course card appears in the category grid on the website:
                       </p>
 
-                      {/* DYNAMIC 2x2 PILLS GRID PREVIEW */}
-                      <div className="grid grid-cols-2 gap-2 pt-1">
-                        {[
-                          parseStatPill(formData.duration, '6', 'Months'),
-                          parseStatPill(formData.internships, '5', 'Internships'),
-                          parseStatPill(formData.mockTests, '5', 'Mock Tests'),
-                          parseStatPill(formData.projects, '5', 'Projects')
-                        ].map((pill, pIdx) => (
-                          <div
-                            key={pIdx}
-                            className="bg-[#f0f6ff] border border-[#dbeafe] text-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap truncate shadow-2xs"
-                          >
-                            <span className="font-black text-slate-900">{pill.val}</span>
-                            {pill.label && <span className="truncate text-slate-600">{pill.label}</span>}
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* DYNAMIC CHECKMARK FEATURE BULLETS PREVIEW */}
-                      <div className="flex flex-col gap-1.5 pt-1 border-t border-slate-100">
-                        {getCourseHighlights(null, formData.highlightsText).map((feat, fIdx) => (
-                          <div key={fIdx} className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-700">
-                            <span className="w-3.5 h-3.5 rounded bg-blue-50 border border-blue-200 text-blue-600 font-extrabold text-[9px] flex items-center justify-center flex-shrink-0">
-                              ✓
+                      <div className={`bg-white rounded-3xl p-5 border shadow-md flex flex-col justify-between gap-4 transition-all ${
+                        formData.isActive !== false ? 'border-slate-200/90' : 'border-amber-200 bg-amber-50/20'
+                      }`}>
+                        {/* TOP HEADER: CATEGORY BADGE & LIVE STATUS */}
+                        <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                          <span className="text-[11px] font-extrabold text-blue-800 bg-blue-50/90 px-3 py-1 rounded-xl border border-blue-200/80 flex items-center gap-1.5 shadow-2xs truncate">
+                            <img
+                              src={currentSelectedMainCat.icon}
+                              alt=""
+                              className="w-3.5 h-3.5 object-contain shrink-0"
+                              onError={(e) => { e.target.style.display = 'none'; }}
+                            />
+                            <span className="shrink-0">{currentSelectedMainCat.label}</span>
+                            <span className="text-slate-300 font-normal shrink-0">•</span>
+                            <span className="text-purple-700 font-extrabold truncate">
+                              {(formData.subCategories || []).map(sId => {
+                                const foundSub = allSubCategoryOptions.find(sub => sub.id === sId);
+                                return foundSub ? foundSub.label : sId;
+                              }).join(', ') || 'Web Dev'}
                             </span>
-                            <span className="truncate">{feat}</span>
+                          </span>
+
+                          <div className={`text-[10.5px] font-black px-2.5 py-1 rounded-xl flex items-center gap-1.5 whitespace-nowrap border shrink-0 ${
+                            formData.isActive !== false
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                              : 'bg-slate-100 text-slate-600 border-slate-300'
+                          }`}>
+                            <div className={`w-1.5 h-1.5 rounded-full ${formData.isActive !== false ? 'bg-emerald-600' : 'bg-slate-400'}`} />
+                            <span>{formData.isActive !== false ? 'Live on Website' : 'Hidden'}</span>
                           </div>
-                        ))}
+                        </div>
+
+                        {/* MIDDLE CONTENT: TITLE & PRICE */}
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between gap-2 flex-wrap">
+                            <h3 className="text-base font-black text-slate-900 font-heading flex items-center gap-2 flex-1 min-w-[180px]">
+                              {formData.icon || formData.logoUrl ? (
+                                <img
+                                  src={formData.icon || formData.logoUrl}
+                                  alt=""
+                                  className="w-6 h-6 object-contain rounded-lg shrink-0 border border-slate-200 p-0.5 bg-slate-50"
+                                  onError={(e) => { e.target.style.display = 'none'; }}
+                                />
+                              ) : (
+                                <SchoolIcon className="!w-5 !h-5 text-blue-600 shrink-0" />
+                              )}
+                              <span className="leading-snug">{formData.title || 'Course Title Preview'}</span>
+                            </h3>
+
+                            {/* PRICE TAG PREVIEW */}
+                            {formData.showPrice !== false ? (
+                              <div className="text-xs font-black px-3 py-1.5 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 flex items-center gap-1.5 shadow-2xs">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                                {formData.isDiscountActive && (Number(formData.discountPercent) > 0 || formData.originalPrice) ? (
+                                  <span className="flex items-center gap-1.5">
+                                    {formData.originalPrice && (
+                                      <span className="line-through text-slate-400 text-[11px] font-semibold">{formData.originalPrice}</span>
+                                    )}
+                                    <span className="text-emerald-700 font-extrabold text-xs">{formData.price || '₹ 19,999'}</span>
+                                    <span className="bg-rose-600 text-white font-black text-[9.5px] px-1.5 py-0.2 rounded-full shadow-2xs">
+                                      {formData.discountPercent}% OFF
+                                    </span>
+                                  </span>
+                                ) : (
+                                  <span>{formData.price || '₹ 24,999'}</span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-xs font-black px-2.5 py-1 rounded-xl border border-slate-300 bg-slate-100 text-slate-400">
+                                Price Hidden 👁️‍🗨️
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2">
+                            {formData.description || 'Comprehensive course syllabus description preview will be displayed here...'}
+                          </p>
+
+                          {/* DYNAMIC 2x2 PILLS GRID PREVIEW */}
+                          <div className="grid grid-cols-2 gap-2 pt-1">
+                            {[
+                              parseStatPill(formData.duration, '6', 'Months'),
+                              parseStatPill(formData.internships, '5', 'Internships'),
+                              parseStatPill(formData.mockTests, '5', 'Mock Tests'),
+                              parseStatPill(formData.projects, '5', 'Projects')
+                            ].map((pill, pIdx) => (
+                              <div
+                                key={pIdx}
+                                className="bg-[#f0f6ff] border border-[#dbeafe] text-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap truncate shadow-2xs"
+                              >
+                                <span className="font-black text-slate-900">{pill.val}</span>
+                                {pill.label && <span className="truncate text-slate-600">{pill.label}</span>}
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* DYNAMIC CHECKMARK FEATURE BULLETS PREVIEW */}
+                          <div className="flex flex-col gap-1.5 pt-1 border-t border-slate-100">
+                            {getCourseHighlights(null, formData.highlightsText).map((feat, fIdx) => (
+                              <div key={fIdx} className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-700">
+                                <span className="w-3.5 h-3.5 rounded bg-blue-50 border border-blue-200 text-blue-600 font-extrabold text-[9px] flex items-center justify-center flex-shrink-0">
+                                  ✓
+                                </span>
+                                <span className="truncate">{feat}</span>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* TECHNOLOGIES TAGS PREVIEW */}
+                          {currentTechList.length > 0 && (
+                            <div className="flex flex-wrap gap-1 pt-1.5 border-t border-slate-100">
+                              {currentTechList.slice(0, 6).map((tech, tIdx) => (
+                                <span
+                                  key={tIdx}
+                                  className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200"
+                                >
+                                  {tech}
+                                </span>
+                              ))}
+                              {currentTechList.length > 6 && (
+                                <span className="px-1.5 py-0.5 rounded-md text-[9.5px] font-bold text-slate-400 bg-slate-50">
+                                  +{currentTechList.length - 6} more
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* BOTTOM ACTION BAR PREVIEW */}
+                        <div className="pt-3 border-t border-slate-100 flex flex-col gap-2.5 text-xs">
+                          <div className="flex items-center justify-between gap-2 font-bold text-slate-600">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[11px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100 flex items-center gap-1.5">
+                                <GroupIcon className="!w-3.5 !h-3.5 text-blue-600" />
+                                <span>18 Students</span>
+                              </span>
+                              <span className="text-slate-400 font-semibold">• {formData.duration || '6 Months'}</span>
+                            </div>
+                            <span className="text-[10px] font-extrabold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
+                              Live Card
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-4 gap-1.5 pt-0.5">
+                            <button
+                              type="button"
+                              onClick={() => setCoursePreviewMode('details')}
+                              className="px-2 py-1.5 rounded-xl text-[10.5px] font-black text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-center truncate cursor-pointer transition-all active:scale-95 shadow-2xs flex items-center justify-center gap-1"
+                              title="Click to view Details Page Preview"
+                            >
+                              <span>Details</span>
+                              <span className="text-[9px]">↗</span>
+                            </button>
+                            <span className="px-2 py-1.5 rounded-xl text-[10.5px] font-extrabold text-amber-700 bg-amber-50 border border-amber-200 text-center truncate opacity-80">
+                              Discount
+                            </span>
+                            <span className="px-2 py-1.5 rounded-xl text-[10.5px] font-extrabold text-blue-700 bg-blue-50/70 border border-blue-200 text-center truncate opacity-80">
+                              Edit
+                            </span>
+                            <span className="px-2 py-1.5 rounded-xl text-[10.5px] font-extrabold text-rose-700 bg-rose-50/70 border border-rose-200 text-center truncate opacity-80">
+                              Delete
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-blue-50/80 rounded-xl border border-blue-200 text-[11px] font-semibold text-blue-900 leading-relaxed flex items-center justify-between gap-2">
+                        <span>✨ Click "Details ↗" or the top tab to preview the full Details Page!</span>
+                        <button
+                          type="button"
+                          onClick={() => setCoursePreviewMode('details')}
+                          className="px-2.5 py-1 rounded-lg bg-blue-600 text-white font-extrabold text-[10.5px] shrink-0 cursor-pointer shadow-2xs"
+                        >
+                          View Details Page 📱
+                        </button>
                       </div>
                     </div>
+                  )}
 
-                    {/* BOTTOM ACTION BAR PREVIEW */}
-                    <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
-                      <div className="flex items-center gap-2 font-bold text-slate-600">
-                        <span className="text-[11px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100 flex items-center gap-1.5">
-                          <GroupIcon className="!w-3.5 !h-3.5 text-blue-600" />
-                          <span>18 Students</span>
-                        </span>
-                        <span className="text-slate-400 font-semibold">• {formData.duration || '6 Months'}</span>
+                  {/* PREVIEW MODE 2: EXACT SAME COURSE DETAILS PAGE PREVIEW (SCREENSHOT 2) */}
+                  {coursePreviewMode === 'details' && (
+                    <div className="space-y-2 animate-fade-in">
+                      <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
+                        <span>Exact student view when clicking "View Details":</span>
+                        <button
+                          type="button"
+                          onClick={() => setCoursePreviewMode('card')}
+                          className="text-blue-600 hover:underline cursor-pointer flex items-center gap-1"
+                        >
+                          ← Back to Card Preview
+                        </button>
                       </div>
 
-                      <div className="flex items-center gap-1.5 opacity-80">
-                        <span className="px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-blue-700 bg-white border border-blue-200">
-                          Edit
-                        </span>
-                        <span className="px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-rose-700 bg-white border border-rose-200">
-                          Delete
-                        </span>
+                      {/* DETAILS PAGE PHONE CONTAINER */}
+                      <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden flex flex-col max-h-[720px]">
+                        {/* TOP NAVBAR (SCREENSHOT 2) */}
+                        <div className="bg-white/95 border-b border-slate-100 px-3.5 py-2.5 flex items-center justify-between shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => setCoursePreviewMode('card')}
+                            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+                            title="Back to Card Preview"
+                          >
+                            <LucideArrowLeft className="w-4 h-4" />
+                          </button>
+
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full border border-slate-200 bg-white p-0.5 shadow-2xs overflow-hidden flex items-center justify-center">
+                              <img
+                                src="/logo-icon.png"
+                                alt="CodeGuru"
+                                className="w-full h-full object-contain rounded-full"
+                                onError={(e) => { e.target.src = '/images/categories/coding.png'; }}
+                              />
+                            </div>
+                            <div className="flex flex-col text-left">
+                              <span className="font-extrabold text-slate-900 text-xs tracking-tight leading-none flex items-center gap-1">
+                                CODE <span className="text-orange-500">GURRU</span>
+                              </span>
+                              <span className="text-[8.5px] font-semibold text-slate-500 leading-none mt-0.5">
+                                Skills Today, Better Tomorrow
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => setCoursePreviewMode('card')}
+                            className="text-[10px] font-extrabold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg border border-blue-200 cursor-pointer"
+                          >
+                            Card 🎴
+                          </button>
+                        </div>
+
+                        {/* SCROLLABLE DETAILS PAGE CONTENT */}
+                        <div className="overflow-y-auto p-3 space-y-2.5 scrollbar-thin">
+                          {/* DARK HERO BANNER (#14161d) */}
+                          <div className="relative w-full bg-[#14161d] border border-slate-800 rounded-2xl p-4 flex flex-col items-center text-center shadow-lg overflow-hidden">
+                            <div className="absolute -top-10 -right-10 w-28 h-28 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+                            <div className="absolute -bottom-10 -left-10 w-28 h-28 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
+
+                            {/* TECH LOGO */}
+                            {(() => {
+                              const titleLower = (formData.title || '').toLowerCase();
+                              const isMern = titleLower.includes('mern');
+                              if (isMern) {
+                                return (
+                                  <div className="relative z-10 flex items-center justify-center gap-1.5 mb-1">
+                                    <div className="w-9 h-9 rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#10b981] font-black text-xs">M</div>
+                                    <LucideChevronRight className="w-3 h-3 text-slate-600" />
+                                    <div className="w-9 h-9 rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-white font-black text-xs">E</div>
+                                    <LucideChevronRight className="w-3 h-3 text-slate-600" />
+                                    <div className="w-9 h-9 rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#f59e0b] font-black text-xs">R</div>
+                                    <LucideChevronRight className="w-3 h-3 text-slate-600" />
+                                    <div className="w-9 h-9 rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#84cc16] font-black text-xs">N</div>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <div className="relative z-10 w-11 h-11 rounded-xl bg-[#222530] border border-slate-700/80 p-2 flex items-center justify-center shadow-xs mb-1">
+                                  {formData.icon || formData.logoUrl ? (
+                                    <img
+                                      src={formData.icon || formData.logoUrl}
+                                      alt=""
+                                      className="w-full h-full object-contain"
+                                      onError={(e) => { e.target.src = '/images/categories/coding.png'; }}
+                                    />
+                                  ) : (
+                                    <SchoolIcon className="!w-5 !h-5 text-amber-400" />
+                                  )}
+                                </div>
+                              );
+                            })()}
+
+                            {/* TITLE & SUBTITLE */}
+                            <div className="relative z-10 text-center space-y-1 max-w-sm mx-auto mt-1">
+                              <h1 className="text-sm sm:text-base font-black text-white tracking-tight leading-tight">
+                                {formData.title || 'Course Title Preview'}
+                              </h1>
+                              <p className="text-[10.5px] text-slate-400 font-medium leading-relaxed">
+                                {formData.subtitle || formData.description || 'Learn to build real-world web applications from scratch'}
+                              </p>
+                            </div>
+
+                            {/* WATCH INTRO VIDEO BUTTON */}
+                            <button
+                              type="button"
+                              onClick={() => setAdminShowVideoModal(true)}
+                              className="relative z-10 w-full bg-[#f59e0b] hover:bg-[#e08e00] text-slate-950 font-black text-xs py-2 px-3 rounded-full flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20 active:scale-[0.99] transition-all cursor-pointer mt-2.5"
+                            >
+                              <LucidePlay className="w-3.5 h-3.5 fill-slate-950 text-slate-950 translate-x-0.5" />
+                              <span>Watch Intro Video</span>
+                            </button>
+                          </div>
+
+                          {/* DURATION RING & 4 FEATURE PILLS */}
+                          <div className="bg-white border border-slate-200/80 rounded-xl p-2.5 space-y-2 shadow-2xs">
+                            <div className="bg-[#f8fafc] border border-slate-100 rounded-lg p-2 flex items-center gap-2.5">
+                              <div className="relative w-7 h-7 flex items-center justify-center shrink-0">
+                                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                  <path className="text-slate-200" strokeWidth="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                  <path className="text-[#047857]" strokeDasharray="68, 100" strokeWidth="3.8" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                </svg>
+                                <span className="absolute font-black text-slate-900 text-[11px] leading-none">
+                                  {(String(formData.duration || '3').match(/\d+/) || ['3'])[0]}
+                                </span>
+                              </div>
+                              <div className="flex flex-col min-w-0">
+                                <span className="font-extrabold text-slate-900 text-xs leading-tight truncate">
+                                  {formData.duration || '3 Months'}
+                                </span>
+                                <span className="text-[9.5px] font-medium text-slate-400 leading-tight">
+                                  Duration
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* 2x2 GRID ROUNDED PILLS */}
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {(() => {
+                                const pills = getLivePills();
+                                const icons = [LucideVideo, LucideAward, LucideBriefcase, LucideHeadphones, LucideGraduationCap];
+                                return pills.slice(0, 4).map((pill, idx) => {
+                                  const IconComponent = icons[idx % icons.length] || LucideVideo;
+                                  return (
+                                    <div key={idx} className="bg-white border border-slate-200/90 rounded-full px-2 py-1 flex items-center gap-1.5 text-[10px] font-bold text-slate-700 shadow-2xs">
+                                      <IconComponent className="w-3 h-3 text-slate-600 shrink-0" />
+                                      <span className="truncate">{typeof pill === 'string' ? pill : pill.text}</span>
+                                    </div>
+                                  );
+                                });
+                              })()}
+                            </div>
+                          </div>
+
+                          {/* WHAT YOU WILL LEARN */}
+                          <div className="bg-white rounded-xl border border-slate-200/80 p-2.5 shadow-2xs">
+                            <h3 className="font-extrabold text-slate-900 text-xs mb-1.5">
+                              What You Will Learn
+                            </h3>
+                            <div className="space-y-1">
+                              {getLiveWhatYouWillLearn().map((item, idx) => (
+                                <div key={idx} className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-700">
+                                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8.5px] font-black shrink-0">
+                                    ✓
+                                  </span>
+                                  <span className="truncate">{item}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* BATCH DETAILS */}
+                          <div className="bg-white rounded-xl border border-slate-200/80 p-2.5 shadow-2xs">
+                            <h3 className="font-extrabold text-slate-900 text-xs mb-2">
+                              Batch Details
+                            </h3>
+                            <div className="grid grid-cols-2 gap-1.5 text-[10.5px]">
+                              <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                                <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                                  <LucideCalendar className="w-3 h-3 text-white" />
+                                </div>
+                                <span className="truncate"><strong>Duration:</strong> {formData.duration || '3 Months'}</span>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                                <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                                  <LucideVideo className="w-3 h-3 text-white" />
+                                </div>
+                                <span className="truncate"><strong>Classes:</strong> {formData.batchClasses || 'Live + Recorded'}</span>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                                <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                                  <LucideClock className="w-3 h-3 text-white" />
+                                </div>
+                                <span className="truncate"><strong>Batch:</strong> {formData.batchTimings || 'Morning/Evening'}</span>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                                <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                                  <LucideMapPin className="w-3 h-3 text-white" />
+                                </div>
+                                <span className="truncate"><strong>Mode:</strong> {formData.batchMode || 'Online / Offline'}</span>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-[#f2f6fd] border border-blue-100/70 col-span-2">
+                                <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                                  <LucideShieldCheck className="w-3 h-3 text-white" />
+                                </div>
+                                <span className="truncate"><strong>Certificate:</strong> {formData.certificateProvided || 'Provided'}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* STICKY BOTTOM BUTTON (SCREENSHOT 2) */}
+                        <div className="bg-white border-t border-slate-100 px-3 py-2 flex items-center justify-center shrink-0">
+                          <div className="w-full bg-blue-600 text-white py-2 rounded-full text-xs font-extrabold flex items-center justify-center gap-1 shadow-md shadow-blue-500/25">
+                            <span>Enroll Now</span>
+                            <LucideChevronRight className="w-3.5 h-3.5 stroke-[3]" />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="p-3 bg-blue-50/80 rounded-xl border border-blue-200 text-[11px] font-semibold text-blue-900 leading-relaxed">
-                    ✨ Real-time preview updates live as you type title, upload logo, set price, toggle discount or choose duration.
-                  </div>
                 </div>
 
               </div>
             </div>
 
             {/* FIXED FOOTER */}
-            <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2.5">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                form="courseForm"
-                className="px-5 py-2 rounded-xl text-xs font-extrabold bg-blue-600 text-white hover:bg-blue-700 shadow-sm transition-all cursor-pointer"
-              >
-                {editingCourseId ? 'Update Course Track' : 'Save Course Track'}
-              </button>
+            <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-500">Status:</span>
+                <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border ${
+                  formData.isActive !== false ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-slate-100 text-slate-600 border-slate-300'
+                }`}>
+                  {formData.isActive !== false ? '🟢 Ready to Publish Live' : '⚪ Hidden on Website'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  form="courseForm"
+                  className="px-6 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-sm transition-all cursor-pointer active:scale-95 flex items-center gap-2"
+                >
+                  <span>{editingCourseId ? '💾 Update Course Track' : '✨ Save Course Track'}</span>
+                </button>
+              </div>
             </div>
 
           </div>
@@ -2237,6 +3757,329 @@ export default function CoursesManagerView() {
               </button>
             </div>
 
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* VIEW COURSE DETAILS MODAL (MATCHES EXACT USER SCREENSHOT & FRONTEND MODAL) */}
+      {selectedCourseForView && createPortal(
+        <div className="fixed inset-0 z-[99999] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto select-none animate-fade-in">
+          <div className="relative w-full max-w-xl bg-white rounded-3xl border border-slate-200/90 shadow-2xl flex flex-col h-[94vh] max-h-[860px] overflow-hidden my-auto animate-modal-slide-up">
+            
+            {/* TOP NAVBAR (MATCHING SCREENSHOT 2) */}
+            <div className="bg-white/95 border-b border-slate-100 px-3.5 py-2.5 flex items-center justify-between flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setSelectedCourseForView(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Back"
+                title="Back to courses list"
+              >
+                <LucideArrowLeft className="w-4 h-4" />
+              </button>
+
+              {/* CODE GURRU LOGO HEADER */}
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full border border-slate-200 bg-white p-0.5 shadow-2xs overflow-hidden flex-shrink-0 flex items-center justify-center">
+                  <img
+                    src="/logo-icon.png"
+                    alt="CodeGuru Logo"
+                    className="w-full h-full object-contain rounded-full"
+                    onError={(e) => { e.target.src = '/images/categories/coding.png'; }}
+                  />
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="font-extrabold text-slate-900 text-xs sm:text-sm tracking-tight leading-none flex items-center gap-1">
+                    CODE <span className="text-orange-500">GURRU</span>
+                  </span>
+                  <span className="text-[9px] font-semibold text-slate-500 leading-none mt-0.5">
+                    Skills Today, Better Tomorrow
+                  </span>
+                </div>
+              </div>
+
+              {/* CLOSE BUTTON */}
+              <button
+                type="button"
+                onClick={() => setSelectedCourseForView(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+                title="Close View"
+              >
+                <CloseIcon className="!w-4 !h-4" />
+              </button>
+            </div>
+
+            {/* INNER CONTAINER WITH SCROLLING CONTENT */}
+            <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-2.5 space-y-2.5 scrollbar-thin">
+              
+              {/* DARK HERO CARD (EXACT REPLICA OF SCREENSHOT 2) */}
+              <div className="relative w-full bg-[#14161d] border border-slate-800 rounded-2xl p-4 flex flex-col items-center text-center shadow-lg overflow-hidden">
+                {/* BACKGROUND GLOW BLOBS */}
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
+
+                {/* TECH STACK / ICON BADGE */}
+                {(() => {
+                  const titleLower = (selectedCourseForView.title || '').toLowerCase();
+                  const isMern = selectedCourseForView.id === 'mern-stack' || titleLower.includes('mern');
+                  if (isMern) {
+                    return (
+                      <div className="relative z-10 flex items-center justify-center gap-1.5 sm:gap-2.5 mb-1">
+                        <div className="flex flex-col items-center">
+                          <div className="w-10 h-10 rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#10b981] font-black text-sm shadow-xs flex-shrink-0">
+                            M
+                          </div>
+                          <span className="text-[10px] font-medium text-slate-400 mt-1">MongoDB</span>
+                        </div>
+                        <LucideChevronRight className="w-3.5 h-3.5 text-slate-600 mb-3 flex-shrink-0" />
+                        <div className="flex flex-col items-center">
+                          <div className="w-10 h-10 rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-white font-black text-sm shadow-xs flex-shrink-0">
+                            E
+                          </div>
+                          <span className="text-[10px] font-medium text-slate-400 mt-1">Express</span>
+                        </div>
+                        <LucideChevronRight className="w-3.5 h-3.5 text-slate-600 mb-3 flex-shrink-0" />
+                        <div className="flex flex-col items-center">
+                          <div className="w-10 h-10 rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#f59e0b] font-black text-sm shadow-xs flex-shrink-0">
+                            R
+                          </div>
+                          <span className="text-[10px] font-medium text-slate-400 mt-1">React</span>
+                        </div>
+                        <LucideChevronRight className="w-3.5 h-3.5 text-slate-600 mb-3 flex-shrink-0" />
+                        <div className="flex flex-col items-center">
+                          <div className="w-10 h-10 rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#84cc16] font-black text-sm shadow-xs flex-shrink-0">
+                            N
+                          </div>
+                          <span className="text-[10px] font-medium text-slate-400 mt-1">Node.js</span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="relative z-10 w-12 h-12 rounded-xl bg-[#222530] border border-slate-700/80 p-2.5 flex items-center justify-center shadow-xs mb-1.5 flex-shrink-0">
+                      {selectedCourseForView.icon || selectedCourseForView.logoUrl ? (
+                        <img
+                          src={selectedCourseForView.icon || selectedCourseForView.logoUrl}
+                          alt={selectedCourseForView.title}
+                          className="w-full h-full object-contain"
+                          onError={(e) => { e.target.src = '/images/categories/coding.png'; }}
+                        />
+                      ) : (
+                        <SchoolIcon className="!w-6 !h-6 text-amber-400" />
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {/* TITLE & SUBTITLE */}
+                <div className="relative z-10 text-center space-y-1 max-w-sm mx-auto mt-2">
+                  <h1 className="text-base sm:text-lg font-black text-white tracking-tight leading-tight">
+                    {selectedCourseForView.title}
+                  </h1>
+                  <p className="text-[11px] sm:text-xs text-slate-400 font-medium leading-relaxed">
+                    {selectedCourseForView.subtitle || selectedCourseForView.description || 'Learn to build real-world web applications from scratch'}
+                  </p>
+                </div>
+
+                {/* WATCH INTRO VIDEO BUTTON */}
+                <button
+                  type="button"
+                  onClick={() => setAdminShowVideoModal(true)}
+                  className="relative z-10 w-full bg-[#f59e0b] hover:bg-[#e08e00] text-slate-950 font-black text-xs sm:text-sm py-2.5 px-4 rounded-full flex items-center justify-center gap-2 shadow-md shadow-amber-500/20 active:scale-[0.99] transition-all cursor-pointer mt-3"
+                >
+                  <LucidePlay className="w-3.5 h-3.5 fill-slate-950 text-slate-950 translate-x-0.5" />
+                  <span>Watch Intro Video</span>
+                </button>
+              </div>
+
+              {/* HIGHLIGHTS CARD: DURATION RING & 4 PILLS */}
+              <div className="bg-white border border-slate-200/80 rounded-xl p-2.5 space-y-2 shadow-2xs">
+                {/* DURATION ROW */}
+                <div className="bg-[#f8fafc] border border-slate-100 rounded-lg p-2 flex items-center gap-2.5">
+                  <div className="relative w-8 h-8 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                      <path
+                        className="text-slate-200"
+                        strokeWidth="3.8"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <path
+                        className="text-[#047857]"
+                        strokeDasharray="68, 100"
+                        strokeWidth="3.8"
+                        strokeLinecap="round"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                    </svg>
+                    <span className="absolute font-black text-slate-900 text-xs leading-none">
+                      {(String(selectedCourseForView.duration || '3').match(/\d+/) || ['3'])[0]}
+                    </span>
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-extrabold text-slate-900 text-xs sm:text-sm leading-tight truncate">
+                      {selectedCourseForView.duration || '3 Months'}
+                    </span>
+                    <span className="text-[10px] font-medium text-slate-400 leading-tight">
+                      Duration
+                    </span>
+                  </div>
+                </div>
+
+                {/* 2x2 GRID ROUNDED PILLS */}
+                <div className="grid grid-cols-2 gap-1.5">
+                  {(() => {
+                    const pillsList = getCourseDetailsPills(selectedCourseForView);
+                    const icons = [LucideVideo, LucideAward, LucideBriefcase, LucideHeadphones, LucideGraduationCap, LucideSparkles, LucideClock];
+                    return pillsList.slice(0, 4).map((pill, idx) => {
+                      const IconComponent = icons[idx % icons.length] || LucideVideo;
+                      return (
+                        <div key={idx} className="bg-white border border-slate-200/90 rounded-full px-2.5 py-1 flex items-center gap-1.5 text-[10.5px] font-bold text-slate-700 shadow-2xs">
+                          <IconComponent className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
+                          <span className="truncate">{typeof pill === 'string' ? pill : pill.text}</span>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+
+              {/* WHAT YOU WILL LEARN */}
+              <div className="bg-white rounded-xl border border-slate-200/80 p-2.5 shadow-2xs">
+                <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-1.5">
+                  What You Will Learn
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                  {getCourseDetailsWhatYouWillLearn(selectedCourseForView).map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-1.5 text-[10.5px] font-semibold text-slate-700">
+                      <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8.5px] font-black flex-shrink-0 shadow-2xs">
+                        ✓
+                      </span>
+                      <span className="truncate">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* BATCH DETAILS */}
+              <div className="bg-white rounded-xl border border-slate-200/80 p-2.5 sm:p-3 shadow-2xs">
+                <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-2">
+                  Batch Details
+                </h3>
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-xs">
+                  {/* DURATION */}
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                    <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                      <LucideCalendar className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+                    </div>
+                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                      <strong className="font-extrabold text-slate-900">Duration:</strong>{' '}
+                      <span className="text-slate-600 font-normal">{selectedCourseForView.duration || '3 Months'}</span>
+                    </span>
+                  </div>
+
+                  {/* CLASSES */}
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                    <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                      <LucideVideo className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+                    </div>
+                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                      <strong className="font-extrabold text-slate-900">Classes:</strong>{' '}
+                      <span className="text-slate-600 font-normal">{selectedCourseForView.batchClasses || 'Live + Recorded'}</span>
+                    </span>
+                  </div>
+
+                  {/* BATCH */}
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                    <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                      <LucideClock className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+                    </div>
+                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                      <strong className="font-extrabold text-slate-900">Batch:</strong>{' '}
+                      <span className="text-slate-600 font-normal">{selectedCourseForView.batchTimings || 'Morning/Evening'}</span>
+                    </span>
+                  </div>
+
+                  {/* MODE */}
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                    <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                      <LucideMapPin className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+                    </div>
+                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                      <strong className="font-extrabold text-slate-900">Mode:</strong>{' '}
+                      <span className="text-slate-600 font-normal">{selectedCourseForView.batchMode || selectedCourseForView.mode || 'Online / Offline'}</span>
+                    </span>
+                  </div>
+
+                  {/* CERTIFICATE */}
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                    <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                      <LucideShieldCheck className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+                    </div>
+                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                      <strong className="font-extrabold text-slate-900">Certificate:</strong>{' '}
+                      <span className="text-slate-600 font-normal">{selectedCourseForView.certificateProvided || 'Provided'}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* STICKY BOTTOM ACTIONS: EDIT COURSE & CLOSE */}
+            <div className="bg-white border-t border-slate-100 px-4 py-2.5 flex items-center justify-between gap-3 shadow-md flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setSelectedCourseForView(null)}
+                className="px-4 py-2.5 rounded-full border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-100 transition-all cursor-pointer"
+              >
+                Close Preview
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const target = selectedCourseForView;
+                  setSelectedCourseForView(null);
+                  handleEdit(target);
+                }}
+                className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-2.5 px-4 rounded-full text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/25 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer"
+              >
+                <EditOutlinedIcon className="!w-4 !h-4" />
+                <span>✏️ Edit This Course in Admin</span>
+                <LucideChevronRight className="w-4 h-4 stroke-[3]" />
+              </button>
+            </div>
+
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* INTRO VIDEO MODAL FOR ADMIN PREVIEW */}
+      {adminShowVideoModal && createPortal(
+        <div className="fixed inset-0 z-[100000] bg-black/90 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-2xl bg-black rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setAdminShowVideoModal(false)}
+              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/20 text-white hover:bg-white/40 flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <LucideX className="w-5 h-5" />
+            </button>
+            <div className="aspect-video w-full">
+              <iframe
+                className="w-full h-full"
+                src={getEmbedVideoUrl(selectedCourseForView?.videoUrl || formData.videoUrl)}
+                title="Course Intro Video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
           </div>
         </div>,
         document.body

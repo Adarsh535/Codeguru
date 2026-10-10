@@ -11,18 +11,42 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
 
   useEffect(() => {
     let isMounted = true;
-    apiService.getPlacements().then(data => {
-      if (isMounted && data && data.length > 0) {
-        const formatted = data.map(item => ({
-          ...item,
-          id: item.id || item._id,
-          photo: item.photo || item.avatarUrl || item.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-          companyLogo: item.companyLogo || item.logo || 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg'
-        }));
-        setStudents(formatted);
+
+    const fetchPlacements = () => {
+      apiService.getPlacements().then(data => {
+        if (isMounted && data && data.length > 0) {
+          const formatted = data.map(item => ({
+            ...item,
+            id: item.id || item._id,
+            photo: item.photo || item.avatarUrl || item.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+            companyLogo: item.companyLogo || item.logo || 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg'
+          }));
+          setStudents(formatted);
+        }
+      }).catch(() => {});
+    };
+
+    fetchPlacements();
+
+    // 1. Live SSE update listeners
+    window.addEventListener('codeguru_refresh_placements', fetchPlacements);
+    window.addEventListener('codeguru_refresh_all', fetchPlacements);
+    window.addEventListener('focus', fetchPlacements);
+
+    // 2. Background polling fallback (every 4 seconds)
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        fetchPlacements();
       }
-    });
-    return () => { isMounted = false; };
+    }, 4000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener('codeguru_refresh_placements', fetchPlacements);
+      window.removeEventListener('codeguru_refresh_all', fetchPlacements);
+      window.removeEventListener('focus', fetchPlacements);
+    };
   }, []);
 
   const doubleStudents = [...students, ...students, ...students];
@@ -34,11 +58,11 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
         {/* HEADING */}
         <div className="flex justify-between items-center px-4 md:px-8 mb-3 sm:mb-4">
           <div className="flex items-center gap-2 sm:gap-2.5">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 flex-shrink-0 relative flex items-center justify-center -my-2">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 flex-shrink-0 relative flex items-center justify-center rounded-xl bg-amber-50/70 p-0.5 border border-amber-200/60 shadow-2xs">
               <img
-                src="/images/top-achiever-3d-icon.png"
+                src="/images/top-achiever-trophy.png"
                 alt="Top Placements Trophy"
-                className="w-full h-full object-contain drop-shadow-md hover:scale-110 transition-transform duration-300"
+                className="w-full h-full object-contain rounded-lg hover:scale-105 transition-transform duration-300"
               />
             </div>
             <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight font-heading">

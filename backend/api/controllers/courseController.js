@@ -6,6 +6,7 @@
  */
 
 import { Course } from '../../models/Course.js';
+import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
 
 /**
  * @route   GET /api/courses
@@ -56,8 +57,20 @@ export const addCourse = async (req, res) => {
       internships: req.body.internships || '5 Internships',
       mockTests: req.body.mockTests || '5 Mock Tests',
       projects: req.body.projects || '5 Projects',
-      highlights: Array.isArray(req.body.highlights) ? req.body.highlights : []
+      highlights: Array.isArray(req.body.highlights) ? req.body.highlights : [],
+      subtitle: req.body.subtitle || '',
+      videoUrl: req.body.videoUrl || '',
+      featurePills: Array.isArray(req.body.featurePills) ? req.body.featurePills : [],
+      whatYouWillLearn: Array.isArray(req.body.whatYouWillLearn) ? req.body.whatYouWillLearn : [],
+      syllabusModules: Array.isArray(req.body.syllabusModules) ? req.body.syllabusModules : [],
+      projectsList: Array.isArray(req.body.projectsList) ? req.body.projectsList : [],
+      batchClasses: req.body.batchClasses || 'Live + Recorded',
+      batchTimings: req.body.batchTimings || 'Morning/Evening',
+      batchMode: req.body.batchMode || 'Online / Offline',
+      certificateProvided: req.body.certificateProvided || 'Provided'
     });
+
+    broadcastRealtimeEvent('courses', course);
 
     return res.status(201).json({ success: true, message: 'Course added to MongoDB Atlas', data: course });
   } catch (err) {
@@ -78,7 +91,10 @@ export const updateCourse = async (req, res) => {
       payload.subCat = req.body.subCategories[0];
     }
     const course = await Course.findByIdAndUpdate(req.params.id, payload, { new: true });
-    if (course) return res.json({ success: true, message: 'Course updated in MongoDB Atlas', data: course });
+    if (course) {
+      broadcastRealtimeEvent('courses', course);
+      return res.json({ success: true, message: 'Course updated in MongoDB Atlas', data: course });
+    }
     return res.status(404).json({ success: false, message: 'Course not found' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -93,6 +109,7 @@ export const updateCourse = async (req, res) => {
 export const deleteCourse = async (req, res) => {
   try {
     await Course.findByIdAndDelete(req.params.id);
+    broadcastRealtimeEvent('courses', { id: req.params.id, deleted: true });
     return res.json({ success: true, message: 'Course deleted successfully' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });

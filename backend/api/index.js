@@ -19,6 +19,7 @@ import navMenuRoutes from './routes/navMenuRoutes.js';
 import enrollmentRoutes from './routes/enrollmentRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
+import realtimeRoutes from './routes/realtimeRoutes.js';
 
 const apiRouter = express.Router();
 
@@ -36,6 +37,8 @@ apiRouter.use('/traffic', trafficRoutes);
 apiRouter.use('/navmenus', navMenuRoutes);
 apiRouter.use('/enrollments', enrollmentRoutes);
 apiRouter.use('/settings', settingsRoutes);
+apiRouter.use('/realtime', realtimeRoutes);
+apiRouter.use('/events', realtimeRoutes);
 
 export default apiRouter;
 

@@ -15,6 +15,7 @@ import InquiryModal from '../views/components/InquiryModal';
 import AuthModal from '../views/components/AuthModal';
 import BatchEnrollModal from '../views/components/BatchEnrollModal';
 import { apiService } from '../services/apiService';
+import { realtimeSync } from '../services/realtimeService';
 
 export default function ClientShell({ children }) {
   const pathname = usePathname();

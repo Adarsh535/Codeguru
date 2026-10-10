@@ -7,6 +7,7 @@
  */
 
 import { Placement } from '../../models/Placement.js';
+import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
 
 /**
  * @route   GET /api/placements
@@ -41,6 +42,8 @@ export const addPlacement = async (req, res) => {
       batch: req.body.batch || 'PLACEMENT BATCH 2026'
     });
 
+    broadcastRealtimeEvent('placements', placement);
+
     return res.status(201).json({ success: true, message: 'Placement recorded in MongoDB Atlas', data: placement });
   } catch (err) {
     console.error('[placementController Error]:', err.message);
@@ -56,7 +59,10 @@ export const addPlacement = async (req, res) => {
 export const updatePlacement = async (req, res) => {
   try {
     const placement = await Placement.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (placement) return res.json({ success: true, message: 'Placement record updated in MongoDB Atlas', data: placement });
+    if (placement) {
+      broadcastRealtimeEvent('placements', placement);
+      return res.json({ success: true, message: 'Placement record updated in MongoDB Atlas', data: placement });
+    }
     return res.status(404).json({ success: false, message: 'Placement record not found' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -71,6 +77,7 @@ export const updatePlacement = async (req, res) => {
 export const deletePlacement = async (req, res) => {
   try {
     await Placement.findByIdAndDelete(req.params.id);
+    broadcastRealtimeEvent('placements', { id: req.params.id, deleted: true });
     return res.json({ success: true, message: 'Placement record deleted successfully' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });

@@ -50,21 +50,45 @@ export default function OurTeamSlider({ onOpenContactModal }) {
 
   useEffect(() => {
     let isMounted = true;
-    apiService.getTeam().then(data => {
-      if (isMounted && data && data.length > 0) {
-        const formatted = data.map(item => ({
-          id: item.id || item._id,
-          name: item.name,
-          role: item.role || 'Senior Tech Instructor',
-          tag: '#TEAMCODEGURRU',
-          photo: item.photoUrl || item.photo || item.image || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=500&fit=crop&crop=faces',
-          bio: item.bio || item.specialization || 'Full Stack & Software Engineering Expert.',
-          phone: item.phone || '9198483...'
-        }));
-        setTeamMembers(formatted);
+
+    const fetchTeam = () => {
+      apiService.getTeam().then(data => {
+        if (isMounted && data && data.length > 0) {
+          const formatted = data.map(item => ({
+            id: item.id || item._id,
+            name: item.name,
+            role: item.role || 'Senior Tech Instructor',
+            tag: '#TEAMCODEGURRU',
+            photo: item.photoUrl || item.photo || item.image || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=500&fit=crop&crop=faces',
+            bio: item.bio || item.specialization || 'Full Stack & Software Engineering Expert.',
+            phone: item.phone || '9198483...'
+          }));
+          setTeamMembers(formatted);
+        }
+      }).catch(() => {});
+    };
+
+    fetchTeam();
+
+    // 1. Live SSE update listeners
+    window.addEventListener('codeguru_refresh_team', fetchTeam);
+    window.addEventListener('codeguru_refresh_all', fetchTeam);
+    window.addEventListener('focus', fetchTeam);
+
+    // 2. Background polling fallback (every 4 seconds)
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        fetchTeam();
       }
-    });
-    return () => { isMounted = false; };
+    }, 4000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener('codeguru_refresh_team', fetchTeam);
+      window.removeEventListener('codeguru_refresh_all', fetchTeam);
+      window.removeEventListener('focus', fetchTeam);
+    };
   }, []);
 
   const doubleMembers = [...teamMembers, ...teamMembers, ...teamMembers];

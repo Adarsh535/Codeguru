@@ -60,9 +60,38 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
   const rawLevel = course.level || 'Intermediate';
   const displayLevel = rawLevel.toLowerCase().includes('begin') ? 'Beginner' : rawLevel.toLowerCase().includes('master') ? 'Master' : 'Intermediate';
   const courseLevel = displayLevel;
-  const coursePrice = course.price || '₹7,999';
-  const courseOriginalPrice = course.originalPrice || '₹12,999';
-  const courseDiscount = course.discount || '38% OFF';
+  const formatPrice = (val) => {
+    if (!val) return '';
+    const s = String(val).trim();
+    return s.startsWith('₹') ? s : `₹${s}`;
+  };
+
+  const rawPrice = course.price;
+  const coursePrice = rawPrice ? formatPrice(rawPrice) : '₹7,999';
+  const rawOriginalPrice = course.originalPrice;
+  const courseOriginalPrice = rawOriginalPrice ? formatPrice(rawOriginalPrice) : '';
+  const showPrice = course.showPrice !== false && !!coursePrice;
+
+  const isDiscountActive = course.isDiscountActive !== false;
+  let discountDisplay = '';
+  const hasDiscount = isDiscountActive && (course.discountPercent > 0 || (courseOriginalPrice && courseOriginalPrice !== coursePrice));
+
+  if (isDiscountActive) {
+    if (course.discountPercent && course.discountPercent > 0) {
+      discountDisplay = `${course.discountPercent}% OFF`;
+    } else if (course.discount) {
+      discountDisplay = course.discount;
+    } else if (courseOriginalPrice && courseOriginalPrice !== coursePrice) {
+      const origNum = parseInt(String(courseOriginalPrice).replace(/[^0-9]/g, ''));
+      const currNum = parseInt(String(coursePrice).replace(/[^0-9]/g, ''));
+      if (origNum && currNum && origNum > currNum) {
+        discountDisplay = `${Math.round(((origNum - currNum) / origNum) * 100)}% OFF`;
+      } else {
+        discountDisplay = 'OFFER';
+      }
+    }
+  }
+
   const courseMode = course.mode || 'Online / Offline';
 
   const handleShare = async () => {
@@ -87,7 +116,17 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
     setTimeout(() => setCopiedShare(false), 2000);
   };
 
+  const getEmbedVideoUrl = (rawUrl) => {
+    if (!rawUrl) return 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1';
+    if (rawUrl.includes('embed/')) return rawUrl.includes('autoplay=1') ? rawUrl : `${rawUrl}?autoplay=1`;
+    const match = rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+    return match && match[1] ? `https://www.youtube.com/embed/${match[1]}?autoplay=1` : rawUrl;
+  };
+
   const getWhatYouWillLearn = () => {
+    if (Array.isArray(course.whatYouWillLearn) && course.whatYouWillLearn.length > 0) {
+      return course.whatYouWillLearn;
+    }
     if (isMern) {
       return [
         'HTML, CSS, JavaScript (Advance)',
@@ -162,6 +201,9 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
   };
 
   const getSyllabusModules = () => {
+    if (Array.isArray(course.syllabusModules) && course.syllabusModules.length > 0) {
+      return course.syllabusModules;
+    }
     if (isMern) {
       return [
         { title: 'Module 1: Web Fundamentals', desc: 'HTML5, CSS3, Flexbox, Grid, Responsive Design, Git & GitHub' },
@@ -182,6 +224,9 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
   };
 
   const getProjectsList = () => {
+    if (Array.isArray(course.projectsList) && course.projectsList.length > 0) {
+      return course.projectsList;
+    }
     return [
       { name: 'Full-Scale E-Commerce Application', tech: 'React, Node, Express, MongoDB', desc: 'Complete store with cart, user auth, admin panel & payment gateway.' },
       { name: 'Real-Time Chat & Collaboration Tool', tech: 'WebSockets, Socket.io, React', desc: 'Instant messaging app with room creation & online media sharing.' },
@@ -319,8 +364,29 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
                 {course.title}
               </h1>
               <p className="text-[11px] sm:text-xs text-slate-400 font-medium">
-                Learn to build real-world web applications from scratch
+                {course.subtitle || course.description || 'Learn to build real-world web applications from scratch'}
               </p>
+
+              {/* HERO PRICE BADGE */}
+              {showPrice && (
+                <div className="pt-1.5 flex items-center justify-center">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md border border-white/15 rounded-full shadow-inner">
+                    <span className="text-white font-black text-xs sm:text-sm tracking-tight">
+                      {coursePrice}
+                    </span>
+                    {hasDiscount && courseOriginalPrice && (
+                      <span className="line-through text-slate-400 text-[11px] font-semibold">
+                        {courseOriginalPrice}
+                      </span>
+                    )}
+                    {hasDiscount && discountDisplay && (
+                      <span className="bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 text-[9.5px] font-black px-1.5 py-0.2 rounded-full">
+                        {discountDisplay}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* WATCH INTRO VIDEO BUTTON */}
@@ -372,185 +438,105 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
 
             {/* BOTTOM ROW: 2x2 GRID ROUNDED PILLS */}
             <div className="grid grid-cols-2 gap-1.5">
-              <div className="bg-white border border-slate-200/90 rounded-full px-2.5 py-1 flex items-center gap-1.5 text-[10.5px] font-bold text-slate-700 shadow-2xs">
-                <Video className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
-                <span className="truncate">Live + recordings</span>
-              </div>
+              {(() => {
+                const defaultPills = ['Live + recordings', 'Certificate', '2 to 3 projects', 'Placement support'];
+                const pillsList = Array.isArray(course.featurePills) && course.featurePills.length > 0
+                  ? course.featurePills
+                  : defaultPills;
+                const icons = [Video, Award, Briefcase, Headphones, GraduationCap, BookOpen, Sparkles, Clock];
 
-              <div className="bg-white border border-slate-200/90 rounded-full px-2.5 py-1 flex items-center gap-1.5 text-[10.5px] font-bold text-slate-700 shadow-2xs">
-                <Award className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
-                <span className="truncate">Certificate</span>
-              </div>
-
-              <div className="bg-white border border-slate-200/90 rounded-full px-2.5 py-1 flex items-center gap-1.5 text-[10.5px] font-bold text-slate-700 shadow-2xs">
-                <Briefcase className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
-                <span className="truncate">2 to 3 projects</span>
-              </div>
-
-              <div className="bg-white border border-slate-200/90 rounded-full px-2.5 py-1 flex items-center gap-1.5 text-[10.5px] font-bold text-slate-700 shadow-2xs">
-                <Headphones className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
-                <span className="truncate">Placement support</span>
-              </div>
+                return pillsList.slice(0, 4).map((pill, idx) => {
+                  const IconComponent = icons[idx % icons.length] || Video;
+                  return (
+                    <div key={idx} className="bg-white border border-slate-200/90 rounded-full px-2.5 py-1 flex items-center gap-1.5 text-[10.5px] font-bold text-slate-700 shadow-2xs">
+                      <IconComponent className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
+                      <span className="truncate">{typeof pill === 'string' ? pill : pill.text}</span>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           </div>
 
-          {/* COMPACT SEGMENTED TABS BAR */}
-          <div className="flex items-center justify-between bg-slate-100/90 p-0.5 rounded-lg border border-slate-200/80 text-[10.5px] font-extrabold">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`flex-1 py-1 rounded-md text-center transition-all cursor-pointer ${
-                activeTab === 'overview'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => setActiveTab('syllabus')}
-              className={`flex-1 py-1 rounded-md text-center transition-all cursor-pointer ${
-                activeTab === 'syllabus'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Syllabus
-            </button>
-            <button
-              onClick={() => setActiveTab('projects')}
-              className={`flex-1 py-1 rounded-md text-center transition-all cursor-pointer ${
-                activeTab === 'projects'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Projects
-            </button>
+          {/* WHAT YOU WILL LEARN */}
+          <div className="bg-white rounded-xl border border-slate-200/80 p-2.5 shadow-2xs">
+            <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-1.5">
+              What You Will Learn
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+              {getWhatYouWillLearn().map((item, idx) => (
+                <div key={idx} className="flex items-center gap-1.5 text-[10.5px] font-semibold text-slate-700">
+                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8.5px] font-black flex-shrink-0 shadow-2xs">
+                    ✓
+                  </span>
+                  <span className="truncate">{item}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* COMPACT TAB CONTENT PANELS */}
-          {activeTab === 'overview' && (
-            <div className="space-y-2 animate-in fade-in duration-200">
-              {/* WHAT YOU WILL LEARN */}
-              <div className="bg-white rounded-xl border border-slate-200/80 p-2.5 shadow-2xs">
-                <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-1.5">
-                  What You Will Learn
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                  {getWhatYouWillLearn().map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-1.5 text-[10.5px] font-semibold text-slate-700">
-                      <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8.5px] font-black flex-shrink-0 shadow-2xs">
-                        ✓
-                      </span>
-                      <span className="truncate">{item}</span>
-                    </div>
-                  ))}
+          {/* BATCH DETAILS */}
+          <div className="bg-white rounded-xl border border-slate-200/80 p-2.5 sm:p-3 shadow-2xs">
+            <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-2">
+              Batch Details
+            </h3>
+            <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-xs">
+              {/* DURATION */}
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                  <Calendar className="w-3.5 h-3.5 text-white stroke-[2.2]" />
                 </div>
+                <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                  <strong className="font-extrabold text-slate-900">Duration:</strong>{' '}
+                  <span className="text-slate-600 font-normal">{courseDuration}</span>
+                </span>
               </div>
 
-              {/* BATCH DETAILS */}
-              <div className="bg-white rounded-xl border border-slate-200/80 p-2.5 sm:p-3 shadow-2xs">
-                <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-2">
-                  Batch Details
-                </h3>
-                <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-xs">
-                  {/* DURATION */}
-                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
-                    <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
-                      <Calendar className="w-3.5 h-3.5 text-white stroke-[2.2]" />
-                    </div>
-                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
-                      <strong className="font-extrabold text-slate-900">Duration:</strong>{' '}
-                      <span className="text-slate-600 font-normal">{courseDuration}</span>
-                    </span>
-                  </div>
-
-                  {/* CLASSES */}
-                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
-                    <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
-                      <Video className="w-3.5 h-3.5 text-white stroke-[2.2]" />
-                    </div>
-                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
-                      <strong className="font-extrabold text-slate-900">Classes:</strong>{' '}
-                      <span className="text-slate-600 font-normal">Live + Recorded</span>
-                    </span>
-                  </div>
-
-                  {/* BATCH */}
-                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
-                    <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
-                      <Clock className="w-3.5 h-3.5 text-white stroke-[2.2]" />
-                    </div>
-                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
-                      <strong className="font-extrabold text-slate-900">Batch:</strong>{' '}
-                      <span className="text-slate-600 font-normal">Morning/Evening</span>
-                    </span>
-                  </div>
-
-                  {/* MODE */}
-                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
-                    <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
-                      <MapPin className="w-3.5 h-3.5 text-white stroke-[2.2]" />
-                    </div>
-                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
-                      <strong className="font-extrabold text-slate-900">Mode:</strong>{' '}
-                      <span className="text-slate-600 font-normal">{courseMode}</span>
-                    </span>
-                  </div>
-
-                  {/* CERTIFICATE */}
-                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
-                    <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
-                      <ShieldCheck className="w-3.5 h-3.5 text-white stroke-[2.2]" />
-                    </div>
-                    <span className="text-[10.5px] sm:text-[11px] leading-snug">
-                      <strong className="font-extrabold text-slate-900">Certificate:</strong>{' '}
-                      <span className="text-slate-600 font-normal">Provided</span>
-                    </span>
-                  </div>
+              {/* CLASSES */}
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                  <Video className="w-3.5 h-3.5 text-white stroke-[2.2]" />
                 </div>
+                <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                  <strong className="font-extrabold text-slate-900">Classes:</strong>{' '}
+                  <span className="text-slate-600 font-normal">{course.batchClasses || 'Live + Recorded'}</span>
+                </span>
+              </div>
+
+              {/* BATCH */}
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                  <Clock className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+                </div>
+                <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                  <strong className="font-extrabold text-slate-900">Batch:</strong>{' '}
+                  <span className="text-slate-600 font-normal">{course.batchTimings || 'Morning/Evening'}</span>
+                </span>
+              </div>
+
+              {/* MODE */}
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                  <MapPin className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+                </div>
+                <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                  <strong className="font-extrabold text-slate-900">Mode:</strong>{' '}
+                  <span className="text-slate-600 font-normal">{course.batchMode || courseMode}</span>
+                </span>
+              </div>
+
+              {/* CERTIFICATE */}
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-[#f2f6fd] border border-blue-100/70">
+                <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
+                  <ShieldCheck className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+                </div>
+                <span className="text-[10.5px] sm:text-[11px] leading-snug">
+                  <strong className="font-extrabold text-slate-900">Certificate:</strong>{' '}
+                  <span className="text-slate-600 font-normal">{course.certificateProvided || 'Provided'}</span>
+                </span>
               </div>
             </div>
-          )}
-
-          {activeTab === 'syllabus' && (
-            <div className="space-y-2 animate-in fade-in duration-200">
-              <h3 className="font-extrabold text-slate-900 text-xs mb-1">
-                Detailed Course Syllabus
-              </h3>
-              {getSyllabusModules().map((mod, idx) => (
-                <div key={idx} className="bg-white rounded-lg border border-slate-200/80 p-2.5 shadow-2xs">
-                  <div className="font-extrabold text-slate-900 text-[11px] text-blue-600 mb-0.5">
-                    {mod.title}
-                  </div>
-                  <p className="text-[10.5px] text-slate-600 font-medium leading-snug">
-                    {mod.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {activeTab === 'projects' && (
-            <div className="space-y-2 animate-in fade-in duration-200">
-              <h3 className="font-extrabold text-slate-900 text-xs mb-1">
-                Real-World Capstone Projects
-              </h3>
-              {getProjectsList().map((proj, idx) => (
-                <div key={idx} className="bg-white rounded-lg border border-slate-200/80 p-2.5 shadow-2xs space-y-1">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-extrabold text-slate-900 text-[11px]">
-                      {proj.name}
-                    </h4>
-                    <span className="text-[9px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100">
-                      Live Project
-                    </span>
-                  </div>
-                  <p className="text-[10.5px] text-slate-600 font-medium">{proj.desc}</p>
-                </div>
-              ))}
-            </div>
-          )}
+          </div>
 
           {activeTab === 'reviews' && (
             <div className="space-y-2 animate-in fade-in duration-200">
@@ -585,14 +571,45 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
         </div>
 
         {/* COMPACT FIXED BOTTOM BAR */}
-        <div className="bg-white border-t border-slate-100 px-3 py-2 flex items-center justify-center shadow-md flex-shrink-0">
-          {/* ENROLL NOW BUTTON (FULL WIDTH ROYAL BLUE PILL) */}
+        <div className="bg-white border-t border-slate-100 px-3.5 sm:px-4 py-2.5 flex items-center justify-between gap-3 shadow-md flex-shrink-0">
+          {showPrice ? (
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-baseline gap-1.5 flex-wrap">
+                <span className="text-base sm:text-lg font-black text-slate-900 leading-tight">
+                  {coursePrice}
+                </span>
+                {hasDiscount && courseOriginalPrice && (
+                  <span className="line-through text-slate-400 text-xs font-semibold leading-tight">
+                    {courseOriginalPrice}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1 mt-0.5">
+                {hasDiscount && discountDisplay ? (
+                  <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/60 leading-none">
+                    {discountDisplay}
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-semibold text-slate-500 leading-none">
+                    Course Fee
+                  </span>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-extrabold text-slate-900 leading-tight">Admissions Open</span>
+              <span className="text-[10px] font-medium text-slate-500 leading-tight">Limited seats available</span>
+            </div>
+          )}
+
+          {/* ENROLL NOW BUTTON */}
           <button
             onClick={() => {
               onClose();
               if (onEnroll) onEnroll(course);
             }}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-full text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/25 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer whitespace-nowrap"
+            className="w-auto min-w-[130px] sm:min-w-[160px] bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-5 rounded-full text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/25 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap ml-auto"
           >
             Enroll Now <ChevronRight className="w-4 h-4 stroke-[3]" />
           </button>
@@ -613,7 +630,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
             <div className="aspect-video w-full">
               <iframe
                 className="w-full h-full"
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
+                src={getEmbedVideoUrl(course.videoUrl)}
                 title="Course Intro Video"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen

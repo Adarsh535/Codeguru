@@ -45,6 +45,8 @@ export function useLeadsController(isAuthenticated = true) {
 
       window.addEventListener('storage', handleSync);
       window.addEventListener('codeguru_lead_added', handleSync);
+      window.addEventListener('codeguru_refresh_leads', handleSync);
+      window.addEventListener('codeguru_refresh_enrollments', handleSync);
       window.addEventListener('codeguru_refresh_all', handleSync);
       window.addEventListener('focus', handleSync);
 
@@ -52,6 +54,8 @@ export function useLeadsController(isAuthenticated = true) {
         clearInterval(interval);
         window.removeEventListener('storage', handleSync);
         window.removeEventListener('codeguru_lead_added', handleSync);
+        window.removeEventListener('codeguru_refresh_leads', handleSync);
+        window.removeEventListener('codeguru_refresh_enrollments', handleSync);
         window.removeEventListener('codeguru_refresh_all', handleSync);
         window.removeEventListener('focus', handleSync);
       };

@@ -222,6 +222,12 @@ export default function Topbar({ onToggleSidebar, searchQuery, setSearchQuery, t
       {/* RIGHT: ACTION ICONS & USER PROFILE */}
       <div className="flex items-center gap-2 sm:gap-3">
 
+        {/* Live Realtime Sync Status Badge */}
+        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/90 text-emerald-700 text-[11px] font-black shadow-2xs select-none">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>Live Sync</span>
+        </div>
+
         {/* Refresh Leads & Admin Data Button */}
         <div className="relative">
           <button

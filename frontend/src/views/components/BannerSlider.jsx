@@ -46,24 +46,48 @@ export default function BannerSlider({ onOpenContactModal }) {
 
   useEffect(() => {
     let isMounted = true;
-    apiService.getBanners().then(dynamicBanners => {
-      if (isMounted && dynamicBanners && dynamicBanners.length > 0) {
-        const formatted = dynamicBanners.map(b => {
-          const media = b.mediaUrl || b.videoUrl || b.imageUrl || '';
-          const isVid = b.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(media) || media.includes('/video/');
-          return {
-            ...b,
-            id: b._id || b.id,
-            type: isVid ? 'video' : 'image',
-            mediaUrl: media,
-            videoUrl: b.videoUrl || media,
-            imageUrl: b.imageUrl || media
-          };
-        });
-        setSlides(formatted);
+
+    const fetchBanners = () => {
+      apiService.getBanners().then(dynamicBanners => {
+        if (isMounted && dynamicBanners && dynamicBanners.length > 0) {
+          const formatted = dynamicBanners.map(b => {
+            const media = b.mediaUrl || b.videoUrl || b.imageUrl || '';
+            const isVid = b.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(media) || media.includes('/video/');
+            return {
+              ...b,
+              id: b._id || b.id,
+              type: isVid ? 'video' : 'image',
+              mediaUrl: media,
+              videoUrl: b.videoUrl || media,
+              imageUrl: b.imageUrl || media
+            };
+          });
+          setSlides(formatted);
+        }
+      }).catch(() => {});
+    };
+
+    fetchBanners();
+
+    // 1. Live SSE update listeners
+    window.addEventListener('codeguru_refresh_banners', fetchBanners);
+    window.addEventListener('codeguru_refresh_all', fetchBanners);
+    window.addEventListener('focus', fetchBanners);
+
+    // 2. Continuous smart auto-refresh polling (every 4 seconds)
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        fetchBanners();
       }
-    });
-    return () => { isMounted = false; };
+    }, 4000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener('codeguru_refresh_banners', fetchBanners);
+      window.removeEventListener('codeguru_refresh_all', fetchBanners);
+      window.removeEventListener('focus', fetchBanners);
+    };
   }, []);
 
   const [currentIndex, setCurrentIndex] = useState(0);

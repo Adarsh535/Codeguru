@@ -50,7 +50,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
     timing: batchData.timing || '09:00 AM - 11:00 AM (Mon-Fri)',
     mentor: batchData.mentor || 'Vikrant Shinde',
     startDate: batchData.startDate || '15 Sept 2026',
-    fee: batchData.fee || '₹24,999'
+    fee: batchData.fee || batchData.price || '₹24,999'
   };
 
   // Extract fee number

@@ -8,6 +8,7 @@
 import { Lead } from '../../models/Lead.js';
 import { Settings } from '../../models/Settings.js';
 import { sendRealSMS } from '../../services/smsService.js';
+import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
 
 /**
  * @route   GET /api/leads
@@ -42,6 +43,9 @@ export const addLead = async (req, res) => {
       notes: req.body.notes || 'Inquired from CodeGuru Portal'
     });
 
+    // Realtime SSE Broadcast for instant live dashboard update across all open admins & tabs
+    broadcastRealtimeEvent('leads', lead);
+
     // Fetch dynamic Admin Notification Phone Number (Default: 9670912923)
     let settings = await Settings.findOne();
     const adminPhone = settings?.adminPhone || '9670912923';
@@ -73,7 +77,10 @@ export const addLead = async (req, res) => {
 export const updateLeadStatus = async (req, res) => {
   try {
     const lead = await Lead.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (lead) return res.json({ success: true, message: 'Lead status updated in MongoDB Atlas', data: lead });
+    if (lead) {
+      broadcastRealtimeEvent('leads', lead);
+      return res.json({ success: true, message: 'Lead status updated in MongoDB Atlas', data: lead });
+    }
     return res.status(404).json({ success: false, message: 'Lead not found' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -92,6 +99,7 @@ export const deleteLead = async (req, res) => {
     } else {
       await Lead.deleteMany({ leadId: req.params.id });
     }
+    broadcastRealtimeEvent('leads', { id: req.params.id, deleted: true });
     return res.json({ success: true, message: 'Lead record deleted successfully from MongoDB Atlas' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });

@@ -9,48 +9,12 @@ import {
   Clock,
   ArrowRight,
   Sparkles,
-  ShieldCheck,
   Award,
   Globe,
-  BookOpen,
-  Building2,
-  Landmark,
-  FileCheck,
-  Rocket,
-  Store,
-  CheckCircle2,
-  ExternalLink
+  BookOpen
 } from 'lucide-react';
 
-const DigitalDIcon = ({ className = "w-4 h-4" }) => (
-  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M5 3.5H12.5C16.6421 3.5 20 6.85786 20 11C20 15.1421 16.6421 18.5 12.5 18.5H5V3.5Z"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M9.5 7.5H12.5C14.433 7.5 16 9.067 16 11C16 12.933 14.433 14.5 12.5 14.5H9.5V7.5Z"
-      fill="currentColor"
-      opacity="0.9"
-    />
-  </svg>
-);
-
 export default function Footer({ selectedLocation, onOpenLocationModal, onOpenContactModal }) {
-  const cityName = selectedLocation?.name || 'Ayodhya, UP';
-  const encodedCity = encodeURIComponent(cityName);
-
-  const certifications = [
-    { title: 'MCA Registered Company', icon: Building2, color: 'from-amber-500/20 to-amber-600/10 border-amber-500/30 text-amber-400' },
-    { title: 'Government e-Marketplace (GeM)', icon: Landmark, color: 'from-cyan-500/20 to-blue-600/10 border-cyan-500/30 text-cyan-400' },
-    { title: 'ISO 9001:2015 Certified Org', icon: FileCheck, color: 'from-emerald-500/20 to-teal-600/10 border-emerald-500/30 text-emerald-400' },
-    { title: 'Recognized by Startup India', icon: Rocket, color: 'from-purple-500/20 to-indigo-600/10 border-purple-500/30 text-purple-400' },
-    { title: 'Registered under MSME (Udyam)', icon: Store, color: 'from-blue-500/20 to-indigo-600/10 border-blue-500/30 text-blue-400' },
-    { title: 'Digital India Initiative', icon: DigitalDIcon, color: 'from-orange-500/20 to-amber-600/10 border-orange-500/30 text-orange-400' }
-  ];
 
   const quickLinks = [
     { name: 'Home', href: '/' },
@@ -145,43 +109,11 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
-        {/* CERTIFICATIONS & RECOGNITION BADGES ROW */}
-        <div className="w-full mb-12 pb-10 border-b border-slate-800/80">
-          <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-3">
-            <h4 className="text-xs font-black uppercase tracking-widest text-amber-400 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-amber-400" />
-              <span>Government Accreditations & Recognitions</span>
-            </h4>
-            <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Verified Legal Entity
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
-            {certifications.map((cert, i) => {
-              const IconComponent = cert.icon;
-              return (
-                <div
-                  key={i}
-                  className="group flex items-center gap-3 p-3 rounded-2xl bg-slate-900/70 backdrop-blur-md border border-slate-800/90 hover:border-amber-500/40 hover:bg-slate-800/80 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/5 cursor-default"
-                >
-                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${cert.color} border flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
-                    <IconComponent className="w-4 h-4" />
-                  </div>
-                  <span className="text-[11px] font-bold leading-snug text-slate-200 group-hover:text-white transition-colors line-clamp-2">
-                    {cert.title}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* MAIN 4-COLUMN FOOTER GRID */}
+        {/* MAIN 3-COLUMN FOOTER GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-slate-800/80">
           
-          {/* COLUMN 1: BRAND & CONTACT INFO (4 cols) */}
-          <div className="lg:col-span-4 flex flex-col gap-5">
+          {/* COLUMN 1: BRAND & CONTACT INFO (5 cols) */}
+          <div className="lg:col-span-5 flex flex-col gap-5">
             <div className="flex items-center gap-3 cursor-pointer group" onClick={onOpenContactModal}>
               <div className="p-1 rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-transparent border border-amber-500/30 group-hover:border-amber-400 transition-colors">
                 <img
@@ -250,8 +182,8 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
             </div>
           </div>
 
-          {/* COLUMN 2: QUICK LINKS & POLICIES (3 cols) */}
-          <div className="lg:col-span-3 flex flex-col gap-6">
+          {/* COLUMN 2: QUICK LINKS & POLICIES (4 cols) */}
+          <div className="lg:col-span-4 flex flex-col gap-6">
             <div>
               <div className="mb-3">
                 <h4 className="text-white font-extrabold text-sm uppercase tracking-wider flex items-center gap-2">
@@ -295,8 +227,8 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
             </div>
           </div>
 
-          {/* COLUMN 3: POPULAR PROGRAMS (2 cols) */}
-          <div className="lg:col-span-2 flex flex-col gap-4">
+          {/* COLUMN 3: POPULAR PROGRAMS (3 cols) */}
+          <div className="lg:col-span-3 flex flex-col gap-4">
             <div>
               <h4 className="text-white font-extrabold text-sm uppercase tracking-wider">
                 Popular Programs
@@ -341,76 +273,6 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
                 </Link>
               </li>
             </ul>
-          </div>
-
-          {/* COLUMN 4: INTERACTIVE LOCATION MAP (3 cols) */}
-          <div className="lg:col-span-3 flex flex-col gap-4">
-            <div>
-              <div className="flex items-center justify-between">
-                <h4 className="text-white font-extrabold text-sm uppercase tracking-wider flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-orange-400" />
-                  <span>Current Location</span>
-                </h4>
-                <button
-                  suppressHydrationWarning
-                  onClick={onOpenLocationModal}
-                  className="text-[11px] font-extrabold text-amber-400 hover:text-amber-300 underline cursor-pointer"
-                  title="Change detected location"
-                >
-                  Change
-                </button>
-              </div>
-              <div className="h-0.5 w-10 bg-gradient-to-r from-orange-500 to-amber-400 rounded-full mt-1.5" />
-            </div>
-
-            {/* DETECTED LOCATION DISPLAY PILL */}
-            <div
-              onClick={onOpenLocationModal}
-              className="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-slate-900/90 to-slate-900/50 border border-slate-800 cursor-pointer hover:border-amber-500/50 transition-all shadow-md group"
-              title="Click to select location"
-            >
-              <div className="flex items-center gap-2.5 truncate">
-                <div className="w-7 h-7 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400 flex-shrink-0 group-hover:scale-110 transition-transform">
-                  <MapPin className="w-3.5 h-3.5" />
-                </div>
-                <span className="text-xs font-bold text-white truncate">
-                  {cityName}
-                </span>
-              </div>
-              <span className="text-[10px] font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center flex-shrink-0">
-                <span className="relative flex h-2 w-2 mr-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                GPS Live
-              </span>
-            </div>
-
-            {/* EMBEDDED INTERACTIVE GOOGLE MAP IFRAME FOR AYODHYA */}
-            <div className="w-full h-36 rounded-2xl overflow-hidden border border-slate-800/90 bg-slate-950 relative shadow-xl group">
-              <iframe
-                title="CodeGuru Current Location Map"
-                width="100%"
-                height="100%"
-                style={{ border: 0, filter: 'contrast(1.05) opacity(0.9)' }}
-                loading="lazy"
-                allowFullScreen
-                src={`https://maps.google.com/maps?q=${encodedCity}+Ayodhya&t=&z=13&ie=UTF8&iwloc=&output=embed`}
-              />
-              <div
-                onClick={onOpenLocationModal}
-                className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/0 transition-colors cursor-pointer flex items-end justify-end p-2"
-                title="Click to expand location map"
-              >
-                <span className="text-[10px] font-bold bg-slate-900/90 text-slate-200 px-2 py-1 rounded-md border border-slate-700 backdrop-blur-xs flex items-center gap-1">
-                  <ExternalLink className="w-3 h-3 text-amber-400" /> Expand
-                </span>
-              </div>
-            </div>
-            
-            <p className="text-[10.5px] text-slate-400 font-medium leading-tight">
-              Showing CodeGuru campus & partner center map for <span className="text-amber-400 font-bold">{cityName}</span>.
-            </p>
           </div>
 
         </div>

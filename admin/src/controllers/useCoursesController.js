@@ -37,7 +37,17 @@ export function useCoursesController() {
     internships: '5 Internships',
     mockTests: '5 Mock Tests',
     projects: '5 Projects',
-    highlightsText: ''
+    highlightsText: '',
+    subtitle: '',
+    videoUrl: '',
+    featurePillsText: 'Live + recordings, Certificate, 2 to 3 projects, Placement support',
+    whatYouWillLearnText: '',
+    syllabusModulesText: '',
+    projectsListText: '',
+    batchClasses: 'Live + Recorded',
+    batchTimings: 'Morning/Evening',
+    batchMode: 'Online / Offline',
+    certificateProvided: 'Provided'
   });
 
   // Category Modal States
@@ -64,8 +74,27 @@ export function useCoursesController() {
   useEffect(() => {
     loadData();
     const handleRefresh = () => loadData();
+
+    // 1. Instant SSE & Broadcast events
     window.addEventListener('codeguru_refresh_all', handleRefresh);
-    return () => window.removeEventListener('codeguru_refresh_all', handleRefresh);
+    window.addEventListener('codeguru_refresh_courses', handleRefresh);
+    window.addEventListener('codeguru_refresh_categories', handleRefresh);
+    window.addEventListener('focus', handleRefresh);
+
+    // 2. Background polling fallback (every 3 seconds)
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        loadData();
+      }
+    }, 3000);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('codeguru_refresh_all', handleRefresh);
+      window.removeEventListener('codeguru_refresh_courses', handleRefresh);
+      window.removeEventListener('codeguru_refresh_categories', handleRefresh);
+      window.removeEventListener('focus', handleRefresh);
+    };
   }, [loadData]);
 
   // Course Handlers
@@ -92,7 +121,17 @@ export function useCoursesController() {
       internships: '5 Internships',
       mockTests: '5 Mock Tests',
       projects: '5 Projects',
-      highlightsText: ''
+      highlightsText: '',
+      subtitle: '',
+      videoUrl: '',
+      featurePillsText: 'Live + recordings, Certificate, 2 to 3 projects, Placement support',
+      whatYouWillLearnText: '',
+      syllabusModulesText: '',
+      projectsListText: '',
+      batchClasses: 'Live + Recorded',
+      batchTimings: 'Morning/Evening',
+      batchMode: 'Online / Offline',
+      certificateProvided: 'Provided'
     });
     setShowAddModal(true);
   };
@@ -175,6 +214,22 @@ export function useCoursesController() {
       ? course.highlights.join('\n')
       : (typeof course.highlights === 'string' && course.highlights.trim() ? course.highlights : defaultHl.join('\n'));
 
+    const pillsStr = Array.isArray(course.featurePills) && course.featurePills.length > 0
+      ? course.featurePills.join(', ')
+      : 'Live + recordings, Certificate, 2 to 3 projects, Placement support';
+
+    const whatLearnStr = Array.isArray(course.whatYouWillLearn) && course.whatYouWillLearn.length > 0
+      ? course.whatYouWillLearn.join('\n')
+      : hlText;
+
+    const modulesStr = Array.isArray(course.syllabusModules) && course.syllabusModules.length > 0
+      ? course.syllabusModules.map(m => typeof m === 'string' ? m : `${m.title || ''} | ${m.desc || ''}`).join('\n')
+      : '';
+
+    const projectsStr = Array.isArray(course.projectsList) && course.projectsList.length > 0
+      ? course.projectsList.map(p => typeof p === 'string' ? p : `${p.name || ''} | ${p.tech || ''} | ${p.desc || ''}`).join('\n')
+      : '';
+
     setFormData({
       title: course.title || '',
       category: course.category || 'coding',
@@ -196,7 +251,17 @@ export function useCoursesController() {
       internships: course.internships || '5 Internships',
       mockTests: course.mockTests || '5 Mock Tests',
       projects: course.projects || '5 Projects',
-      highlightsText: hlText
+      highlightsText: hlText,
+      subtitle: course.subtitle || '',
+      videoUrl: course.videoUrl || course.introVideoUrl || '',
+      featurePillsText: pillsStr,
+      whatYouWillLearnText: whatLearnStr,
+      syllabusModulesText: modulesStr,
+      projectsListText: projectsStr,
+      batchClasses: course.batchClasses || 'Live + Recorded',
+      batchTimings: course.batchTimings || 'Morning/Evening',
+      batchMode: course.mode || course.batchMode || 'Online / Offline',
+      certificateProvided: course.certificateProvided || 'Provided'
     });
     setShowAddModal(true);
   };
@@ -274,6 +339,28 @@ export function useCoursesController() {
       ? formData.highlightsText.split('\n').map(h => h.trim()).filter(Boolean)
       : (Array.isArray(formData.highlights) ? formData.highlights : []);
 
+    const whatYouWillLearnArr = typeof formData.whatYouWillLearnText === 'string' && formData.whatYouWillLearnText.trim()
+      ? formData.whatYouWillLearnText.split('\n').map(s => s.trim()).filter(Boolean)
+      : highlightsArr;
+
+    const syllabusModulesArr = typeof formData.syllabusModulesText === 'string' && formData.syllabusModulesText.trim()
+      ? formData.syllabusModulesText.split('\n').map(s => s.trim()).filter(Boolean).map(line => {
+          const parts = line.split('|').map(p => p.trim());
+          return { title: parts[0] || line, desc: parts[1] || '' };
+        })
+      : [];
+
+    const projectsListArr = typeof formData.projectsListText === 'string' && formData.projectsListText.trim()
+      ? formData.projectsListText.split('\n').map(s => s.trim()).filter(Boolean).map(line => {
+          const parts = line.split('|').map(p => p.trim());
+          return { name: parts[0] || line, tech: parts[1] || '', desc: parts[2] || '' };
+        })
+      : [];
+
+    const featurePillsArr = typeof formData.featurePillsText === 'string' && formData.featurePillsText.trim()
+      ? formData.featurePillsText.split(',').map(s => s.trim()).filter(Boolean)
+      : ['Live + recordings', 'Certificate', '2 to 3 projects', 'Placement support'];
+
     const payload = {
       ...formData,
       subCategories: selectedSubCats,
@@ -281,7 +368,17 @@ export function useCoursesController() {
       technologies: typeof formData.technologies === 'string'
         ? formData.technologies.split(',').map(t => t.trim()).filter(Boolean)
         : formData.technologies,
-      highlights: highlightsArr
+      highlights: highlightsArr,
+      subtitle: formData.subtitle || '',
+      videoUrl: formData.videoUrl || '',
+      whatYouWillLearn: whatYouWillLearnArr,
+      syllabusModules: syllabusModulesArr,
+      projectsList: projectsListArr,
+      featurePills: featurePillsArr,
+      batchClasses: formData.batchClasses || 'Live + Recorded',
+      batchTimings: formData.batchTimings || 'Morning/Evening',
+      batchMode: formData.batchMode || 'Online / Offline',
+      certificateProvided: formData.certificateProvided || 'Provided'
     };
 
     let result = null;
@@ -306,11 +403,27 @@ export function useCoursesController() {
         badge: 'Job Guaranteed Batch',
         description: '',
         technologies: 'React, Node.js, MongoDB',
+        icon: '',
+        logoUrl: '',
         isActive: true,
+        showPrice: true,
+        discountPercent: 0,
+        originalPrice: '',
+        isDiscountActive: false,
         internships: '5 Internships',
         mockTests: '5 Mock Tests',
         projects: '5 Projects',
-        highlightsText: ''
+        highlightsText: '',
+        subtitle: '',
+        videoUrl: '',
+        featurePillsText: 'Live + recordings, Certificate, 2 to 3 projects, Placement support',
+        whatYouWillLearnText: '',
+        syllabusModulesText: '',
+        projectsListText: '',
+        batchClasses: 'Live + Recorded',
+        batchTimings: 'Morning/Evening',
+        batchMode: 'Online / Offline',
+        certificateProvided: 'Provided'
       });
       window.dispatchEvent(new Event('codeguru_refresh_all'));
     }

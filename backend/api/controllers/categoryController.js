@@ -6,6 +6,7 @@
  */
 
 import { Category } from '../../models/Category.js';
+import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
 
 const DEFAULT_CATEGORIES = [
   {
@@ -131,6 +132,7 @@ export const createCategory = async (req, res) => {
         existing.subCategories = subCategories;
       }
       await existing.save();
+      broadcastRealtimeEvent('categories', existing);
       return res.status(200).json({ success: true, data: existing, message: `Category '${label}' updated successfully` });
     }
 
@@ -146,6 +148,7 @@ export const createCategory = async (req, res) => {
     });
 
     await newCategory.save();
+    broadcastRealtimeEvent('categories', newCategory);
     return res.status(201).json({ success: true, data: newCategory, message: `Category '${label}' created successfully` });
   } catch (error) {
     console.error('[categoryController createCategory Error]:', error);
@@ -175,6 +178,7 @@ export const updateCategory = async (req, res) => {
     if (!updated) {
       return res.status(404).json({ success: false, message: 'Category not found' });
     }
+    broadcastRealtimeEvent('categories', updated);
     return res.json({ success: true, data: updated });
   } catch (error) {
     console.error('[categoryController updateCategory Error]:', error);
@@ -197,6 +201,7 @@ export const deleteCategory = async (req, res) => {
     if (!deleted) {
       deleted = await Category.findOneAndDelete({ category: id });
     }
+    broadcastRealtimeEvent('categories', { id, deleted: true });
     res.json({ success: true, message: 'Category deleted successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

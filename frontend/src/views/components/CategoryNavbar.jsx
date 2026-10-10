@@ -41,15 +41,33 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
   useEffect(() => {
     let isMounted = true;
-    Promise.all([
-      apiService.getCourses().catch(() => []),
-      apiService.getCategories().catch(() => [])
-    ]).then(([coursesData, catData]) => {
-      if (isMounted) {
-        if (coursesData && coursesData.length > 0) setCustomCourses(coursesData);
-        if (catData && catData.length > 0) setApiCategories(catData);
+
+    const fetchCoursesAndCategories = () => {
+      Promise.all([
+        apiService.getCourses().catch(() => []),
+        apiService.getCategories().catch(() => [])
+      ]).then(([coursesData, catData]) => {
+        if (isMounted) {
+          if (coursesData && coursesData.length > 0) setCustomCourses(coursesData);
+          if (catData && catData.length > 0) setApiCategories(catData);
+        }
+      });
+    };
+
+    fetchCoursesAndCategories();
+
+    // 1. Live SSE and cross-tab update events
+    window.addEventListener('codeguru_refresh_courses', fetchCoursesAndCategories);
+    window.addEventListener('codeguru_refresh_categories', fetchCoursesAndCategories);
+    window.addEventListener('codeguru_refresh_all', fetchCoursesAndCategories);
+    window.addEventListener('focus', fetchCoursesAndCategories);
+
+    // 2. Background polling fallback (every 4 seconds)
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        fetchCoursesAndCategories();
       }
-    });
+    }, 4000);
 
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -65,7 +83,14 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       }
     }
 
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener('codeguru_refresh_courses', fetchCoursesAndCategories);
+      window.removeEventListener('codeguru_refresh_categories', fetchCoursesAndCategories);
+      window.removeEventListener('codeguru_refresh_all', fetchCoursesAndCategories);
+      window.removeEventListener('focus', fetchCoursesAndCategories);
+    };
   }, []);
 
   const DEFAULT_SUB_CATEGORIES = {
@@ -868,31 +893,14 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                     key={course.id}
                     className="group relative flex flex-col bg-white border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] rounded-[20px] sm:rounded-[24px] p-3.5 min-[400px]:p-4 sm:p-6 transition-all duration-300 hover:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.12)] hover:border-blue-200 justify-between gap-3 sm:gap-4"
                   >
-                    {/* ATTACHED BESTSELLER / TOP BADGE + PRICE TAG */}
-                    <div className="flex items-center justify-between gap-2 absolute top-0 -translate-y-1/2 left-4 sm:left-6 right-4 sm:right-6 z-10 pointer-events-none">
-                      {course.tag ? (
+                    {/* ATTACHED BESTSELLER / TOP BADGE */}
+                    {course.tag && (
+                      <div className="absolute top-0 -translate-y-1/2 left-4 sm:left-6 z-10 pointer-events-none">
                         <div className="px-2.5 sm:px-3 py-0.5 bg-[#fde047] border border-[#facc15] text-[#713f12] font-black text-[9.5px] sm:text-[10.5px] rounded-lg shadow-2xs tracking-wider uppercase">
                           {course.tag}
                         </div>
-                      ) : <div />}
-                      {course.showPrice !== false && course.price && (
-                        <div className="px-2.5 sm:px-3 py-0.5 bg-emerald-500 border border-emerald-600 text-white font-black text-[10px] sm:text-[11.5px] rounded-lg shadow-sm flex items-center gap-1.5">
-                          {course.isDiscountActive !== false && (course.discountPercent > 0 || course.originalPrice) ? (
-                            <span className="flex items-center gap-1.5">
-                              {course.originalPrice && (
-                                <span className="line-through text-emerald-100/90 font-medium text-[10px]">{course.originalPrice}</span>
-                              )}
-                              <span>{course.price}</span>
-                              <span className="bg-rose-500 text-white font-black text-[9px] px-1.5 py-0.2 rounded-md shadow-2xs">
-                                {course.discountPercent ? `${course.discountPercent}% OFF` : 'OFFER'}
-                              </span>
-                            </span>
-                          ) : (
-                            <span>{course.price}</span>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
 
                     {/* TOP ROW: ICON + TITLE + 2x2 PILLS GRID */}
                     <div className="flex flex-row gap-2.5 min-[400px]:gap-3.5 sm:gap-5 items-start">

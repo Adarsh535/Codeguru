@@ -8,6 +8,7 @@
 
 import { Enrollment } from '../../models/Enrollment.js';
 import { Lead } from '../../models/Lead.js';
+import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
 
 /**
  * --------------------------------------------------------------------------
@@ -112,6 +113,9 @@ export const createEnrollment = async (req, res) => {
       console.warn('Sync lead notice:', leadErr.message);
     }
 
+    broadcastRealtimeEvent('enrollments', savedEnrollment);
+    broadcastRealtimeEvent('leads', savedEnrollment);
+
     res.status(201).json({
       success: true,
       message: 'Student enrolled and payment recorded successfully',
@@ -144,6 +148,8 @@ export const updateEnrollmentStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Enrollment not found' });
     }
 
+    broadcastRealtimeEvent('enrollments', updated);
+
     res.status(200).json({
       success: true,
       message: 'Enrollment updated successfully',
@@ -172,6 +178,7 @@ export const deleteEnrollment = async (req, res) => {
     if (!deleted) {
       return res.status(404).json({ success: false, message: 'Enrollment not found' });
     }
+    broadcastRealtimeEvent('enrollments', { id, deleted: true });
     res.status(200).json({ success: true, message: 'Enrollment deleted successfully' });
   } catch (error) {
     console.error('Error deleting enrollment:', error);

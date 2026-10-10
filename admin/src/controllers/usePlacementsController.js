@@ -32,8 +32,23 @@ export function usePlacementsController() {
   useEffect(() => {
     loadPlacements();
     const handleRefresh = () => loadPlacements();
+
     window.addEventListener('codeguru_refresh_all', handleRefresh);
-    return () => window.removeEventListener('codeguru_refresh_all', handleRefresh);
+    window.addEventListener('codeguru_refresh_placements', handleRefresh);
+    window.addEventListener('focus', handleRefresh);
+
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        loadPlacements();
+      }
+    }, 3000);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('codeguru_refresh_all', handleRefresh);
+      window.removeEventListener('codeguru_refresh_placements', handleRefresh);
+      window.removeEventListener('focus', handleRefresh);
+    };
   }, [loadPlacements]);
 
   const handleOpenAddModal = () => {

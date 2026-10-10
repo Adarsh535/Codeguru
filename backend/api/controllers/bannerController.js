@@ -6,6 +6,7 @@
  */
 
 import { Banner } from '../../models/Banner.js';
+import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
 
 /**
  * @route   GET /api/banners
@@ -43,6 +44,9 @@ export const addBanner = async (req, res) => {
       ctaText: req.body.ctaText || 'Learn More',
       active: true
     });
+
+    broadcastRealtimeEvent('banners', banner);
+
     return res.status(201).json({ success: true, message: 'Banner added to MongoDB Atlas', data: banner });
   } catch (err) {
     console.error('[bannerController Error]:', err.message);
@@ -58,7 +62,10 @@ export const addBanner = async (req, res) => {
 export const updateBanner = async (req, res) => {
   try {
     const banner = await Banner.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (banner) return res.json({ success: true, message: 'Banner updated in MongoDB Atlas', data: banner });
+    if (banner) {
+      broadcastRealtimeEvent('banners', banner);
+      return res.json({ success: true, message: 'Banner updated in MongoDB Atlas', data: banner });
+    }
     return res.status(404).json({ success: false, message: 'Banner not found' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -73,6 +80,7 @@ export const updateBanner = async (req, res) => {
 export const deleteBanner = async (req, res) => {
   try {
     await Banner.findByIdAndDelete(req.params.id);
+    broadcastRealtimeEvent('banners', { id: req.params.id, deleted: true });
     return res.json({ success: true, message: 'Banner deleted successfully' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
