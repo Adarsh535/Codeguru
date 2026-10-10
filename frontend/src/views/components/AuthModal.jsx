@@ -8,6 +8,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PhoneOutlinedIcon from '@mui/icons-material/PhoneOutlined';
 import { apiService } from '../../services/apiService';
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAuthSuccess }) {
@@ -20,6 +21,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     password: ''
   });
 
@@ -31,7 +33,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
     setLoading(false);
     setServerError('');
     setErrors({});
-    setFormData({ name: '', email: '', password: '' });
+    setFormData({ name: '', email: '', phone: '', password: '' });
   }, [initialMode, isOpen]);
 
   if (!isOpen) return null;
@@ -54,6 +56,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Enter a valid email address';
+    }
+    if (mode === 'register' && formData.phone && formData.phone.trim().length < 10) {
+      newErrors.phone = 'Enter a valid 10-digit mobile number';
     }
     if (!formData.password) {
       newErrors.password = 'Password is required';
@@ -91,6 +96,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
         const userPayload = {
           name: res.user?.name || formData.name,
           email: res.user?.email || formData.email,
+          phone: formData.phone || '',
           isLoggedIn: true,
           token: res.token,
           loginTime: new Date().toISOString()
@@ -100,14 +106,18 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
 
         // Submit lead notification
         try {
+          const cleanPhone = formData.phone ? formData.phone.trim() : '';
+          const cleanEmail = formData.email ? formData.email.trim() : '';
+
           const newLead = {
             id: `LEAD-${Date.now().toString().slice(-4)}`,
             name: formData.name.trim(),
-            phone: formData.email,
+            phone: cleanPhone,
+            email: cleanEmail,
             course: 'Full Stack Web Development (New Registered Student)',
             status: 'New',
             createdAt: new Date().toISOString(),
-            notes: `New Student Registered (${formData.email})`
+            notes: `New Student Registered (${cleanEmail})`
           };
           apiService.submitLead(newLead);
           const existingRaw = localStorage.getItem('codeguru_leads');
@@ -305,6 +315,34 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
                   <span className="text-[10px] font-bold text-rose-500 ml-3">{errors.email}</span>
                 )}
               </div>
+
+              {/* PHONE NUMBER FIELD (REGISTER MODE) */}
+              {mode === 'register' && (
+                <div className="flex flex-col gap-0.5">
+                  <label className="text-[11px] font-extrabold text-slate-700 font-heading ml-2 flex items-center gap-1">
+                    <span>Phone Number</span>
+                    <span className="text-slate-400 font-normal text-[10px]">(Optional)</span>
+                  </label>
+                  <div className="relative flex items-center">
+                    <PhoneOutlinedIcon className="absolute left-3.5 !w-4 !h-4 text-slate-400" />
+                    <input
+                      suppressHydrationWarning
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="e.g. 9670912923"
+                      maxLength={10}
+                      className={`w-full pl-10 pr-4 py-2 bg-slate-50 border ${
+                        errors.phone ? 'border-rose-500 focus:ring-rose-200' : 'border-slate-300 focus:border-cyan-500 focus:ring-cyan-100'
+                      } rounded-full text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all`}
+                    />
+                  </div>
+                  {errors.phone && (
+                    <span className="text-[10px] font-bold text-rose-500 ml-3">{errors.phone}</span>
+                  )}
+                </div>
+              )}
 
               {/* 3. PASSWORD FIELD */}
               <div className="flex flex-col gap-0.5">

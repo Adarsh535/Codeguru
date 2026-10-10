@@ -176,7 +176,24 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
               </div>
             </div>
 
-            {/* ROW 2: Interested Course */}
+            {/* ROW 2: Email Address */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-extrabold text-slate-800 flex items-center gap-1 ml-2">
+                <span>Your Email Address</span>
+                <span className="text-slate-400 font-normal text-[10.5px]">(Optional)</span>
+              </label>
+              <input
+                suppressHydrationWarning
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="e.g. student@gmail.com"
+                className="w-full px-4 py-2.5 rounded-full border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs font-semibold outline-none transition-all"
+              />
+            </div>
+
+            {/* ROW 3: Interested Course */}
             <div className="flex flex-col gap-1">
               <label className="text-xs font-extrabold text-slate-800 flex items-center gap-1 ml-2">
                 <span>Interested Course</span>

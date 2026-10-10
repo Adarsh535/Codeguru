@@ -5,7 +5,13 @@ import { Home, BookOpen, Phone, Layers, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-export default function BottomNav({ activeTab: externalActiveTab, setActiveTab: externalSetActiveTab, onOpenContactModal }) {
+export default function BottomNav({ 
+  activeTab: externalActiveTab, 
+  setActiveTab: externalSetActiveTab, 
+  onOpenContactModal,
+  onOpenOtpSheet,
+  user
+}) {
   const pathname = usePathname();
 
   const getTabFromPathname = (path) => {
@@ -28,7 +34,9 @@ export default function BottomNav({ activeTab: externalActiveTab, setActiveTab: 
 
   const handleCallClick = (e) => {
     e.preventDefault();
-    if (onOpenContactModal) {
+    if (onOpenOtpSheet) {
+      onOpenOtpSheet();
+    } else if (onOpenContactModal) {
       onOpenContactModal();
     }
   };
@@ -48,7 +56,7 @@ export default function BottomNav({ activeTab: externalActiveTab, setActiveTab: 
     },
     {
       id: 'center-call',
-      label: 'Call',
+      label: user ? 'Account' : 'Login',
       isCenter: true
     },
     {
@@ -78,7 +86,7 @@ export default function BottomNav({ activeTab: externalActiveTab, setActiveTab: 
                     suppressHydrationWarning
                     onClick={handleCallClick}
                     className="relative bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 w-[52px] h-[52px] rounded-full flex items-center justify-center shadow-lg shadow-orange-500/30 z-20 transition-transform active:scale-90 hover:scale-105 duration-300 cursor-pointer"
-                    title="Call / Contact Us"
+                    title={user ? 'My Account' : 'Instant Login via Mobile OTP'}
                   >
                     <Phone className="w-6 h-6 fill-slate-900 stroke-none rotate-[10deg]" />
                   </button>

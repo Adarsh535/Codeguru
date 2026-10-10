@@ -18,7 +18,37 @@ import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
 export const getLeads = async (req, res) => {
   try {
     const leads = await Lead.find().sort({ createdAt: -1 });
-    return res.json({ success: true, data: leads });
+
+    // Auto-migrate & sanitize: Any lead with email address in phone field should have it in email field
+    const cleanedLeads = await Promise.all(leads.map(async (lead) => {
+      let phone = (lead.phone || '').trim();
+      let email = (lead.email || '').trim();
+      let modified = false;
+
+      // If phone contains '@', it is actually an email
+      if (phone.includes('@')) {
+        if (!email) email = phone;
+        phone = '';
+        modified = true;
+      }
+
+      // If email doesn't contain '@' and looks like digits, it is actually a phone
+      if (email && !email.includes('@') && /^[\d\s\+\-\(\)]{7,15}$/.test(email)) {
+        if (!phone) phone = email;
+        email = '';
+        modified = true;
+      }
+
+      if (modified) {
+        lead.phone = phone;
+        lead.email = email;
+        await lead.save().catch(() => {});
+      }
+
+      return lead;
+    }));
+
+    return res.json({ success: true, data: cleanedLeads });
   } catch (err) {
     console.error('[leadController Error]:', err.message);
     return res.status(500).json({ success: false, message: err.message, data: [] });
@@ -33,10 +63,27 @@ export const getLeads = async (req, res) => {
 export const addLead = async (req, res) => {
   try {
     const newId = `LEAD-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    let phone = (req.body.phone || '').trim();
+    let email = (req.body.email || '').trim();
+
+    // If phone contains '@', it is actually an email address
+    if (phone.includes('@')) {
+      if (!email) email = phone;
+      phone = '';
+    }
+
+    // If email has no '@' and looks like digits, it is actually a phone number
+    if (email && !email.includes('@') && /^[\d\s\+\-\(\)]{7,15}$/.test(email)) {
+      if (!phone) phone = email;
+      email = '';
+    }
+
     const lead = await Lead.create({
       leadId: req.body.leadId || newId,
       name: req.body.name || 'Anonymous Student',
-      phone: req.body.phone || '',
+      phone: phone,
+      email: email,
       location: req.body.location || 'Ayodhya, UP',
       course: req.body.course || 'Full Stack Web Development',
       status: req.body.status || 'New',

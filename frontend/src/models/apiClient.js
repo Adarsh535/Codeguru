@@ -5,10 +5,17 @@
  * Centralized API client base URL and HTTP request helpers for Frontend app.
  */
 
-export const API_BASE = 
-  (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_BASE_URL) || 
-  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || 
-  'http://localhost:5000/api';
+export function getApiBase() {
+  if (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_BASE_URL) {
+    return process.env.NEXT_PUBLIC_API_BASE_URL;
+  }
+  if (typeof window !== 'undefined' && window.location && window.location.hostname) {
+    return `http://${window.location.hostname}:5000/api`;
+  }
+  return 'http://localhost:5000/api';
+}
+
+export const API_BASE = getApiBase();
 
 /**
  * Helper for executing HTTP requests to Express REST API Backend
@@ -16,7 +23,8 @@ export const API_BASE =
  * @param {object} options - Fetch configuration options
  */
 export async function apiFetch(endpoint, options = {}) {
-  const url = `${API_BASE}${endpoint}`;
+  const base = getApiBase();
+  const url = `${base}${endpoint}`;
   const defaultHeaders = {
     'Content-Type': 'application/json',
   };

@@ -82,7 +82,25 @@ export const apiService = {
    * API: Student Login in MongoDB
    * @route POST http://localhost:5000/api/auth/student/login
    */
-  loginStudent: (credentials) => userModel.loginStudent(credentials)
+  loginStudent: (credentials) => userModel.loginStudent(credentials),
+
+  /**
+   * API: Send Mobile OTP for Fast Student Login
+   * @route POST http://localhost:5000/api/auth/student/send-otp
+   */
+  sendOtp: (phone) => userModel.sendOtp(phone),
+
+  /**
+   * API: Verify Mobile OTP & Auto Login
+   * @route POST http://localhost:5000/api/auth/student/verify-otp
+   */
+  verifyOtp: (payload) => userModel.verifyOtp(payload),
+
+  /**
+   * API: Update Student Name & Email
+   * @route POST http://localhost:5000/api/auth/student/update-profile
+   */
+  updateStudentProfile: (payload) => userModel.updateProfile(payload)
 };
 
 

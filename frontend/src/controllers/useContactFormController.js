@@ -11,6 +11,7 @@ export function useContactFormController() {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    email: '',
     location: 'Ayodhya, UP',
     course: 'Full Stack Web Development'
   });
@@ -165,6 +166,7 @@ export function useContactFormController() {
       id: `LEAD-${Date.now().toString().slice(-4)}`,
       name: cleanName,
       phone: cleanPhone,
+      email: formData.email ? formData.email.trim() : '',
       location: cleanLocation,
       course: formData.course || 'Full Stack Web Development',
       status: 'New',

@@ -26,12 +26,31 @@ export const leadModel = {
       const res = await fetch(API_URL);
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
-        return data.data.map(item => ({
-          ...item,
-          id: item._id || item.leadId || item.id,
-          location: item.location || 'Ayodhya, UP',
-          createdAt: item.createdAt || new Date().toISOString()
-        }));
+        return data.data.map(item => {
+          let phone = (item.phone || '').trim();
+          let email = (item.email || '').trim();
+
+          // If phone is an email
+          if (phone.includes('@')) {
+            if (!email) email = phone;
+            phone = '';
+          }
+
+          // If email is actually a phone number
+          if (email && !email.includes('@') && /^[\d\s\+\-\(\)]{7,15}$/.test(email)) {
+            if (!phone) phone = email;
+            email = '';
+          }
+
+          return {
+            ...item,
+            id: item._id || item.leadId || item.id,
+            phone,
+            email,
+            location: item.location || 'Ayodhya, UP',
+            createdAt: item.createdAt || new Date().toISOString()
+          };
+        });
       }
     } catch (err) {
       console.warn('[leadModel API Warning] Backend API error:', err);

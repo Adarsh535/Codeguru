@@ -46,5 +46,65 @@ export const userModel = {
       console.warn('[userModel API Warning] Login network error:', err);
       return { success: false, message: 'Unable to connect to server. Please check connection.' };
     }
+  },
+
+  /**
+   * API: Send Mobile OTP for Fast Student Login
+   * @route   POST http://localhost:5000/api/auth/student/send-otp
+   * @param   {string} phone - 10-digit mobile number
+   * @returns {Promise<Object>} API JSON response
+   */
+  sendOtp: async (phone) => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/student/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      });
+      return await res.json();
+    } catch (err) {
+      console.warn('[userModel API Warning] sendOtp network error:', err);
+      return { success: false, message: 'Unable to reach server. Please try again.' };
+    }
+  },
+
+  /**
+   * API: Verify Mobile OTP & Auto Login
+   * @route   POST http://localhost:5000/api/auth/student/verify-otp
+   * @param   {Object} params - { phone, otp, name }
+   * @returns {Promise<Object>} API JSON response
+   */
+  verifyOtp: async ({ phone, otp, name }) => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/student/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, otp, name })
+      });
+      return await res.json();
+    } catch (err) {
+      console.warn('[userModel API Warning] verifyOtp network error:', err);
+      return { success: false, message: 'Unable to reach server. Please try again.' };
+    }
+  },
+
+  /**
+   * API: Update Student Profile (Name & Email after OTP Verification)
+   * @route   POST http://localhost:5000/api/auth/student/update-profile
+   * @param   {Object} params - { phone, name, email }
+   * @returns {Promise<Object>} API JSON response
+   */
+  updateProfile: async ({ phone, name, email }) => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/student/update-profile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, name, email })
+      });
+      return await res.json();
+    } catch (err) {
+      console.warn('[userModel API Warning] updateProfile network error:', err);
+      return { success: false, message: 'Unable to reach server. Please try again.' };
+    }
   }
 };

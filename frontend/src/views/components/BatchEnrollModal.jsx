@@ -123,6 +123,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
         id: `LEAD-${Date.now().toString().slice(-4)}`,
         name: enrollmentRecord.studentName,
         phone: enrollmentRecord.studentPhone,
+        email: enrollmentRecord.studentEmail || '',
         location: 'Pune Campus',
         course: `${enrollmentRecord.courseName} (${enrollmentRecord.batchCode})`,
         status: 'Enrolled',

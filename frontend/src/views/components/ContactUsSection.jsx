@@ -110,7 +110,24 @@ export default function ContactUsSection() {
 
             </div>
 
-            {/* ROW 2: INTERESTED COURSE */}
+            {/* ROW 2: EMAIL ADDRESS */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-extrabold text-slate-800 tracking-tight flex items-center gap-1">
+                <span>Email Address</span>
+                <span className="text-slate-400 font-normal text-[11px]">(Optional)</span>
+              </label>
+              <input
+                suppressHydrationWarning
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="e.g. student@gmail.com"
+                className="w-full px-4 py-2.5 rounded-full border border-slate-200/90 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs font-semibold text-slate-900 placeholder-slate-400 outline-none transition-all"
+              />
+            </div>
+
+            {/* ROW 3: INTERESTED COURSE */}
             <div className="flex flex-col gap-1">
               <label className="text-xs font-extrabold text-slate-800 tracking-tight flex items-center gap-1">
                 <span>Interested Course</span>

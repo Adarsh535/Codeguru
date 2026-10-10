@@ -7,8 +7,15 @@
  * updates live in real time whenever Admin or Backend changes data.
  */
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-const STREAM_URL = `${BACKEND_URL}/realtime/stream`;
+function getStreamUrl() {
+  if (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_URL) {
+    return `${process.env.NEXT_PUBLIC_API_URL}/realtime/stream`;
+  }
+  if (typeof window !== 'undefined' && window.location && window.location.hostname) {
+    return `http://${window.location.hostname}:5000/api/realtime/stream`;
+  }
+  return 'http://localhost:5000/api/realtime/stream';
+}
 
 class RealtimeSyncManager {
   constructor() {
@@ -87,7 +94,7 @@ class RealtimeSyncManager {
     }
 
     try {
-      this.eventSource = new EventSource(STREAM_URL);
+      this.eventSource = new EventSource(getStreamUrl());
 
       this.eventSource.onopen = () => {
         this.isConnected = true;

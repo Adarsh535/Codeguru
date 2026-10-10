@@ -10,15 +10,17 @@ import SearchIcon from '@mui/icons-material/Search';
 import SchoolIcon from '@mui/icons-material/School';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CloseIcon from '@mui/icons-material/Close';
+import EmailIcon from '@mui/icons-material/Email';
 
 export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDeleteLead, onAddLead }) {
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newLeadData, setNewLeadData] = useState({ name: '', phone: '', location: 'Ayodhya, UP', course: 'Full Stack Web Development', notes: '' });
+  const [newLeadData, setNewLeadData] = useState({ name: '', phone: '', email: '', location: 'Ayodhya, UP', course: 'Full Stack Web Development', notes: '' });
 
   const filteredLeads = leads.filter(lead => 
     !searchQuery ||
     lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     lead.phone.includes(searchQuery) ||
+    (lead.email && lead.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
     (lead.location && lead.location.toLowerCase().includes(searchQuery.toLowerCase())) ||
     lead.course.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -28,13 +30,24 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
     if (!newLeadData.name || !newLeadData.phone) return;
 
     onAddLead(newLeadData);
-    setNewLeadData({ name: '', phone: '', location: 'Ayodhya, UP', course: 'Full Stack Web Development', notes: '' });
+    setNewLeadData({ name: '', phone: '', email: '', location: 'Ayodhya, UP', course: 'Full Stack Web Development', notes: '' });
     setShowAddModal(false);
   };
 
+  const getCleanLeadContact = (l) => {
+    const rawPhone = (l.phone || '').trim();
+    const rawEmail = (l.email || '').trim();
+    const email = rawEmail.includes('@') ? rawEmail : (rawPhone.includes('@') ? rawPhone : '');
+    const phone = rawPhone.includes('@') ? '' : rawPhone;
+    return { phone, email };
+  };
+
   const exportCSV = () => {
-    const headers = ['ID,Name,Phone,Location,Course,Status,Date'];
-    const rows = leads.map(l => `"${l.id}","${l.name}","${l.phone}","${l.location || 'Ayodhya, UP'}","${l.course}","${l.status}","${l.createdAt}"`);
+    const headers = ['ID,Name,Phone,Email,Location,Course,Status,Date'];
+    const rows = leads.map(l => {
+      const { phone, email } = getCleanLeadContact(l);
+      return `"${l.id}","${l.name}","${phone}","${email}","${l.location || 'Ayodhya, UP'}","${l.course}","${l.status}","${l.createdAt}"`;
+    });
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers, ...rows].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
@@ -51,17 +64,21 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
       alert('Please allow popups to export PDF report!');
       return;
     }
-    const tableRows = filteredLeads.map((l, i) => `
+    const tableRows = filteredLeads.map((l, i) => {
+      const { phone, email } = getCleanLeadContact(l);
+      return `
       <tr>
         <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">${i + 1}</td>
         <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">${l.name}</td>
-        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; color: #2563eb; font-weight: 600;">+91 ${l.phone}</td>
+        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; color: #2563eb; font-weight: 600;">${phone ? (phone.startsWith('+') ? phone : '+91 ' + phone) : '—'}</td>
+        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; color: #475569;">${email || '—'}</td>
         <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0;">${l.location || 'Ayodhya, UP'}</td>
         <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0;">${l.course}</td>
         <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0;"><span style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 800;">${l.status}</span></td>
         <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-size: 11px; color: #64748b;">${new Date(l.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -190,6 +207,7 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
               <tr>
                 <th className="py-3.5 px-4 whitespace-nowrap">Lead ID & Student</th>
                 <th className="py-3.5 px-4 whitespace-nowrap">Phone Number</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Email Address</th>
                 <th className="py-3.5 px-4 whitespace-nowrap">Location</th>
                 <th className="py-3.5 px-4 whitespace-nowrap">Course Inquiry</th>
                 <th className="py-3.5 px-4 whitespace-nowrap">Status</th>
@@ -214,12 +232,35 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
                     </div>
                   </td>
 
-                  <td className="py-3.5 px-4 whitespace-nowrap">
-                    <a href={`tel:${lead.phone}`} className="text-blue-600 font-bold hover:underline inline-flex items-center gap-1 whitespace-nowrap">
-                      <PhoneIcon className="!w-3.5 !h-3.5 shrink-0" />
-                      <span className="whitespace-nowrap">+91 {lead.phone}</span>
-                    </a>
-                  </td>
+                  {(() => {
+                    const { phone, email } = getCleanLeadContact(lead);
+                    const cleanPhone = phone.replace(/^\+?91\s*/, '');
+                    return (
+                      <>
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          {phone ? (
+                            <a href={`tel:${cleanPhone}`} className="text-blue-600 font-bold hover:underline inline-flex items-center gap-1 whitespace-nowrap">
+                              <PhoneIcon className="!w-3.5 !h-3.5 shrink-0" />
+                              <span className="whitespace-nowrap">{phone.startsWith('+') ? phone : `+91 ${cleanPhone}`}</span>
+                            </a>
+                          ) : (
+                            <span className="text-slate-400 italic text-[11px] font-normal">—</span>
+                          )}
+                        </td>
+
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          {email ? (
+                            <a href={`mailto:${email}`} className="text-slate-700 font-semibold hover:text-blue-600 hover:underline inline-flex items-center gap-1.5 whitespace-nowrap" title={email}>
+                              <EmailIcon className="!w-3.5 !h-3.5 text-slate-400 shrink-0" />
+                              <span className="whitespace-nowrap truncate max-w-[170px]">{email}</span>
+                            </a>
+                          ) : (
+                            <span className="text-slate-400 italic text-[11px] font-normal">—</span>
+                          )}
+                        </td>
+                      </>
+                    );
+                  })()}
 
                   <td className="py-3.5 px-4 whitespace-nowrap">
                     <span className="inline-flex items-center gap-1 text-cyan-800 bg-cyan-50 border border-cyan-200/80 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap">
@@ -315,6 +356,17 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
                     value={newLeadData.phone}
                     onChange={(e) => setNewLeadData({ ...newLeadData, phone: e.target.value })}
                     placeholder="10 digit mobile"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-700">Email Address</label>
+                  <input
+                    type="email"
+                    value={newLeadData.email}
+                    onChange={(e) => setNewLeadData({ ...newLeadData, email: e.target.value })}
+                    placeholder="e.g. student@gmail.com"
                     className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500"
                   />
                 </div>

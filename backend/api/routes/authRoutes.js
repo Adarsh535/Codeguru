@@ -6,7 +6,15 @@
  */
 
 import express from 'express';
-import { loginAdmin, updateCredentials, registerStudent, loginStudent } from '../controllers/authController.js';
+import { 
+  loginAdmin, 
+  updateCredentials, 
+  registerStudent, 
+  loginStudent,
+  sendStudentOtp,
+  verifyStudentOtp,
+  updateStudentProfile
+} from '../controllers/authController.js';
 
 const router = express.Router();
 
@@ -37,5 +45,20 @@ router.post('/student/register', registerStudent);
  * @access Public
  */
 router.post('/student/login', loginStudent);
+
+/**
+ * @api    POST /api/auth/student/send-otp
+ * @desc   Sends 4-digit mobile verification OTP to student phone
+ * @access Public
+ */
+router.post('/student/send-otp', sendStudentOtp);
+
+/**
+ * @api    POST /api/auth/student/verify-otp
+ * @desc   Verifies OTP code and logs in/registers student
+ * @access Public
+ */
+router.post('/student/verify-otp', verifyStudentOtp);
+router.post('/student/update-profile', updateStudentProfile);
 
 export default router;

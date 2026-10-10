@@ -8,6 +8,12 @@
 import bcrypt from 'bcryptjs';
 import { Admin } from '../../models/Admin.js';
 import { Student } from '../../models/Student.js';
+import { Lead } from '../../models/Lead.js';
+import { sendRealSMS, sendOtpSMS, checkTwilioVerify } from '../../services/smsService.js';
+import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
+
+// In-memory OTP store: phone -> { otp, expiresAt }
+const otpStore = new Map();
 
 /**
  * @route   POST /api/auth/login
@@ -289,4 +295,271 @@ export const loginStudent = async (req, res) => {
     });
   }
 };
+
+/**
+ * @route   POST /api/auth/student/send-otp
+ * @desc    Generate and send verification OTP to student mobile number via Twilio SMS
+ * @access  Public
+ */
+export const sendStudentOtp = async (req, res) => {
+  try {
+    const rawPhone = req.body.phone || '';
+    const cleanPhone = rawPhone.toString().replace(/[^0-9]/g, '').slice(-10);
+
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid 10-digit mobile number'
+      });
+    }
+
+    // Generate fallback 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 mins expiration
+
+    otpStore.set(cleanPhone, { otp, expiresAt });
+
+    // Send real cellular SMS to student phone via Twilio Verify
+    const smsResult = await sendOtpSMS(cleanPhone, otp);
+
+    console.log(`\n======================================================`);
+    console.log(`🔑 [STUDENT OTP DISPATCHED] Phone: +91 ${cleanPhone}`);
+    console.log(`📡 SMS Provider Result:`, smsResult?.provider || 'TwilioVerify');
+    console.log(`======================================================\n`);
+
+    return res.json({
+      success: true,
+      message: `OTP has been sent to +91 ${cleanPhone} via SMS`,
+      phone: cleanPhone,
+      provider: smsResult?.provider || 'TwilioVerify'
+    });
+  } catch (error) {
+    console.error('[authController sendStudentOtp Error]:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to send OTP. Please try again.'
+    });
+  }
+};
+
+/**
+ * @route   POST /api/auth/student/verify-otp
+ * @desc    Verify OTP and automatically authenticate / create student
+ * @access  Public
+ */
+export const verifyStudentOtp = async (req, res) => {
+  try {
+    const { phone, otp, name } = req.body;
+    const cleanPhone = (phone || '').toString().replace(/[^0-9]/g, '').slice(-10);
+    const cleanOtp = (otp || '').toString().trim();
+
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid 10-digit mobile number'
+      });
+    }
+
+    if (!cleanOtp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter the verification OTP'
+      });
+    }
+
+    let isValid = false;
+
+    // 1. First check Twilio Verify service (real SMS delivered to user's mobile)
+    const twilioValid = await checkTwilioVerify(cleanPhone, cleanOtp);
+    if (twilioValid) {
+      isValid = true;
+      otpStore.delete(cleanPhone);
+    } else if (cleanOtp === '1234' || cleanOtp === '123456') {
+      // 2. Allow master test OTPs for instant validation
+      isValid = true;
+    } else {
+      // 3. Check in-memory fallback OTP
+      const storedData = otpStore.get(cleanPhone);
+      if (storedData) {
+        if (Date.now() > storedData.expiresAt) {
+          otpStore.delete(cleanPhone);
+          return res.status(400).json({
+            success: false,
+            message: 'OTP has expired. Please request a new OTP.'
+          });
+        }
+        if (storedData.otp === cleanOtp) {
+          isValid = true;
+          otpStore.delete(cleanPhone);
+        }
+      }
+    }
+
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid OTP code. Please enter the OTP received on your mobile.'
+      });
+    }
+
+    // Look up student by phone
+    let student = await Student.findOne({ phone: cleanPhone });
+
+    if (!student) {
+      const studentName = (name && name.trim()) || `Student ${cleanPhone.slice(-4)}`;
+      const autoEmail = `${cleanPhone}@student.codeguru.in`;
+      const tempPassword = await bcrypt.hash(`OTP@${cleanPhone}`, 10);
+
+      // Check if student with this email exists
+      student = await Student.findOne({ email: autoEmail });
+      if (!student) {
+        student = new Student({
+          name: studentName,
+          phone: cleanPhone,
+          email: autoEmail,
+          password: tempPassword,
+          role: 'Student'
+        });
+        await student.save();
+      } else {
+        student.phone = cleanPhone;
+        await student.save();
+      }
+
+      // Add to Lead CRM collection
+      try {
+        const newLead = new Lead({
+          leadId: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
+          name: studentName,
+          phone: cleanPhone,
+          email: autoEmail,
+          location: 'Ayodhya, UP',
+          course: 'Full Stack Web Development (OTP Verified)',
+          status: 'New',
+          notes: `Instant Mobile OTP Login Verified (+91 ${cleanPhone})`
+        });
+        await newLead.save();
+        broadcastRealtimeEvent('leads', newLead);
+      } catch (err) {
+        console.warn('[verifyStudentOtp Lead Sync Warning]:', err.message);
+      }
+    }
+
+    return res.json({
+      success: true,
+      token: `cg-student-jwt-${Date.now()}`,
+      student: {
+        id: student._id,
+        name: student.name,
+        email: student.email,
+        phone: student.phone,
+        role: student.role || 'Student'
+      },
+      message: 'Mobile OTP verified successfully! Logged in.'
+    });
+  } catch (error) {
+    console.error('[authController verifyStudentOtp Error]:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Error verifying OTP'
+    });
+  }
+};
+
+/**
+ * @route   POST /api/auth/student/update-profile
+ * @desc    Update student name and email right after mobile OTP verification
+ * @access  Public
+ */
+export const updateStudentProfile = async (req, res) => {
+  try {
+    const { phone, name, email } = req.body;
+    const cleanPhone = (phone || '').toString().replace(/[^0-9]/g, '').slice(-10);
+
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid 10-digit mobile number required'
+      });
+    }
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter your full name'
+      });
+    }
+
+    const cleanName = name.trim();
+    const cleanEmail = (email && email.trim().toLowerCase()) || `${cleanPhone}@student.codeguru.in`;
+
+    let student = await Student.findOne({ phone: cleanPhone });
+
+    if (!student) {
+      student = await Student.findOne({ email: cleanEmail });
+    }
+
+    if (student) {
+      student.name = cleanName;
+      student.email = cleanEmail;
+      student.phone = cleanPhone;
+      await student.save();
+    } else {
+      const tempPassword = await bcrypt.hash(`OTP@${cleanPhone}`, 10);
+      student = new Student({
+        name: cleanName,
+        phone: cleanPhone,
+        email: cleanEmail,
+        password: tempPassword,
+        role: 'Student'
+      });
+      await student.save();
+    }
+
+    // Also update Lead CRM
+    try {
+      let lead = await Lead.findOne({ phone: cleanPhone });
+      if (lead) {
+        lead.name = cleanName;
+        lead.email = cleanEmail;
+        await lead.save();
+      } else {
+        lead = new Lead({
+          leadId: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
+          name: cleanName,
+          phone: cleanPhone,
+          email: cleanEmail,
+          location: 'Ayodhya, UP',
+          course: 'Full Stack Web Development (OTP Verified)',
+          status: 'New',
+          notes: `Instant Mobile OTP Login Verified (+91 ${cleanPhone})`
+        });
+        await lead.save();
+      }
+      broadcastRealtimeEvent('leads', lead);
+    } catch (leadErr) {
+      console.warn('[updateStudentProfile Lead Sync Warning]:', leadErr.message);
+    }
+
+    return res.json({
+      success: true,
+      token: `cg-student-jwt-${Date.now()}`,
+      student: {
+        id: student._id,
+        name: student.name,
+        email: student.email,
+        phone: student.phone,
+        role: student.role || 'Student'
+      },
+      message: 'Student profile updated successfully!'
+    });
+  } catch (error) {
+    console.error('[authController updateStudentProfile Error]:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Error updating student profile'
+    });
+  }
+};
+
 
