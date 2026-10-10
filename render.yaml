@@ -1,12 +1,22 @@
 services:
   - type: web
     name: codeguru-backend
-    env: node
+    runtime: node
+    plan: free
     rootDir: backend
     buildCommand: npm install
     startCommand: node server.js
+    healthCheckPath: /api/health
     envVars:
-      - key: PORT
-        value: 5000
       - key: NODE_ENV
         value: production
+      - key: MONGODB_URI
+        value: mongodb+srv://Adarshverma:adarshverma%403213@cluster0.illbds4.mongodb.net/codeguru_db?retryWrites=true&w=majority
+      - key: JWT_SECRET
+        value: codeguru_super_secret_jwt_key_2026
+      - key: CLOUDINARY_CLOUD_NAME
+        value: dsjquwwrh
+      - key: CLOUDINARY_API_KEY
+        value: 685555386428513
+      - key: CLOUDINARY_API_SECRET
+        value: dN7oi-FxP3roCXKdsqQEWt0XKsk

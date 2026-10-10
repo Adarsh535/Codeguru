@@ -98,10 +98,8 @@ app.post('/api/health/switch-db', async (req, res) => {
 // Unified API Router Mount (backend/api/index.js)
 app.use('/api', apiRouter);
 
-app.listen(PORT, () => {
-
+app.listen(PORT, '0.0.0.0', () => {
   console.log(` CodeGuru REST API Backend running on port ${PORT}`);
   console.log(` Base API URL: http://localhost:${PORT}/api`);
   console.log(` Uploads URL:  http://localhost:${PORT}/uploads`);
- 
 });
