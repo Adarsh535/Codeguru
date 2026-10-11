@@ -74,12 +74,12 @@ export const userModel = {
    * @param   {Object} params - { phone, otp, name }
    * @returns {Promise<Object>} API JSON response
    */
-  verifyOtp: async ({ phone, otp, name }) => {
+  verifyOtp: async ({ phone, otp, name, location }) => {
     try {
       const res = await fetch(`${API_BASE}/auth/student/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, otp, name })
+        body: JSON.stringify({ phone, otp, name, location })
       });
       return await res.json();
     } catch (err) {
@@ -91,15 +91,15 @@ export const userModel = {
   /**
    * API: Update Student Profile (Name & Email after OTP Verification)
    * @route   POST http://localhost:5000/api/auth/student/update-profile
-   * @param   {Object} params - { phone, name, email }
+   * @param   {Object} params - { phone, name, email, location }
    * @returns {Promise<Object>} API JSON response
    */
-  updateProfile: async ({ phone, name, email }) => {
+  updateProfile: async ({ phone, name, email, location }) => {
     try {
       const res = await fetch(`${API_BASE}/auth/student/update-profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, name, email })
+        body: JSON.stringify({ phone, name, email, location })
       });
       return await res.json();
     } catch (err) {

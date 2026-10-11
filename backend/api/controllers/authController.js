@@ -434,15 +434,16 @@ export const verifyStudentOtp = async (req, res) => {
 
       // Add to Lead CRM collection
       try {
+        const studentLocation = (req.body.location && req.body.location.trim()) || 'Ayodhya, UP';
         const newLead = new Lead({
           leadId: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
           name: studentName,
           phone: cleanPhone,
           email: autoEmail,
-          location: 'Ayodhya, UP',
+          location: studentLocation,
           course: 'Full Stack Web Development (OTP Verified)',
           status: 'New',
-          notes: `Instant Mobile OTP Login Verified (+91 ${cleanPhone})`
+          notes: `Instant Mobile OTP Login Verified (+91 ${cleanPhone}, Location: ${studentLocation})`
         });
         await newLead.save();
         broadcastRealtimeEvent('leads', newLead);
@@ -524,10 +525,14 @@ export const updateStudentProfile = async (req, res) => {
 
     // Also update Lead CRM
     try {
+      const studentLocation = (req.body.location && req.body.location.trim()) || '';
       let lead = await Lead.findOne({ phone: cleanPhone });
       if (lead) {
         lead.name = cleanName;
         lead.email = cleanEmail;
+        if (studentLocation && studentLocation !== 'Ayodhya, UP') {
+          lead.location = studentLocation;
+        }
         await lead.save();
       } else {
         lead = new Lead({
@@ -535,10 +540,10 @@ export const updateStudentProfile = async (req, res) => {
           name: cleanName,
           phone: cleanPhone,
           email: cleanEmail,
-          location: 'Ayodhya, UP',
+          location: studentLocation || 'Ayodhya, UP',
           course: 'Full Stack Web Development (OTP Verified)',
           status: 'New',
-          notes: `Instant Mobile OTP Login Verified (+91 ${cleanPhone})`
+          notes: `Instant Mobile OTP Login Verified (+91 ${cleanPhone}${studentLocation ? ', Location: ' + studentLocation : ''})`
         });
         await lead.save();
       }

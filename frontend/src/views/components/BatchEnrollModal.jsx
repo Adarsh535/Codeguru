@@ -15,6 +15,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import LockIcon from '@mui/icons-material/Lock';
 import ShieldIcon from '@mui/icons-material/Shield';
 import { apiService } from '../../services/apiService';
+import { getQuickLocationSync, detectStudentRealLocation } from '../../utils/geoLocator';
 
 export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onEnrollSuccess }) {
   const [step, setStep] = useState(1); // 1: Plan & Details, 2: Payment Gateway, 3: Success
@@ -119,16 +120,17 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
       apiService.createEnrollment(enrollmentRecord);
 
       // 3. Admin CRM lead sync
+      const studentLiveLoc = getQuickLocationSync() || 'Online';
       const newAdminLead = {
         id: `LEAD-${Date.now().toString().slice(-4)}`,
         name: enrollmentRecord.studentName,
         phone: enrollmentRecord.studentPhone,
         email: enrollmentRecord.studentEmail || '',
-        location: 'Pune Campus',
+        location: studentLiveLoc,
         course: `${enrollmentRecord.courseName} (${enrollmentRecord.batchCode})`,
         status: 'Enrolled',
         createdAt: new Date().toISOString(),
-        notes: `Enrolled via Student Portal (${enrollmentRecord.paymentPlan}, Paid: ${enrollmentRecord.paidAmount}, Txn: ${txnId})`
+        notes: `Enrolled via Student Portal (Live Location: ${studentLiveLoc}, Plan: ${enrollmentRecord.paymentPlan}, Paid: ${enrollmentRecord.paidAmount}, Txn: ${txnId})`
       };
       apiService.submitLead(newAdminLead);
 

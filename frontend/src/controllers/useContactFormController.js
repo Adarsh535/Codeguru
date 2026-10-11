@@ -5,14 +5,14 @@
 import { useState, useEffect } from 'react';
 import { apiService } from '../services/apiService';
 import { API_BASE } from '../models/apiClient';
-import { sanitizeLocation, sanitizeCityName } from '../utils/locationSanitizer';
+import { detectStudentRealLocation, getQuickLocationSync } from '../utils/geoLocator';
 
 export function useContactFormController() {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
-    location: 'Ayodhya, UP',
+    location: getQuickLocationSync() || '',
     course: 'Full Stack Web Development'
   });
   const [adminPhone, setAdminPhone] = useState('9670912923');
@@ -61,79 +61,34 @@ export function useContactFormController() {
       .catch(err => console.warn('[useContactFormController] Using cached notification phone number:', err));
   }, []);
 
-  // Auto-detect student location silently in the background
+  // Detect the student's actual current location in the background
   useEffect(() => {
     let isMounted = true;
 
-    const detectLocation = async () => {
-      // 1. Check if user selected/saved a location previously
-      try {
-        const savedLoc = localStorage.getItem('codeguru_selected_location');
-        if (savedLoc) {
-          const parsed = JSON.parse(savedLoc);
-          if (parsed?.name && isMounted) {
-            const sanitized = sanitizeLocation(parsed);
-            setFormData(prev => ({ ...prev, location: sanitized.name }));
-            return;
-          }
-        }
-      } catch (e) {}
-
-      // 2. Try browser HTML5 Geolocation reverse geocoding
-      if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            try {
-              const { latitude, longitude } = position.coords;
-              const res = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-              );
-              const data = await res.json();
-              if (data && data.address && isMounted) {
-                const rawCity = data.address.city || data.address.town || data.address.state_district || data.address.county || data.address.state || 'Ayodhya';
-                const city = sanitizeCityName(rawCity, data.address.state);
-                const locStr = `${city}, UP`;
-                setFormData(prev => ({ ...prev, location: locStr }));
-                return;
-              }
-            } catch (err) {
-              console.warn('Geolocation reverse geocode failed:', err);
-            }
-          },
-          (err) => {
-            console.warn('Geolocation access declined/unavailable:', err.message);
-          },
-          { timeout: 5000, maximumAge: 300000 }
-        );
+    // Detect actual live location of student
+    detectStudentRealLocation().then((loc) => {
+      if (isMounted && loc?.name) {
+        setFormData(prev => ({
+          ...prev,
+          location: loc.name
+        }));
       }
+    });
 
-      // 3. Try IP Geolocation API fallback
-      try {
-        const ipRes = await fetch('https://ipapi.co/json/');
-        if (ipRes.ok) {
-          const ipData = await ipRes.json();
-          if (ipData && ipData.city && isMounted) {
-            const city = sanitizeCityName(ipData.city, ipData.region);
-            const state = ipData.region_code || ipData.region || 'UP';
-            const locStr = `${city}, ${state}`;
-            setFormData(prev => ({ ...prev, location: locStr }));
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn('IP Geolocation fallback failed:', err);
-      }
-
-      // 4. Default fallback: Ayodhya, UP
-      if (isMounted) {
-        setFormData(prev => ({ ...prev, location: prev.location || 'Ayodhya, UP' }));
+    const handleLocationUpdate = (e) => {
+      if (isMounted && e.detail?.name) {
+        setFormData(prev => ({
+          ...prev,
+          location: e.detail.name
+        }));
       }
     };
 
-    detectLocation();
+    window.addEventListener('codeguru_location_updated', handleLocationUpdate);
 
     return () => {
       isMounted = false;
+      window.removeEventListener('codeguru_location_updated', handleLocationUpdate);
     };
   }, []);
 
@@ -145,11 +100,10 @@ export function useContactFormController() {
     setIsCaptchaChecked(prev => !prev);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const cleanName = formData.name ? formData.name.trim() : '';
     const cleanPhone = formData.phone ? formData.phone.trim() : '';
-    const cleanLocation = formData.location ? formData.location.trim() : 'Ayodhya, UP';
 
     if (!cleanName) {
       showAlertModal('error', 'Ooops', 'Please enter your full name to proceed.', 'Done');
@@ -158,6 +112,20 @@ export function useContactFormController() {
     if (!cleanPhone || cleanPhone.length < 10) {
       showAlertModal('error', 'Ooops', 'Please enter a valid 10-digit mobile number.', 'Done');
       return;
+    }
+
+    // Capture the real, exact live physical location of the student filling the form
+    let cleanLocation = formData.location ? formData.location.trim() : '';
+    if (!cleanLocation || cleanLocation === 'Ayodhya, UP') {
+      try {
+        const liveLoc = await detectStudentRealLocation();
+        if (liveLoc?.name) {
+          cleanLocation = liveLoc.name;
+        }
+      } catch (err) {}
+    }
+    if (!cleanLocation) {
+      cleanLocation = getQuickLocationSync() || 'Ayodhya, UP';
     }
 
     setIsSubmitted(true);
@@ -171,7 +139,7 @@ export function useContactFormController() {
       course: formData.course || 'Full Stack Web Development',
       status: 'New',
       createdAt: new Date().toISOString(),
-      notes: `Submitted via Inquiry Form (Auto Location: ${cleanLocation})`
+      notes: `Submitted via Inquiry Form (Live Location: ${cleanLocation})`
     };
 
     // 1. Submit to Backend Express Server API

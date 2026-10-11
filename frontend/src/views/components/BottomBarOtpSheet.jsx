@@ -16,6 +16,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import BadgeIcon from '@mui/icons-material/Badge';
 import SmsIcon from '@mui/icons-material/Sms';
 import { apiService } from '../../services/apiService';
+import { getQuickLocationSync } from '../../utils/geoLocator';
 
 export default function BottomBarOtpSheet({
   isOpen,
@@ -188,7 +189,8 @@ export default function BottomBarOtpSheet({
       const res = await apiService.verifyOtp({
         phone: cleanPhone,
         otp: entered,
-        name: ''
+        name: '',
+        location: getQuickLocationSync() || ''
       });
 
       if (res.success && res.student) {
@@ -249,7 +251,8 @@ export default function BottomBarOtpSheet({
       const res = await apiService.updateStudentProfile({
         phone: cleanPhone,
         name: studentName.trim(),
-        email: studentEmail.trim().toLowerCase()
+        email: studentEmail.trim().toLowerCase(),
+        location: getQuickLocationSync() || ''
       });
 
       if (res.success && res.student) {
@@ -309,7 +312,7 @@ export default function BottomBarOtpSheet({
           isClosing ? 'translate-y-full sm:scale-95 opacity-0' : 'translate-y-0 sm:scale-100 opacity-100'
         }`}
         style={{
-          background: 'radial-gradient(circle at 50% 12%, rgba(255, 190, 26, 0.16) 0%, rgba(255, 255, 255, 0) 65%), #ffffff'
+          background: 'radial-gradient(circle at 50% 12%, rgba(249, 115, 22, 0.14) 0%, rgba(255, 255, 255, 0) 65%), #ffffff'
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -331,7 +334,7 @@ export default function BottomBarOtpSheet({
         {/* ---------------- ALREADY LOGGED IN VIEW ---------------- */}
         {user ? (
           <div className="flex flex-col gap-4 pt-2">
-            <div className="w-16 h-16 rounded-2xl bg-[#ffbe1a] text-slate-950 flex items-center justify-center shadow-lg shadow-amber-400/25 mx-auto font-black text-2xl uppercase">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#fb923c] to-[#ea580c] text-white flex items-center justify-center shadow-lg shadow-orange-500/25 mx-auto font-black text-2xl uppercase">
               {user.name ? user.name[0] : 'S'}
             </div>
             <div className="text-center">
@@ -347,7 +350,7 @@ export default function BottomBarOtpSheet({
                 href="/my-batch"
                 className="flex items-center justify-center gap-2 py-3 px-3 bg-slate-900 text-white rounded-2xl text-xs font-bold hover:bg-slate-800 transition-colors shadow-sm"
               >
-                <SchoolIcon className="!w-4 !h-4 text-amber-400" />
+                <SchoolIcon className="!w-4 !h-4 text-orange-400" />
                 <span>My Batches</span>
               </a>
 
@@ -357,9 +360,9 @@ export default function BottomBarOtpSheet({
                   handleClose();
                   if (onOpenContactModal) onOpenContactModal();
                 }}
-                className="flex items-center justify-center gap-2 py-3 px-3 bg-amber-50 text-amber-900 border border-amber-200 rounded-2xl text-xs font-bold hover:bg-amber-100 transition-colors"
+                className="flex items-center justify-center gap-2 py-3 px-3 bg-orange-50 text-orange-950 border border-orange-200 rounded-2xl text-xs font-bold hover:bg-orange-100 transition-colors"
               >
-                <CallIcon className="!w-4 !h-4 text-amber-600" />
+                <CallIcon className="!w-4 !h-4 text-orange-600" />
                 <span>Call Support</span>
               </button>
             </div>
@@ -375,16 +378,16 @@ export default function BottomBarOtpSheet({
           </div>
 
         ) : step === 'phone' ? (
-          /* ---------------- STEP 1: WELCOME BACK (IDENTICAL TO SCREENSHOT) ---------------- */
+          /* ---------------- STEP 1: WELCOME BACK (EXACT 1-TO-1 MATCH TO REFERENCE IMAGE) ---------------- */
           <form onSubmit={handleSendOtp} className="flex flex-col">
             
             {/* HERO PHONE ICON SQUIRCLE */}
-            <div className="w-16 h-16 rounded-[22px] bg-[#ffbe1a] text-slate-950 flex items-center justify-center shadow-lg shadow-amber-400/30 mx-auto mt-1 mb-4">
+            <div className="w-16 h-16 rounded-[22px] bg-gradient-to-br from-[#fb923c] via-[#f97316] to-[#ea580c] text-white flex items-center justify-center shadow-lg shadow-orange-500/35 mx-auto mt-1 mb-4">
               <svg 
-                className="w-7 h-7 text-slate-950" 
+                className="w-7 h-7 text-white" 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="currentColor" 
+                stroke="white" 
                 strokeWidth="2.4" 
                 strokeLinecap="round" 
                 strokeLinejoin="round"
@@ -416,7 +419,7 @@ export default function BottomBarOtpSheet({
               <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
                 MOBILE NUMBER
               </label>
-              <div className="bg-[#f8fafc] border border-slate-200/80 rounded-2xl px-4 py-3.5 flex items-center gap-3 focus-within:bg-white focus-within:border-amber-400 focus-within:ring-4 focus-within:ring-amber-400/20 transition-all">
+              <div className="bg-[#f8fafc] border border-slate-200/90 rounded-2xl px-4 py-3.5 flex items-center gap-3 focus-within:bg-white focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/15 transition-all">
                 <div className="flex items-center gap-1.5 text-xs font-black text-slate-700 select-none shrink-0">
                   <span>IN</span>
                   <span>+91</span>
@@ -443,21 +446,21 @@ export default function BottomBarOtpSheet({
             <button
               type="submit"
               disabled={loading || phone.length < 10}
-              className={`w-full py-4 px-4 rounded-2xl text-base font-black text-slate-950 flex items-center justify-center gap-2 shadow-md shadow-amber-400/20 transition-all cursor-pointer ${
+              className={`w-full py-4 px-4 rounded-2xl text-base font-black text-white flex items-center justify-center gap-2 shadow-md shadow-orange-500/25 transition-all cursor-pointer ${
                 loading || phone.length < 10
-                  ? 'bg-amber-200 text-slate-400 cursor-not-allowed shadow-none'
-                  : 'bg-[#ffbe1a] hover:bg-[#f5b40f] active:scale-[0.98]'
+                  ? 'bg-orange-300 text-white/80 cursor-not-allowed shadow-none'
+                  : 'bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] active:scale-[0.98]'
               }`}
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   <span>Sending OTP...</span>
                 </>
               ) : (
                 <>
                   <span>Get OTP</span>
-                  <ArrowForwardIcon className="!w-4 !h-4" />
+                  <ArrowForwardIcon className="!w-4 !h-4 text-white" />
                 </>
               )}
             </button>
@@ -473,12 +476,12 @@ export default function BottomBarOtpSheet({
           <div className="flex flex-col">
             
             {/* HERO OTP ICON */}
-            <div className="w-16 h-16 rounded-[22px] bg-[#ffbe1a] text-slate-950 flex items-center justify-center shadow-lg shadow-amber-400/30 mx-auto mt-1 mb-4">
+            <div className="w-16 h-16 rounded-[22px] bg-gradient-to-br from-[#fb923c] via-[#f97316] to-[#ea580c] text-white flex items-center justify-center shadow-lg shadow-orange-500/35 mx-auto mt-1 mb-4">
               <svg 
-                className="w-7 h-7 text-slate-950" 
+                className="w-7 h-7 text-white" 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="currentColor" 
+                stroke="white" 
                 strokeWidth="2.4" 
                 strokeLinecap="round" 
                 strokeLinejoin="round"
@@ -498,7 +501,7 @@ export default function BottomBarOtpSheet({
                 <button
                   type="button"
                   onClick={() => { setStep('phone'); setErrorMsg(''); }}
-                  className="text-amber-600 hover:text-amber-700 font-extrabold underline cursor-pointer ml-1"
+                  className="text-orange-600 hover:text-orange-700 font-extrabold underline cursor-pointer ml-1"
                 >
                   Edit
                 </button>
@@ -506,13 +509,13 @@ export default function BottomBarOtpSheet({
             </div>
 
             {smsNotification?.otp && (
-              <div className="mb-4 p-3 sm:p-3.5 bg-gradient-to-r from-amber-500/10 via-amber-400/15 to-amber-500/10 border border-amber-300 rounded-2xl flex items-center justify-between gap-3 animate-fadeIn shadow-xs">
+              <div className="mb-4 p-3 sm:p-3.5 bg-gradient-to-r from-orange-500/10 via-orange-400/15 to-orange-500/10 border border-orange-300 rounded-2xl flex items-center justify-between gap-3 animate-fadeIn shadow-xs">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse shrink-0" />
                   <div className="min-w-0">
                     <p className="text-xs font-black text-slate-900 tracking-tight flex items-center gap-1.5">
                       <span>Trial OTP:</span>
-                      <span className="font-mono text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded-md font-extrabold tracking-widest">{smsNotification.otp}</span>
+                      <span className="font-mono text-orange-700 bg-orange-100/80 px-1.5 py-0.5 rounded-md font-extrabold tracking-widest">{smsNotification.otp}</span>
                     </p>
                     <p className="text-[10px] font-semibold text-slate-500 truncate">
                       SMS Trial mode active • Tap to auto-fill
@@ -528,7 +531,7 @@ export default function BottomBarOtpSheet({
                     setOtpDigits(padded);
                     handleVerifyOtp(otpStr);
                   }}
-                  className="px-3 py-1.5 bg-[#ffbe1a] hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-xs transition-all cursor-pointer shrink-0 active:scale-95"
+                  className="px-3 py-1.5 bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white font-black text-xs rounded-xl shadow-xs transition-all cursor-pointer shrink-0 active:scale-95"
                 >
                   Auto Fill
                 </button>
@@ -556,8 +559,8 @@ export default function BottomBarOtpSheet({
                   onKeyDown={(e) => handleOtpKeyDown(idx, e)}
                   className={`w-11 h-12 sm:w-12 sm:h-14 aspect-square shrink-0 text-center text-xl sm:text-2xl font-black rounded-2xl border-2 transition-all outline-none shadow-sm flex items-center justify-center ${
                     digit
-                      ? 'border-[#ffbe1a] bg-amber-50/50 text-slate-900 ring-2 ring-amber-400/20'
-                      : 'border-slate-200 bg-[#f8fafc] text-slate-900 focus:border-[#ffbe1a] focus:bg-white focus:ring-4 focus:ring-amber-400/20'
+                      ? 'border-[#f97316] bg-orange-50/40 text-slate-900 ring-2 ring-orange-500/20'
+                      : 'border-slate-200 bg-[#f8fafc] text-slate-900 focus:border-[#f97316] focus:bg-white focus:ring-4 focus:ring-orange-500/20'
                   }`}
                 />
               ))}
@@ -568,21 +571,21 @@ export default function BottomBarOtpSheet({
               type="button"
               onClick={() => handleVerifyOtp()}
               disabled={loading || otpDigits.filter(Boolean).length < 4}
-              className={`w-full py-4 px-4 rounded-2xl text-base font-black text-slate-950 flex items-center justify-center gap-2 shadow-md shadow-amber-400/20 transition-all cursor-pointer ${
+              className={`w-full py-4 px-4 rounded-2xl text-base font-black text-white flex items-center justify-center gap-2 shadow-md shadow-orange-500/25 transition-all cursor-pointer ${
                 loading || otpDigits.filter(Boolean).length < 4
-                  ? 'bg-amber-200 text-slate-400 cursor-not-allowed shadow-none'
-                  : 'bg-[#ffbe1a] hover:bg-[#f5b40f] active:scale-[0.98]'
+                  ? 'bg-orange-300 text-white/80 cursor-not-allowed shadow-none'
+                  : 'bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] active:scale-[0.98]'
               }`}
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   <span>Verifying...</span>
                 </>
               ) : (
                 <>
                   <span>Verify Code</span>
-                  <ArrowForwardIcon className="!w-4 !h-4" />
+                  <ArrowForwardIcon className="!w-4 !h-4 text-white" />
                 </>
               )}
             </button>
@@ -597,7 +600,7 @@ export default function BottomBarOtpSheet({
                   type="button"
                   onClick={handleSendOtp}
                   disabled={loading}
-                  className="text-amber-600 hover:underline inline-flex items-center gap-1 font-extrabold cursor-pointer"
+                  className="text-orange-600 hover:underline inline-flex items-center gap-1 font-extrabold cursor-pointer"
                 >
                   <RefreshIcon className="!w-3.5 !h-3.5" />
                   <span>Resend OTP</span>
@@ -611,12 +614,12 @@ export default function BottomBarOtpSheet({
           <form onSubmit={handleSaveDetails} className="flex flex-col animate-fadeIn">
             
             {/* HERO PROFILE ICON */}
-            <div className="w-16 h-16 rounded-[22px] bg-[#ffbe1a] text-slate-950 flex items-center justify-center shadow-lg shadow-amber-400/30 mx-auto mt-1 mb-4">
+            <div className="w-16 h-16 rounded-[22px] bg-gradient-to-br from-[#fb923c] via-[#f97316] to-[#ea580c] text-white flex items-center justify-center shadow-lg shadow-orange-500/35 mx-auto mt-1 mb-4">
               <svg 
-                className="w-7 h-7 text-slate-950" 
+                className="w-7 h-7 text-white" 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="currentColor" 
+                stroke="white" 
                 strokeWidth="2.4" 
                 strokeLinecap="round" 
                 strokeLinejoin="round"
@@ -648,7 +651,7 @@ export default function BottomBarOtpSheet({
               <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
                 FULL NAME
               </label>
-              <div className="bg-[#f8fafc] border border-slate-200/90 rounded-2xl px-4 py-3.5 flex items-center gap-3 focus-within:bg-white focus-within:border-amber-400 focus-within:ring-4 focus-within:ring-amber-400/20 transition-all">
+              <div className="bg-[#f8fafc] border border-slate-200/90 rounded-2xl px-4 py-3.5 flex items-center gap-3 focus-within:bg-white focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/15 transition-all">
                 <PersonIcon className="!w-5 !h-5 text-slate-400" />
                 <input
                   ref={nameInputRef}
@@ -670,7 +673,7 @@ export default function BottomBarOtpSheet({
               <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
                 EMAIL ADDRESS
               </label>
-              <div className="bg-[#f8fafc] border border-slate-200/90 rounded-2xl px-4 py-3.5 flex items-center gap-3 focus-within:bg-white focus-within:border-amber-400 focus-within:ring-4 focus-within:ring-amber-400/20 transition-all">
+              <div className="bg-[#f8fafc] border border-slate-200/90 rounded-2xl px-4 py-3.5 flex items-center gap-3 focus-within:bg-white focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/15 transition-all">
                 <EmailIcon className="!w-5 !h-5 text-slate-400" />
                 <input
                   ref={emailInputRef}
@@ -691,21 +694,21 @@ export default function BottomBarOtpSheet({
             <button
               type="submit"
               disabled={loading || !studentName.trim() || !studentEmail.trim()}
-              className={`w-full py-4 px-4 rounded-2xl text-base font-black text-slate-950 flex items-center justify-center gap-2 shadow-md shadow-amber-400/20 transition-all cursor-pointer ${
+              className={`w-full py-4 px-4 rounded-2xl text-base font-black text-white flex items-center justify-center gap-2 shadow-md shadow-orange-500/25 transition-all cursor-pointer ${
                 loading || !studentName.trim() || !studentEmail.trim()
-                  ? 'bg-amber-200 text-slate-400 cursor-not-allowed shadow-none'
-                  : 'bg-[#ffbe1a] hover:bg-[#f5b40f] active:scale-[0.98]'
+                  ? 'bg-orange-300 text-white/80 cursor-not-allowed shadow-none'
+                  : 'bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] active:scale-[0.98]'
               }`}
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   <span>Saving Profile...</span>
                 </>
               ) : (
                 <>
                   <span>Complete Login</span>
-                  <ArrowForwardIcon className="!w-4 !h-4" />
+                  <ArrowForwardIcon className="!w-4 !h-4 text-white" />
                 </>
               )}
             </button>

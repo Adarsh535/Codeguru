@@ -6,7 +6,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
-import { sanitizeLocation, sanitizeCityName, DEFAULT_AYODHYA_LOCATION } from '../../utils/locationSanitizer';
+import { sanitizeLocation, DEFAULT_AYODHYA_LOCATION } from '../../utils/locationSanitizer';
+import { detectStudentRealLocation } from '../../utils/geoLocator';
 
 export default function LocationModal({ isOpen, onClose, selectedLocation, onSelectLocation }) {
   const [isLocating, setIsLocating] = useState(false);
@@ -23,85 +24,27 @@ export default function LocationModal({ isOpen, onClose, selectedLocation, onSel
   const handleGPSDetect = async () => {
     setIsLocating(true);
 
-    const applyLocation = (locObj) => {
-      const sanitized = sanitizeLocation(locObj);
-      try {
-        localStorage.setItem('codeguru_selected_location', JSON.stringify(sanitized));
-      } catch (e) {}
-      onSelectLocation(sanitized);
-      setIsLocating(false);
-      handleClose();
-    };
+    try {
+      const loc = await detectStudentRealLocation(true);
+      if (loc) {
+        const sanitized = sanitizeLocation(loc);
+        try {
+          localStorage.setItem('codeguru_selected_location', JSON.stringify(sanitized));
+        } catch (e) {}
+        onSelectLocation(sanitized);
+        setIsLocating(false);
+        handleClose();
+        return;
+      }
+    } catch (err) {}
 
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          try {
-            const { latitude, longitude } = pos.coords;
-            const apiRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
-            const data = await apiRes.json();
-
-            let rawCity = data.city || data.locality || data.principalSubdivision || 'Ayodhya';
-            let state = data.principalSubdivision || 'Uttar Pradesh';
-            let city = sanitizeCityName(rawCity, state);
-
-            const getStateCode = (st) => {
-              if (!st) return 'UP';
-              const s = st.toLowerCase();
-              if (s.includes('maharashtra')) return 'MH';
-              if (s.includes('uttar pradesh')) return 'UP';
-              if (s.includes('delhi')) return 'DL';
-              if (s.includes('karnataka')) return 'KA';
-              if (s.includes('telangana')) return 'TS';
-              if (s.includes('tamil nadu')) return 'TN';
-              if (s.includes('gujarat')) return 'GJ';
-              if (s.includes('rajasthan')) return 'RJ';
-              return 'UP';
-            };
-
-            const cityStr = `${city}, ${getStateCode(state)}`;
-            applyLocation({
-              id: 'auto-gps',
-              name: cityStr,
-              city,
-              state,
-              icon: '📍',
-              autoDetected: true
-            });
-            return;
-          } catch (err) {}
-
-          tryIPLookup();
-        },
-        () => {
-          tryIPLookup();
-        },
-        { timeout: 8000, enableHighAccuracy: true }
-      );
-    } else {
-      tryIPLookup();
-    }
-
-    async function tryIPLookup() {
-      try {
-        const res = await fetch('https://ipapi.co/json/');
-        const data = await res.json();
-        if (data && data.city) {
-          const city = sanitizeCityName(data.city, data.region);
-          const cityStr = `${city}, ${data.region_code || 'UP'}`;
-          applyLocation({
-            id: 'auto-ip',
-            name: cityStr,
-            city,
-            state: data.region || 'Uttar Pradesh',
-            icon: '📍',
-            autoDetected: true
-          });
-          return;
-        }
-      } catch (e) {}
-      applyLocation(DEFAULT_AYODHYA_LOCATION);
-    }
+    const fallback = sanitizeLocation(DEFAULT_AYODHYA_LOCATION);
+    try {
+      localStorage.setItem('codeguru_selected_location', JSON.stringify(fallback));
+    } catch (e) {}
+    onSelectLocation(fallback);
+    setIsLocating(false);
+    handleClose();
   };
 
   useEffect(() => {

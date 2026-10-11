@@ -10,6 +10,7 @@ import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PhoneOutlinedIcon from '@mui/icons-material/PhoneOutlined';
 import { apiService } from '../../services/apiService';
+import { getQuickLocationSync } from '../../utils/geoLocator';
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAuthSuccess }) {
   const [mode, setMode] = useState(initialMode); // 'login' or 'register'
@@ -109,15 +110,17 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onAu
           const cleanPhone = formData.phone ? formData.phone.trim() : '';
           const cleanEmail = formData.email ? formData.email.trim() : '';
 
+          const studentLoc = getQuickLocationSync() || 'Ayodhya, UP';
           const newLead = {
             id: `LEAD-${Date.now().toString().slice(-4)}`,
             name: formData.name.trim(),
             phone: cleanPhone,
             email: cleanEmail,
+            location: studentLoc,
             course: 'Full Stack Web Development (New Registered Student)',
             status: 'New',
             createdAt: new Date().toISOString(),
-            notes: `New Student Registered (${cleanEmail})`
+            notes: `New Student Registered (${cleanEmail}, Live Location: ${studentLoc})`
           };
           apiService.submitLead(newLead);
           const existingRaw = localStorage.getItem('codeguru_leads');
