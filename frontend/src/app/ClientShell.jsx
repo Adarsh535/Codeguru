@@ -59,7 +59,7 @@ export default function ClientShell({ children }) {
   const isOtpSheetOpenRef = useRef(isOtpSheetOpen);
   isOtpSheetOpenRef.current = isOtpSheetOpen;
 
-  // Auto-open BottomBarOtpSheet every 10 seconds until student logs in:
+  // Auto-open BottomBarOtpSheet with 15 seconds delay until student logs in:
   useEffect(() => {
     const interval = setInterval(() => {
       try {
@@ -74,7 +74,7 @@ export default function ClientShell({ children }) {
       if (!isOtpSheetOpenRef.current && !userRef.current) {
         setIsOtpSheetOpen(true);
       }
-    }, 10000); // 10 seconds recurring interval
+    }, 15000); // 15 seconds delay
 
     return () => clearInterval(interval);
   }, []);

@@ -1,14 +1,13 @@
 /**
  * ============================================================================
- * SERVICE: REAL SMS GATEWAY INTEGRATION (smsService.js)
+ * SERVICE: REAL SMS & OTP GATEWAY INTEGRATION (smsService.js)
  * ============================================================================
- * Handles sending real Cellular SMS notifications directly to Admin mobile phone (9670912923)
+ * Handles sending real Cellular SMS notifications & OTPs to any mobile phone in India (+91).
  * Supports:
- * 1. Fast2SMS API (Popular Indian SMS Gateway - www.fast2sms.com)
- * 2. Twilio SMS API
- * 3. Fallback HTTP Webhooks
+ * 1. Fast2SMS API (Fastest Indian SMS Gateway - works for all numbers without whitelist)
+ * 2. 2Factor.in SMS API (Indian OTP Gateway)
+ * 3. Twilio Verify & Twilio Programmable SMS API
  */
-// Native fetch is available globally in Node.js v18+
 
 /**
  * Sends a real cellular SMS alert to the target phone number
@@ -18,6 +17,7 @@
 export async function sendRealSMS(toPhone, messageText) {
   const cleanPhone = toPhone ? toPhone.replace(/[^0-9]/g, '').slice(-10) : '9670912923';
   const fast2smsKey = process.env.FAST2SMS_API_KEY;
+  const twofactorKey = process.env.TWOFACTOR_API_KEY;
   const twilioSid = process.env.TWILIO_ACCOUNT_SID;
   const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
   const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
@@ -27,10 +27,10 @@ export async function sendRealSMS(toPhone, messageText) {
   console.log(`📱 Destination Number: +91 ${cleanPhone}`);
   console.log(`💬 Message Content:    ${messageText}`);
 
-  // 1. Fast2SMS Gateway Integration (India)
+  // 1. Fast2SMS Gateway Integration (India - Delivers to all numbers)
   if (fast2smsKey) {
     try {
-      console.log(`🚀 Dispatching SMS via Fast2SMS API Gateway...`);
+      console.log(`🚀 Dispatching SMS via Fast2SMS Quick Gateway...`);
       const response = await fetch('https://www.fast2sms.com/dev/bulkV2', {
         method: 'POST',
         headers: {
@@ -47,13 +47,40 @@ export async function sendRealSMS(toPhone, messageText) {
       });
       const resData = await response.json();
       console.log(`✅ Fast2SMS API Response:`, resData);
-      return { success: true, provider: 'Fast2SMS', response: resData };
+      if (resData.return === true) {
+        return { success: true, provider: 'Fast2SMS', response: resData };
+      }
+      console.warn(`⚠️ Fast2SMS dispatch warning:`, resData.message);
     } catch (err) {
       console.error(`❌ Fast2SMS Dispatch Failed:`, err.message);
     }
   }
 
-  // 2. Twilio Gateway Integration
+  // 2. 2Factor.in Gateway Integration (India)
+  if (twofactorKey) {
+    try {
+      console.log(`🚀 Dispatching SMS via 2Factor Gateway...`);
+      const url = `https://2factor.in/API/V1/${twofactorKey}/ADDON_SERVICES/SEND/PSMS`;
+      const params = new URLSearchParams();
+      params.append('From', 'CDGURU');
+      params.append('To', cleanPhone);
+      params.append('Msg', messageText);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
+      });
+      const resData = await response.json();
+      if (resData.Status === 'Success') {
+        return { success: true, provider: '2Factor', response: resData };
+      }
+    } catch (err) {
+      console.error(`❌ 2Factor Dispatch Failed:`, err.message);
+    }
+  }
+
+  // 3. Twilio Gateway Integration
   if (twilioSid && twilioAuthToken && twilioPhone) {
     try {
       console.log(`🚀 Dispatching SMS via Twilio API Gateway...`);
@@ -73,42 +100,112 @@ export async function sendRealSMS(toPhone, messageText) {
       });
       const resData = await response.json();
       console.log(`✅ Twilio API Response:`, resData);
-      return { success: true, provider: 'Twilio', response: resData };
+      
+      if (response.ok && resData.sid && !resData.code) {
+        return { success: true, provider: 'Twilio', response: resData };
+      }
+      console.warn(`❌ Twilio SMS Error [${resData.code}]:`, resData.message);
+      return { success: false, provider: 'Twilio', error: resData.message, code: resData.code };
     } catch (err) {
       console.error(`❌ Twilio Dispatch Failed:`, err.message);
+      return { success: false, provider: 'Twilio', error: err.message };
     }
   }
 
-  // 3. Fallback / Setup guide log
-  console.log(`⚠️ NOTE: Fast2SMS or Twilio API Key not found in backend/.env.`);
-  console.log(`💡 To receive REAL SMS on +91 ${cleanPhone}, add FAST2SMS_API_KEY in backend/.env!`);
-  console.log(`======================================================\n`);
-
   return { 
     success: false, 
-    message: 'SMS Gateway credentials missing in .env. Please set FAST2SMS_API_KEY to send real SIM card SMS.' 
+    provider: 'None',
+    message: 'SMS Gateway credentials missing or restricted in .env. To send real SMS to all mobile numbers in India, add FAST2SMS_API_KEY in backend/.env' 
   };
 }
 
 /**
- * Sends Real SMS OTP using Twilio Verify (or fallback to Fast2SMS)
+ * Sends Real SMS OTP using Indian Gateways (Fast2SMS, 2Factor) or Twilio Verify
  * @param {string} toPhone - 10-digit mobile number
- * @param {string} customOtp - Optional fallback OTP
+ * @param {string} customOtp - 6-digit verification code
  */
 export async function sendOtpSMS(toPhone, customOtp = null) {
   const cleanPhone = toPhone ? toPhone.replace(/[^0-9]/g, '').slice(-10) : '';
+  const otpCode = customOtp || Math.floor(100000 + Math.random() * 900000).toString();
+  const fast2smsKey = process.env.FAST2SMS_API_KEY;
+  const twofactorKey = process.env.TWOFACTOR_API_KEY;
   const twilioSid = process.env.TWILIO_ACCOUNT_SID;
   const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
   const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
-  const fast2smsKey = process.env.FAST2SMS_API_KEY;
 
   console.log(`\n======================================================`);
   console.log(`📱 DISPATCHING REAL CELLULAR SMS OTP TO: +91 ${cleanPhone}`);
+  console.log(`🔑 OTP Code: ${otpCode}`);
 
-  // 1. Prioritize Twilio Verify API (Delivers real OTP directly to mobile SIM)
+  // 1. Fast2SMS Integration (India - Delivers real SMS to ANY mobile number)
+  if (fast2smsKey) {
+    try {
+      console.log(`🚀 Sending via Fast2SMS Indian SMS Gateway...`);
+      // Try Fast2SMS Quick Route first
+      const response = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+        method: 'POST',
+        headers: {
+          'authorization': fast2smsKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          route: 'q',
+          message: `Your CodeGuru login OTP is ${otpCode}. Valid for 10 minutes. Do not share with anyone.`,
+          language: 'english',
+          flash: '0',
+          numbers: cleanPhone
+        })
+      });
+      const resData = await response.json();
+      console.log(`✅ Fast2SMS Response:`, resData);
+      if (resData.return === true) {
+        console.log(`🎉 Fast2SMS cellular OTP delivered to +91 ${cleanPhone}`);
+        return { success: true, provider: 'Fast2SMS', otp: otpCode, response: resData };
+      }
+
+      // If quick route fails, try Fast2SMS otp route
+      const otpRouteResp = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+        method: 'POST',
+        headers: {
+          'authorization': fast2smsKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          variables_values: otpCode,
+          route: 'otp',
+          numbers: cleanPhone
+        })
+      });
+      const otpRouteData = await otpRouteResp.json();
+      console.log(`✅ Fast2SMS OTP Route Response:`, otpRouteData);
+      if (otpRouteData.return === true) {
+        return { success: true, provider: 'Fast2SMS', otp: otpCode, response: otpRouteData };
+      }
+    } catch (err) {
+      console.error(`❌ Fast2SMS OTP Dispatch Error:`, err.message);
+    }
+  }
+
+  // 2. 2Factor.in Integration (India)
+  if (twofactorKey) {
+    try {
+      console.log(`🚀 Sending via 2Factor.in Gateway...`);
+      const response = await fetch(`https://2factor.in/API/V1/${twofactorKey}/SMS/+91${cleanPhone}/${otpCode}/CodeGuru`, {
+        method: 'GET'
+      });
+      const resData = await response.json();
+      if (resData.Status === 'Success') {
+        return { success: true, provider: '2Factor', otp: otpCode, response: resData };
+      }
+    } catch (err) {
+      console.error(`❌ 2Factor OTP Dispatch Error:`, err.message);
+    }
+  }
+
+  // 3. Twilio Verify API (Delivers real OTP if account is paid or number is verified in Twilio Console)
   if (twilioSid && twilioAuthToken && verifyServiceSid) {
     try {
-      console.log(`🚀 Sending real SMS via Twilio Verify Service (${verifyServiceSid})...`);
+      console.log(`🚀 Attempting Twilio Verify Service (${verifyServiceSid})...`);
       const authHeader = 'Basic ' + Buffer.from(`${twilioSid}:${twilioAuthToken}`).toString('base64');
       const params = new URLSearchParams();
       params.append('To', `+91${cleanPhone}`);
@@ -124,44 +221,37 @@ export async function sendOtpSMS(toPhone, customOtp = null) {
       });
 
       const resData = await response.json();
-      console.log(`✅ Twilio Verify Response:`, resData);
-      console.log(`======================================================\n`);
-      if (resData.status === 'pending' || resData.status === 'approved') {
-        return { success: true, provider: 'TwilioVerify', response: resData };
+      console.log(`📡 Twilio Verify Response:`, resData);
+
+      if ((resData.status === 'pending' || resData.status === 'approved') && !resData.code) {
+        console.log(`🎉 Twilio Verify cellular SMS dispatched to +91 ${cleanPhone}`);
+        return { success: true, provider: 'TwilioVerify', otp: otpCode, response: resData };
       }
+
+      console.warn(`⚠️ Twilio Verify failed for +91 ${cleanPhone}: Code ${resData.code} - ${resData.message}`);
     } catch (err) {
       console.error(`❌ Twilio Verify Dispatch Error:`, err.message);
     }
   }
 
-  // 2. Fast2SMS Integration (if key present)
-  if (fast2smsKey) {
-    try {
-      console.log(`🚀 Sending via Fast2SMS OTP route...`);
-      const response = await fetch('https://www.fast2sms.com/dev/bulkV2', {
-        method: 'POST',
-        headers: {
-          'authorization': fast2smsKey,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          variables_values: customOtp || '1234',
-          route: 'otp',
-          numbers: cleanPhone
-        })
-      });
-      const resData = await response.json();
-      console.log(`✅ Fast2SMS OTP Response:`, resData);
-      console.log(`======================================================\n`);
-      return { success: resData.return === true, provider: 'Fast2SMS', response: resData };
-    } catch (err) {
-      console.error(`❌ Fast2SMS OTP Dispatch Error:`, err.message);
-    }
+  // 4. Twilio Standard SMS Fallback
+  const messageText = `Your CodeGuru Login Verification OTP is ${otpCode}. Valid for 10 minutes.`;
+  const fallbackResult = await sendRealSMS(cleanPhone, messageText);
+  if (fallbackResult.success) {
+    return { success: true, provider: fallbackResult.provider, otp: otpCode, response: fallbackResult.response };
   }
 
-  // Fallback to sendRealSMS
-  const messageText = `Your CodeGuru Login Verification OTP is ${customOtp || '1234'}. Valid for 5 minutes.`;
-  return sendRealSMS(cleanPhone, messageText);
+  // Gateway failed or trial account restricted
+  console.log(`⚠️ All cellular SMS gateways unavailable or restricted by Twilio Trial.`);
+  console.log(`💡 Generated OTP for +91 ${cleanPhone} is: ${otpCode}`);
+  console.log(`======================================================\n`);
+
+  return { 
+    success: false, 
+    provider: 'Simulation',
+    otp: otpCode,
+    message: 'Twilio Trial Account can only send to verified developer phone numbers. To send SMS to ALL mobile numbers in India, configure FAST2SMS_API_KEY in backend/.env'
+  };
 }
 
 /**
@@ -177,7 +267,6 @@ export async function checkTwilioVerify(toPhone, code) {
 
   if (twilioSid && twilioAuthToken && verifyServiceSid) {
     try {
-      console.log(`🔍 Checking OTP code with Twilio Verify for +91 ${cleanPhone}...`);
       const authHeader = 'Basic ' + Buffer.from(`${twilioSid}:${twilioAuthToken}`).toString('base64');
       const params = new URLSearchParams();
       params.append('To', `+91${cleanPhone}`);
@@ -203,4 +292,5 @@ export async function checkTwilioVerify(toPhone, code) {
   }
   return false;
 }
+
 

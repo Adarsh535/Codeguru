@@ -313,25 +313,31 @@ export const sendStudentOtp = async (req, res) => {
       });
     }
 
-    // Generate fallback 6-digit OTP
+    // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 mins expiration
 
     otpStore.set(cleanPhone, { otp, expiresAt });
 
-    // Send real cellular SMS to student phone via Twilio Verify
+    // Send real cellular SMS to student phone via SMS Gateway
     const smsResult = await sendOtpSMS(cleanPhone, otp);
+    const isRealDelivered = Boolean(smsResult && smsResult.success === true);
 
     console.log(`\n======================================================`);
-    console.log(`🔑 [STUDENT OTP DISPATCHED] Phone: +91 ${cleanPhone}`);
-    console.log(`📡 SMS Provider Result:`, smsResult?.provider || 'TwilioVerify');
+    console.log(`🔑 [STUDENT OTP DISPATCH] Phone: +91 ${cleanPhone} | Code: ${otp}`);
+    console.log(`📡 SMS Provider Result:`, smsResult?.provider || 'Simulation');
+    console.log(`📡 Real SMS Delivered:`, isRealDelivered ? 'YES' : 'NO (Trial/Simulation Mode)');
     console.log(`======================================================\n`);
 
     return res.json({
       success: true,
-      message: `OTP has been sent to +91 ${cleanPhone} via SMS`,
+      message: isRealDelivered
+        ? `OTP has been sent to +91 ${cleanPhone} via SMS`
+        : `Trial Mode: Real SMS restricted by Twilio Trial. Your OTP is ${otp}`,
       phone: cleanPhone,
-      provider: smsResult?.provider || 'TwilioVerify'
+      provider: smsResult?.provider || 'Simulation',
+      isRealSMS: isRealDelivered,
+      demoOtp: isRealDelivered ? undefined : otp
     });
   } catch (error) {
     console.error('[authController sendStudentOtp Error]:', error);

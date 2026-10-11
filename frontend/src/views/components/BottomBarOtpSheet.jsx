@@ -61,11 +61,7 @@ export default function BottomBarOtpSheet({
       setStep('phone');
       setErrorMsg('');
       setOtpDigits(['', '', '', '', '', '']);
-      setTimeout(() => {
-        if (phoneInputRef.current && !user) {
-          phoneInputRef.current.focus();
-        }
-      }, 250);
+      // Keyboard will only open when user manually clicks/taps the input field
     } else if (renderSheet) {
       setIsClosing(true);
       const timer = setTimeout(() => {
@@ -113,8 +109,12 @@ export default function BottomBarOtpSheet({
       if (res.success) {
         setStep('otp');
         setResendTimer(45);
-        setActiveOtp('1234');
-        setSmsNotification(null);
+        setActiveOtp(res.demoOtp || '1234');
+        setSmsNotification({
+          otp: res.demoOtp || null,
+          isRealSMS: res.isRealSMS || false,
+          message: res.message || ''
+        });
 
         setTimeout(() => {
           if (otpRefs[0].current) otpRefs[0].current.focus();
@@ -504,6 +504,36 @@ export default function BottomBarOtpSheet({
                 </button>
               </div>
             </div>
+
+            {smsNotification?.otp && (
+              <div className="mb-4 p-3 sm:p-3.5 bg-gradient-to-r from-amber-500/10 via-amber-400/15 to-amber-500/10 border border-amber-300 rounded-2xl flex items-center justify-between gap-3 animate-fadeIn shadow-xs">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-black text-slate-900 tracking-tight flex items-center gap-1.5">
+                      <span>Trial OTP:</span>
+                      <span className="font-mono text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded-md font-extrabold tracking-widest">{smsNotification.otp}</span>
+                    </p>
+                    <p className="text-[10px] font-semibold text-slate-500 truncate">
+                      SMS Trial mode active • Tap to auto-fill
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const otpStr = smsNotification.otp.toString();
+                    const digits = otpStr.split('');
+                    const padded = [...digits, ...Array(Math.max(0, 6 - digits.length)).fill('')];
+                    setOtpDigits(padded);
+                    handleVerifyOtp(otpStr);
+                  }}
+                  className="px-3 py-1.5 bg-[#ffbe1a] hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-xs transition-all cursor-pointer shrink-0 active:scale-95"
+                >
+                  Auto Fill
+                </button>
+              </div>
+            )}
 
             {errorMsg && (
               <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 animate-fadeIn">
