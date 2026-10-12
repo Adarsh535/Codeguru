@@ -97,25 +97,19 @@ export default function Navbar({
                 </span>
               </div>
 
-              {/* Subtitle: CODEGURU PLACEMENT ACADEMY + Location Tag */}
-              <div className="flex items-center gap-1 min-w-0 mt-0.5">
-                <span className="text-[7.5px] min-[360px]:text-[8.5px] sm:text-[9.5px] font-black uppercase tracking-wider text-amber-600 truncate leading-none">
-                  CODEGURU PLACEMENT ACADEMY
-                </span>
-
-                {/* Location Tag */}
-                {selectedLocation && (
+              {/* Location Tag */}
+              {selectedLocation && (
+                <div className="flex items-center min-w-0 mt-0.5">
                   <button
                     onClick={onOpenLocationModal}
-                    className="hidden sm:inline-flex items-center gap-0.5 text-[8.5px] text-slate-400 hover:text-amber-600 font-semibold transition-colors cursor-pointer ml-0.5"
+                    className="inline-flex items-center gap-0.5 text-[9px] text-slate-400 hover:text-amber-600 font-semibold transition-colors cursor-pointer"
                     title="Change Location"
                   >
-                    <span className="text-slate-300">•</span>
                     <MapPin className="text-amber-500 flex-shrink-0 w-2.5 h-2.5" />
                     <span className="truncate">{selectedLocation.name}</span>
                   </button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 

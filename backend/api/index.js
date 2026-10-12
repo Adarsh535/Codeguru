@@ -21,6 +21,7 @@ import settingsRoutes from './routes/settingsRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import realtimeRoutes from './routes/realtimeRoutes.js';
 import adRoutes from './routes/adRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
 const apiRouter = express.Router();
 
@@ -36,6 +37,7 @@ apiRouter.use('/branches', branchRoutes);
 apiRouter.use('/leads', leadRoutes);
 apiRouter.use('/upload', uploadRoutes);
 apiRouter.use('/traffic', trafficRoutes);
+apiRouter.use('/analytics', analyticsRoutes);
 apiRouter.use('/navmenus', navMenuRoutes);
 apiRouter.use('/enrollments', enrollmentRoutes);
 apiRouter.use('/settings', settingsRoutes);

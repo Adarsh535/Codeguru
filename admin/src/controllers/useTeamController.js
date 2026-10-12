@@ -16,6 +16,7 @@ export function useTeamController() {
   const [formData, setFormData] = useState({
     name: '',
     role: 'Senior Instructor',
+    specialization: 'Full Stack & System Design',
     bio: '',
     photoUrl: '',
     experience: '8+ Years Exp'
@@ -53,6 +54,7 @@ export function useTeamController() {
     setFormData({
       name: '',
       role: 'Senior Instructor',
+      specialization: 'Full Stack & System Design',
       bio: '',
       photoUrl: '',
       experience: '8+ Years Exp'
@@ -65,6 +67,7 @@ export function useTeamController() {
     setFormData({
       name: member.name || '',
       role: member.role || 'Senior Instructor',
+      specialization: member.specialization || member.bio || 'Full Stack & System Design',
       bio: member.bio || '',
       photoUrl: member.photoUrl || member.photo || '',
       experience: member.experience || '8+ Years Exp'

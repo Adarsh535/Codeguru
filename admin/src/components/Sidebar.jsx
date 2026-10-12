@@ -17,6 +17,7 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, to
       title: 'MAIN',
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'visitors', label: 'Visitors', icon: Globe, badge: 'Live', badgeColor: 'bg-emerald-500' },
         { id: 'notifications', label: 'Notifications', icon: Bell, badge: '5 New', badgeColor: 'bg-rose-500' }
       ]
     },

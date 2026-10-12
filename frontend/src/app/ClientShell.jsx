@@ -17,6 +17,7 @@ import BatchEnrollModal from '../views/components/BatchEnrollModal';
 import BottomBarOtpSheet from '../views/components/BottomBarOtpSheet';
 import { apiService } from '../services/apiService';
 import { realtimeSync } from '../services/realtimeService';
+import { trackPageView, sendHeartbeat } from '../utils/visitorTracker';
 
 export default function ClientShell({ children }) {
   const pathname = usePathname();
@@ -120,6 +121,28 @@ export default function ClientShell({ children }) {
     }, 30000);
     return () => clearInterval(interval);
   }, [selectedLocation]);
+
+  // Track visitor page views on route changes and maintain live presence
+  useEffect(() => {
+    trackPageView(pathname);
+
+    // Periodic heartbeat to maintain live visitor state (every 45s)
+    const hbInterval = setInterval(() => {
+      sendHeartbeat(pathname);
+    }, 45000);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        sendHeartbeat(pathname);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(hbInterval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [pathname]);
 
   // Clone children and pass callbacks if needed
   const childrenWithProps = React.Children.map(children, child => {

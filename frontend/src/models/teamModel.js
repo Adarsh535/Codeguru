@@ -60,9 +60,9 @@ export const teamModel = {
           name: item.name,
           role: item.role || 'Senior Software Instructor',
           experience: item.experience || '6+ Yrs Exp',
-          photo: item.photo || item.mediaUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
-          exCompany: item.exCompany || 'Ex-MNC Tech Lead',
-          specialization: item.specialization || 'Full Stack & System Architecture'
+          photo: item.photo || item.photoUrl || item.mediaUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+          bio: item.bio || '',
+          specialization: item.specialization || item.bio || 'Full Stack & System Design'
         }));
       }
     } catch (err) {

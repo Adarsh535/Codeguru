@@ -98,7 +98,8 @@ export default function TeamManagerView() {
                     {member.tag || '#TEAMCODEGURU'}
                   </span>
                   <h3 className="text-base font-extrabold text-slate-900 mt-2 font-heading">{member.name}</h3>
-                  <p className="text-xs font-bold text-slate-600">{member.role}</p>
+                  <p className="text-xs font-bold text-blue-600">{member.specialization || 'Full Stack & System Design'}</p>
+                  <p className="text-[11px] font-semibold text-slate-500">{member.role}</p>
                 </div>
 
                 {member.bio && (
@@ -139,15 +140,54 @@ export default function TeamManagerView() {
 
             <form id="teamForm" onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
               
-              {/* PINNED TOP SECTION: MENTOR PORTRAIT PHOTO UPLOAD */}
+              {/* PINNED TOP SECTION: MENTOR PORTRAIT PHOTO UPLOAD & LIVE PREVIEW */}
               <div className="p-4 bg-slate-50/90 border-b border-slate-200/80 shrink-0 flex flex-col gap-2">
-                <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wide">1. Mentor Portrait Photo</label>
-                <div className="border-2 border-dashed border-blue-300 hover:border-blue-500 bg-white rounded-xl p-3 flex flex-col items-center justify-center text-center gap-1 cursor-pointer relative transition-all">
-                  <input type="file" accept="image/*" onChange={handlePhotoUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                  <CloudUploadIcon className="!w-5 !h-5 text-blue-600" />
-                  <span className="text-xs font-bold text-slate-700">
-                    {uploading ? 'Uploading Photo...' : (formData.photoUrl || formData.photo ? 'Photo Loaded ✓' : 'Click to Upload Portrait Photo')}
-                  </span>
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wide">1. Mentor Portrait Photo</label>
+                  {(formData.photoUrl || formData.photo) && (
+                    <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Photo Loaded
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3 sm:gap-4">
+                  {/* SIDE PREVIEW THUMBNAIL (COMPACT & PROPORTIONAL) */}
+                  {(formData.photoUrl || formData.photo) ? (
+                    <div className="relative shrink-0">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-blue-200 bg-white shadow-sm overflow-hidden flex items-center justify-center p-0.5">
+                        <img 
+                          src={formData.photoUrl || formData.photo} 
+                          alt="Mentor Preview" 
+                          className="w-full h-full object-cover object-top rounded-xl"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, photoUrl: '', photo: '' }))}
+                        className="absolute -top-1.5 -right-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-full p-1 shadow-md cursor-pointer transition-transform hover:scale-110"
+                        title="Remove photo"
+                      >
+                        <CloseIcon className="!w-3 !h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-100/70 flex flex-col items-center justify-center shrink-0 text-slate-400 gap-1">
+                      <CloudUploadIcon className="!w-5 !h-5 text-slate-400" />
+                      <span className="text-[10px] font-semibold text-slate-400">No Photo</span>
+                    </div>
+                  )}
+
+                  {/* UPLOAD / CHANGE DROPZONE */}
+                  <div className="flex-1 min-w-0 border-2 border-dashed border-blue-300 hover:border-blue-500 bg-white hover:bg-blue-50/30 rounded-2xl p-3 sm:p-4 flex flex-col items-center justify-center text-center gap-1 cursor-pointer relative transition-all group">
+                    <input type="file" accept="image/*" onChange={handlePhotoUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                    <CloudUploadIcon className="!w-5 !h-5 text-blue-600 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-slate-800">
+                      {uploading ? 'Uploading Photo...' : ((formData.photoUrl || formData.photo) ? 'Click to Change Photo' : 'Upload Mentor Portrait Photo')}
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium">PNG, JPG, WEBP • Max 5MB</span>
+                  </div>
                 </div>
               </div>
 
@@ -180,12 +220,24 @@ export default function TeamManagerView() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-700">Bio Description</label>
+                  <label className="text-xs font-bold text-slate-700">Specialization / Subject Line (Shows below Name)</label>
+                  <input
+                    type="text"
+                    value={formData.specialization || ''}
+                    onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
+                    placeholder="e.g. Full Stack & System Design"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500"
+                  />
+                  <span className="text-[10px] text-slate-400 font-medium">This text is displayed right below the Mentor Name on website slider card.</span>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-bold text-slate-700">Bio Description / Note</label>
                   <textarea
-                    rows={3}
+                    rows={2}
                     value={formData.bio}
                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                    placeholder="Short bio description of mentor..."
+                    placeholder="Short bio or mentor description..."
                     className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500"
                   />
                 </div>

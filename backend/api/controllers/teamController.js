@@ -35,7 +35,8 @@ export const addTeamMember = async (req, res) => {
       role: req.body.role || 'Tech Mentor',
       photo: req.body.photo || req.body.photoUrl || '',
       experience: req.body.experience || '8+ Yrs Exp',
-      bio: req.body.bio || 'CodeGuru Master Educator'
+      bio: req.body.bio || '',
+      specialization: req.body.specialization || req.body.bio || 'Full Stack & System Design'
     });
 
     broadcastRealtimeEvent('team', member);

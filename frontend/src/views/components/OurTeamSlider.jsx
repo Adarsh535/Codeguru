@@ -60,7 +60,8 @@ export default function OurTeamSlider({ onOpenContactModal }) {
             role: item.role || 'Senior Tech Instructor',
             tag: '#TEAMCODEGURRU',
             photo: item.photoUrl || item.photo || item.image || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=500&fit=crop&crop=faces',
-            bio: item.bio || item.specialization || 'Full Stack & Software Engineering Expert.',
+            specialization: item.specialization || '',
+            bio: item.bio || item.specialization || '',
             phone: item.phone || '9198483...'
           }));
           setTeamMembers(formatted);
@@ -143,8 +144,8 @@ export default function OurTeamSlider({ onOpenContactModal }) {
                     <h3 className="font-extrabold text-slate-900 text-[12px] sm:text-[13px] tracking-tight leading-snug mb-0.5 truncate">
                       {member.name}
                     </h3>
-                    <p className="text-slate-500 text-[9.5px] sm:text-[10px] leading-snug font-medium line-clamp-1">
-                      {member.bio}
+                    <p className="text-slate-500 text-[9.5px] sm:text-[10px] leading-snug font-medium line-clamp-2 whitespace-pre-line">
+                      {member.bio || member.specialization || ''}
                     </p>
                   </div>
 

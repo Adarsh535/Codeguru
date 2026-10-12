@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import LoginView from './views/LoginView';
 import DashboardView from './views/DashboardView';
+import VisitorsView from './views/VisitorsView';
 import LeadsView from './views/LeadsView';
 import NotificationsView from './views/NotificationsView';
 import { leadService } from './services/leadService';
@@ -111,6 +112,7 @@ function AdminMainApp() {
                 onNavigateToLeads={() => setActiveTab('leads')}
               />
             )}
+            {activeTab === 'visitors' && <VisitorsView />}
             {activeTab === 'notifications' && <NotificationsView />}
 
             {/* 2. CRM */}
