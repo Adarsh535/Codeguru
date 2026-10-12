@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Award, Check, ArrowRight } from 'lucide-react';
 import { TOP_PLACEMENTS_STUDENTS } from '../../models/placementModel';
 import { apiService } from '../../services/apiService';
 
@@ -95,82 +94,37 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
                     contactElem.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="w-[210px] xs:w-[230px] sm:w-[250px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[18px] sm:rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] flex flex-col mx-2 relative overflow-hidden group cursor-pointer hover:scale-[0.97] hover:shadow-md hover:border-blue-400 transition-all duration-300 ease-out select-none"
+                className="w-[160px] xs:w-[175px] sm:w-[190px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[16px] shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col mx-1.5 relative overflow-hidden group cursor-pointer hover:shadow-md hover:border-blue-300 transition-all select-none"
               >
-                {/* TOP PORTRAIT PHOTO AREA - EDGE TO EDGE FULL COVER FIT */}
-                <div className="w-full h-[190px] sm:h-[210px] bg-slate-100 relative overflow-hidden flex items-center justify-center">
+                {/* TOP PORTRAIT PHOTO AREA - EXACT SAME CLEAN DISPLAY AS OUR TEAM */}
+                <div 
+                  className="w-full bg-slate-100 relative overflow-hidden flex items-center justify-center shrink-0"
+                  style={{ height: '175px', minHeight: '175px' }}
+                >
                   <img
                     src={student.photo}
                     alt={student.name}
-                    className="w-full h-full object-cover object-top transition-transform duration-300 ease-out group-hover:scale-105"
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                   />
-
-                  {/* GREEN DIAGONAL CORNER RIBBON: PLACED */}
-                  <div className="absolute top-0 right-0 w-[72px] h-[72px] overflow-hidden pointer-events-none z-20">
-                    <div className="absolute top-[12px] -right-[22px] w-[95px] transform rotate-45 bg-emerald-600 text-white font-black text-[8.5px] sm:text-[9px] uppercase tracking-widest text-center py-0.5 shadow-sm">
-                      PLACED
-                    </div>
-                  </div>
-                  
-                  {/* SLEEK PACKAGE BADGE ON BOTTOM LEFT */}
-                  <div className="absolute bottom-2 left-2 z-20 bg-slate-900/90 text-white font-black text-[9px] sm:text-[9.5px] px-2.5 py-0.5 rounded-lg shadow-sm border border-slate-700/80">
-                    {student.package || '6.5 LPA'}
-                  </div>
                 </div>
 
-                {/* CARD CONTENT */}
-                <div className="p-3 sm:p-3.5 bg-white flex flex-col flex-1 justify-between">
-                  <div>
-                    {/* STUDENT NAME & ROLE (INLINE ON SAME LINE) */}
-                    <div className="flex items-center gap-1.5 min-w-0 w-full truncate mb-0.5">
-                      <h3 className="font-extrabold text-slate-900 text-[12.5px] sm:text-[13.5px] tracking-tight truncate flex-shrink-0 max-w-[58%]">
-                        {student.name}
-                      </h3>
-                      <span className="text-slate-400 font-medium text-[10px] flex-shrink-0">•</span>
-                      <span className="text-slate-500 font-semibold text-[10px] sm:text-[10.5px] truncate flex-1">
-                        {student.role}
-                      </span>
-                    </div>
-
-                    {/* COMPANY BRANDING & TRAINING TYPE ROW */}
-                    <div className="flex items-center justify-between gap-1.5 mt-2 pt-2 border-t border-slate-100 w-full">
-                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                        <img
-                          src={student.companyLogo || 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg'}
-                          alt={student.company}
-                          className="w-4 h-4 object-contain flex-shrink-0"
-                        />
-                        <span className="font-bold text-slate-800 text-[11px] sm:text-[11.5px] truncate">
-                          {student.company}
-                        </span>
-                      </div>
-
-                      <div className="bg-slate-100 text-slate-600 font-extrabold text-[8px] sm:text-[8.5px] px-2 py-0.5 rounded-full border border-slate-200/80 flex-shrink-0 tracking-tight">
-                        {student.trainingType || 'Internship Training'}
-                      </div>
-                    </div>
+                {/* BOTTOM WHITE CONTENT CONTAINER */}
+                <div className="p-2.5 sm:p-3 bg-white flex flex-col flex-1 justify-between border-t border-slate-100">
+                  <div className="flex flex-col">
+                    <h3 className="font-extrabold text-slate-900 text-[12px] sm:text-[13px] tracking-tight leading-snug mb-0.5 truncate">
+                      {student.name}
+                    </h3>
+                    <p className="text-slate-500 text-[9.5px] sm:text-[10px] leading-snug font-medium line-clamp-1">
+                      {student.role || student.trainingType || 'Full Stack & System Design'}
+                    </p>
                   </div>
 
-                  {/* FOOTER ROW */}
-                  <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-100 w-full">
-                    <span className="text-[9px] sm:text-[9.5px] font-extrabold text-emerald-700 flex items-center gap-1">
-                      <Check className="w-3 h-3 stroke-[3.5px] text-emerald-600" /> Placed & Verified
+                  {/* FOOTER ROLE ROW */}
+                  <div className="flex items-center pt-2 mt-2 border-t border-slate-100 w-full">
+                    <span className="text-[9.5px] sm:text-[10px] font-bold text-slate-700 truncate">
+                      {student.company ? `${student.company}${student.package ? ` (${student.package})` : ''}` : (student.batch || 'Placed Student')}
                     </span>
-                    <button
-                      suppressHydrationWarning
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onOpenContactModal) onOpenContactModal();
-                        const contactElem = document.getElementById('contact-section');
-                        if (contactElem) {
-                          contactElem.scrollIntoView({ behavior: 'smooth' });
-                        }
-                      }}
-                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-[8.5px] sm:text-[9px] px-2.5 py-1 rounded-full shadow-2xs hover:shadow-md hover:scale-105 active:scale-95 transition-all flex items-center gap-1 uppercase tracking-wider cursor-pointer"
-                    >
-                      <span>Inquire</span>
-                      <ArrowRight className="w-2.5 h-2.5 stroke-[3px]" />
-                    </button>
                   </div>
                 </div>
 

@@ -81,25 +81,13 @@ export default function PlacementsManagerView() {
               key={itemId}
               className="bg-white border border-slate-200/90 rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] flex flex-col relative overflow-hidden group hover:shadow-md hover:border-blue-400 transition-all duration-300 select-none"
             >
-              {/* TOP PORTRAIT PHOTO AREA - EDGE TO EDGE FULL COVER FIT */}
-              <div className="w-full h-[220px] bg-slate-100 relative overflow-hidden flex items-center justify-center">
+              {/* TOP PORTRAIT PHOTO AREA - CLEAN FULL VIEW */}
+              <div className="w-full h-[190px] sm:h-[200px] bg-slate-100 relative overflow-hidden flex items-center justify-center">
                 <img
                   src={photoUrl}
                   alt={item.name}
-                  className="w-full h-full object-cover object-top transition-transform duration-300 ease-out group-hover:scale-105"
+                  className="w-full h-full object-cover object-center transition-transform duration-300 ease-out group-hover:scale-105"
                 />
-
-                {/* GREEN DIAGONAL CORNER RIBBON: PLACED */}
-                <div className="absolute top-0 right-0 w-[72px] h-[72px] overflow-hidden pointer-events-none z-20">
-                  <div className="absolute top-[12px] -right-[22px] w-[95px] transform rotate-45 bg-emerald-600 text-white font-black text-[9px] uppercase tracking-widest text-center py-0.5 shadow-sm">
-                    PLACED
-                  </div>
-                </div>
-                
-                {/* SLEEK PACKAGE BADGE ON BOTTOM LEFT */}
-                <div className="absolute bottom-2.5 left-2.5 z-20 bg-slate-900/90 text-white font-black text-[10px] px-2.5 py-0.5 rounded-lg shadow-sm border border-slate-700/80">
-                  {item.package ? (item.package.includes('LPA') || item.package.includes('₹') ? item.package : `₹ ${item.package}`) : '6.5 LPA'}
-                </div>
               </div>
 
               {/* CARD CONTENT */}
@@ -130,8 +118,8 @@ export default function PlacementsManagerView() {
                       </span>
                     </div>
 
-                    <div className="bg-slate-100 text-slate-600 font-extrabold text-[9px] px-2 py-0.5 rounded-full border border-slate-200/80 flex-shrink-0 tracking-tight">
-                      {item.trainingType || 'Internship Training'}
+                    <div className="bg-emerald-50 text-emerald-700 font-extrabold text-[10px] px-2 py-0.5 rounded-full border border-emerald-200/80 flex-shrink-0 tracking-tight">
+                      {item.package ? (item.package.includes('LPA') || item.package.includes('₹') ? item.package : `₹ ${item.package}`) : '6.5 LPA'}
                     </div>
                   </div>
                 </div>
