@@ -125,11 +125,12 @@ export default function OurTeamSlider({ onOpenContactModal }) {
                 className="w-[160px] xs:w-[175px] sm:w-[190px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[16px] shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col mx-1.5 relative overflow-hidden group cursor-pointer hover:shadow-md hover:border-blue-300 transition-all select-none"
               >
                 {/* TOP PHOTO AREA */}
-                <div className="w-full h-[125px] sm:h-[140px] bg-gradient-to-b from-slate-100/70 via-slate-50 to-white relative overflow-hidden flex items-end justify-center">
+                <div className="w-full h-[155px] xs:h-[165px] sm:h-[180px] bg-slate-100 relative overflow-hidden flex items-center justify-center">
                   <img
                     src={member.photo}
                     alt={member.name}
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                   />
                 </div>
 
