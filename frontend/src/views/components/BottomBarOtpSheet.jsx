@@ -306,30 +306,38 @@ export default function BottomBarOtpSheet({
         onClick={handleClose}
       />
 
-      {/* SMOOTH CARD MODAL / BOTTOM SHEET (EXACT 1-TO-1 MATCH TO REFERENCE IMAGE) */}
+      {/* ============================================================== */}
+      {/* SECTION 1: BADHA CARD (BACKGROUND ELEVATED CARD / FRAME)        */}
+      {/* ============================================================== */}
       <div 
-        className={`relative z-10 w-full max-w-[420px] mx-auto rounded-t-[32px] sm:rounded-[34px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35)] border-t sm:border border-slate-100/90 overflow-hidden transform transition-all duration-300 ease-out px-6 sm:px-8 pt-3.5 pb-7 sm:pb-8 ${
+        className={`relative z-10 w-full max-w-[440px] mx-auto rounded-t-[36px] sm:rounded-[38px] p-2.5 sm:p-3 bg-gradient-to-b from-slate-200/90 via-slate-100/95 to-slate-200/90 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] border-t sm:border border-white/60 backdrop-blur-md transform transition-all duration-300 ease-out ${
           isClosing ? 'translate-y-full sm:scale-95 opacity-0' : 'translate-y-0 sm:scale-100 opacity-100'
         }`}
-        style={{
-          background: 'radial-gradient(circle at 50% 12%, rgba(249, 115, 22, 0.14) 0%, rgba(255, 255, 255, 0) 65%), #ffffff'
-        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* TOP DRAG HANDLE */}
-        <div className="pt-0.5 pb-2.5 flex justify-center cursor-pointer" onClick={handleClose}>
-          <div className="w-12 h-1 bg-slate-300/80 rounded-full hover:bg-slate-400 transition-colors" />
+        <div className="pt-0.5 pb-2 flex justify-center cursor-pointer" onClick={handleClose}>
+          <div className="w-12 h-1.5 bg-slate-400/40 rounded-full hover:bg-slate-400 transition-colors" />
         </div>
 
-        {/* FLOATING DARK CIRCULAR CLOSE BUTTON */}
-        <button
-          type="button"
-          onClick={handleClose}
-          className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-[#111827] hover:bg-black text-white flex items-center justify-center shadow-md transition-all active:scale-90 cursor-pointer"
-          title="Close"
+        {/* ============================================================== */}
+        {/* SECTION 2: CHHOTA CARD (INNER WHITE CARD WITH FULL OTP SYSTEM)  */}
+        {/* ============================================================== */}
+        <div 
+          className="relative w-full bg-white rounded-[28px] sm:rounded-[30px] shadow-[0_10px_30px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.05)] border border-slate-100/80 px-6 sm:px-7 pt-5 pb-6 overflow-hidden flex flex-col"
+          style={{
+            background: 'radial-gradient(circle at 50% 12%, rgba(249, 115, 22, 0.14) 0%, rgba(255, 255, 255, 0) 65%), #ffffff'
+          }}
         >
-          <CloseIcon className="!w-4 !h-4 text-white" />
-        </button>
+          {/* FLOATING DARK CIRCULAR CLOSE (X) BUTTON DIRECTLY ON OTP CARD */}
+          <button
+            type="button"
+            onClick={handleClose}
+            className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-20 w-8 h-8 rounded-full bg-[#111827] hover:bg-black text-white flex items-center justify-center shadow-md border border-white/20 transition-all active:scale-90 cursor-pointer"
+            title="Close"
+          >
+            <CloseIcon className="!w-4 !h-4 text-white" />
+          </button>
 
         {/* ---------------- ALREADY LOGGED IN VIEW ---------------- */}
         {user ? (
@@ -439,6 +447,16 @@ export default function BottomBarOtpSheet({
                   placeholder="5151222032"
                   className="w-full bg-transparent text-lg font-bold text-slate-900 placeholder-slate-300 outline-none tracking-wide"
                 />
+                {phone && (
+                  <button
+                    type="button"
+                    onClick={() => { setPhone(''); if (errorMsg) setErrorMsg(''); }}
+                    className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/80 transition-colors cursor-pointer shrink-0"
+                    title="Clear number"
+                  >
+                    <CloseIcon className="!w-4 !h-4" />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -729,6 +747,7 @@ export default function BottomBarOtpSheet({
           </div>
         )}
 
+        </div>
       </div>
     </div>
   );

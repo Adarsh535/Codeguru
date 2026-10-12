@@ -8,7 +8,6 @@ import {
   Mail,
   Clock,
   ArrowRight,
-  Sparkles,
   Award,
   Globe,
   BookOpen
@@ -115,20 +114,20 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
           {/* COLUMN 1: BRAND & CONTACT INFO (5 cols) */}
           <div className="lg:col-span-5 flex flex-col gap-5">
             <div className="flex items-center gap-3 cursor-pointer group" onClick={onOpenContactModal}>
-              <div className="p-1 rounded-2xl bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-transparent border border-amber-500/30 group-hover:border-amber-400 transition-colors">
+              <div className="w-12 h-12 rounded-xl bg-[#090d16] border-1.5 border-amber-500/70 shadow-lg shadow-amber-500/10 p-1 flex items-center justify-center group-hover:border-amber-400 group-hover:scale-105 transition-all">
                 <img
                   src="/logo.png"
                   alt="CodeGuru Logo"
-                  className="w-10 h-10 sm:w-11 sm:h-11 object-contain"
+                  className="w-full h-full object-contain rounded-lg"
                   onError={(e) => { e.target.src = '/logo-icon.png'; }}
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-2xl font-black tracking-wide font-heading text-white flex items-center gap-1">
-                  CODE<span className="bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 bg-clip-text text-transparent">GURRU</span>
+                <span className="text-2xl font-black tracking-wide font-heading text-white flex items-center gap-1 select-none">
+                  CODE<span className="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">GURRU</span>
                 </span>
-                <span className="text-[10px] text-amber-400/90 font-bold uppercase tracking-widest">
-                  CodeGuru Placement Academy
+                <span className="text-[10px] text-amber-400 font-extrabold uppercase tracking-widest mt-0.5">
+                  CODEGURU PLACEMENT ACADEMY
                 </span>
               </div>
             </div>
@@ -137,49 +136,6 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
               Providing industry-leading IT training, full stack web development bootcamps, and guaranteed 100% placement assistance to engineering students & IT job seekers since 2020.
             </p>
 
-            {/* FULL CONTACT ADDRESS DETAILS */}
-            <div className="flex flex-col gap-3 pt-2 text-xs">
-              <div className="flex items-start gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/90 hover:border-slate-700 transition-colors">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-md shadow-orange-500/20">
-                  <MapPin className="w-4 h-4" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-extrabold text-amber-400 text-xs">HQ Campus Address</span>
-                  <span className="text-slate-200 text-[11.5px] leading-snug font-medium">
-                    CodeGuru Tower, Near Naya Ghat Bypass Road, Ayodhya, UP - 224123
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/90 hover:border-slate-700 transition-colors">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-500/20">
-                  <Phone className="w-4 h-4" />
-                </div>
-                <div className="flex items-center gap-2 font-bold text-slate-200">
-                  <a href="tel:9670912923" className="hover:text-amber-400 transition-colors">+91-96709-12923</a>
-                  <span className="text-slate-600">/</span>
-                  <a href="tel:6392361443" className="hover:text-amber-400 transition-colors">+91-6392-361-443</a>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/90 hover:border-slate-700 transition-colors">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-emerald-500/20">
-                  <Mail className="w-4 h-4" />
-                </div>
-                <a href="mailto:contact@codeguru.com" className="hover:text-emerald-400 font-bold text-slate-200 transition-colors truncate">
-                  contact@codeguru.com / support@codeguru.com
-                </a>
-              </div>
-
-              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/90 hover:border-slate-700 transition-colors">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-purple-500/20">
-                  <Clock className="w-4 h-4" />
-                </div>
-                <span className="text-slate-200 font-semibold">
-                  Working Hours: Mon - Sat (9:00 AM - 7:00 PM)
-                </span>
-              </div>
-            </div>
           </div>
 
           {/* COLUMN 2: QUICK LINKS & POLICIES (4 cols) */}
@@ -295,20 +251,7 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
             </div>
           </div>
 
-          {/* SECTION 2: MORE TRAINING LINKS IN AYODHYA */}
-          <div>
-            <h5 className="font-extrabold text-slate-300 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              <span>More Training & Skill Links in Ayodhya</span>
-            </h5>
-            <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-slate-400 text-[11px] leading-relaxed">
-              {moreTrainingLinks.map((link, idx) => (
-                <span key={idx} className="hover:text-white transition-colors cursor-pointer" onClick={onOpenContactModal}>
-                  {link} {idx < moreTrainingLinks.length - 1 ? <span className="text-slate-700 ml-2">•</span> : ''}
-                </span>
-              ))}
-            </div>
-          </div>
+
 
           {/* SECTION 3: ADVANCED TRAINING PROGRAMS IN AYODHYA */}
           <div>
@@ -342,29 +285,7 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
 
         </div>
 
-        {/* CORPORATE LEGAL REGISTRATION & INCORPORATION BLOCK */}
-        <div className="py-6 border-b border-slate-800/80 bg-gradient-to-r from-slate-900/90 via-indigo-950/30 to-slate-900/90 border border-slate-700/60 p-5 rounded-2xl my-6 flex flex-col md:flex-row items-center justify-between gap-5 text-xs text-slate-300 shadow-xl hover:border-amber-500/40 transition-all">
-          <div className="flex flex-col gap-1.5 text-center md:text-left">
-            <div className="font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-amber-200 text-sm sm:text-base tracking-wide">
-              CodeGuru Technologies Private Limited
-            </div>
-            <div className="text-[11.5px] text-slate-300 leading-relaxed font-medium">
-              <span className="font-bold text-amber-400">Company Type:</span> Private Limited <span className="mx-2 text-slate-600">•</span> 
-              <span className="font-bold text-amber-400">CIN:</span> U85499UP2025PTC233762 <span className="mx-2 text-slate-600">•</span> 
-              <span className="font-bold text-amber-400">Date of Incorporation:</span> 15-Oct-2025
-            </div>
-            <div className="text-[11px] text-slate-400 font-normal">
-              Registered Office: CodeGuru Tower, Near Naya Ghat Bypass Road, Ayodhya, UP - 224123
-            </div>
-          </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 font-black text-xs tracking-wider uppercase shadow-inner flex items-center gap-1.5">
-              <Award className="w-4 h-4 text-amber-400" />
-              MSME & Startup India
-            </span>
-          </div>
-        </div>
 
         {/* BOTTOM COPYRIGHT & LEGAL BAR */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 text-xs text-slate-400 font-medium">

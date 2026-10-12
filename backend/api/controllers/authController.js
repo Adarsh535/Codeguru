@@ -500,18 +500,42 @@ export const updateStudentProfile = async (req, res) => {
     const cleanName = name.trim();
     const cleanEmail = (email && email.trim().toLowerCase()) || `${cleanPhone}@student.codeguru.in`;
 
-    let student = await Student.findOne({ phone: cleanPhone });
+    // 1. Check if student already exists by email
+    const existingWithEmail = await Student.findOne({ email: cleanEmail });
+    // 2. Check if student exists by phone
+    const existingWithPhone = await Student.findOne({ phone: cleanPhone });
 
-    if (!student) {
-      student = await Student.findOne({ email: cleanEmail });
-    }
+    let student = null;
 
-    if (student) {
-      student.name = cleanName;
-      student.email = cleanEmail;
-      student.phone = cleanPhone;
-      await student.save();
+    if (existingWithEmail && existingWithPhone) {
+      if (existingWithEmail._id.toString() !== existingWithPhone._id.toString()) {
+        // User had an existing account with this email, and a temp account was created by phone OTP.
+        // Merge them: Link phone to the real email account, update name, and remove temp record.
+        existingWithEmail.phone = cleanPhone;
+        existingWithEmail.name = cleanName;
+        await existingWithEmail.save();
+        await Student.deleteOne({ _id: existingWithPhone._id });
+        student = existingWithEmail;
+      } else {
+        existingWithEmail.name = cleanName;
+        existingWithEmail.phone = cleanPhone;
+        await existingWithEmail.save();
+        student = existingWithEmail;
+      }
+    } else if (existingWithEmail) {
+      // Account exists with this email - link this phone & update name
+      existingWithEmail.name = cleanName;
+      existingWithEmail.phone = cleanPhone;
+      await existingWithEmail.save();
+      student = existingWithEmail;
+    } else if (existingWithPhone) {
+      // Account exists with this phone - update email and name
+      existingWithPhone.name = cleanName;
+      existingWithPhone.email = cleanEmail;
+      await existingWithPhone.save();
+      student = existingWithPhone;
     } else {
+      // Brand new student record
       const tempPassword = await bcrypt.hash(`OTP@${cleanPhone}`, 10);
       student = new Student({
         name: cleanName,
@@ -527,9 +551,14 @@ export const updateStudentProfile = async (req, res) => {
     try {
       const studentLocation = (req.body.location && req.body.location.trim()) || '';
       let lead = await Lead.findOne({ phone: cleanPhone });
+      if (!lead && cleanEmail) {
+        lead = await Lead.findOne({ email: cleanEmail });
+      }
+
       if (lead) {
         lead.name = cleanName;
         lead.email = cleanEmail;
+        lead.phone = cleanPhone;
         if (studentLocation && studentLocation !== 'Ayodhya, UP') {
           lead.location = studentLocation;
         }
@@ -566,6 +595,12 @@ export const updateStudentProfile = async (req, res) => {
     });
   } catch (error) {
     console.error('[authController updateStudentProfile Error]:', error);
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'This email is already associated with another account.'
+      });
+    }
     return res.status(500).json({
       success: false,
       message: error.message || 'Error updating student profile'

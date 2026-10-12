@@ -67,47 +67,54 @@ export default function Navbar({
           
           {/* LEFT SIDE: LOGO ICON, LOGO TEXT, AND LOCATION */}
           <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-shrink-0">
-            {/* Logo Icon */}
+            {/* Logo Icon (Image 1 Style: Squircle with Golden Border) */}
             <button
               suppressHydrationWarning
               onClick={handleBrandClick}
-              className="w-8 h-8 min-w-[32px] sm:w-10 sm:h-10 md:w-11 md:h-11 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-full border border-gray-200/90 bg-white shadow-xs cursor-pointer hover:scale-105 active:scale-95 transition-transform p-0.5"
+              className="w-9 h-9 min-w-[36px] sm:w-11 sm:h-11 md:w-12 md:h-12 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-xl bg-[#090d16] border-1.5 border-amber-500/70 shadow-md shadow-amber-500/10 cursor-pointer hover:scale-105 active:scale-95 transition-all p-0.5"
               title="CodeGuru Home"
             >
               <img
-                src="/logo-icon.png"
-                alt="Code Guru Icon"
-                className="w-full h-full object-contain rounded-full"
+                src="/logo.png"
+                alt="CODE GURRU"
+                className="w-full h-full object-contain rounded-lg"
                 onError={(e) => {
-                  e.target.src = '/logo.png';
+                  e.target.src = '/logo-icon.png';
                 }}
               />
             </button>
 
-            {/* Brand Title & Location */}
+            {/* Brand Title & Subtitle (Image 1: CODE GURRU + CODEGURU PLACEMENT ACADEMY) */}
             <div className="flex flex-col justify-center min-w-0 flex-shrink">
               <div
                 onClick={handleBrandClick}
                 className="flex items-center cursor-pointer min-w-0"
                 title="CodeGuru Home"
               >
-                <img
-                  src="/brand-text-logo.png"
-                  alt="CODE GURRU"
-                  className="h-[14px] min-[360px]:h-[16px] sm:h-5 md:h-6 lg:h-[24px] w-auto max-w-[110px] min-[360px]:max-w-[140px] sm:max-w-[180px] lg:max-w-[210px] object-contain hover:scale-[1.01] transition-transform"
-                />
+                <span className="text-[17px] min-[360px]:text-[19px] sm:text-xl md:text-2xl font-black tracking-tight font-heading leading-tight flex items-center gap-1 select-none">
+                  <span className="text-slate-900">CODE</span>
+                  <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 bg-clip-text text-transparent">GURRU</span>
+                </span>
               </div>
 
-              {/* Location Picker Pill */}
-              <div
-                onClick={onOpenLocationModal}
-                className="flex items-center gap-0.5 sm:gap-1 text-slate-500 text-[8px] min-[360px]:text-[9px] sm:text-[10px] cursor-pointer hover:text-slate-700 transition-colors truncate w-full mt-0.5 pl-0.5"
-                title="Change Location"
-              >
-                <MapPin className="text-orange-400 flex-shrink-0 w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                <span className="font-semibold truncate leading-none">
-                  {selectedLocation ? selectedLocation.name : 'Detecting...'}
+              {/* Subtitle: CODEGURU PLACEMENT ACADEMY + Location Tag */}
+              <div className="flex items-center gap-1 min-w-0 mt-0.5">
+                <span className="text-[7.5px] min-[360px]:text-[8.5px] sm:text-[9.5px] font-black uppercase tracking-wider text-amber-600 truncate leading-none">
+                  CODEGURU PLACEMENT ACADEMY
                 </span>
+
+                {/* Location Tag */}
+                {selectedLocation && (
+                  <button
+                    onClick={onOpenLocationModal}
+                    className="hidden sm:inline-flex items-center gap-0.5 text-[8.5px] text-slate-400 hover:text-amber-600 font-semibold transition-colors cursor-pointer ml-0.5"
+                    title="Change Location"
+                  >
+                    <span className="text-slate-300">•</span>
+                    <MapPin className="text-amber-500 flex-shrink-0 w-2.5 h-2.5" />
+                    <span className="truncate">{selectedLocation.name}</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
