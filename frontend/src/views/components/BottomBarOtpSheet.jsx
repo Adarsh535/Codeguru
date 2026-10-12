@@ -54,6 +54,23 @@ export default function BottomBarOtpSheet({
     useRef(null)
   ];
 
+  const [showMyBatch, setShowMyBatch] = useState(true);
+
+  // Fetch showMyBatchNav setting
+  useEffect(() => {
+    try {
+      const base = typeof window !== 'undefined' ? (process.env.NEXT_PUBLIC_API_BASE_URL || `http://${window.location.hostname}:5000/api`) : 'http://localhost:5000/api';
+      fetch(`${base}/settings`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.success && data.data && data.data.showMyBatchNav !== undefined) {
+            setShowMyBatch(Boolean(data.data.showMyBatchNav));
+          }
+        })
+        .catch(() => {});
+    } catch (e) {}
+  }, [isOpen]);
+
   // Animate open/close
   useEffect(() => {
     if (isOpen) {
@@ -353,14 +370,16 @@ export default function BottomBarOtpSheet({
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2.5 mt-2">
-              <a
-                href="/my-batch"
-                className="flex items-center justify-center gap-2 py-3 px-3 bg-slate-900 text-white rounded-2xl text-xs font-bold hover:bg-slate-800 transition-colors shadow-sm"
-              >
-                <SchoolIcon className="!w-4 !h-4 text-orange-400" />
-                <span>My Batches</span>
-              </a>
+            <div className={`grid ${showMyBatch ? 'grid-cols-2' : 'grid-cols-1'} gap-2.5 mt-2`}>
+              {showMyBatch && (
+                <a
+                  href="/my-batch"
+                  className="flex items-center justify-center gap-2 py-3 px-3 bg-slate-900 text-white rounded-2xl text-xs font-bold hover:bg-slate-800 transition-colors shadow-sm"
+                >
+                  <SchoolIcon className="!w-4 !h-4 text-orange-400" />
+                  <span>My Batches</span>
+                </a>
+              )}
 
               <button
                 type="button"

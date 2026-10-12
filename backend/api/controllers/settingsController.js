@@ -16,7 +16,8 @@ export const getSettings = async (req, res) => {
         adminEmail: 'admin@codeguru.com',
         siteTitle: 'CodeGuru Student Placement & Learning Platform',
         whatsappNotificationEnabled: true,
-        autoWhatsappRedirect: true
+        autoWhatsappRedirect: true,
+        showMyBatchNav: true
       });
     }
     return res.status(200).json({ success: true, data: settings });
@@ -25,14 +26,14 @@ export const getSettings = async (req, res) => {
     return res.status(500).json({ 
       success: false, 
       message: 'Failed to fetch settings',
-      data: { adminPhone: '9670912923', whatsappNotificationEnabled: true } 
+      data: { adminPhone: '9670912923', whatsappNotificationEnabled: true, showMyBatchNav: true } 
     });
   }
 };
 
 export const updateSettings = async (req, res) => {
   try {
-    const { adminPhone, adminEmail, siteTitle, whatsappNotificationEnabled, autoWhatsappRedirect } = req.body;
+    const { adminPhone, adminEmail, siteTitle, whatsappNotificationEnabled, autoWhatsappRedirect, showMyBatchNav } = req.body;
     
     let settings = await Settings.findOne();
     if (!settings) {
@@ -44,6 +45,7 @@ export const updateSettings = async (req, res) => {
     if (siteTitle !== undefined) settings.siteTitle = siteTitle.trim();
     if (whatsappNotificationEnabled !== undefined) settings.whatsappNotificationEnabled = whatsappNotificationEnabled;
     if (autoWhatsappRedirect !== undefined) settings.autoWhatsappRedirect = autoWhatsappRedirect;
+    if (showMyBatchNav !== undefined) settings.showMyBatchNav = Boolean(showMyBatchNav);
 
     await settings.save();
 

@@ -15,6 +15,7 @@ export default function Navbar({
   setActiveTab
 }) {
   const [user, setUser] = useState(null);
+  const [showMyBatch, setShowMyBatch] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -31,13 +32,37 @@ export default function Navbar({
     }
   };
 
+  const fetchSettings = () => {
+    try {
+      const base = typeof window !== 'undefined' ? (process.env.NEXT_PUBLIC_API_BASE_URL || `http://${window.location.hostname}:5000/api`) : 'http://localhost:5000/api';
+      fetch(`${base}/settings`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.success && data.data && data.data.showMyBatchNav !== undefined) {
+            setShowMyBatch(Boolean(data.data.showMyBatchNav));
+          }
+        })
+        .catch(() => {});
+    } catch (e) {}
+  };
+
   useEffect(() => {
     checkUser();
+    fetchSettings();
+
     window.addEventListener('storage', checkUser);
     window.addEventListener('codeguru_user_updated', checkUser);
+    window.addEventListener('codeguru_refresh_all', fetchSettings);
+    window.addEventListener('focus', fetchSettings);
+
+    const interval = setInterval(fetchSettings, 5000);
+
     return () => {
       window.removeEventListener('storage', checkUser);
       window.removeEventListener('codeguru_user_updated', checkUser);
+      window.removeEventListener('codeguru_refresh_all', fetchSettings);
+      window.removeEventListener('focus', fetchSettings);
+      clearInterval(interval);
     };
   }, []);
 
@@ -151,7 +176,7 @@ export default function Navbar({
             >
               Placements
             </Link>
-            {user && (
+            {user && showMyBatch && (
               <Link
                 href="/my-batch"
                 onClick={() => setActiveTab && setActiveTab('my-batch')}

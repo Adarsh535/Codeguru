@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, Video, FileText, CheckCircle2, Clock, UserCheck, Award, 
   Search, Plus, Calendar, BarChart2, CheckSquare, XSquare, Printer, 
-  Download, Eye, QrCode, AlertTriangle, Layers, Users, X
+  Download, Eye, QrCode, AlertTriangle, Layers, Users, X,
+  School, EyeOff, Check, ToggleLeft, ToggleRight, Sparkles, RefreshCw
 } from 'lucide-react';
 import { enrollmentModel } from '../models/enrollmentModel';
+import { systemModel } from '../models/systemModel';
 
 // ==========================================
 // 1. MODULES & LESSONS VIEW
@@ -82,6 +84,252 @@ export function ModulesLessonsView() {
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 1.5. ACADEMIC: MY BATCH (STUDENT PORTAL MANAGEMENT)
+// ==========================================
+export function AcademicMyBatchView() {
+  const [showMyBatch, setShowMyBatch] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [enrollments, setEnrollments] = useState([]);
+  const [search, setSearch] = useState('');
+
+  // Fetch current visibility setting and enrollments
+  useEffect(() => {
+    let isMounted = true;
+    const load = async () => {
+      try {
+        const [settingsRes, enrollRes] = await Promise.all([
+          systemModel.getSettings(),
+          enrollmentModel.getEnrollments()
+        ]);
+        if (isMounted) {
+          if (settingsRes && settingsRes.data && settingsRes.data.showMyBatchNav !== undefined) {
+            setShowMyBatch(settingsRes.data.showMyBatchNav);
+          }
+          if (Array.isArray(enrollRes)) {
+            setEnrollments(enrollRes);
+          }
+        }
+      } catch (e) {
+        console.error('Error loading my batch admin data:', e);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+    load();
+    return () => { isMounted = false; };
+  }, []);
+
+  const handleToggle = async (newVal) => {
+    setShowMyBatch(newVal);
+    setSaving(true);
+    setSaveSuccess(false);
+    try {
+      const res = await systemModel.updateSettings({ showMyBatchNav: newVal });
+      if (res && res.success) {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      }
+    } catch (err) {
+      alert('Failed to update My Batch visibility.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const filteredEnrollments = enrollments.filter(e => 
+    (e.studentName || '').toLowerCase().includes(search.toLowerCase()) ||
+    (e.courseName || '').toLowerCase().includes(search.toLowerCase()) ||
+    (e.batchCode || '').toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-700">
+              Frontend Student Portal
+            </span>
+            <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700">
+              Academic Hub
+            </span>
+          </div>
+          <h1 className="text-xl font-black text-slate-900 tracking-tight mt-1 flex items-center gap-2 font-heading">
+            <School className="w-6 h-6 text-orange-500" />
+            <span>My Batch Portal Management</span>
+          </h1>
+          <p className="text-xs font-semibold text-slate-500 mt-0.5">
+            Control whether the "My Batch" tab is visible to logged-in students on the website header/navbar
+          </p>
+        </div>
+
+        {saveSuccess && (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold animate-fade-in">
+            <Check className="w-4 h-4" />
+            <span>Settings Saved Live!</span>
+          </div>
+        )}
+      </div>
+
+      {/* VISIBILITY CONTROLLER CARD */}
+      <div className="bg-gradient-to-br from-white via-orange-50/20 to-white p-6 rounded-3xl border-2 border-orange-200/80 shadow-xs space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-extrabold text-slate-900">
+                Frontend Logged-in Student Navbar Visibility
+              </h2>
+              {showMyBatch ? (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Visible on Website
+                </span>
+              ) : (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-700 border border-rose-200 flex items-center gap-1">
+                  <EyeOff className="w-3 h-3" />
+                  Hidden From Students
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-600 font-medium max-w-2xl leading-relaxed">
+              Jab ye option <strong>"OFF (Hidden)"</strong> hoga, to koi bhi student jab website par login karega, usko navbar ya header par <strong>"My Batch"</strong> ka option <strong>show nahi hoga</strong>. Admin se instantly hide ho jayega!
+            </p>
+          </div>
+
+          {/* TOGGLE SWITCH */}
+          <div className="flex items-center gap-3 shrink-0">
+            <span className={`text-xs font-black ${!showMyBatch ? 'text-rose-600' : 'text-slate-400'}`}>
+              Hidden
+            </span>
+            <button
+              onClick={() => handleToggle(!showMyBatch)}
+              disabled={loading || saving}
+              className={`w-16 h-9 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${
+                showMyBatch ? 'bg-orange-500' : 'bg-slate-300'
+              } disabled:opacity-50 shadow-inner`}
+              title={showMyBatch ? 'Click to Hide My Batch' : 'Click to Show My Batch'}
+            >
+              <div
+                className={`bg-white w-7 h-7 rounded-full shadow-md transform transition-transform duration-300 flex items-center justify-center ${
+                  showMyBatch ? 'translate-x-7' : 'translate-x-0'
+                }`}
+              >
+                {showMyBatch ? (
+                  <Check className="w-4 h-4 text-orange-600" />
+                ) : (
+                  <EyeOff className="w-3.5 h-3.5 text-slate-400" />
+                )}
+              </div>
+            </button>
+            <span className={`text-xs font-black ${showMyBatch ? 'text-emerald-600' : 'text-slate-400'}`}>
+              Visible
+            </span>
+          </div>
+        </div>
+
+        {/* LIVE STATUS BANNER */}
+        <div className={`p-4 rounded-2xl border text-xs font-medium flex items-center justify-between ${
+          showMyBatch 
+            ? 'bg-emerald-50/70 border-emerald-200 text-emerald-800' 
+            : 'bg-rose-50/70 border-rose-200 text-rose-800'
+        }`}>
+          <div className="flex items-center gap-2.5">
+            <School className={`w-5 h-5 shrink-0 ${showMyBatch ? 'text-emerald-600' : 'text-rose-600'}`} />
+            <div>
+              <strong>Current Status: </strong>
+              {showMyBatch 
+                ? 'Active — Logged-in students can view and access their "My Batch" schedule on the website.'
+                : 'Hidden — "My Batch" icon & link are completely removed from the student navbar in real time.'}
+            </div>
+          </div>
+          {saving && (
+            <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1">
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Saving...
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* ACTIVE STUDENT BATCH ALLOCATIONS SUMMARY */}
+      <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <h3 className="text-base font-extrabold text-slate-900">
+              Enrolled Student Batch Roster ({filteredEnrollments.length})
+            </h3>
+            <p className="text-xs text-slate-500 font-medium">
+              List of all students currently enrolled in live batches with their course schedules
+            </p>
+          </div>
+          <div className="w-full sm:w-64">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search student, course, batch..."
+              className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium outline-none focus:border-orange-500"
+            />
+          </div>
+        </div>
+
+        {filteredEnrollments.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 text-[11px] font-extrabold text-slate-600 uppercase border-b border-slate-200">
+                  <th className="py-2.5 px-3">Student Name</th>
+                  <th className="py-2.5 px-3">Batch Code</th>
+                  <th className="py-2.5 px-3">Course</th>
+                  <th className="py-2.5 px-3">Timing / Schedule</th>
+                  <th className="py-2.5 px-3">Mentor</th>
+                  <th className="py-2.5 px-3">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs font-medium">
+                {filteredEnrollments.map((en, idx) => (
+                  <tr key={en._id || en.id || idx} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="py-3 px-3">
+                      <div className="font-bold text-slate-900">{en.studentName}</div>
+                      <div className="text-[10px] text-slate-400 font-mono">{en.studentEmail || en.studentPhone}</div>
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className="font-mono text-[11px] font-black px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
+                        {en.batchCode || 'FS-2026-42'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 font-semibold text-slate-800">
+                      {en.courseName}
+                    </td>
+                    <td className="py-3 px-3 text-slate-600 text-[11px]">
+                      {en.timing || '09:00 AM - 11:00 AM (Mon-Fri)'}
+                    </td>
+                    <td className="py-3 px-3 font-bold text-slate-700">
+                      {en.mentor || 'Vikrant Shinde'}
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                        {en.status || 'Active'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="py-12 text-center text-slate-400 font-semibold text-xs">
+            No batch enrollments found.
+          </div>
+        )}
       </div>
     </div>
   );

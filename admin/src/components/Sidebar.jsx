@@ -5,7 +5,7 @@ import {
   Award, FileText, DollarSign, Receipt, RefreshCw, Image, ImagePlus, 
   Users2, Globe, Search, BarChart3, TrendingUp, Shield, 
   Key, ShieldAlert, Database, Settings, LogOut, X, ChevronRight, FileSpreadsheet,
-  Megaphone
+  Megaphone, School
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -34,6 +34,7 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, to
     {
       title: 'ACADEMIC',
       items: [
+        { id: 'academic-my-batch', label: 'My Batch', icon: School, badge: 'Frontend', badgeColor: 'bg-orange-500' },
         { id: 'academic-courses', label: 'Courses', icon: BookOpen },
         { id: 'academic-modules', label: 'Modules & Lessons', icon: Layers },
         { id: 'academic-batches', label: 'Batches', icon: Calendar },

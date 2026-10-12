@@ -25,7 +25,7 @@ import { FollowUpsView, AdmissionsView, StudentsView, CommunicationView } from '
 
 // Academic Views
 import { 
-  ModulesLessonsView, BatchesView, AttendanceView, 
+  AcademicMyBatchView, ModulesLessonsView, BatchesView, AttendanceView, 
   AssessmentsView, StudentProgressView, CertificatesView 
 } from './views/AcademicViews';
 
@@ -136,6 +136,7 @@ function AdminMainApp() {
             {activeTab === 'crm-communication' && <CommunicationView />}
 
             {/* 3. ACADEMIC */}
+            {activeTab === 'academic-my-batch' && <AcademicMyBatchView />}
             {activeTab === 'academic-courses' && <CoursesManagerView />}
             {activeTab === 'academic-modules' && <ModulesLessonsView />}
             {activeTab === 'academic-batches' && <BatchesView />}
