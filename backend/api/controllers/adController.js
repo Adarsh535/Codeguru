@@ -47,12 +47,7 @@ const ensureDefaultAdExists = async () => {
  */
 export const getAds = async (req, res) => {
   try {
-    let ads = await Ad.find().sort({ displayOrder: 1, createdAt: -1 });
-
-    if (!ads || ads.length === 0) {
-      const seeded = await ensureDefaultAdExists();
-      if (seeded) ads = seeded;
-    }
+    const ads = await Ad.find().sort({ displayOrder: 1, createdAt: -1 });
 
     return res.json({
       success: true,
@@ -83,11 +78,6 @@ export const getActiveAds = async (req, res) => {
     }
 
     let ads = await Ad.find(query).sort({ displayOrder: 1, createdAt: -1 });
-
-    if (!ads || ads.length === 0) {
-      await ensureDefaultAdExists();
-      ads = await Ad.find(query).sort({ displayOrder: 1, createdAt: -1 });
-    }
 
     return res.json({
       success: true,

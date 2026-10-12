@@ -2,11 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/apiService';
-import { FALLBACK_AD } from '../../models/adModel';
 
+/**
+ * FeaturedAdBanner
+ * - Shows ONLY when admin has at least one active ad in the CRM
+ * - If no active ad exists (or all are hidden) → renders nothing
+ * - No hardcoded fallback banner
+ */
 export default function FeaturedAdBanner({ onOpenContactModal }) {
   const [ad, setAd] = useState(null);
-  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -15,59 +19,48 @@ export default function FeaturedAdBanner({ onOpenContactModal }) {
       try {
         const ads = await apiService.getActiveAds('all');
         if (isMounted) {
-          if (ads && ads.length > 0) {
-            // Pick first active ad from any position
-            const activeAd = ads[0];
-            setAd(activeAd);
-            setIsVisible(true);
-          } else {
-            // No active ads — hide section entirely
-            setAd(FALLBACK_AD);
-            setIsVisible(true);
-          }
+          // Only set ad if admin has an active one, otherwise null (hidden)
+          setAd(ads && ads.length > 0 ? ads[0] : null);
         }
       } catch (err) {
-        console.warn('[FeaturedAdBanner] Error loading ad, keeping fallback:', err);
+        // On error, keep hidden — don't show any fallback
+        if (isMounted) setAd(null);
+        console.warn('[FeaturedAdBanner] Could not load ads:', err);
       }
     };
 
     fetchAd();
 
-    // Re-check periodically or on focus for real-time CRM updates
+    // Poll every 5s so admin changes reflect in real-time
+    const interval = setInterval(fetchAd, 5000);
     const handleFocus = () => fetchAd();
     window.addEventListener('focus', handleFocus);
 
-    const interval = setInterval(fetchAd, 5000);
-
     return () => {
       isMounted = false;
-      window.removeEventListener('focus', handleFocus);
       clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
     };
   }, []);
 
-  if (!isVisible || !ad) {
-    return null;
-  }
+  // No active ad from admin → render nothing
+  if (!ad) return null;
 
   const handleClick = () => {
     if (ad._id || ad.id) {
       apiService.trackAdClick(ad._id || ad.id);
-    }
-    if (!ad.linkUrl && onOpenContactModal) {
-      // If no external link provided, opens inquiry modal on click as fallback
-      // or simply does nothing if not needed
     }
   };
 
   const BannerContent = (
     <div className="w-full rounded-[16px] sm:rounded-[22px] bg-white border border-slate-200/90 p-1.5 sm:p-2.5 shadow-xs flex items-center justify-center overflow-hidden hover:shadow-md transition-all duration-300 group cursor-pointer">
       <img
-        src={ad.imageUrl || '/images/arena-25-years.jpg'}
-        alt={ad.title || 'Celebrating 25 Years - Arena Animation'}
+        src={ad.imageUrl}
+        alt={ad.title || 'Advertisement'}
         className="w-full h-[100px] sm:h-[160px] md:h-[200px] object-cover sm:object-fill rounded-xl mx-auto transition-transform duration-500 group-hover:scale-[1.01]"
         onError={(e) => {
-          e.currentTarget.src = '/images/arena-25-years.jpg';
+          // If image fails to load, hide the entire section
+          e.currentTarget.closest('section')?.style && (e.currentTarget.closest('section').style.display = 'none');
         }}
       />
     </div>
