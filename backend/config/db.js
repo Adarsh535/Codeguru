@@ -54,7 +54,10 @@ export const getSanitizedUri = (rawUri) => {
   return rawUri;
 };
 
-const rawTargetUri = process.env.MONGODB_URI || 'mongodb+srv://Adarshverma:adarshverma%403213@cluster0.illbds4.mongodb.net/codeguru_db?retryWrites=true&w=majority';
+// Fallback direct hosts for rfadttm cluster in case Node.js/Windows querySrv returns ECONNREFUSED
+export const RFADTTM_DIRECT_URI = 'mongodb://cgukvk_db_user:JdSCwMQTjDTqjDwF@ac-0e0udxv-shard-00-00.rfadttm.mongodb.net:27017,ac-0e0udxv-shard-00-01.rfadttm.mongodb.net:27017,ac-0e0udxv-shard-00-02.rfadttm.mongodb.net:27017/codeguru_db?ssl=true&replicaSet=atlas-12f6dr-shard-0&authSource=admin&retryWrites=true&w=majority';
+
+const rawTargetUri = process.env.MONGODB_URI || 'mongodb+srv://cgukvk_db_user:JdSCwMQTjDTqjDwF@cluster0.rfadttm.mongodb.net/codeguru_db?retryWrites=true&w=majority';
 export const CLOUD_MONGODB_URI = getSanitizedUri(rawTargetUri);
 export const LOCAL_MONGODB_URI = 'mongodb://127.0.0.1:27017/codeguru_db';
 export let currentDbMode = 'cloud';
@@ -120,30 +123,47 @@ export const connectDB = async () => {
     console.warn(`================================================`);
     console.warn(`⚠️ Primary MongoDB Connection Failed (${primaryErr.message})`);
     
-    if (isAtlas) {
-      console.warn(`🔄 Attempting Fallback to Local MongoDB (127.0.0.1:27017)...`);
+    // Check if error is SRV query failure and we have a direct host fallback
+    if (activeUri.includes('rfadttm.mongodb.net')) {
       try {
-        activeUri = LOCAL_MONGODB_URI;
-        isAtlas = false;
+        console.warn(`🔄 Attempting Direct ReplicaSet Connection (bypassing SRV query)...`);
+        activeUri = RFADTTM_DIRECT_URI;
         conn = await mongoose.connect(activeUri, {
-          serverSelectionTimeoutMS: 5000
+          serverSelectionTimeoutMS: 8000
         });
-        currentDbMode = 'local';
-      } catch (fallbackErr) {
-        console.warn(`================================================`);
-        console.warn(`⚠️ Local MongoDB Connection Error (${fallbackErr.message})`);
-        console.warn(`👉 For MongoDB Atlas:`);
-        console.warn(`   1. Check your Atlas Connection String in backend/.env`);
-        console.warn(`   2. Ensure IP Access List includes your IP or 0.0.0.0/0 in Atlas Network Access`);
-        console.warn(`   3. Verify database username & password are correct`);
-        console.warn(`👉 For Local MongoDB: Ensure MongoDB service is running at mongodb://127.0.0.1:27017`);
+        currentDbMode = 'cloud';
+        isAtlas = true;
+      } catch (directErr) {
+        console.warn(`⚠️ Direct Atlas Connection Failed (${directErr.message})`);
+      }
+    }
+
+    if (!conn) {
+      if (isAtlas) {
+        console.warn(`🔄 Attempting Fallback to Local MongoDB (127.0.0.1:27017)...`);
+        try {
+          activeUri = LOCAL_MONGODB_URI;
+          isAtlas = false;
+          conn = await mongoose.connect(activeUri, {
+            serverSelectionTimeoutMS: 5000
+          });
+          currentDbMode = 'local';
+        } catch (fallbackErr) {
+          console.warn(`================================================`);
+          console.warn(`⚠️ Local MongoDB Connection Error (${fallbackErr.message})`);
+          console.warn(`👉 For MongoDB Atlas:`);
+          console.warn(`   1. Check your Atlas Connection String in backend/.env`);
+          console.warn(`   2. Ensure IP Access List includes your IP or 0.0.0.0/0 in Atlas Network Access`);
+          console.warn(`   3. Verify database username & password are correct`);
+          console.warn(`👉 For Local MongoDB: Ensure MongoDB service is running at mongodb://127.0.0.1:27017`);
+          console.warn(`================================================`);
+          return false;
+        }
+      } else {
+        console.warn(`👉 Ensure MongoDB service is running locally at mongodb://127.0.0.1:27017`);
         console.warn(`================================================`);
         return false;
       }
-    } else {
-      console.warn(`👉 Ensure MongoDB service is running locally at mongodb://127.0.0.1:27017`);
-      console.warn(`================================================`);
-      return false;
     }
   }
 
@@ -162,9 +182,9 @@ export const connectDB = async () => {
     const adminCount = await Admin.countDocuments();
     if (adminCount === 0) {
       await Admin.create({
-        name: 'Super Admin',
-        email: 'admin@codeguru.com',
-        password: bcrypt.hashSync('admin123', 10),
+        name: 'CodeGuru Admin',
+        email: 'codeguru123@gmail.com',
+        password: bcrypt.hashSync('codeguru123', 10),
         role: 'Master Admin'
       });
       console.log(`🔑 Admin user created in MongoDB 'admins' collection`);
