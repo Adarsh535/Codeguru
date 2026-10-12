@@ -20,12 +20,14 @@ import enrollmentRoutes from './routes/enrollmentRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import realtimeRoutes from './routes/realtimeRoutes.js';
+import adRoutes from './routes/adRoutes.js';
 
 const apiRouter = express.Router();
 
 // Mount all API endpoints
 apiRouter.use('/auth', authRoutes);
 apiRouter.use('/banners', bannerRoutes);
+apiRouter.use('/ads', adRoutes);
 apiRouter.use('/courses', courseRoutes);
 apiRouter.use('/categories', categoryRoutes);
 apiRouter.use('/placements', placementRoutes);

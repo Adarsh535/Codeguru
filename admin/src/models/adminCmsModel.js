@@ -141,6 +141,89 @@ export const adminCmsModel = {
 
   /**
    * --------------------------------------------------------------------------
+   * API: Get Promotional / Advertisement Banners List
+   * --------------------------------------------------------------------------
+   * @route   GET http://localhost:5000/api/ads
+   */
+  getAds: async () => {
+    try {
+      const res = await fetch(`${API_BASE}/ads`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        return data.data.map(item => ({
+          ...item,
+          id: item._id || item.id
+        }));
+      }
+      return [];
+    } catch (err) {
+      console.warn('[adminCmsModel API Warning] Ads API call failed:', err);
+      return [];
+    }
+  },
+
+  /**
+   * --------------------------------------------------------------------------
+   * API: Create New Ad Banner
+   * --------------------------------------------------------------------------
+   * @route   POST http://localhost:5000/api/ads
+   */
+  createAd: async (payload) => {
+    try {
+      const res = await fetch(`${API_BASE}/ads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      const item = data.data;
+      return item ? { ...item, id: item._id || item.id } : null;
+    } catch (err) {
+      console.error('[adminCmsModel API Error] Error creating ad:', err);
+      return null;
+    }
+  },
+
+  /**
+   * --------------------------------------------------------------------------
+   * API: Update Existing Ad Banner
+   * --------------------------------------------------------------------------
+   * @route   PUT http://localhost:5000/api/ads/:id
+   */
+  updateAd: async (id, payload) => {
+    try {
+      const res = await fetch(`${API_BASE}/ads/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      const item = data.data;
+      return item ? { ...item, id: item._id || item.id } : null;
+    } catch (err) {
+      console.error('[adminCmsModel API Error] Error updating ad:', err);
+      return null;
+    }
+  },
+
+  /**
+   * --------------------------------------------------------------------------
+   * API: Delete Ad Banner
+   * --------------------------------------------------------------------------
+   * @route   DELETE http://localhost:5000/api/ads/:id
+   */
+  deleteAd: async (id) => {
+    try {
+      const res = await fetch(`${API_BASE}/ads/${id}`, { method: 'DELETE' });
+      return await res.json();
+    } catch (err) {
+      console.error('[adminCmsModel API Error] Error deleting ad:', err);
+      return { success: false, message: err.message };
+    }
+  },
+
+  /**
+   * --------------------------------------------------------------------------
    * API: Get All Courses
    * --------------------------------------------------------------------------
    * @route   GET http://localhost:5000/api/courses

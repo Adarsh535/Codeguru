@@ -36,6 +36,30 @@ export const apiAdminService = {
   deleteBanner: (id) => adminCmsModel.deleteBanner(id),
 
   /**
+   * API: Fetch Promotional & Ad Banners
+   * @route GET http://localhost:5000/api/ads
+   */
+  getAds: () => adminCmsModel.getAds(),
+
+  /**
+   * API: Create New Ad Banner
+   * @route POST http://localhost:5000/api/ads
+   */
+  addAd: (payload) => adminCmsModel.createAd(payload),
+
+  /**
+   * API: Update Existing Ad Banner
+   * @route PUT http://localhost:5000/api/ads/:id
+   */
+  updateAd: (id, payload) => adminCmsModel.updateAd(id, payload),
+
+  /**
+   * API: Delete Ad Banner
+   * @route DELETE http://localhost:5000/api/ads/:id
+   */
+  deleteAd: (id) => adminCmsModel.deleteAd(id),
+
+  /**
    * API: Fetch Training Courses Catalog
    * @route GET http://localhost:5000/api/courses
    */

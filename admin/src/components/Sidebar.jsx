@@ -4,7 +4,8 @@ import {
   MessageSquare, BookOpen, Layers, Calendar, UserCheck2, CheckSquare, 
   Award, FileText, DollarSign, Receipt, RefreshCw, Image, ImagePlus, 
   Users2, Globe, Search, BarChart3, TrendingUp, Shield, 
-  Key, ShieldAlert, Database, Settings, LogOut, X, ChevronRight, FileSpreadsheet
+  Key, ShieldAlert, Database, Settings, LogOut, X, ChevronRight, FileSpreadsheet,
+  Megaphone
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -55,6 +56,7 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, to
       title: 'WEBSITE CMS',
       items: [
         { id: 'cms-banners', label: 'Hero Banners', icon: Image },
+        { id: 'cms-ads', label: 'Ad Banners (Ads)', icon: Megaphone, badge: 'Dynamic', badgeColor: 'bg-blue-600' },
         { id: 'cms-placements', label: 'Placement Posters', icon: ImagePlus },
         { id: 'cms-team', label: 'Team & Mentors', icon: Users2 },
         { id: 'cms-courses', label: 'Course Catalog', icon: BookOpen },

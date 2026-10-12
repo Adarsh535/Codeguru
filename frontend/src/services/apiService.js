@@ -13,6 +13,7 @@ import { leadModel } from '../models/leadModel';
 import { enrollmentModel } from '../models/enrollmentModel';
 import { userModel } from '../models/userModel';
 import { categoryModel } from '../models/categoryModel';
+import { adModel } from '../models/adModel';
 
 export const apiService = {
   /**
@@ -20,6 +21,13 @@ export const apiService = {
    * @route GET http://localhost:5000/api/banners
    */
   getBanners: () => bannerModel.getBanners(),
+
+  /**
+   * API: Fetch Dynamic Promotional & Advertisement Banners
+   * @route GET http://localhost:5000/api/ads/active
+   */
+  getActiveAds: (position) => adModel.getActiveAds(position),
+  trackAdClick: (id) => adModel.trackClick(id),
 
   /**
    * API: Fetch Course Categories

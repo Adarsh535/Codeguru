@@ -13,6 +13,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 
 // Website CMS Views
 import BannersManagerView from './views/BannersManagerView';
+import AdsManagerView from './views/AdsManagerView';
 import PlacementsManagerView from './views/PlacementsManagerView';
 import TeamManagerView from './views/TeamManagerView';
 import CoursesManagerView from './views/CoursesManagerView';
@@ -150,6 +151,7 @@ function AdminMainApp() {
 
             {/* 5. WEBSITE CMS */}
             {activeTab === 'cms-banners' && <BannersManagerView />}
+            {activeTab === 'cms-ads' && <AdsManagerView />}
             {activeTab === 'cms-placements' && <PlacementsManagerView />}
             {activeTab === 'cms-team' && <TeamManagerView />}
             {activeTab === 'cms-courses' && <CoursesManagerView />}

@@ -139,16 +139,21 @@ export default function BannersManagerView() {
 
       {/* UPLOAD MODAL */}
       {showAddModal && createPortal(
-        <div className="fixed inset-0 z-[99999] bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-xl border border-slate-200 shadow-2xl flex flex-col my-auto max-h-[90vh] overflow-hidden animate-fade-in">
+        <div className="fixed inset-0 z-[99999] bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+          <div className="bg-white rounded-3xl w-full max-w-5xl border border-slate-200 shadow-2xl flex flex-col my-auto max-h-[92vh] overflow-hidden animate-fade-in">
             
             {/* MODAL HEADER */}
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-5 bg-blue-600 rounded-full" />
-                <h3 className="text-sm sm:text-base font-black text-slate-900 font-heading">
-                  {editingBannerId ? 'Edit Hero Banner' : 'Upload Homepage Image or Video Banner'}
-                </h3>
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-2.5 h-6 bg-blue-600 rounded-full" />
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-slate-900 font-heading">
+                    {editingBannerId ? 'Edit Hero Banner' : 'Upload Homepage Image or Video Banner'}
+                  </h3>
+                  <p className="text-[11px] font-semibold text-slate-500">
+                    Live slider preview updates in real-time as you type and upload
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
@@ -160,9 +165,10 @@ export default function BannersManagerView() {
               </button>
             </div>
 
-            <form id="bannerForm" onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-              
-              {/* PINNED TOP SECTION: UPLOAD BOX & MEDIA TYPE (FIXED ABOVE SCROLL AREA) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 overflow-hidden flex-1 min-h-0">
+              <form id="bannerForm" onSubmit={handleSubmit} className="lg:col-span-7 flex flex-col flex-1 min-h-0 overflow-y-auto max-h-[calc(92vh-130px)] scrollbar-thin border-b lg:border-b-0 lg:border-r border-slate-200">
+                
+                {/* PINNED TOP SECTION: UPLOAD BOX & MEDIA TYPE (FIXED ABOVE SCROLL AREA) */}
               <div className="p-4 bg-slate-50/90 border-b border-slate-200/80 shrink-0 flex flex-col gap-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
                   {/* MEDIA TYPE TOGGLE */}
@@ -322,6 +328,65 @@ export default function BannersManagerView() {
               </div>
 
             </form>
+
+            {/* RIGHT COLUMN: LIVE SLIDER PREVIEW */}
+            <div className="lg:col-span-5 bg-slate-50/70 p-5 sm:p-6 flex flex-col gap-4 overflow-y-auto max-h-[calc(92vh-130px)] scrollbar-thin">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-800 font-heading">
+                    Live Slider Preview
+                  </span>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                  Real-time
+                </span>
+              </div>
+
+              {/* SIMULATED HERO SLIDER CONTAINER */}
+              <div className="rounded-2xl border border-slate-200 shadow-sm overflow-hidden bg-slate-950 flex flex-col relative group">
+                <div className="h-48 w-full bg-slate-900 relative flex items-center justify-center overflow-hidden">
+                  {formData.mediaUrl ? (
+                    isVideo(formData.mediaUrl, formData.type) ? (
+                      <video src={formData.mediaUrl} controls muted className="w-full h-full object-cover" />
+                    ) : (
+                      <img src={formData.mediaUrl} alt="Preview" className="w-full h-full object-cover" />
+                    )
+                  ) : (
+                    <div className="text-slate-500 flex flex-col items-center gap-1 text-xs">
+                      <ImageIcon className="!w-8 !h-8" />
+                      <span>Media preview will appear here</span>
+                    </div>
+                  )}
+
+                  <span className="absolute top-3 left-3 text-white text-[10px] font-black uppercase px-2.5 py-1 rounded-full shadow-xs bg-blue-600">
+                    {formData.badge || 'PROMOTION'}
+                  </span>
+                </div>
+
+                <div className="p-4 bg-white flex flex-col gap-2">
+                  <h4 className="text-sm font-black text-slate-900 font-heading leading-tight">
+                    {formData.title || 'Banner Title'}
+                  </h4>
+                  <p className="text-xs text-slate-500 font-medium line-clamp-2">
+                    {formData.subtitle || 'Subtitle description...'}
+                  </p>
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-400">CTA: {formData.ctaText || 'Learn More'}</span>
+                    <span className="px-2.5 py-1 rounded-lg bg-blue-600 text-white text-[10px] font-bold">
+                      {formData.ctaText || 'Explore'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white border border-slate-200 text-xs text-slate-500 flex items-center gap-2">
+                <span>💡</span>
+                <span>Real-time preview of how this slider card appears on the live website.</span>
+              </div>
+            </div>
+
+          </div>
 
           </div>
         </div>,
