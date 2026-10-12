@@ -150,23 +150,54 @@ export async function detectStudentRealLocation(forceRefresh = false) {
     let gpsResult = null;
     if (typeof window !== 'undefined' && 'geolocation' in navigator) {
       gpsResult = await new Promise((resolve) => {
-        const timer = setTimeout(() => resolve(null), 4000); // 4s timeout for GPS prompt
+        const timer = setTimeout(() => resolve(null), 6000);
         navigator.geolocation.getCurrentPosition(
           async (pos) => {
             clearTimeout(timer);
             try {
               const { latitude, longitude } = pos.coords;
-              const res = await fetch(
+
+              // PRIMARY: Nominatim (OpenStreetMap) — free, accurate, no API key needed
+              const nominatimRes = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`,
+                { headers: { 'Accept-Language': 'en', 'User-Agent': 'CodeGuru-App/1.0' } }
+              );
+              if (nominatimRes.ok) {
+                const data = await nominatimRes.json();
+                const addr = data.address || {};
+                // Pick best city field (city > town > village > county)
+                const city = addr.city || addr.town || addr.village || addr.county || addr.state_district;
+                const state = addr.state || 'Uttar Pradesh';
+                if (city) {
+                  const stateCode = getStateCode(state);
+                  resolve({
+                    id: `auto-gps-${Date.now()}`,
+                    name: `${city}, ${stateCode}`,
+                    city,
+                    state,
+                    stateCode,
+                    latitude,
+                    longitude,
+                    icon: '📍',
+                    source: 'gps',
+                    autoDetected: true
+                  });
+                  return;
+                }
+              }
+
+              // FALLBACK: BigDataCloud if Nominatim fails
+              const bdcRes = await fetch(
                 `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
               );
-              if (res.ok) {
-                const data = await res.json();
+              if (bdcRes.ok) {
+                const data = await bdcRes.json();
                 const city = data.city || data.locality || data.principalSubdivision;
                 const state = data.principalSubdivision || 'Uttar Pradesh';
                 if (city) {
                   const stateCode = getStateCode(state);
                   resolve({
-                    id: `auto-gps-${Date.now()}`,
+                    id: `auto-gps-bdc-${Date.now()}`,
                     name: `${city}, ${stateCode}`,
                     city,
                     state,
@@ -187,7 +218,7 @@ export async function detectStudentRealLocation(forceRefresh = false) {
             clearTimeout(timer);
             resolve(null);
           },
-          { enableHighAccuracy: true, timeout: 3500, maximumAge: 60000 }
+          { enableHighAccuracy: true, timeout: 5000, maximumAge: 60000 }
         );
       });
     }
