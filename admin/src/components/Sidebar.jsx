@@ -100,20 +100,20 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, to
       )}
 
       <aside 
-        className={`fixed top-0 left-0 bottom-0 z-50 w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 left-0 bottom-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } shadow-sm lg:shadow-none`}
       >
         {/* TOP BRAND LOGO HEADER */}
         <div>
-          <div className="h-16 px-4 flex items-center justify-between border-b border-slate-100">
+          <div className="h-16 px-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-white border border-slate-200/80 p-0.5 shadow-2xs flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-full bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 p-0.5 shadow-2xs flex items-center justify-center shrink-0">
                 <img src="/logo.png" alt="CodeGuru Icon" className="w-full h-full object-contain rounded-full" />
               </div>
               <div className="flex flex-col min-w-0">
-                <img src="/brand-text-logo.png" alt="CODE GURRU" className="h-4.5 w-auto object-contain object-left" />
-                <span className="text-[9px] font-black tracking-widest text-indigo-600 uppercase mt-0.5">
+                <img src="/brand-text-logo.png" alt="CODE GURRU" className="h-4.5 w-auto object-contain object-left dark:brightness-110" />
+                <span className="text-[9px] font-black tracking-widest text-indigo-600 dark:text-indigo-400 uppercase mt-0.5">
                   Admin Panel
                 </span>
               </div>
@@ -122,7 +122,7 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, to
             {/* Close button for mobile */}
             <button 
               onClick={() => setIsOpen(false)}
-              className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 shrink-0"
+              className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0"
             >
               <X className="w-5 h-5" />
             </button>
@@ -132,7 +132,7 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, to
           <nav className="p-3.5 flex flex-col gap-5 overflow-y-auto max-h-[calc(100vh-140px)] scrollbar-thin">
             {navSections.map((section, idx) => (
               <div key={idx} className="flex flex-col gap-1">
-                <span className="px-3 text-[10px] font-extrabold tracking-wider text-slate-400 uppercase">
+                <span className="px-3 text-[10px] font-extrabold tracking-wider text-slate-400 dark:text-slate-500 uppercase">
                   {section.title}
                 </span>
 
@@ -149,13 +149,13 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, to
                       }}
                       className={`w-full px-3 py-2 rounded-xl font-semibold text-xs transition-all duration-150 flex items-center justify-between group cursor-pointer ${
                         isActive
-                          ? 'bg-blue-50/90 text-blue-600 font-extrabold shadow-2xs'
-                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                          ? 'bg-blue-50/90 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-extrabold shadow-2xs'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <Icon className={`w-4 h-4 transition-colors ${
-                          isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'
+                          isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
                         }`} />
                         <span>{item.label}</span>
                       </div>
@@ -177,17 +177,17 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, to
         </div>
 
         {/* BOTTOM USER PROFILE CARD & LOGOUT */}
-        <div className="p-3.5 border-t border-slate-100 bg-slate-50/50">
-          <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+        <div className="p-3.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+          <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-white dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700 shadow-2xs">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 uppercase">
                 {user?.name?.[0]?.toUpperCase() || 'A'}
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-bold text-slate-900 truncate">
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
                   {user?.name || 'Super Admin'}
                 </span>
-                <span className="text-[10px] font-medium text-slate-500 truncate">
+                <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 truncate">
                   {user?.email || 'admin@codeguru.com'}
                 </span>
               </div>
@@ -197,7 +197,7 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, to
             <button
               onClick={logout}
               title="Logout from Admin"
-              className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition-colors shrink-0 cursor-pointer"
+              className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 transition-colors shrink-0 cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>

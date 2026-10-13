@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import LoginView from './views/LoginView';
@@ -75,7 +76,7 @@ function AdminMainApp() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#f4f6fb] text-slate-800 flex">
+      <div className="min-h-screen bg-[#f4f6fb] dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex transition-colors duration-200">
         
         {/* SIDEBAR NAVIGATION (Full Enterprise Taxonomy) */}
         <Sidebar
@@ -248,8 +249,10 @@ function AdminMainApp() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AdminMainApp />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AdminMainApp />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
