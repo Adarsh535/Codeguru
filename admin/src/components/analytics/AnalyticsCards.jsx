@@ -130,12 +130,12 @@ export default function AnalyticsCards({ summary, loading, streamConnected = tru
       fieldKey: 'liveVisitors',
       title: "Live Visitors",
       value: liveVisitors.toLocaleString('en-IN'),
-      subtitle: liveVisitors > 0 ? 'Browsing right now' : (streamConnected ? 'Listening on stream' : 'Reconnecting stream...'),
+      subtitle: liveVisitors > 0 ? 'Browsing right now' : 'Standby / listening',
       icon: Radio,
-      badge: streamConnected ? 'LIVE' : 'SYNC',
+      badge: 'LIVE',
       isLive: true,
-      color: streamConnected ? 'text-rose-600 bg-rose-50 border-rose-100' : 'text-slate-500 bg-slate-100 border-slate-200',
-      valueColor: streamConnected ? 'text-rose-600' : 'text-slate-700'
+      color: 'text-rose-600 bg-rose-50 border-rose-100',
+      valueColor: 'text-rose-600'
     }
   ];
 
@@ -157,16 +157,12 @@ export default function AnalyticsCards({ summary, loading, streamConnected = tru
             {/* Top Icon & Badge Row */}
             <div className="flex items-center justify-between gap-1.5 mb-2.5">
               <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 transition-colors ${c.color}`}>
-                <Icon className={`w-4 h-4 ${c.isLive && streamConnected ? 'animate-pulse' : ''}`} />
+                <Icon className={`w-4 h-4 ${c.isLive ? 'animate-pulse' : ''}`} />
               </div>
               {c.isLive ? (
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black border shadow-2xs shrink-0 transition-all ${
-                  streamConnected 
-                    ? 'bg-rose-50 text-rose-600 border-rose-200/60' 
-                    : 'bg-slate-100 text-slate-500 border-slate-200'
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${streamConnected ? 'bg-rose-500 animate-ping' : 'bg-slate-400'}`}></span>
-                  {c.badge}
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-50 text-rose-600 border border-rose-200/60 shadow-2xs shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
+                  LIVE
                 </span>
               ) : (
                 <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-50 border border-slate-100 text-slate-500 shrink-0">

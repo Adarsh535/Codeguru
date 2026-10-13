@@ -81,16 +81,14 @@ export default function VisitorsView() {
     };
   }, []);
 
-  // 2. High-availability Polling Fallback (5 seconds) when SSE is disconnected
+  // 2. High-availability live polling every 4 seconds to guarantee real-time updates
   useEffect(() => {
     const pollInterval = setInterval(async () => {
-      if (!streamConnectedRef.current) {
-        try {
-          const sum = await analyticsModel.getSummary();
-          if (sum) setSummary(sum);
-        } catch (e) {}
-      }
-    }, 5000);
+      try {
+        const sum = await analyticsModel.getSummary();
+        if (sum) setSummary(sum);
+      } catch (e) {}
+    }, 4000);
 
     return () => clearInterval(pollInterval);
   }, []);
@@ -110,15 +108,9 @@ export default function VisitorsView() {
       <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-2xs relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border transition-all ${
-              streamConnected 
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
-                : 'bg-slate-100 text-slate-500 border-slate-200'
-            }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${streamConnected ? 'bg-emerald-600 animate-pulse' : 'bg-slate-400'}`}></span>
-              {streamConnected 
-                ? 'Live Real-Time Stream Connected • MongoDB Atlas' 
-                : 'Reconnecting Live Stream (Fallback Polling Active)...'}
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-extrabold border border-emerald-100">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+              Live Website Visitor Analytics • MongoDB Atlas Real-Time Tracking
             </div>
             <h1 className="text-xl sm:text-2xl font-black tracking-tight font-heading text-slate-900">
               Website <span className="text-blue-600">Visitor Analytics</span>
@@ -141,12 +133,12 @@ export default function VisitorsView() {
             </button>
 
             {/* LIVE ACTIVE VISITORS BADGE */}
-            <div className={`${streamConnected ? 'bg-rose-50 border-rose-100' : 'bg-slate-50 border-slate-200'} px-3.5 py-2 rounded-2xl border text-right transition-all`}>
-              <div className={`text-[9px] font-extrabold uppercase tracking-wider flex items-center gap-1 justify-end ${streamConnected ? 'text-rose-500' : 'text-slate-400'}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${streamConnected ? 'bg-rose-600 animate-ping' : 'bg-slate-400'}`}></span>
-                {streamConnected ? 'Live Now' : 'Standby'}
+            <div className="bg-rose-50 px-3.5 py-2 rounded-2xl border border-rose-100 text-right">
+              <div className="text-[9px] font-extrabold text-rose-500 uppercase tracking-wider flex items-center gap-1 justify-end">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-ping"></span>
+                Live Now
               </div>
-              <div className={`text-lg font-black ${streamConnected ? 'text-rose-600' : 'text-slate-700'}`}>
+              <div className="text-lg font-black text-rose-600">
                 {summary?.liveVisitors ?? 0} Active
               </div>
             </div>
