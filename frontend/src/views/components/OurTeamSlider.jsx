@@ -46,9 +46,11 @@ const DEFAULT_MEMBERS = [
 
 export default function OurTeamSlider({ onOpenContactModal }) {
   const [teamMembers, setTeamMembers] = useState(DEFAULT_MEMBERS);
+  const [mounted, setMounted] = useState(false);
   const sliderRef = useRef(null);
 
   useEffect(() => {
+    setMounted(true);
     let isMounted = true;
 
     const fetchTeam = () => {
@@ -105,27 +107,28 @@ export default function OurTeamSlider({ onOpenContactModal }) {
   };
 
   return (
-    <section className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-[#f8fafc] overflow-hidden select-none">
-      <div className="max-w-7xl mx-auto border border-slate-200 rounded-[18px] sm:rounded-[24px] bg-white pt-2.5 pb-3 sm:pt-3.5 sm:pb-4 shadow-xs relative z-10 w-full overflow-hidden">
+    <section className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-[#f8fafc] overflow-hidden select-none" suppressHydrationWarning>
+      <div className="max-w-7xl mx-auto border border-slate-200 rounded-[18px] sm:rounded-[24px] bg-white pt-2.5 pb-3 sm:pt-3.5 sm:pb-4 shadow-xs relative z-10 w-full overflow-hidden" suppressHydrationWarning>
         
         {/* HEADER */}
-        <div className="flex justify-between items-center px-4 sm:px-6 mb-2 sm:mb-3">
+        <div className="flex justify-between items-center px-4 sm:px-6 mb-2 sm:mb-3" suppressHydrationWarning>
           <div className="flex items-center gap-2">
             <h2 className="text-base sm:text-lg font-bold text-slate-800 tracking-tight">
               Our Team & Mentors
             </h2>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3" suppressHydrationWarning>
             <span className="text-slate-400 font-bold text-[9px] sm:text-[10.5px] uppercase tracking-widest hidden sm:block">
               #TEAMCODEGURRU
             </span>
 
-            {/* Slider Navigation Controls (shown when there are multiple cards) */}
-            {uniqueMembers.length > 3 && (
-              <div className="flex items-center gap-1">
+            {/* Slider Navigation Controls (shown when mounted and there are multiple cards) */}
+            {mounted && uniqueMembers.length > 3 && (
+              <div className="flex items-center gap-1" suppressHydrationWarning>
                 <button
                   type="button"
+                  suppressHydrationWarning
                   onClick={() => scroll('left')}
                   className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 active:scale-95 flex items-center justify-center transition-all cursor-pointer border border-slate-200/80 shadow-2xs"
                   title="Scroll Left"
@@ -135,6 +138,7 @@ export default function OurTeamSlider({ onOpenContactModal }) {
                 </button>
                 <button
                   type="button"
+                  suppressHydrationWarning
                   onClick={() => scroll('right')}
                   className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 active:scale-95 flex items-center justify-center transition-all cursor-pointer border border-slate-200/80 shadow-2xs"
                   title="Scroll Right"
