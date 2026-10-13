@@ -5,7 +5,7 @@
  * Manages Team Members and Mentors data for Our Team section.
  */
 
-import { API_BASE } from './apiClient';
+import { API_BASE, apiFetch } from './apiClient';
 
 export const OUR_TEAM_MEMBERS = [
   {
@@ -52,7 +52,7 @@ export const teamModel = {
    */
   getTeam: async () => {
     try {
-      const res = await fetch(`${API_BASE}/team`);
+      const res = await apiFetch('/team');
       const data = await res.json();
       if (data.success && Array.isArray(data.data) && data.data.length > 0) {
         return data.data.map((item, idx) => ({

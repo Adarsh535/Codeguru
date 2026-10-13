@@ -52,10 +52,30 @@ const allowedOrigins = [
   'http://127.0.0.1:5174'
 ].filter(Boolean);
 
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  try {
+    const url = new URL(origin);
+    if (
+      url.hostname.endsWith('.vercel.app') ||
+      url.hostname.endsWith('codegurru.in') ||
+      url.hostname === 'codegurru.in' ||
+      url.hostname === 'localhost' ||
+      url.hostname === '127.0.0.1'
+    ) {
+      return true;
+    }
+  } catch (e) {
+    if (origin.endsWith('.vercel.app') || origin.includes('codegurru.in')) return true;
+  }
+  return false;
+};
+
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (e.g. mobile apps, curl, server-to-server) or allowed origins
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (isAllowedOrigin(origin)) {
       callback(null, true);
     } else {
       callback(new Error(`CORS blocked request from unauthorized origin: ${origin}`));

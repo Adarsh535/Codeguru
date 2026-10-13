@@ -5,7 +5,7 @@
  * Handles fetching training courses catalog from Express REST API Backend with fallbacks.
  */
 
-import { API_BASE } from './apiClient';
+import { API_BASE, apiFetch } from './apiClient';
 
 export const courseModel = {
   /**
@@ -19,7 +19,7 @@ export const courseModel = {
    */
   getCourses: async () => {
     try {
-      const res = await fetch(`${API_BASE}/courses`);
+      const res = await apiFetch('/courses');
       const data = await res.json();
       if (data.success && Array.isArray(data.data) && data.data.length > 0) {
         return data.data.map((item, idx) => ({

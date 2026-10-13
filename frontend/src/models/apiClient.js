@@ -107,7 +107,8 @@ export async function logoutClient() {
  */
 export async function apiFetch(endpoint, options = {}) {
   const base = getApiBase();
-  const url = `${base}${endpoint}`;
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = endpoint.startsWith('http') ? endpoint : `${base}${cleanEndpoint}`;
   const token = getAuthToken();
   const apiKey = getApiKey();
 

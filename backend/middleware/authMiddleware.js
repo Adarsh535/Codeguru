@@ -30,14 +30,25 @@ export const validateApiKey = (req, res, next) => {
   const expectedKey = process.env.API_SECRET_KEY || 'cg_app_secret_369_2026';
   const providedKey = req.headers['x-api-key'] || req.headers['x-secret-key'] || req.query.apiKey;
 
-  if (!providedKey || providedKey !== expectedKey) {
-    return res.status(403).json({
-      success: false,
-      message: 'Access Denied: Invalid or missing API security key.'
-    });
+  if (providedKey && providedKey === expectedKey) {
+    return next();
   }
 
-  next();
+  // Also permit requests originating from trusted frontend/admin domains (Vercel & Codeguru)
+  const origin = req.headers.origin || req.headers.referer || '';
+  if (
+    origin.includes('.vercel.app') ||
+    origin.includes('codegurru.in') ||
+    origin.includes('localhost') ||
+    origin.includes('127.0.0.1')
+  ) {
+    return next();
+  }
+
+  return res.status(403).json({
+    success: false,
+    message: 'Access Denied: Invalid or missing API security key.'
+  });
 };
 
 /**

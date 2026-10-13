@@ -6,7 +6,7 @@
  * with fallback seed banners.
  */
 
-import { API_BASE } from './apiClient';
+import { API_BASE, apiFetch } from './apiClient';
 
 export const FALLBACK_BANNERS = [
   {
@@ -35,7 +35,7 @@ export const bannerModel = {
    */
   getBanners: async () => {
     try {
-      const res = await fetch(`${API_BASE}/banners`);
+      const res = await apiFetch('/banners');
       const data = await res.json();
       if (data.success && Array.isArray(data.data) && data.data.length > 0) {
         return data.data.map((item, idx) => ({

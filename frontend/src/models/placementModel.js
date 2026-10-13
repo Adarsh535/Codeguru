@@ -5,7 +5,7 @@
  * Manages placement drives, student star achievers, and aggregates domain models.
  */
 
-import { API_BASE } from './apiClient';
+import { API_BASE, apiFetch } from './apiClient';
 
 // Re-export all domain models for central access and backward compatibility
 export { LOCATIONS, getLocationById, getPopularLocations } from './locationModel';
@@ -156,7 +156,7 @@ export const placementModel = {
    */
   getPlacements: async () => {
     try {
-      const res = await fetch(`${API_BASE}/placements`);
+      const res = await apiFetch('/placements');
       const data = await res.json();
       if (data.success && Array.isArray(data.data) && data.data.length > 0) {
         return data.data.map((item, idx) => ({

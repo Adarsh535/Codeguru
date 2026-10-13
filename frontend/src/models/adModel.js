@@ -6,7 +6,7 @@
  * with fallback to the featured Arena Animation 25 Years banner.
  */
 
-import { API_BASE } from './apiClient';
+import { API_BASE, apiFetch } from './apiClient';
 
 export const FALLBACK_AD = {
   _id: 'default-arena-ad',
@@ -32,10 +32,10 @@ export const adModel = {
   getActiveAds: async (position = 'all') => {
     try {
       // When 'all', skip position filter so every active ad is returned
-      const url = (position && position !== 'all')
-        ? `${API_BASE}/ads/active?position=${encodeURIComponent(position)}`
-        : `${API_BASE}/ads/active?position=all`;
-      const res = await fetch(url);
+      const path = (position && position !== 'all')
+        ? `/ads/active?position=${encodeURIComponent(position)}`
+        : `/ads/active?position=all`;
+      const res = await apiFetch(path);
       const data = await res.json();
       if (data.success && Array.isArray(data.data) && data.data.length > 0) {
         return data.data.map(item => ({
@@ -56,7 +56,7 @@ export const adModel = {
   trackClick: async (id) => {
     if (!id || id.startsWith('default-')) return;
     try {
-      await fetch(`${API_BASE}/ads/${id}/click`, { method: 'POST' });
+      await apiFetch(`/ads/${id}/click`, { method: 'POST' });
     } catch (err) {
       // Non-critical analytics tracking
       console.debug('[adModel] Click track error:', err);

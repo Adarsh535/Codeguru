@@ -3,7 +3,7 @@
  * Manages placement categories, course categories and category metadata.
  */
 
-import { getApiBase } from './apiClient';
+import { apiFetch } from './apiClient';
 
 export const PLACEMENT_CATEGORIES = [
   { id: 'all', label: 'Placement Drives', icon: 'Briefcase', badge: 'Popular' },
@@ -23,8 +23,7 @@ export const categoryModel = {
    */
   getCategories: async () => {
     try {
-      const base = getApiBase();
-      const res = await fetch(`${base}/categories`);
+      const res = await apiFetch('/categories');
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         return data.data;
