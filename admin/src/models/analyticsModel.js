@@ -213,12 +213,12 @@ export const analyticsModel = {
             eventSource.close();
             eventSource = null;
           }
-          // Retry connection after 4 seconds
+          // Retry connection after 1 second
           if (isSubscribed && !reconnectTimer) {
             reconnectTimer = setTimeout(() => {
               reconnectTimer = null;
               connect();
-            }, 4000);
+            }, 1000);
           }
         };
       } catch (err) {
@@ -229,7 +229,7 @@ export const analyticsModel = {
           reconnectTimer = setTimeout(() => {
             reconnectTimer = null;
             connect();
-          }, 4000);
+          }, 1000);
         }
       }
     };

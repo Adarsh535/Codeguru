@@ -59,16 +59,29 @@ export default function VisitorsView() {
     loadData(false);
   }, [loadData]);
 
-  // 1. Real-time Server-Sent Events (SSE) Stream
+  // 1. Real-time Server-Sent Events (SSE) Stream (Instant 1-second push)
   useEffect(() => {
     const unsubscribe = analyticsModel.subscribeStream(
       (streamData) => {
         setStreamConnected(true);
         if (streamData) {
-          setSummary((prev) => ({
-            ...prev,
-            ...streamData
-          }));
+          setSummary((prev) => {
+            if (
+              prev &&
+              prev.liveVisitors === streamData.liveVisitors &&
+              prev.todayVisitors === streamData.todayVisitors &&
+              prev.todayPageViews === streamData.todayPageViews &&
+              prev.yesterdayVisitors === streamData.yesterdayVisitors &&
+              prev.totalVisitors === streamData.totalVisitors &&
+              prev.thisMonthVisitors === streamData.thisMonthVisitors
+            ) {
+              return prev;
+            }
+            return {
+              ...prev,
+              ...streamData
+            };
+          });
         }
       },
       (isConnected) => {
@@ -81,26 +94,61 @@ export default function VisitorsView() {
     };
   }, []);
 
-  // 2. High-availability live polling every 4 seconds to guarantee real-time updates
+  // 2. High-availability live polling every 1 second (1000ms) to guarantee real-time updates
   useEffect(() => {
     const pollInterval = setInterval(async () => {
       try {
         const sum = await analyticsModel.getSummary();
-        if (sum) setSummary(sum);
+        if (sum) {
+          setSummary((prev) => {
+            if (
+              prev &&
+              prev.liveVisitors === sum.liveVisitors &&
+              prev.todayVisitors === sum.todayVisitors &&
+              prev.todayPageViews === sum.todayPageViews &&
+              prev.yesterdayVisitors === sum.yesterdayVisitors &&
+              prev.totalVisitors === sum.totalVisitors &&
+              prev.thisMonthVisitors === sum.thisMonthVisitors
+            ) {
+              return prev;
+            }
+            return {
+              ...prev,
+              ...sum
+            };
+          });
+        }
       } catch (e) {}
-    }, 4000);
+    }, 1000);
 
     return () => clearInterval(pollInterval);
   }, []);
 
-  // 3. Periodic background refresh for charts, top pages, and insights (every 25 seconds)
+  // 3. Periodic background refresh for charts, top pages, and insights (every 10 seconds)
   useEffect(() => {
     const reportInterval = setInterval(() => {
       loadData(true);
-    }, 25000);
+    }, 10000);
 
     return () => clearInterval(reportInterval);
   }, [loadData]);
+
+  // 4. Instant reaction on custom realtime broadcast events
+  useEffect(() => {
+    const handleTrafficUpdate = () => {
+      analyticsModel.getSummary().then((sum) => {
+        if (sum) setSummary((prev) => ({ ...prev, ...sum }));
+      }).catch(() => {});
+    };
+
+    window.addEventListener('codeguru_refresh_traffic', handleTrafficUpdate);
+    window.addEventListener('codeguru_refresh_all', handleTrafficUpdate);
+
+    return () => {
+      window.removeEventListener('codeguru_refresh_traffic', handleTrafficUpdate);
+      window.removeEventListener('codeguru_refresh_all', handleTrafficUpdate);
+    };
+  }, []);
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -110,7 +158,7 @@ export default function VisitorsView() {
           <div className="space-y-1">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-extrabold border border-emerald-100">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
-              Live Website Visitor Analytics • MongoDB Atlas Real-Time Tracking
+              Live 1s Real-Time Auto-Refresh • MongoDB Atlas Synchronized
             </div>
             <h1 className="text-xl sm:text-2xl font-black tracking-tight font-heading text-slate-900">
               Website <span className="text-blue-600">Visitor Analytics</span>
@@ -125,7 +173,7 @@ export default function VisitorsView() {
             <button
               onClick={() => loadData(false)}
               disabled={loading}
-              title="Refresh Analytics Data"
+              title="Refresh Analytics Data Now"
               className="px-3.5 py-2 rounded-2xl bg-slate-50 border border-slate-200/80 text-slate-700 hover:text-blue-600 hover:bg-blue-50 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold shrink-0"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : ''}`} />
@@ -136,7 +184,7 @@ export default function VisitorsView() {
             <div className="bg-rose-50 px-3.5 py-2 rounded-2xl border border-rose-100 text-right">
               <div className="text-[9px] font-extrabold text-rose-500 uppercase tracking-wider flex items-center gap-1 justify-end">
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-ping"></span>
-                Live Now
+                Live Now • 1s Auto-Refresh
               </div>
               <div className="text-lg font-black text-rose-600">
                 {summary?.liveVisitors ?? 0} Active

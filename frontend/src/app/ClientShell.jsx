@@ -134,7 +134,7 @@ export default function ClientShell({ children }) {
         if (document.visibilityState === 'visible') {
           sendHeartbeat(pathname);
         }
-      }, 25000); // 25s interval
+      }, 5000); // 5s interval for snappy presence detection
     };
 
     const stopHeartbeat = () => {
