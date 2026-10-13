@@ -80,7 +80,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'otp', onAuth
     setErrorMessage('');
   };
 
-  // SEND OTP HANDLER
+  // Direct Lead Submission without OTP
   const handleSendOtp = async (e) => {
     if (e) e.preventDefault();
     if (!phone || phone.length !== 10) {
@@ -91,23 +91,41 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'otp', onAuth
     setLoading(true);
     setErrorMessage('');
     try {
-      const res = await apiService.sendOtp(phone);
-      if (res && res.success !== false) {
-        setStep('verify');
-        setTimer(30);
-        setCanResend(false);
-        setSuccessMessage('OTP sent to your WhatsApp number!');
-        setTimeout(() => {
-          if (otpInputsRef.current[0]) otpInputsRef.current[0].focus();
-        }, 150);
-      } else {
-        setErrorMessage(res?.message || 'Failed to send OTP. Please try again.');
+      const leadPayload = {
+        name: 'Student Applicant',
+        phone: phone,
+        email: '',
+        location: 'Online Visitor',
+        course: 'Admission & Training Inquiry',
+        notes: 'Submitted via Login / WhatsApp Modal (Direct Lead)',
+        status: 'New'
+      };
+
+      await apiService.submitLead(leadPayload);
+
+      const userPayload = {
+        name: 'Student Applicant',
+        phone: phone,
+        isLoggedIn: true,
+        loginTime: new Date().toISOString()
+      };
+      localStorage.setItem('codeguru_user', JSON.stringify(userPayload));
+      localStorage.setItem('codeguru_lead_submitted', phone);
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('codeguru_user_updated'));
+
+      setSuccess(true);
+      setSuccessMessage('Inquiry Submitted! Our counselor will connect with you shortly.');
+
+      if (onAuthSuccess) {
+        onAuthSuccess(userPayload);
       }
+
+      setTimeout(() => {
+        onClose();
+      }, 1600);
     } catch (err) {
-      // In case server OTP endpoint has fallback/mock demo
-      setStep('verify');
-      setTimer(30);
-      setCanResend(false);
+      setErrorMessage('Failed to submit. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -466,7 +484,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'otp', onAuth
                       </div>
                     </div>
 
-                    {/* GET OTP ACTION BUTTON */}
+                    {/* SUBMIT ACTION BUTTON */}
                     <button
                       type="submit"
                       disabled={loading || phone.length !== 10}
@@ -475,11 +493,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'otp', onAuth
                       {loading ? (
                         <>
                           <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          <span>Sending OTP...</span>
+                          <span>Submitting...</span>
                         </>
                       ) : (
                         <>
-                          <span>Get OTP</span>
+                          <span>Submit</span>
                           <ArrowForwardRoundedIcon className="!w-5 !h-5" />
                         </>
                       )}

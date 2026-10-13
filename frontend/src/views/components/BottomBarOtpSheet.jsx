@@ -110,7 +110,7 @@ export default function BottomBarOtpSheet({
     }, 280);
   };
 
-  // Step 1: Send OTP
+  // Step 1: Submit Phone Number and Open Step 2 (Name & Email Form)
   const handleSendOtp = async (e) => {
     if (e) e.preventDefault();
     setErrorMsg('');
@@ -123,25 +123,29 @@ export default function BottomBarOtpSheet({
 
     setLoading(true);
     try {
-      const res = await apiService.sendOtp(cleanPhone);
-      if (res.success) {
-        setStep('otp');
-        setResendTimer(45);
-        setActiveOtp(res.demoOtp || '1234');
-        setSmsNotification({
-          otp: res.demoOtp || null,
-          isRealSMS: res.isRealSMS || false,
-          message: res.message || ''
-        });
+      const userLoc = getQuickLocationSync() || 'Online Visitor';
+      // Record initial lead with phone number to Admin Leads
+      await apiService.submitLead({
+        name: 'Student Applicant',
+        phone: cleanPhone,
+        email: '',
+        location: userLoc,
+        course: 'Admission & Training Inquiry',
+        notes: 'Inquiry Started (Phone submitted, filling profile)',
+        status: 'New'
+      }).catch(() => {});
 
-        setTimeout(() => {
-          if (otpRefs[0].current) otpRefs[0].current.focus();
-        }, 150);
-      } else {
-        setErrorMsg(res.message || 'Failed to send OTP. Please try again.');
-      }
+      // Instantly open the second form (Name & Email)
+      setStep('details');
+      setErrorMsg('');
+
+      setTimeout(() => {
+        if (nameInputRef.current) {
+          nameInputRef.current.focus();
+        }
+      }, 200);
     } catch (err) {
-      setErrorMsg('Network error. Please check your connection.');
+      setStep('details');
     } finally {
       setLoading(false);
     }
@@ -263,45 +267,56 @@ export default function BottomBarOtpSheet({
 
     setLoading(true);
     const cleanPhone = phone.replace(/[^0-9]/g, '').slice(-10);
+    const userLoc = getQuickLocationSync() || 'Online Visitor';
 
     try {
+      // 1. Send complete student inquiry to Admin Leads (Name + Phone + Email)
+      await apiService.submitLead({
+        name: studentName.trim(),
+        phone: cleanPhone,
+        email: studentEmail.trim().toLowerCase(),
+        location: userLoc,
+        course: 'Admission & Training Inquiry',
+        notes: `Full Lead - Name: ${studentName.trim()}, Phone: ${cleanPhone}, Email: ${studentEmail.trim().toLowerCase()}`,
+        status: 'New'
+      }).catch(() => {});
+
+      // 2. Update/create student profile in backend
       const res = await apiService.updateStudentProfile({
         phone: cleanPhone,
         name: studentName.trim(),
         email: studentEmail.trim().toLowerCase(),
-        location: getQuickLocationSync() || ''
-      });
+        location: userLoc
+      }).catch(() => null);
 
-      if (res.success && res.student) {
-        setStep('success');
+      // 3. Persist login session so student is logged in immediately
+      const userPayload = {
+        name: (res && res.student && res.student.name) ? res.student.name : studentName.trim(),
+        email: (res && res.student && res.student.email) ? res.student.email : studentEmail.trim().toLowerCase(),
+        phone: cleanPhone,
+        isLoggedIn: true,
+        token: (res && res.token) ? res.token : (verifiedToken || `cg-student-jwt-${Date.now()}`),
+        loginTime: new Date().toISOString()
+      };
 
-        const userPayload = {
-          name: res.student.name || studentName.trim(),
-          email: res.student.email || studentEmail.trim(),
-          phone: res.student.phone || cleanPhone,
-          isLoggedIn: true,
-          token: res.token || verifiedToken || `cg-student-jwt-${Date.now()}`,
-          loginTime: new Date().toISOString()
-        };
+      localStorage.setItem('codeguru_user', JSON.stringify(userPayload));
+      localStorage.setItem('codeguru_token', userPayload.token);
+      localStorage.setItem('token', userPayload.token);
+      localStorage.setItem('codeguru_lead_submitted', cleanPhone);
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('codeguru_user_updated'));
 
-        // Persist to localStorage
-        localStorage.setItem('codeguru_user', JSON.stringify(userPayload));
-        if (userPayload.token) {
-          localStorage.setItem('codeguru_token', userPayload.token);
-          localStorage.setItem('token', userPayload.token);
-        }
-        window.dispatchEvent(new Event('storage'));
-        window.dispatchEvent(new CustomEvent('codeguru_user_updated'));
+      setStep('success');
 
-        setTimeout(() => {
-          if (onLoginSuccess) onLoginSuccess(userPayload);
-          handleClose();
-        }, 1200);
-      } else {
-        setErrorMsg(res.message || 'Failed to save profile. Please try again.');
+      if (onLoginSuccess) {
+        onLoginSuccess(userPayload);
       }
+
+      setTimeout(() => {
+        handleClose();
+      }, 1600);
     } catch (err) {
-      setErrorMsg('Network error. Please try again.');
+      setErrorMsg('Failed to save profile. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -485,7 +500,7 @@ export default function BottomBarOtpSheet({
               </div>
             </div>
 
-            {/* GET OTP BUTTON */}
+            {/* SUBMIT BUTTON */}
             <button
               type="submit"
               disabled={loading || phone.length < 10}
@@ -498,11 +513,11 @@ export default function BottomBarOtpSheet({
               {loading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Sending OTP...</span>
+                  <span>Submitting...</span>
                 </>
               ) : (
                 <>
-                  <span>Get OTP</span>
+                  <span>Submit</span>
                   <ArrowForwardIcon className="!w-4 !h-4 text-white" />
                 </>
               )}
@@ -733,7 +748,7 @@ export default function BottomBarOtpSheet({
               </div>
             </div>
 
-            {/* COMPLETE LOGIN BUTTON */}
+            {/* SUBMIT & LOGIN BUTTON */}
             <button
               type="submit"
               disabled={loading || !studentName.trim() || !studentEmail.trim()}
@@ -746,11 +761,11 @@ export default function BottomBarOtpSheet({
               {loading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Saving Profile...</span>
+                  <span>Submitting &amp; Logging In...</span>
                 </>
               ) : (
                 <>
-                  <span>Complete Login</span>
+                  <span>Submit &amp; Login</span>
                   <ArrowForwardIcon className="!w-4 !h-4 text-white" />
                 </>
               )}
@@ -758,16 +773,16 @@ export default function BottomBarOtpSheet({
           </form>
 
         ) : (
-          /* ---------------- STEP 4: SUCCESS & LOGGED IN ---------------- */
+          /* ---------------- STEP 4: SUCCESS ---------------- */
           <div className="py-6 text-center flex flex-col items-center gap-3 animate-fadeIn">
             <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center animate-bounce shadow-md">
               <CheckCircleIcon className="!w-10 !h-10" />
             </div>
             <h3 className="text-xl font-black text-slate-900 tracking-tight">
-              Welcome, {studentName || 'Student'}!
+              Inquiry Submitted Successfully!
             </h3>
             <p className="text-xs text-slate-500 font-semibold max-w-xs">
-              Your account has been verified. You are now logged in!
+              Thank you! Our counselor will connect with you on WhatsApp shortly.
             </p>
           </div>
         )}

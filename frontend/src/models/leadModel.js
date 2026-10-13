@@ -6,7 +6,7 @@
  * and pinging student traffic analytics.
  */
 
-import { API_BASE } from './apiClient';
+import { API_BASE, apiFetch } from './apiClient';
 
 export const leadModel = {
   /**
@@ -21,7 +21,7 @@ export const leadModel = {
    */
   submitLead: async (leadData) => {
     try {
-      const res = await fetch(`${API_BASE}/leads`, {
+      const res = await apiFetch('/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(leadData)
@@ -46,7 +46,7 @@ export const leadModel = {
    */
   pingTraffic: async (searchQuery = '', city = '') => {
     try {
-      await fetch(`${API_BASE}/traffic/ping`, {
+      await apiFetch('/traffic/ping', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ searchQuery, city })
