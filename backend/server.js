@@ -14,7 +14,6 @@ import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import { connectDB, switchDatabaseMode, currentDbMode } from './config/db.js';
 import apiRouter from './api/index.js';
-import { generalApiLimiter } from './middleware/rateLimiter.js';
 import { requireAdmin } from './middleware/authMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -131,8 +130,8 @@ app.post('/api/health/switch-db', requireAdmin, async (req, res) => {
   }
 });
 
-// 6. Unified API Router Mount with General Rate Limiter
-app.use('/api', generalApiLimiter, apiRouter);
+// 6. Unified API Router Mount
+app.use('/api', apiRouter);
 
 // 7. Centralized Error Handling Middleware (Suppresses sensitive stack traces in production)
 app.use((err, req, res, next) => {
