@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Sparkles, Briefcase, Award } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { OUR_TEAM_MEMBERS } from '../../models/placementModel';
 import { apiService } from '../../services/apiService';
 
@@ -46,7 +46,7 @@ const DEFAULT_MEMBERS = [
 
 export default function OurTeamSlider({ onOpenContactModal }) {
   const [teamMembers, setTeamMembers] = useState(DEFAULT_MEMBERS);
-  const [isPaused, setIsPaused] = useState(false);
+  const sliderRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -92,7 +92,17 @@ export default function OurTeamSlider({ onOpenContactModal }) {
     };
   }, []);
 
-  const doubleMembers = [...teamMembers, ...teamMembers, ...teamMembers];
+  // Deduplicate members to ensure strictly one card per member (no double cards)
+  const uniqueMembers = teamMembers.filter((item, index, self) =>
+    index === self.findIndex((t) => (t.id && item.id && t.id === item.id) || (t.name && item.name && t.name.toLowerCase().trim() === item.name.toLowerCase().trim()))
+  );
+
+  const scroll = (direction) => {
+    if (sliderRef.current) {
+      const scrollAmount = direction === 'left' ? -220 : 220;
+      sliderRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   return (
     <section className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-[#f8fafc] overflow-hidden select-none">
@@ -100,29 +110,61 @@ export default function OurTeamSlider({ onOpenContactModal }) {
         
         {/* HEADER */}
         <div className="flex justify-between items-center px-4 sm:px-6 mb-2 sm:mb-3">
-          <h2 className="text-base sm:text-lg font-bold text-slate-800 tracking-tight">
-            Our Team & Mentors
-          </h2>
-          <span className="text-slate-400 font-bold text-[9px] sm:text-[10.5px] uppercase tracking-widest hidden sm:block">
-            #TEAMCODEGURRU
-          </span>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base sm:text-lg font-bold text-slate-800 tracking-tight">
+              Our Team & Mentors
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="text-slate-400 font-bold text-[9px] sm:text-[10.5px] uppercase tracking-widest hidden sm:block">
+              #TEAMCODEGURRU
+            </span>
+
+            {/* Slider Navigation Controls (shown when there are multiple cards) */}
+            {uniqueMembers.length > 3 && (
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => scroll('left')}
+                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 active:scale-95 flex items-center justify-center transition-all cursor-pointer border border-slate-200/80 shadow-2xs"
+                  title="Scroll Left"
+                  aria-label="Scroll Left"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scroll('right')}
+                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 active:scale-95 flex items-center justify-center transition-all cursor-pointer border border-slate-200/80 shadow-2xs"
+                  title="Scroll Right"
+                  aria-label="Scroll Right"
+                >
+                  <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* MARQUEE ROW */}
-        <div className="w-full overflow-hidden sm:[mask-image:_linear-gradient(to_right,transparent_0,_black_30px,_black_calc(100%-30px),transparent_100%)] px-3">
+        {/* SLIDER ROW - CLEAN, UNIQUE CARDS (NO DUPLICATES) */}
+        <div className={`w-full overflow-hidden px-3 ${uniqueMembers.length > 4 ? 'sm:[mask-image:_linear-gradient(to_right,transparent_0,_black_30px,_black_calc(100%-30px),transparent_100%)]' : ''}`}>
           <div
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-            onTouchStart={() => setIsPaused(true)}
-            onTouchEnd={() => setIsPaused(false)}
-            onTouchCancel={() => setIsPaused(false)}
-            style={{ animationPlayState: isPaused ? 'paused' : 'running' }}
-            className="flex w-max animate-[marquee_36s_linear_infinite] md:animate-[marquee_48s_linear_infinite] py-1 active:[animation-play-state:paused] hover:[animation-play-state:paused]"
+            ref={sliderRef}
+            className={`flex items-center py-1 overflow-x-auto scroll-smooth no-scrollbar select-none ${
+              uniqueMembers.length <= 4 ? 'justify-start sm:justify-center' : 'justify-start'
+            }`}
           >
-            {doubleMembers.map((member, idx) => (
+            {uniqueMembers.map((member) => (
               <div
-                key={`${member.id}-${idx}`}
-                onClick={onOpenContactModal}
+                key={member.id}
+                onClick={(e) => {
+                  if (onOpenContactModal) onOpenContactModal();
+                  const contactElem = document.getElementById('contact-section');
+                  if (contactElem) {
+                    contactElem.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
                 className="w-[160px] xs:w-[175px] sm:w-[190px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[16px] shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col mx-1.5 relative overflow-hidden group cursor-pointer hover:shadow-md hover:border-blue-300 transition-all select-none"
               >
                 {/* TOP PHOTO AREA */}
