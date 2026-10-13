@@ -7,6 +7,7 @@
 
 import express from 'express';
 import { getBanners, addBanner, updateBanner, deleteBanner } from '../controllers/bannerController.js';
+import { requireAdmin } from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -22,20 +23,20 @@ router.get('/', getBanners);
  * @desc   Creates a new image or video banner slide
  * @access Admin Private
  */
-router.post('/', addBanner);
+router.post('/', requireAdmin, addBanner);
 
 /**
  * @api    PUT /api/banners/:id
  * @desc   Updates existing banner details
  * @access Admin Private
  */
-router.put('/:id', updateBanner);
+router.put('/:id', requireAdmin, updateBanner);
 
 /**
  * @api    DELETE /api/banners/:id
  * @desc   Deletes a banner slide by ID
  * @access Admin Private
  */
-router.delete('/:id', deleteBanner);
+router.delete('/:id', requireAdmin, deleteBanner);
 
 export default router;

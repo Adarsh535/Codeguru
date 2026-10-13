@@ -1,4 +1,5 @@
 import '../index.css';
+import '../models/apiClient';
 import ClientShell from './ClientShell';
 
 export const metadata = {

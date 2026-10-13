@@ -7,6 +7,7 @@
 
 import express from 'express';
 import { getPlacements, addPlacement, updatePlacement, deletePlacement } from '../controllers/placementController.js';
+import { requireAdmin } from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -22,20 +23,20 @@ router.get('/', getPlacements);
  * @desc   Creates a new student placement record
  * @access Admin Private
  */
-router.post('/', addPlacement);
+router.post('/', requireAdmin, addPlacement);
 
 /**
  * @api    PUT /api/placements/:id
  * @desc   Updates placement record by ID
  * @access Admin Private
  */
-router.put('/:id', updatePlacement);
+router.put('/:id', requireAdmin, updatePlacement);
 
 /**
  * @api    DELETE /api/placements/:id
  * @desc   Deletes a placement record by ID
  * @access Admin Private
  */
-router.delete('/:id', deletePlacement);
+router.delete('/:id', requireAdmin, deletePlacement);
 
 export default router;

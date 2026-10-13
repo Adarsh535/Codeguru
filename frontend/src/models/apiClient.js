@@ -2,7 +2,7 @@
  * ==========================================
  * MODEL LAYER: FRONTEND API CLIENT (apiClient.js)
  * ==========================================
- * Centralized API client base URL and HTTP request helpers for Frontend app.
+ * Centralized API client base URL, Secret API Key, and HTTP request helpers for Frontend app.
  */
 
 export function getApiBase() {
@@ -18,7 +18,15 @@ export function getApiBase() {
   return 'https://369.codegurru.in/api';
 }
 
+export function getApiKey() {
+  if (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_SECRET_KEY) {
+    return process.env.NEXT_PUBLIC_API_SECRET_KEY;
+  }
+  return 'cg_app_secret_369_2026';
+}
+
 export const API_BASE = getApiBase();
+export const API_KEY = getApiKey();
 
 /**
  * Retrieves student/user authentication JWT token from localStorage
@@ -69,7 +77,7 @@ export function getCurrentUser() {
 
 /**
  * Helper for executing HTTP requests to Express REST API Backend
- * Automatically injects JWT Bearer Authorization header if student is authenticated.
+ * Automatically injects API Secret Key and JWT Bearer Authorization header if student is authenticated.
  * @param {string} endpoint - Relative path (e.g. '/banners')
  * @param {object} options - Fetch configuration options
  */
@@ -77,9 +85,11 @@ export async function apiFetch(endpoint, options = {}) {
   const base = getApiBase();
   const url = `${base}${endpoint}`;
   const token = getAuthToken();
+  const apiKey = getApiKey();
 
   const defaultHeaders = {
     'Content-Type': 'application/json',
+    'x-api-key': apiKey,
     ...(token ? { 'Authorization': `Bearer ${token}` } : {})
   };
 
@@ -93,4 +103,37 @@ export async function apiFetch(endpoint, options = {}) {
 
   const response = await fetch(url, config);
   return response;
+}
+
+// Global browser fetch interceptor: ensures all outgoing requests to backend include x-api-key
+if (typeof window !== 'undefined' && !window.__codeguru_fetch_shield_installed) {
+  window.__codeguru_fetch_shield_installed = true;
+  const originalFetch = window.fetch;
+  window.fetch = async function (resource, init = {}) {
+    try {
+      const urlStr = typeof resource === 'string' ? resource : (resource?.url || '');
+      const isBackendUrl =
+        urlStr.includes('/api') ||
+        urlStr.includes('369.codegurru.in') ||
+        urlStr.includes('localhost:5000');
+
+      if (isBackendUrl) {
+        const apiKey = getApiKey();
+        const customHeaders = new Headers(
+          init?.headers || (typeof resource !== 'string' && resource?.headers ? resource.headers : {})
+        );
+        if (!customHeaders.has('x-api-key')) {
+          customHeaders.set('x-api-key', apiKey);
+        }
+        const studentToken = getAuthToken();
+        if (studentToken && !customHeaders.has('authorization')) {
+          customHeaders.set('authorization', `Bearer ${studentToken}`);
+        }
+        return originalFetch(resource, { ...init, headers: customHeaders });
+      }
+    } catch (e) {
+      // Fallback silently if any header manipulation issue
+    }
+    return originalFetch(resource, init);
+  };
 }

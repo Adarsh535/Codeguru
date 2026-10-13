@@ -7,6 +7,7 @@
 
 import express from 'express';
 import { getTeam, addTeamMember, updateTeamMember, deleteTeamMember } from '../controllers/teamController.js';
+import { requireAdmin } from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -22,20 +23,20 @@ router.get('/', getTeam);
  * @desc   Creates a new instructor profile
  * @access Admin Private
  */
-router.post('/', addTeamMember);
+router.post('/', requireAdmin, addTeamMember);
 
 /**
  * @api    PUT /api/team/:id
  * @desc   Updates an instructor profile by ID
  * @access Admin Private
  */
-router.put('/:id', updateTeamMember);
+router.put('/:id', requireAdmin, updateTeamMember);
 
 /**
  * @api    DELETE /api/team/:id
  * @desc   Deletes an instructor profile by ID
  * @access Admin Private
  */
-router.delete('/:id', deleteTeamMember);
+router.delete('/:id', requireAdmin, deleteTeamMember);
 
 export default router;

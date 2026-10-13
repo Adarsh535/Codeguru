@@ -14,6 +14,7 @@ import {
   deleteAd,
   trackAdClick
 } from '../controllers/adController.js';
+import { requireAdmin } from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -22,9 +23,9 @@ router.get('/', getAds);
 router.get('/active', getActiveAds);
 router.post('/:id/click', trackAdClick);
 
-// Admin / Management routes
-router.post('/', createAd);
-router.put('/:id', updateAd);
-router.delete('/:id', deleteAd);
+// Admin / Management routes (Protected)
+router.post('/', requireAdmin, createAd);
+router.put('/:id', requireAdmin, updateAd);
+router.delete('/:id', requireAdmin, deleteAd);
 
 export default router;

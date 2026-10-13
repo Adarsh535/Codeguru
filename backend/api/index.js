@@ -22,8 +22,12 @@ import categoryRoutes from './routes/categoryRoutes.js';
 import realtimeRoutes from './routes/realtimeRoutes.js';
 import adRoutes from './routes/adRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import { validateApiKey } from '../middleware/authMiddleware.js';
 
 const apiRouter = express.Router();
+
+// Enforce Global API Key Security Shield on all /api endpoints
+apiRouter.use(validateApiKey);
 
 // Mount all API endpoints
 apiRouter.use('/auth', authRoutes);

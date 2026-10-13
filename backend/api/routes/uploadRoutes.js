@@ -8,6 +8,7 @@
 import express from 'express';
 import { upload } from '../../middleware/upload.js';
 import { handleFileUpload, getUploadStatus, deleteFile } from '../controllers/uploadController.js';
+import { requireAdmin } from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -21,9 +22,9 @@ router.get('/status', getUploadStatus);
 /**
  * @api    POST /api/upload
  * @desc   Uploads a single media file (Image/Video) to Cloudinary or Local Storage
- * @access Public / Upload
+ * @access Admin Private
  */
-router.post('/', (req, res, next) => {
+router.post('/', requireAdmin, (req, res, next) => {
   upload.single('file')(req, res, (err) => {
     if (err) {
       console.error('[Multer Upload Error]:', err.message);
@@ -39,9 +40,8 @@ router.post('/', (req, res, next) => {
 /**
  * @api    DELETE /api/upload
  * @desc   Deletes file from Cloudinary by public_id
- * @access Public / Upload
+ * @access Admin Private
  */
-router.delete('/', deleteFile);
+router.delete('/', requireAdmin, deleteFile);
 
 export default router;
-
