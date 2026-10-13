@@ -18,6 +18,8 @@ build/
 **/build/
 .next/
 **/.next/
+.vite/
+**/.vite/
 
 # Uploaded media files
 backend/uploads/*
