@@ -35,6 +35,8 @@ export default function ProfilePage({ onOpenContactModal }) {
 
   const handleLogout = () => {
     localStorage.removeItem('codeguru_user');
+    localStorage.removeItem('codeguru_token');
+    localStorage.removeItem('token');
     setUser(null);
     window.dispatchEvent(new Event('storage'));
     window.dispatchEvent(new Event('codeguru_user_updated'));

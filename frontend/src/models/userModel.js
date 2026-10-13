@@ -1,16 +1,17 @@
-import { API_BASE } from './apiClient';
+import { API_BASE, getAuthToken, setAuthToken } from './apiClient';
 
 /**
  * ============================================================================
  * MODEL LAYER: USER & AUTHENTICATION MODEL (userModel.js)
  * ============================================================================
  * Handles student registration and authentication requests against Express backend API.
+ * Automatically saves JWT tokens and attaches Authorization Bearer headers.
  */
 
 export const userModel = {
   /**
    * API: Register Student Account
-   * @route   POST http://localhost:5000/api/auth/student/register
+   * @route   POST https://369.codegurru.in/api/auth/student/register
    * @param   {Object} studentData - { name, email, password, phone }
    * @returns {Promise<Object>} API JSON response
    */
@@ -21,7 +22,11 @@ export const userModel = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(studentData)
       });
-      return await res.json();
+      const data = await res.json();
+      if (data && data.success && data.token) {
+        setAuthToken(data.token);
+      }
+      return data;
     } catch (err) {
       console.warn('[userModel API Warning] Registration network error:', err);
       return { success: false, message: 'Unable to connect to server. Please check connection.' };
@@ -30,7 +35,7 @@ export const userModel = {
 
   /**
    * API: Student Login Authentication
-   * @route   POST http://localhost:5000/api/auth/student/login
+   * @route   POST https://369.codegurru.in/api/auth/student/login
    * @param   {Object} credentials - { email, password }
    * @returns {Promise<Object>} API JSON response
    */
@@ -41,7 +46,11 @@ export const userModel = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials)
       });
-      return await res.json();
+      const data = await res.json();
+      if (data && data.success && data.token) {
+        setAuthToken(data.token);
+      }
+      return data;
     } catch (err) {
       console.warn('[userModel API Warning] Login network error:', err);
       return { success: false, message: 'Unable to connect to server. Please check connection.' };
@@ -50,7 +59,7 @@ export const userModel = {
 
   /**
    * API: Send Mobile OTP for Fast Student Login
-   * @route   POST http://localhost:5000/api/auth/student/send-otp
+   * @route   POST https://369.codegurru.in/api/auth/student/send-otp
    * @param   {string} phone - 10-digit mobile number
    * @returns {Promise<Object>} API JSON response
    */
@@ -70,8 +79,8 @@ export const userModel = {
 
   /**
    * API: Verify Mobile OTP & Auto Login
-   * @route   POST http://localhost:5000/api/auth/student/verify-otp
-   * @param   {Object} params - { phone, otp, name }
+   * @route   POST https://369.codegurru.in/api/auth/student/verify-otp
+   * @param   {Object} params - { phone, otp, name, location }
    * @returns {Promise<Object>} API JSON response
    */
   verifyOtp: async ({ phone, otp, name, location }) => {
@@ -81,7 +90,11 @@ export const userModel = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, otp, name, location })
       });
-      return await res.json();
+      const data = await res.json();
+      if (data && data.success && data.token) {
+        setAuthToken(data.token);
+      }
+      return data;
     } catch (err) {
       console.warn('[userModel API Warning] verifyOtp network error:', err);
       return { success: false, message: 'Unable to reach server. Please try again.' };
@@ -90,15 +103,19 @@ export const userModel = {
 
   /**
    * API: Update Student Profile (Name & Email after OTP Verification)
-   * @route   POST http://localhost:5000/api/auth/student/update-profile
+   * @route   POST https://369.codegurru.in/api/auth/student/update-profile
    * @param   {Object} params - { phone, name, email, location }
    * @returns {Promise<Object>} API JSON response
    */
   updateProfile: async ({ phone, name, email, location }) => {
     try {
+      const token = getAuthToken();
       const res = await fetch(`${API_BASE}/auth/student/update-profile`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({ phone, name, email, location })
       });
       return await res.json();

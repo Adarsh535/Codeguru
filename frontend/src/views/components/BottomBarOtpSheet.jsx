@@ -59,7 +59,7 @@ export default function BottomBarOtpSheet({
   // Fetch showMyBatchNav setting
   useEffect(() => {
     try {
-      const base = typeof window !== 'undefined' ? (process.env.NEXT_PUBLIC_API_BASE_URL || `http://${window.location.hostname}:5000/api`) : 'http://localhost:5000/api';
+      const base = typeof window !== 'undefined' ? (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://369.codegurru.in/api') : 'https://369.codegurru.in/api';
       fetch(`${base}/settings`)
         .then(res => res.json())
         .then(data => {
@@ -286,6 +286,10 @@ export default function BottomBarOtpSheet({
 
         // Persist to localStorage
         localStorage.setItem('codeguru_user', JSON.stringify(userPayload));
+        if (userPayload.token) {
+          localStorage.setItem('codeguru_token', userPayload.token);
+          localStorage.setItem('token', userPayload.token);
+        }
         window.dispatchEvent(new Event('storage'));
         window.dispatchEvent(new CustomEvent('codeguru_user_updated'));
 
@@ -305,6 +309,8 @@ export default function BottomBarOtpSheet({
 
   const handleLogout = () => {
     localStorage.removeItem('codeguru_user');
+    localStorage.removeItem('codeguru_token');
+    localStorage.removeItem('token');
     window.dispatchEvent(new Event('storage'));
     window.dispatchEvent(new CustomEvent('codeguru_user_updated'));
     handleClose();

@@ -5,7 +5,7 @@
  * Handles API calls to backend Express server for course enrollments.
  */
 
-import { API_BASE } from './apiClient';
+import { API_BASE, getAuthToken } from './apiClient';
 
 export const enrollmentModel = {
   /**
@@ -13,7 +13,13 @@ export const enrollmentModel = {
    */
   getEnrollments: async () => {
     try {
-      const res = await fetch(`${API_BASE}/enrollments`);
+      const token = getAuthToken();
+      const res = await fetch(`${API_BASE}/enrollments`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
       const data = await res.json();
       if (data && data.success && Array.isArray(data.data)) {
         return data.data;
@@ -31,9 +37,13 @@ export const enrollmentModel = {
    */
   createEnrollment: async (enrollmentData) => {
     try {
+      const token = getAuthToken();
       const res = await fetch(`${API_BASE}/enrollments`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify(enrollmentData)
       });
       const data = await res.json();

@@ -204,6 +204,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'otp', onAuth
         } catch (err) {}
 
         localStorage.setItem('codeguru_user', JSON.stringify(userPayload));
+        if (userPayload.token) {
+          localStorage.setItem('codeguru_token', userPayload.token);
+          localStorage.setItem('token', userPayload.token);
+        }
         window.dispatchEvent(new Event('storage'));
         window.dispatchEvent(new CustomEvent('codeguru_user_updated'));
 
@@ -226,6 +230,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'otp', onAuth
         loginTime: new Date().toISOString()
       };
       localStorage.setItem('codeguru_user', JSON.stringify(userPayload));
+      localStorage.setItem('codeguru_token', userPayload.token);
+      localStorage.setItem('token', userPayload.token);
       window.dispatchEvent(new Event('storage'));
       window.dispatchEvent(new CustomEvent('codeguru_user_updated'));
 
@@ -278,6 +284,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'otp', onAuth
           loginTime: new Date().toISOString()
         };
         localStorage.setItem('codeguru_user', JSON.stringify(userPayload));
+        if (userPayload.token) {
+          localStorage.setItem('codeguru_token', userPayload.token);
+          localStorage.setItem('token', userPayload.token);
+        }
         window.dispatchEvent(new Event('storage'));
         window.dispatchEvent(new CustomEvent('codeguru_user_updated'));
         setIsSuccess(true);
@@ -303,6 +313,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'otp', onAuth
           loginTime: new Date().toISOString()
         };
         localStorage.setItem('codeguru_user', JSON.stringify(userPayload));
+        if (userPayload.token) {
+          localStorage.setItem('codeguru_token', userPayload.token);
+          localStorage.setItem('token', userPayload.token);
+        }
         window.dispatchEvent(new Event('storage'));
         window.dispatchEvent(new CustomEvent('codeguru_user_updated'));
         setIsSuccess(true);

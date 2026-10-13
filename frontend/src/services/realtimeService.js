@@ -8,13 +8,18 @@
  */
 
 function getStreamUrl() {
+  if (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_BASE_URL) {
+    return `${process.env.NEXT_PUBLIC_API_BASE_URL}/realtime/stream`;
+  }
   if (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_URL) {
     return `${process.env.NEXT_PUBLIC_API_URL}/realtime/stream`;
   }
   if (typeof window !== 'undefined' && window.location && window.location.hostname) {
-    return `http://${window.location.hostname}:5000/api/realtime/stream`;
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:5000/api/realtime/stream';
+    }
   }
-  return 'http://localhost:5000/api/realtime/stream';
+  return 'https://369.codegurru.in/api/realtime/stream';
 }
 
 class RealtimeSyncManager {
