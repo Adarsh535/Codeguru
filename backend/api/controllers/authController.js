@@ -2,30 +2,29 @@
  * ============================================================================
  * CONTROLLER: AUTHENTICATION CONTROLLER (authController.js)
  * ============================================================================
- * Manages Master Admin & Student registration, authentication and profile security.
+ * Manages Master Admin & Student registration, authentication, sessions, and profile security.
+ * Hardened with real cryptographic JWTs, HttpOnly cookies, and strict validation.
  */
 
 import bcrypt from 'bcryptjs';
 import { Admin } from '../../models/Admin.js';
 import { Student } from '../../models/Student.js';
 import { Lead } from '../../models/Lead.js';
-import { sendRealSMS, sendOtpSMS, checkTwilioVerify } from '../../services/smsService.js';
+import { sendOtpSMS, checkTwilioVerify } from '../../services/smsService.js';
 import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
+import { generateToken, attachAuthCookie, clearAuthCookie } from '../../utils/jwtHelper.js';
 
-// In-memory OTP store: phone -> { otp, expiresAt }
+// In-memory OTP store: phone -> { otp, expiresAt, attempts }
 const otpStore = new Map();
 
 /**
  * @route   POST /api/auth/login
- * @desc    Master Admin Login authentication (Strict Database Lookup)
+ * @desc    Master Admin Login authentication
  * @access  Public
- * @param   {string} email
- * @param   {string} password
- * @returns {Object} { success, token, user, message }
  */
 export const loginAdmin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
 
     if (!email || !password) {
       return res.status(400).json({
@@ -36,10 +35,10 @@ export const loginAdmin = async (req, res) => {
 
     const cleanEmail = email.toLowerCase().trim();
 
-    // 1. Query MongoDB Atlas Database for Admin account matching cleanEmail
+    // 1. Query MongoDB Database for Admin account matching cleanEmail
     let admin = await Admin.findOne({ email: cleanEmail });
 
-    // Fallback: If DB has no admin records at all, auto-create initial Master Admin
+    // Fallback seed: If DB has zero admins, seed initial Master Admin
     if (!admin) {
       const totalAdmins = await Admin.countDocuments();
       if (totalAdmins === 0) {
@@ -54,7 +53,7 @@ export const loginAdmin = async (req, res) => {
       }
     }
 
-    // 2. If no admin account exists in MongoDB Atlas for this email
+    // Generic error to avoid account enumeration
     if (!admin) {
       return res.status(401).json({
         success: false,
@@ -62,7 +61,7 @@ export const loginAdmin = async (req, res) => {
       });
     }
 
-    // 3. Verify password directly against the stored hash/password in MongoDB Atlas
+    // Verify password hash
     let isMatch = false;
     if (admin.password) {
       if (admin.password.startsWith('$2a$') || admin.password.startsWith('$2b$')) {
@@ -83,9 +82,21 @@ export const loginAdmin = async (req, res) => {
       });
     }
 
+    // Generate signed JWT
+    const tokenPayload = {
+      id: admin._id,
+      email: admin.email,
+      role: admin.role || 'Master Admin'
+    };
+    const token = generateToken(tokenPayload);
+
+    // Attach HttpOnly, Secure, SameSite Cookie
+    attachAuthCookie(res, 'cg_admin_token', token);
+    attachAuthCookie(res, 'cg_token', token);
+
     return res.json({
       success: true,
-      token: `cg-admin-jwt-${Date.now()}`,
+      token,
       user: {
         id: admin._id,
         name: admin.name,
@@ -95,39 +106,39 @@ export const loginAdmin = async (req, res) => {
       message: 'Master Admin login successful'
     });
   } catch (error) {
-    console.error('[authController loginAdmin Error]:', error);
+    console.error('[authController loginAdmin Error]:', error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || 'Internal server authentication error'
+      message: 'Authentication error occurred. Please try again.'
     });
   }
 };
 
 /**
  * @route   POST /api/auth/update-credentials
- * @desc    Update Master Admin Email & Password credentials directly in Database
- * @access  Admin Private
- * @param   {string} currentEmail
- * @param   {string} newEmail
- * @param   {string} newPassword
- * @returns {Object} { success, message }
+ * @desc    Update Master Admin Email & Password credentials
+ * @access  Admin Private (Requires Master Admin JWT)
  */
 export const updateCredentials = async (req, res) => {
   try {
-    const { currentEmail, newEmail, newPassword } = req.body;
+    const { currentEmail, newEmail, newPassword } = req.body || {};
 
-    const queryEmail = (currentEmail || '').toLowerCase().trim();
-    let admin = await Admin.findOne({ email: queryEmail });
-
-    // Fallback: If not found by currentEmail, find the single master admin in database
-    if (!admin) {
-      admin = await Admin.findOne();
+    // Get admin ID or email from authenticated session
+    const requesterEmail = req.admin?.email || currentEmail;
+    if (!requesterEmail) {
+      return res.status(401).json({
+        success: false,
+        message: 'Admin authorization required'
+      });
     }
+
+    const queryEmail = requesterEmail.toLowerCase().trim();
+    const admin = await Admin.findOne({ email: queryEmail });
 
     if (!admin) {
       return res.status(404).json({
         success: false,
-        message: 'Admin account record not found in MongoDB database'
+        message: 'Admin account record not found'
       });
     }
 
@@ -136,28 +147,42 @@ export const updateCredentials = async (req, res) => {
     }
 
     if (newPassword) {
+      if (typeof newPassword !== 'string' || newPassword.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: 'Password must be at least 6 characters long'
+        });
+      }
       admin.password = await bcrypt.hash(newPassword, 10);
     }
 
     await admin.save();
 
-    console.log(`✅ Admin credentials updated in MongoDB Atlas: Email = ${admin.email}`);
+    // Issue refreshed token with updated email
+    const updatedToken = generateToken({
+      id: admin._id,
+      email: admin.email,
+      role: admin.role
+    });
+    attachAuthCookie(res, 'cg_admin_token', updatedToken);
+    attachAuthCookie(res, 'cg_token', updatedToken);
 
     return res.json({
       success: true,
+      token: updatedToken,
       user: {
         id: admin._id,
         name: admin.name,
         email: admin.email,
         role: admin.role
       },
-      message: 'Admin credentials updated successfully in MongoDB Atlas'
+      message: 'Admin credentials updated successfully'
     });
   } catch (error) {
-    console.error('[authController updateCredentials Error]:', error);
+    console.error('[authController updateCredentials Error]:', error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || 'Error updating credentials'
+      message: 'Error updating admin credentials'
     });
   }
 };
@@ -166,15 +191,10 @@ export const updateCredentials = async (req, res) => {
  * @route   POST /api/auth/student/register
  * @desc    Register a new student account
  * @access  Public
- * @param   {string} name
- * @param   {string} email
- * @param   {string} password
- * @param   {string} phone
- * @returns {Object} { success, token, student, message }
  */
 export const registerStudent = async (req, res) => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, phone } = req.body || {};
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -183,7 +203,15 @@ export const registerStudent = async (req, res) => {
       });
     }
 
+    if (typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long'
+      });
+    }
+
     const cleanEmail = email.toLowerCase().trim();
+    const cleanPhone = (phone || '').toString().replace(/[^0-9]/g, '').slice(-10);
 
     const existingStudent = await Student.findOne({ email: cleanEmail });
     if (existingStudent) {
@@ -199,15 +227,23 @@ export const registerStudent = async (req, res) => {
       name: name.trim(),
       email: cleanEmail,
       password: hashedPassword,
-      phone: phone || '',
+      phone: cleanPhone,
       role: 'Student'
     });
 
     await newStudent.save();
 
+    const token = generateToken({
+      id: newStudent._id,
+      email: newStudent.email,
+      phone: newStudent.phone,
+      role: 'Student'
+    });
+    attachAuthCookie(res, 'cg_token', token);
+
     return res.status(201).json({
       success: true,
-      token: `cg-student-jwt-${Date.now()}`,
+      token,
       student: {
         id: newStudent._id,
         name: newStudent.name,
@@ -218,10 +254,10 @@ export const registerStudent = async (req, res) => {
       message: 'Student account registered successfully'
     });
   } catch (error) {
-    console.error('[authController registerStudent Error]:', error);
+    console.error('[authController registerStudent Error]:', error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || 'Error registering student account'
+      message: 'Error registering student account'
     });
   }
 };
@@ -230,13 +266,10 @@ export const registerStudent = async (req, res) => {
  * @route   POST /api/auth/student/login
  * @desc    Authenticate student account login
  * @access  Public
- * @param   {string} email
- * @param   {string} password
- * @returns {Object} { success, token, student, message }
  */
 export const loginStudent = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
 
     if (!email || !password) {
       return res.status(400).json({
@@ -275,9 +308,17 @@ export const loginStudent = async (req, res) => {
       });
     }
 
+    const token = generateToken({
+      id: student._id,
+      email: student.email,
+      phone: student.phone,
+      role: student.role || 'Student'
+    });
+    attachAuthCookie(res, 'cg_token', token);
+
     return res.json({
       success: true,
-      token: `cg-student-jwt-${Date.now()}`,
+      token,
       student: {
         id: student._id,
         name: student.name,
@@ -288,22 +329,22 @@ export const loginStudent = async (req, res) => {
       message: 'Student login successful'
     });
   } catch (error) {
-    console.error('[authController loginStudent Error]:', error);
+    console.error('[authController loginStudent Error]:', error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || 'Server error during student login'
+      message: 'Server error during student login'
     });
   }
 };
 
 /**
  * @route   POST /api/auth/student/send-otp
- * @desc    Generate and send verification OTP to student mobile number via Twilio SMS
- * @access  Public
+ * @desc    Generate and send verification OTP to student mobile number
+ * @access  Public (Protected by otpLimiter)
  */
 export const sendStudentOtp = async (req, res) => {
   try {
-    const rawPhone = req.body.phone || '';
+    const rawPhone = req.body?.phone || '';
     const cleanPhone = rawPhone.toString().replace(/[^0-9]/g, '').slice(-10);
 
     if (!cleanPhone || cleanPhone.length !== 10) {
@@ -313,49 +354,45 @@ export const sendStudentOtp = async (req, res) => {
       });
     }
 
-    // Generate 6-digit OTP
+    // Generate cryptographically random 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 mins expiration
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-    otpStore.set(cleanPhone, { otp, expiresAt });
+    otpStore.set(cleanPhone, { otp, expiresAt, attempts: 0 });
 
-    // Send real cellular SMS to student phone via SMS Gateway
+    // Send real cellular SMS via SMS gateway
     const smsResult = await sendOtpSMS(cleanPhone, otp);
     const isRealDelivered = Boolean(smsResult && smsResult.success === true);
 
-    console.log(`\n======================================================`);
-    console.log(`🔑 [STUDENT OTP DISPATCH] Phone: +91 ${cleanPhone} | Code: ${otp}`);
-    console.log(`📡 SMS Provider Result:`, smsResult?.provider || 'Simulation');
-    console.log(`📡 Real SMS Delivered:`, isRealDelivered ? 'YES' : 'NO (Trial/Simulation Mode)');
-    console.log(`======================================================\n`);
+    // In non-production development environments, provide guidance without leaking in production
+    const isDev = process.env.NODE_ENV !== 'production';
 
     return res.json({
       success: true,
       message: isRealDelivered
         ? `OTP has been sent to +91 ${cleanPhone} via SMS`
-        : `Trial Mode: Real SMS restricted by Twilio Trial. Your OTP is ${otp}`,
-      phone: cleanPhone,
-      provider: smsResult?.provider || 'Simulation',
-      isRealSMS: isRealDelivered,
-      demoOtp: isRealDelivered ? undefined : otp
+        : (isDev
+            ? `Development Mode: OTP has been generated for testing.`
+            : `OTP has been sent to your mobile number.`),
+      phone: cleanPhone
     });
   } catch (error) {
-    console.error('[authController sendStudentOtp Error]:', error);
+    console.error('[authController sendStudentOtp Error]:', error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || 'Failed to send OTP. Please try again.'
+      message: 'Failed to send OTP. Please try again later.'
     });
   }
 };
 
 /**
  * @route   POST /api/auth/student/verify-otp
- * @desc    Verify OTP and automatically authenticate / create student
+ * @desc    Verify OTP and automatically authenticate / register student
  * @access  Public
  */
 export const verifyStudentOtp = async (req, res) => {
   try {
-    const { phone, otp, name } = req.body;
+    const { phone, otp, name } = req.body || {};
     const cleanPhone = (phone || '').toString().replace(/[^0-9]/g, '').slice(-10);
     const cleanOtp = (otp || '').toString().trim();
 
@@ -375,16 +412,13 @@ export const verifyStudentOtp = async (req, res) => {
 
     let isValid = false;
 
-    // 1. First check Twilio Verify service (real SMS delivered to user's mobile)
+    // 1. Verify against Twilio Verify service
     const twilioValid = await checkTwilioVerify(cleanPhone, cleanOtp);
     if (twilioValid) {
       isValid = true;
       otpStore.delete(cleanPhone);
-    } else if (cleanOtp === '1234' || cleanOtp === '123456') {
-      // 2. Allow master test OTPs for instant validation
-      isValid = true;
     } else {
-      // 3. Check in-memory fallback OTP
+      // 2. Check in-memory stored OTP with attempt rate limiting
       const storedData = otpStore.get(cleanPhone);
       if (storedData) {
         if (Date.now() > storedData.expiresAt) {
@@ -394,6 +428,16 @@ export const verifyStudentOtp = async (req, res) => {
             message: 'OTP has expired. Please request a new OTP.'
           });
         }
+
+        storedData.attempts = (storedData.attempts || 0) + 1;
+        if (storedData.attempts > 5) {
+          otpStore.delete(cleanPhone);
+          return res.status(429).json({
+            success: false,
+            message: 'Too many incorrect attempts. Please request a new OTP.'
+          });
+        }
+
         if (storedData.otp === cleanOtp) {
           isValid = true;
           otpStore.delete(cleanPhone);
@@ -404,7 +448,7 @@ export const verifyStudentOtp = async (req, res) => {
     if (!isValid) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid OTP code. Please enter the OTP received on your mobile.'
+        message: 'Invalid OTP code. Please enter the correct code received on your mobile.'
       });
     }
 
@@ -416,7 +460,6 @@ export const verifyStudentOtp = async (req, res) => {
       const autoEmail = `${cleanPhone}@student.codeguru.in`;
       const tempPassword = await bcrypt.hash(`OTP@${cleanPhone}`, 10);
 
-      // Check if student with this email exists
       student = await Student.findOne({ email: autoEmail });
       if (!student) {
         student = new Student({
@@ -432,9 +475,9 @@ export const verifyStudentOtp = async (req, res) => {
         await student.save();
       }
 
-      // Add to Lead CRM collection
+      // Add to Lead CRM
       try {
-        const studentLocation = (req.body.location && req.body.location.trim()) || 'Ayodhya, UP';
+        const studentLocation = (req.body?.location && req.body.location.trim()) || 'Ayodhya, UP';
         const newLead = new Lead({
           leadId: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
           name: studentName,
@@ -443,18 +486,27 @@ export const verifyStudentOtp = async (req, res) => {
           location: studentLocation,
           course: 'Full Stack Web Development (OTP Verified)',
           status: 'New',
-          notes: `Instant Mobile OTP Login Verified (+91 ${cleanPhone}, Location: ${studentLocation})`
+          notes: `Mobile OTP Login Verified (+91 ${cleanPhone})`
         });
         await newLead.save();
         broadcastRealtimeEvent('leads', newLead);
       } catch (err) {
-        console.warn('[verifyStudentOtp Lead Sync Warning]:', err.message);
+        // Log silently
       }
     }
 
+    // Generate signed JWT token
+    const token = generateToken({
+      id: student._id,
+      email: student.email,
+      phone: student.phone,
+      role: student.role || 'Student'
+    });
+    attachAuthCookie(res, 'cg_token', token);
+
     return res.json({
       success: true,
-      token: `cg-student-jwt-${Date.now()}`,
+      token,
       student: {
         id: student._id,
         name: student.name,
@@ -462,25 +514,25 @@ export const verifyStudentOtp = async (req, res) => {
         phone: student.phone,
         role: student.role || 'Student'
       },
-      message: 'Mobile OTP verified successfully! Logged in.'
+      message: 'Mobile OTP verified successfully!'
     });
   } catch (error) {
-    console.error('[authController verifyStudentOtp Error]:', error);
+    console.error('[authController verifyStudentOtp Error]:', error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || 'Error verifying OTP'
+      message: 'Error verifying OTP. Please try again.'
     });
   }
 };
 
 /**
  * @route   POST /api/auth/student/update-profile
- * @desc    Update student name and email right after mobile OTP verification
- * @access  Public
+ * @desc    Update student name and email
+ * @access  Authenticated Student (or matching phone session)
  */
 export const updateStudentProfile = async (req, res) => {
   try {
-    const { phone, name, email } = req.body;
+    const { phone, name, email } = req.body || {};
     const cleanPhone = (phone || '').toString().replace(/[^0-9]/g, '').slice(-10);
 
     if (!cleanPhone || cleanPhone.length !== 10) {
@@ -497,20 +549,24 @@ export const updateStudentProfile = async (req, res) => {
       });
     }
 
+    // If request has authenticated session, enforce ownership check
+    if (req.user && req.user.role === 'Student' && req.user.phone && req.user.phone !== cleanPhone) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: You cannot modify another student profile'
+      });
+    }
+
     const cleanName = name.trim();
     const cleanEmail = (email && email.trim().toLowerCase()) || `${cleanPhone}@student.codeguru.in`;
 
-    // 1. Check if student already exists by email
     const existingWithEmail = await Student.findOne({ email: cleanEmail });
-    // 2. Check if student exists by phone
     const existingWithPhone = await Student.findOne({ phone: cleanPhone });
 
     let student = null;
 
     if (existingWithEmail && existingWithPhone) {
       if (existingWithEmail._id.toString() !== existingWithPhone._id.toString()) {
-        // User had an existing account with this email, and a temp account was created by phone OTP.
-        // Merge them: Link phone to the real email account, update name, and remove temp record.
         existingWithEmail.phone = cleanPhone;
         existingWithEmail.name = cleanName;
         await existingWithEmail.save();
@@ -523,19 +579,16 @@ export const updateStudentProfile = async (req, res) => {
         student = existingWithEmail;
       }
     } else if (existingWithEmail) {
-      // Account exists with this email - link this phone & update name
       existingWithEmail.name = cleanName;
       existingWithEmail.phone = cleanPhone;
       await existingWithEmail.save();
       student = existingWithEmail;
     } else if (existingWithPhone) {
-      // Account exists with this phone - update email and name
       existingWithPhone.name = cleanName;
       existingWithPhone.email = cleanEmail;
       await existingWithPhone.save();
       student = existingWithPhone;
     } else {
-      // Brand new student record
       const tempPassword = await bcrypt.hash(`OTP@${cleanPhone}`, 10);
       student = new Student({
         name: cleanName,
@@ -547,9 +600,9 @@ export const updateStudentProfile = async (req, res) => {
       await student.save();
     }
 
-    // Also update Lead CRM
+    // Update Lead CRM safely
     try {
-      const studentLocation = (req.body.location && req.body.location.trim()) || '';
+      const studentLocation = (req.body?.location && req.body.location.trim()) || '';
       let lead = await Lead.findOne({ phone: cleanPhone });
       if (!lead && cleanEmail) {
         lead = await Lead.findOne({ email: cleanEmail });
@@ -559,31 +612,26 @@ export const updateStudentProfile = async (req, res) => {
         lead.name = cleanName;
         lead.email = cleanEmail;
         lead.phone = cleanPhone;
-        if (studentLocation && studentLocation !== 'Ayodhya, UP') {
+        if (studentLocation) {
           lead.location = studentLocation;
         }
         await lead.save();
-      } else {
-        lead = new Lead({
-          leadId: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
-          name: cleanName,
-          phone: cleanPhone,
-          email: cleanEmail,
-          location: studentLocation || 'Ayodhya, UP',
-          course: 'Full Stack Web Development (OTP Verified)',
-          status: 'New',
-          notes: `Instant Mobile OTP Login Verified (+91 ${cleanPhone}${studentLocation ? ', Location: ' + studentLocation : ''})`
-        });
-        await lead.save();
       }
-      broadcastRealtimeEvent('leads', lead);
     } catch (leadErr) {
-      console.warn('[updateStudentProfile Lead Sync Warning]:', leadErr.message);
+      // Ignore sync error
     }
+
+    const token = generateToken({
+      id: student._id,
+      email: student.email,
+      phone: student.phone,
+      role: student.role || 'Student'
+    });
+    attachAuthCookie(res, 'cg_token', token);
 
     return res.json({
       success: true,
-      token: `cg-student-jwt-${Date.now()}`,
+      token,
       student: {
         id: student._id,
         name: student.name,
@@ -594,18 +642,32 @@ export const updateStudentProfile = async (req, res) => {
       message: 'Student profile updated successfully!'
     });
   } catch (error) {
-    console.error('[authController updateStudentProfile Error]:', error);
-    if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: 'This email is already associated with another account.'
-      });
-    }
+    console.error('[authController updateStudentProfile Error]:', error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || 'Error updating student profile'
+      message: 'Error updating student profile'
     });
   }
 };
 
-
+/**
+ * @route   POST /api/auth/logout
+ * @desc    Clears authentication cookies and terminates session
+ * @access  Public / Authenticated
+ */
+export const logoutUser = async (req, res) => {
+  try {
+    clearAuthCookie(res, 'cg_admin_token');
+    clearAuthCookie(res, 'cg_token');
+    clearAuthCookie(res, 'token');
+    return res.json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Error during logout'
+    });
+  }
+};

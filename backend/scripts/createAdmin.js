@@ -58,7 +58,7 @@ async function createOrUpdateAdmin() {
 
     console.log(`--------------------------------------------------`);
     console.log(`📧 Email:    ${email}`);
-    console.log(`🔑 Password: ${rawPassword}`);
+    console.log(`🔑 Password: [CONFIGURED SECURELY]`);
     console.log(`👤 Name:     ${name}`);
     console.log(`--------------------------------------------------`);
 

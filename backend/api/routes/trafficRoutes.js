@@ -3,10 +3,12 @@
  * API ROUTER: TRAFFIC ROUTES (trafficRoutes.js)
  * ============================================================================
  * Defines REST API endpoints for Realtime Website Analytics & Search Tracking.
+ * Hardened with Master Admin authorization on analytics stats.
  */
 
 import express from 'express';
 import { getTrafficStats, recordVisit, trackCourseSearch } from '../controllers/trafficController.js';
+import { requireAdmin } from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -15,7 +17,7 @@ const router = express.Router();
  * @desc   Retrieves realtime traffic, live active users, top searched courses
  * @access Admin Private
  */
-router.get('/stats', getTrafficStats);
+router.get('/stats', requireAdmin, getTrafficStats);
 
 /**
  * @api    POST /api/traffic/visit

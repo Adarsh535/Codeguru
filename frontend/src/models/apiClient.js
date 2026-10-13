@@ -3,6 +3,7 @@
  * MODEL LAYER: FRONTEND API CLIENT (apiClient.js)
  * ==========================================
  * Centralized API client base URL, Secret API Key, and HTTP request helpers for Frontend app.
+ * Configured with credentials: 'include' for HttpOnly cookies and Bearer fallback.
  */
 
 export function getApiBase() {
@@ -29,7 +30,7 @@ export const API_BASE = getApiBase();
 export const API_KEY = getApiKey();
 
 /**
- * Retrieves student/user authentication JWT token from localStorage
+ * Retrieves student/user authentication JWT token from localStorage (fallback)
  */
 export function getAuthToken() {
   if (typeof window === 'undefined') return null;
@@ -76,8 +77,31 @@ export function getCurrentUser() {
 }
 
 /**
+ * Client logout helper that clears session both on backend (HttpOnly cookies) and client storage
+ */
+export async function logoutClient() {
+  try {
+    const base = getApiBase();
+    await fetch(`${base}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'x-api-key': getApiKey()
+      }
+    });
+  } catch (e) {}
+
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('codeguru_token');
+    localStorage.removeItem('token');
+    localStorage.removeItem('codeguru_user');
+    window.dispatchEvent(new Event('codeguru_user_updated'));
+  }
+}
+
+/**
  * Helper for executing HTTP requests to Express REST API Backend
- * Automatically injects API Secret Key and JWT Bearer Authorization header if student is authenticated.
+ * Automatically injects API Secret Key, JWT Bearer Authorization, and credentials: 'include'.
  * @param {string} endpoint - Relative path (e.g. '/banners')
  * @param {object} options - Fetch configuration options
  */
@@ -94,6 +118,7 @@ export async function apiFetch(endpoint, options = {}) {
   };
 
   const config = {
+    credentials: 'include',
     ...options,
     headers: {
       ...defaultHeaders,
@@ -105,7 +130,7 @@ export async function apiFetch(endpoint, options = {}) {
   return response;
 }
 
-// Global browser fetch interceptor: ensures all outgoing requests to backend include x-api-key
+// Global browser fetch interceptor: ensures all outgoing requests to backend include x-api-key & credentials
 if (typeof window !== 'undefined' && !window.__codeguru_fetch_shield_installed) {
   window.__codeguru_fetch_shield_installed = true;
   const originalFetch = window.fetch;
@@ -129,10 +154,14 @@ if (typeof window !== 'undefined' && !window.__codeguru_fetch_shield_installed) 
         if (studentToken && !customHeaders.has('authorization')) {
           customHeaders.set('authorization', `Bearer ${studentToken}`);
         }
-        return originalFetch(resource, { ...init, headers: customHeaders });
+        return originalFetch(resource, {
+          credentials: 'include',
+          ...init,
+          headers: customHeaders
+        });
       }
     } catch (e) {
-      // Fallback silently if any header manipulation issue
+      // Fallback silently
     }
     return originalFetch(resource, init);
   };

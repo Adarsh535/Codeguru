@@ -3,10 +3,12 @@
  * API ROUTER: BRANCH ROUTES (branchRoutes.js)
  * ============================================================================
  * Defines REST API endpoints for Regional Campus & Branch Locations.
+ * Hardened with Master Admin authorization.
  */
 
 import express from 'express';
 import { getBranches, addBranch, deleteBranch } from '../controllers/branchController.js';
+import { requireAdmin } from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -22,13 +24,13 @@ router.get('/', getBranches);
  * @desc   Creates a new regional campus branch entry
  * @access Admin Private
  */
-router.post('/', addBranch);
+router.post('/', requireAdmin, addBranch);
 
 /**
  * @api    DELETE /api/branches/:id
  * @desc   Deletes a branch location by ID
  * @access Admin Private
  */
-router.delete('/:id', deleteBranch);
+router.delete('/:id', requireAdmin, deleteBranch);
 
 export default router;

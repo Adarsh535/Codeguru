@@ -3,6 +3,7 @@
  * API ROUTER: ENROLLMENT ROUTES (enrollmentRoutes.js)
  * ============================================================================
  * REST API routes for student course enrollment & payment processing.
+ * Hardened with student ownership check and Master Admin RBAC.
  */
 
 import express from 'express';
@@ -12,14 +13,15 @@ import {
   updateEnrollmentStatus,
   deleteEnrollment
 } from '../controllers/enrollmentController.js';
+import { requireAuth, requireAdmin } from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 /**
  * GET /api/enrollments
- * Retrieve all enrollments
+ * Retrieve enrollments (Admin gets all, Student gets only own records)
  */
-router.get('/', getEnrollments);
+router.get('/', requireAuth, getEnrollments);
 
 /**
  * POST /api/enrollments
@@ -29,14 +31,14 @@ router.post('/', createEnrollment);
 
 /**
  * PUT /api/enrollments/:id
- * Update enrollment / fee status
+ * Update enrollment / fee status (Admin only)
  */
-router.put('/:id', updateEnrollmentStatus);
+router.put('/:id', requireAdmin, updateEnrollmentStatus);
 
 /**
  * DELETE /api/enrollments/:id
- * Delete enrollment record
+ * Delete enrollment record (Admin only)
  */
-router.delete('/:id', deleteEnrollment);
+router.delete('/:id', requireAdmin, deleteEnrollment);
 
 export default router;

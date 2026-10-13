@@ -3,6 +3,7 @@
  * MODEL LAYER: API CLIENT CONFIGURATION (admin)
  * ==========================================
  * Centralized API client base URL, Secret API Key, and HTTP request helpers.
+ * Configured with credentials: 'include' for HttpOnly cookies and Bearer fallback.
  */
 
 export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://369.codegurru.in/api';
@@ -26,8 +27,28 @@ export function getAdminAuth() {
 }
 
 /**
+ * Admin logout helper: Clears server-side HttpOnly cookies and client storage
+ */
+export async function logoutAdminSession() {
+  try {
+    await fetch(`${API_BASE}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'x-api-key': API_SECRET_KEY
+      }
+    });
+  } catch (e) {}
+
+  if (typeof window !== 'undefined') {
+    sessionStorage.removeItem('codeguru_admin_session');
+    localStorage.removeItem('codeguru_admin_session');
+  }
+}
+
+/**
  * Common helper for executing HTTP requests to Express REST API
- * Automatically injects Secret API Key and Master Admin Token headers.
+ * Automatically injects Secret API Key, Master Admin Token headers, and credentials: 'include'.
  * @param {string} endpoint - Relative path (e.g. '/banners')
  * @param {object} options - Fetch configuration options
  */
@@ -46,6 +67,7 @@ export async function apiFetch(endpoint, options = {}) {
   };
 
   const config = {
+    credentials: 'include',
     ...options,
     headers: {
       ...defaultHeaders,
@@ -62,7 +84,7 @@ export async function apiFetch(endpoint, options = {}) {
   return response;
 }
 
-// Global browser fetch interceptor: ensures all outgoing requests to backend include x-api-key and Admin Auth
+// Global browser fetch interceptor: ensures all outgoing requests to backend include x-api-key, Admin Auth & credentials
 if (typeof window !== 'undefined' && !window.__codeguru_admin_shield_installed) {
   window.__codeguru_admin_shield_installed = true;
   const originalFetch = window.fetch;
@@ -96,10 +118,14 @@ if (typeof window !== 'undefined' && !window.__codeguru_admin_shield_installed) 
           }
         }
 
-        return originalFetch(resource, { ...init, headers: customHeaders });
+        return originalFetch(resource, {
+          credentials: 'include',
+          ...init,
+          headers: customHeaders
+        });
       }
     } catch (e) {
-      // Fallback silently if any header manipulation issue
+      // Fallback silently
     }
     return originalFetch(resource, init);
   };

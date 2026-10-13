@@ -54,10 +54,10 @@ export const getSanitizedUri = (rawUri) => {
   return rawUri;
 };
 
-// Fallback direct hosts for rfadttm cluster in case Node.js/Windows querySrv returns ECONNREFUSED
-export const RFADTTM_DIRECT_URI = 'mongodb://cgukvk_db_user:JdSCwMQTjDTqjDwF@ac-0e0udxv-shard-00-00.rfadttm.mongodb.net:27017,ac-0e0udxv-shard-00-01.rfadttm.mongodb.net:27017,ac-0e0udxv-shard-00-02.rfadttm.mongodb.net:27017/codeguru_db?ssl=true&replicaSet=atlas-12f6dr-shard-0&authSource=admin&retryWrites=true&w=majority';
+// Fallback connection loaded strictly from environment variable
+export const RFADTTM_DIRECT_URI = process.env.MONGODB_DIRECT_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/codeguru_db';
 
-const rawTargetUri = process.env.MONGODB_URI || 'mongodb+srv://cgukvk_db_user:JdSCwMQTjDTqjDwF@cluster0.rfadttm.mongodb.net/codeguru_db?retryWrites=true&w=majority';
+const rawTargetUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/codeguru_db';
 export const CLOUD_MONGODB_URI = getSanitizedUri(rawTargetUri);
 export const LOCAL_MONGODB_URI = 'mongodb://127.0.0.1:27017/codeguru_db';
 export let currentDbMode = 'cloud';
@@ -90,8 +90,7 @@ export const switchDatabaseMode = async (targetMode) => {
       name: conn.connection.name,
       isAtlas,
       provider: isAtlas ? 'MongoDB Atlas Cloud Cluster' : 'Local MongoDB Compass',
-      uri: isAtlas ? CLOUD_MONGODB_URI : LOCAL_MONGODB_URI,
-      connectionText: `Connected to ${isAtlas ? 'MongoDB Atlas Cloud (cluster0.illbds4.mongodb.net)' : 'Local MongoDB Compass (127.0.0.1:27017)'}`
+      connectionText: isAtlas ? 'Connected to MongoDB Atlas Cloud Cluster' : 'Connected to Local MongoDB'
     };
   } catch (err) {
     console.error(`⚠️ Switch Database Failed (${mode}):`, err.message);

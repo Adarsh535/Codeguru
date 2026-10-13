@@ -3,10 +3,12 @@
  * API ROUTER: NAV MENU ROUTES (navMenuRoutes.js)
  * ============================================================================
  * Defines REST API endpoints for Header Dynamic Navigation Menus.
+ * Hardened with Master Admin authorization.
  */
 
 import express from 'express';
 import { getNavMenus, addNavMenu, deleteNavMenu } from '../controllers/navMenuController.js';
+import { requireAdmin } from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -22,13 +24,13 @@ router.get('/', getNavMenus);
  * @desc   Creates a new navigation menu category
  * @access Admin Private
  */
-router.post('/', addNavMenu);
+router.post('/', requireAdmin, addNavMenu);
 
 /**
  * @api    DELETE /api/navmenus/:id
  * @desc   Deletes a navigation menu category by ID
  * @access Admin Private
  */
-router.delete('/:id', deleteNavMenu);
+router.delete('/:id', requireAdmin, deleteNavMenu);
 
 export default router;

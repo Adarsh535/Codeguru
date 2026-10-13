@@ -5,19 +5,17 @@ import multer from 'multer';
  * UPLOAD MIDDLEWARE (upload.js) — Cloudinary-First with Memory Buffer
  * ============================================================================
  * Uses multer memoryStorage so files are held in RAM as Buffer and streamed
- * DIRECTLY to Cloudinary — no temp disk files written at all.
- *
- * Supported: Images (jpg/png/webp/gif/svg) + Videos (mp4/webm/mov)
+ * directly to Cloudinary — zero temp disk files written.
+ * Hardened with safe raster images, video types, and strict size validation.
  */
 
 const ALLOWED_MIMETYPES = [
-  // Images
+  // Safe Raster Images (SVG excluded to prevent Stored XSS vectors)
   'image/jpeg',
   'image/jpg',
   'image/png',
   'image/webp',
   'image/gif',
-  'image/svg+xml',
   'image/avif',
   // Videos
   'video/mp4',
@@ -25,14 +23,20 @@ const ALLOWED_MIMETYPES = [
   'video/quicktime',
   'video/x-msvideo',
   'video/x-matroska',
-  'video/mpeg',
+  'video/mpeg'
 ];
 
 const fileFilter = (req, file, cb) => {
+  // Prevent path traversal or null byte injection in original filename
+  const cleanFilename = file.originalname.replace(/[\0\r\n]/g, '').trim();
+  if (cleanFilename.includes('..') || cleanFilename.includes('/') || cleanFilename.includes('\\')) {
+    return cb(new Error('Invalid filename detected. Path traversal is forbidden.'), false);
+  }
+
   if (ALLOWED_MIMETYPES.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error(`Unsupported file type: ${file.mimetype}. Allowed: images & videos only.`), false);
+    cb(new Error(`Unsupported file type: ${file.mimetype}. Allowed: safe images (JPG, PNG, WebP, GIF, AVIF) & videos.`), false);
   }
 };
 
@@ -43,6 +47,7 @@ export const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB max
+    fileSize: 50 * 1024 * 1024, // 50MB max limit
+    files: 1
   }
 });

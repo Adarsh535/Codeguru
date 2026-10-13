@@ -21,15 +21,32 @@ import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
  */
 export const getEnrollments = async (req, res) => {
   try {
-    const enrollments = await Enrollment.find().sort({ createdAt: -1 });
+    let query = {};
+    if (req.user && req.user.role === 'Student') {
+      const email = req.user.email || '';
+      const phone = req.user.phone || '';
+      query = {
+        $or: [
+          ...(email ? [{ studentEmail: email }] : []),
+          ...(phone ? [{ studentPhone: phone }] : [])
+        ]
+      };
+      if (!query.$or.length) {
+        return res.status(200).json({ success: true, count: 0, data: [] });
+      }
+    } else if (!req.admin && (!req.user || req.user.role !== 'Master Admin')) {
+      return res.status(401).json({ success: false, message: 'Authentication required to view enrollments' });
+    }
+
+    const enrollments = await Enrollment.find(query).sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       count: enrollments.length,
       data: enrollments
     });
   } catch (error) {
-    console.error('Error fetching enrollments:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch enrollments', error: error.message });
+    console.error('Error fetching enrollments:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to fetch enrollments' });
   }
 };
 
