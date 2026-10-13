@@ -9,6 +9,9 @@
 import express from 'express';
 import {
   trackPageView,
+  recordHeartbeat,
+  recordLeave,
+  streamAnalytics,
   getAnalyticsSummary,
   getDailyAnalytics,
   getTopPages,
@@ -21,10 +24,31 @@ const router = express.Router();
 
 /**
  * @api    POST /api/analytics/track
- * @desc    Records a public visitor page view or session heartbeat
+ * @desc    Records a public visitor page view event
  * @access  Public
  */
 router.post('/track', trackPageView);
+
+/**
+ * @api    POST /api/analytics/heartbeat
+ * @desc    Records a periodic heartbeat to maintain live session presence
+ * @access  Public
+ */
+router.post('/heartbeat', recordHeartbeat);
+
+/**
+ * @api    POST /api/analytics/leave
+ * @desc    Deletes an active session when tab is closed (navigator.sendBeacon)
+ * @access  Public
+ */
+router.post('/leave', recordLeave);
+
+/**
+ * @api    GET /api/analytics/stream
+ * @desc    Server-Sent Events (SSE) stream pushing real-time metrics every 5 seconds
+ * @access  Admin Private
+ */
+router.get('/stream', requireAdmin, streamAnalytics);
 
 /**
  * @api    GET /api/analytics/summary

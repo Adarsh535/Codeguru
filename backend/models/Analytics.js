@@ -78,15 +78,54 @@ const pageViewSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Compound indexes for optimal query aggregation performance
+// Comprehensive indexes for optimal query aggregation performance and fast range counting
+pageViewSchema.index({ visitorId: 1, timestamp: -1 });
 pageViewSchema.index({ date: 1, visitorId: 1 });
 pageViewSchema.index({ date: 1, path: 1 });
 pageViewSchema.index({ date: 1, device: 1 });
 pageViewSchema.index({ date: 1, timestamp: -1 });
+pageViewSchema.index({ timestamp: -1, visitorId: 1 });
+pageViewSchema.index({ path: 1, timestamp: -1 });
 
 export const PageView = mongoose.models.PageView || mongoose.model('PageView', pageViewSchema);
 
-// 2. Daily Metric Aggregate Schema (pre-aggregated daily rollups for ultra-fast queries)
+// 2. ActiveSession Schema (tracks live visitors in real time with 60s TTL)
+const activeSessionSchema = new mongoose.Schema({
+  sessionId: { 
+    type: String, 
+    required: true, 
+    unique: true, 
+    index: true 
+  },
+  visitorId: { 
+    type: String, 
+    required: true, 
+    index: true 
+  },
+  path: { 
+    type: String, 
+    default: '/', 
+    trim: true 
+  },
+  device: { 
+    type: String, 
+    enum: ['desktop', 'mobile', 'tablet'], 
+    default: 'desktop' 
+  },
+  lastSeen: { 
+    type: Date, 
+    default: Date.now, 
+    index: { expires: 60 } 
+  }
+}, {
+  timestamps: true
+});
+
+activeSessionSchema.index({ lastSeen: -1, visitorId: 1 });
+
+export const ActiveSession = mongoose.models.ActiveSession || mongoose.model('ActiveSession', activeSessionSchema);
+
+// 3. Daily Metric Aggregate Schema (pre-aggregated daily rollups for ultra-fast queries)
 const dailyMetricSchema = new mongoose.Schema({
   date: { 
     type: String, 

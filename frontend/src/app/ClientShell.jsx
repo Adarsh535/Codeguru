@@ -17,7 +17,7 @@ import BatchEnrollModal from '../views/components/BatchEnrollModal';
 import BottomBarOtpSheet from '../views/components/BottomBarOtpSheet';
 import { apiService } from '../services/apiService';
 import { realtimeSync } from '../services/realtimeService';
-import { trackPageView, sendHeartbeat } from '../utils/visitorTracker';
+import { trackPageView, sendHeartbeat, sendLeaveEvent } from '../utils/visitorTracker';
 
 export default function ClientShell({ children }) {
   const pathname = usePathname();
@@ -126,21 +126,52 @@ export default function ClientShell({ children }) {
   useEffect(() => {
     trackPageView(pathname);
 
-    // Periodic heartbeat to maintain live visitor state (every 45s)
-    const hbInterval = setInterval(() => {
-      sendHeartbeat(pathname);
-    }, 45000);
+    let hbInterval = null;
 
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        sendHeartbeat(pathname);
+    const startHeartbeat = () => {
+      if (hbInterval) clearInterval(hbInterval);
+      hbInterval = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+          sendHeartbeat(pathname);
+        }
+      }, 25000); // 25s interval
+    };
+
+    const stopHeartbeat = () => {
+      if (hbInterval) {
+        clearInterval(hbInterval);
+        hbInterval = null;
       }
     };
-    document.addEventListener('visibilitychange', handleVisibility);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        sendHeartbeat(pathname);
+        startHeartbeat();
+      } else {
+        stopHeartbeat();
+      }
+    };
+
+    const handleLeave = () => {
+      sendLeaveEvent(pathname);
+    };
+
+    // Trigger heartbeat immediately when tab is active and start interval
+    if (document.visibilityState === 'visible') {
+      sendHeartbeat(pathname);
+      startHeartbeat();
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleLeave);
+    window.addEventListener('pagehide', handleLeave);
 
     return () => {
-      clearInterval(hbInterval);
-      document.removeEventListener('visibilitychange', handleVisibility);
+      stopHeartbeat();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleLeave);
+      window.removeEventListener('pagehide', handleLeave);
     };
   }, [pathname]);
 

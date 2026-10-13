@@ -3,18 +3,35 @@
  * FRONTEND VISITOR TRACKER (frontend/src/utils/visitorTracker.js)
  * ============================================================================
  * Privacy-conscious client-side tracking service for CodeGuru website.
- * Manages anonymous first-party visitor IDs, session tracking, device detection,
- * route change logging, and real-time live presence heartbeats.
+ * Manages stable UUID visitor IDs with localStorage & cookie fallback, tab session IDs,
+ * automatic route change logging, active presence heartbeats, and unload beacon leave events.
  */
 
 import { getApiBase } from '../models/apiClient';
 
-const VISITOR_COOKIE_KEY = 'cg_vid';
+const VISITOR_STORAGE_KEY = 'cg_vid';
 const SESSION_STORAGE_KEY = 'cg_sid';
-const LAST_TRACK_KEY = 'cg_last_track';
 
 /**
- * Cookie Helpers for first-party persistence
+ * Generate standard RFC4122 version 4 UUID
+ */
+export function generateUUID() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    try {
+      return crypto.randomUUID();
+    } catch (e) {
+      // Fallback below
+    }
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+/**
+ * Cookie Helpers for first-party persistence fallback
  */
 function getCookie(name) {
   if (typeof document === 'undefined') return null;
@@ -24,37 +41,45 @@ function getCookie(name) {
 
 function setCookie(name, val, days = 365) {
   if (typeof document === 'undefined') return;
-  const expires = new Date(Date.now() + days * 864e5).toUTCString();
-  document.cookie = `${name}=${encodeURIComponent(val)}; expires=${expires}; path=/; SameSite=Lax`;
+  try {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(val)}; expires=${expires}; path=/; SameSite=Lax`;
+  } catch (e) {}
 }
 
 /**
- * Get or create first-party anonymous visitor ID.
- * Stored in both localStorage and a 1-year first-party cookie for persistence.
+ * Get or create stable anonymous visitor ID (UUID).
+ * Stored in localStorage (with try/catch) and backed up in 1-year first-party cookie.
  */
 export function getOrCreateVisitorId() {
   if (typeof window === 'undefined') return null;
 
+  let vid = null;
   try {
-    let vid = localStorage.getItem(VISITOR_COOKIE_KEY) || getCookie(VISITOR_COOKIE_KEY);
-    if (!vid) {
-      const randPart = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
-      vid = `cg_v_${Date.now().toString(36)}_${randPart}`;
-      localStorage.setItem(VISITOR_COOKIE_KEY, vid);
-      setCookie(VISITOR_COOKIE_KEY, vid, 365);
-    } else {
-      // Sync both storages
-      setCookie(VISITOR_COOKIE_KEY, vid, 365);
-      localStorage.setItem(VISITOR_COOKIE_KEY, vid);
-    }
-    return vid;
-  } catch {
-    return `cg_v_${Date.now()}`;
+    vid = localStorage.getItem(VISITOR_STORAGE_KEY);
+  } catch (e) {}
+
+  if (!vid) {
+    vid = getCookie(VISITOR_STORAGE_KEY);
   }
+
+  // If no ID exists, generate a clean UUID v4
+  if (!vid) {
+    vid = generateUUID();
+  }
+
+  // Persist to both localStorage and cookie
+  try {
+    localStorage.setItem(VISITOR_STORAGE_KEY, vid);
+  } catch (e) {}
+  setCookie(VISITOR_STORAGE_KEY, vid, 365);
+
+  return vid;
 }
 
 /**
- * Get or create a 30-minute session identifier
+ * Get or create tab/session identifier (UUID).
+ * Stored in sessionStorage per browser tab.
  */
 export function getOrCreateSessionId() {
   if (typeof window === 'undefined') return null;
@@ -62,13 +87,39 @@ export function getOrCreateSessionId() {
   try {
     let sid = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!sid) {
-      sid = `cg_s_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 8)}`;
+      sid = generateUUID();
       sessionStorage.setItem(SESSION_STORAGE_KEY, sid);
     }
     return sid;
-  } catch {
-    return `cg_s_${Date.now()}`;
+  } catch (e) {
+    // If sessionStorage is restricted or disabled
+    if (!window.__cg_fallback_sid) {
+      window.__cg_fallback_sid = generateUUID();
+    }
+    return window.__cg_fallback_sid;
   }
+}
+
+/**
+ * Bot and admin/dashboard page detector
+ */
+export function isBotOrExcludedPath(pathname = '') {
+  if (typeof window === 'undefined') return true;
+
+  // Bot detection
+  if (navigator.webdriver) return true;
+  const ua = navigator.userAgent || '';
+  if (/bot|crawl|spider|slurp|facebookexternalhit|bingbot|googlebot|lighthouse|phantom/i.test(ua)) {
+    return true;
+  }
+
+  // Admin or dashboard pages exclusion
+  const clean = pathname || window.location.pathname || '/';
+  if (clean.startsWith('/admin') || clean.startsWith('/dashboard')) {
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -76,7 +127,6 @@ export function getOrCreateSessionId() {
  */
 export function detectDevice() {
   if (typeof window === 'undefined') return 'desktop';
-
   const ua = navigator.userAgent || '';
   const width = window.innerWidth;
 
@@ -119,7 +169,7 @@ export function detectOS() {
   return 'Other';
 }
 
-// In-memory deduplication tracking (per-instance)
+// In-memory deduplication tracking
 let lastTrackedPath = '';
 let lastTrackedTime = 0;
 
@@ -130,11 +180,13 @@ let lastTrackedTime = 0;
 export async function trackPageView(pathname = '/') {
   if (typeof window === 'undefined') return;
 
-  const now = Date.now();
   const cleanPath = pathname || window.location.pathname || '/';
 
-  // React Strict Mode & Rapid Navigation Deduplication:
-  // Prevent duplicate events within 2.5 seconds for the exact same path
+  // Do not count bots or admin visits
+  if (isBotOrExcludedPath(cleanPath)) return;
+
+  const now = Date.now();
+  // Prevent duplicate events within 2.5 seconds for the exact same path (React StrictMode protection)
   if (lastTrackedPath === cleanPath && (now - lastTrackedTime < 2500)) {
     return;
   }
@@ -162,30 +214,33 @@ export async function trackPageView(pathname = '/') {
       device,
       browser,
       os,
+      isBot: false,
       isHeartbeat: false
     };
 
     const apiUrl = `${getApiBase()}/analytics/track`;
 
-    // Non-blocking fetch with keepalive to guarantee delivery on navigation
     fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+      cache: 'no-store',
       keepalive: true
-    }).catch(() => {
-      // Graceful silence on network failure
-    });
+    }).catch(() => {});
   } catch (err) {
-    // Fail silently so website navigation is NEVER blocked
+    // Fail silently so page navigation is never hindered
   }
 }
 
 /**
  * Send lightweight live presence heartbeat
+ * @param {string} pathname
  */
 export async function sendHeartbeat(pathname = '/') {
   if (typeof window === 'undefined' || document.visibilityState === 'hidden') return;
+
+  const cleanPath = pathname || window.location.pathname || '/';
+  if (isBotOrExcludedPath(cleanPath)) return;
 
   try {
     const visitorId = getOrCreateVisitorId();
@@ -195,18 +250,57 @@ export async function sendHeartbeat(pathname = '/') {
     const payload = {
       visitorId,
       sessionId,
-      path: pathname || window.location.pathname || '/',
+      path: cleanPath,
       device,
-      isHeartbeat: true
+      isBot: false
     };
 
-    const apiUrl = `${getApiBase()}/analytics/track`;
+    const apiUrl = `${getApiBase()}/analytics/heartbeat`;
 
     fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+      cache: 'no-store',
       keepalive: true
     }).catch(() => {});
-  } catch {}
+  } catch (err) {}
+}
+
+/**
+ * Send leave event when tab is closed via navigator.sendBeacon
+ * @param {string} pathname
+ */
+export function sendLeaveEvent(pathname = '/') {
+  if (typeof window === 'undefined') return;
+
+  const cleanPath = pathname || window.location.pathname || '/';
+  if (isBotOrExcludedPath(cleanPath)) return;
+
+  try {
+    const visitorId = getOrCreateVisitorId();
+    const sessionId = getOrCreateSessionId();
+    if (!visitorId || !sessionId) return;
+
+    const payload = JSON.stringify({
+      visitorId,
+      sessionId,
+      path: cleanPath
+    });
+
+    const apiUrl = `${getApiBase()}/analytics/leave`;
+
+    if (navigator.sendBeacon) {
+      const blob = new Blob([payload], { type: 'application/json' });
+      navigator.sendBeacon(apiUrl, blob);
+    } else {
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        cache: 'no-store',
+        keepalive: true
+      }).catch(() => {});
+    }
+  } catch (err) {}
 }

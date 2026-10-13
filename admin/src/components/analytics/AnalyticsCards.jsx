@@ -1,10 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Users, Eye, Calendar, Globe, Activity, TrendingUp, TrendingDown,
   Clock, ArrowUpRight, ArrowDownRight, Radio
 } from 'lucide-react';
 
-export default function AnalyticsCards({ summary, loading }) {
+export default function AnalyticsCards({ summary, loading, streamConnected = true }) {
+  const [highlightedKeys, setHighlightedKeys] = useState({});
+  const prevValues = useRef({});
+
+  useEffect(() => {
+    if (!summary) return;
+
+    const changes = {};
+    const metricKeys = [
+      'todayVisitors', 
+      'todayPageViews', 
+      'yesterdayVisitors', 
+      'totalVisitors', 
+      'thisMonthVisitors', 
+      'liveVisitors'
+    ];
+
+    metricKeys.forEach((key) => {
+      if (prevValues.current[key] !== undefined && prevValues.current[key] !== summary[key]) {
+        changes[key] = true;
+      }
+      prevValues.current[key] = summary[key];
+    });
+
+    if (Object.keys(changes).length > 0) {
+      setHighlightedKeys(changes);
+      const timer = setTimeout(() => {
+        setHighlightedKeys({});
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [summary]);
+
   if (loading && !summary) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
@@ -38,6 +70,7 @@ export default function AnalyticsCards({ summary, loading }) {
   const cards = [
     {
       id: 'today-visitors',
+      fieldKey: 'todayVisitors',
       title: "Today's Visitors",
       value: todayVisitors.toLocaleString('en-IN'),
       subtitle: visitorGrowth >= 0 ? `+${visitorGrowth}% vs yesterday` : `${visitorGrowth}% vs yesterday`,
@@ -49,6 +82,7 @@ export default function AnalyticsCards({ summary, loading }) {
     },
     {
       id: 'today-page-views',
+      fieldKey: 'todayPageViews',
       title: "Today's Page Views",
       value: todayPageViews.toLocaleString('en-IN'),
       subtitle: viewsGrowth >= 0 ? `+${viewsGrowth}% vs yesterday` : `${viewsGrowth}% vs yesterday`,
@@ -60,6 +94,7 @@ export default function AnalyticsCards({ summary, loading }) {
     },
     {
       id: 'yesterday-visitors',
+      fieldKey: 'yesterdayVisitors',
       title: "Yesterday's Visitors",
       value: yesterdayVisitors.toLocaleString('en-IN'),
       subtitle: `${s.yesterdayPageViews || 0} views yesterday`,
@@ -70,6 +105,7 @@ export default function AnalyticsCards({ summary, loading }) {
     },
     {
       id: 'total-visitors',
+      fieldKey: 'totalVisitors',
       title: "Total Visitors",
       value: totalVisitors.toLocaleString('en-IN'),
       subtitle: `${(s.totalPageViews || 0).toLocaleString('en-IN')} total views`,
@@ -80,6 +116,7 @@ export default function AnalyticsCards({ summary, loading }) {
     },
     {
       id: 'month-visitors',
+      fieldKey: 'thisMonthVisitors',
       title: "This Month's Visitors",
       value: thisMonthVisitors.toLocaleString('en-IN'),
       subtitle: 'This calendar month',
@@ -90,14 +127,15 @@ export default function AnalyticsCards({ summary, loading }) {
     },
     {
       id: 'live-visitors',
+      fieldKey: 'liveVisitors',
       title: "Live Visitors",
       value: liveVisitors.toLocaleString('en-IN'),
-      subtitle: liveVisitors > 0 ? 'Browsing right now' : 'Standby / listening',
+      subtitle: liveVisitors > 0 ? 'Browsing right now' : (streamConnected ? 'Listening on stream' : 'Reconnecting stream...'),
       icon: Radio,
-      badge: 'LIVE',
+      badge: streamConnected ? 'LIVE' : 'SYNC',
       isLive: true,
-      color: 'text-rose-600 bg-rose-50 border-rose-100',
-      valueColor: 'text-rose-600'
+      color: streamConnected ? 'text-rose-600 bg-rose-50 border-rose-100' : 'text-slate-500 bg-slate-100 border-slate-200',
+      valueColor: streamConnected ? 'text-rose-600' : 'text-slate-700'
     }
   ];
 
@@ -105,20 +143,30 @@ export default function AnalyticsCards({ summary, loading }) {
     <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3.5">
       {cards.map((c) => {
         const Icon = c.icon;
+        const isHighlighted = highlightedKeys[c.fieldKey];
+
         return (
           <div 
             key={c.id} 
-            className="bg-white p-4 sm:p-4.5 rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-md transition-all group flex flex-col justify-between min-w-0"
+            className={`bg-white p-4 sm:p-4.5 rounded-2xl border transition-all duration-300 group flex flex-col justify-between min-w-0 ${
+              isHighlighted 
+                ? 'border-blue-500/80 ring-2 ring-blue-500/25 shadow-md scale-[1.015]' 
+                : 'border-slate-200/80 shadow-2xs hover:shadow-md'
+            }`}
           >
             {/* Top Icon & Badge Row */}
             <div className="flex items-center justify-between gap-1.5 mb-2.5">
-              <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 ${c.color}`}>
-                <Icon className={`w-4 h-4 ${c.isLive ? 'animate-pulse' : ''}`} />
+              <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 transition-colors ${c.color}`}>
+                <Icon className={`w-4 h-4 ${c.isLive && streamConnected ? 'animate-pulse' : ''}`} />
               </div>
               {c.isLive ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-50 text-rose-600 border border-rose-200/60 shadow-2xs shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
-                  LIVE
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black border shadow-2xs shrink-0 transition-all ${
+                  streamConnected 
+                    ? 'bg-rose-50 text-rose-600 border-rose-200/60' 
+                    : 'bg-slate-100 text-slate-500 border-slate-200'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${streamConnected ? 'bg-rose-500 animate-ping' : 'bg-slate-400'}`}></span>
+                  {c.badge}
                 </span>
               ) : (
                 <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-50 border border-slate-100 text-slate-500 shrink-0">
@@ -132,7 +180,9 @@ export default function AnalyticsCards({ summary, loading }) {
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-tight block truncate" title={c.title}>
                 {c.title}
               </span>
-              <div className={`text-xl sm:text-2xl font-black tracking-tight leading-tight ${c.valueColor}`}>
+              <div className={`text-xl sm:text-2xl font-black tracking-tight leading-tight transition-transform duration-200 ${c.valueColor} ${
+                isHighlighted ? 'scale-105 origin-left' : ''
+              }`}>
                 {c.value}
               </div>
               <p className="text-[10.5px] font-medium text-slate-500 truncate mt-0.5" title={c.subtitle}>

@@ -2,62 +2,58 @@
  * ============================================================================
  * CONTROLLER: WEBSITE VISITOR ANALYTICS CONTROLLER (analyticsController.js)
  * ============================================================================
- * Handles privacy-conscious visitor tracking, live sessions, daily trends,
- * top pages reports, and device/referrer insights with accurate IST date boundaries.
+ * Handles privacy-conscious visitor tracking, active live sessions in MongoDB Atlas,
+ * real-time SSE streams, accurate Indian Standard Time (IST, UTC+5:30) date boundaries,
+ * and mathematically consistent unique visitor rollups across CodeGuru.
  */
 
 import crypto from 'crypto';
-import { PageView, DailyMetric } from '../../models/Analytics.js';
+import mongoose from 'mongoose';
+import { PageView, ActiveSession, DailyMetric } from '../../models/Analytics.js';
 import { 
   getTodayKey, 
   getYesterdayKey, 
   getMonthStartKey, 
   getPastNDaysKeys, 
-  getDateRangeKeys 
+  getDateRangeKeys,
+  getISTDayBoundaries,
+  getISTRangeBoundaries
 } from '../../utils/dateTime.js';
 
-// In-memory active visitor sessions store: visitorId -> { lastSeen: number, path: string, device: string, sessionId: string }
-const liveVisitorsMap = new Map();
-
-// Rate limiting & duplicate prevention store: key -> { timestamp: number, count: number }
+// Rate limiting & duplicate prevention store (per-process micro-cache)
 const rateLimitMap = new Map();
 const lastTrackedMap = new Map();
 
-// Cleanup intervals
-const LIVE_SESSION_CUTOFF_MS = 5 * 60 * 1000; // 5 minutes inactivity window
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;       // 1 minute
 const MAX_REQUESTS_PER_MINUTE = 60;
 
 /**
- * Clean up expired active visitor sessions and rate-limit caches
+ * Periodically clean up in-memory rate limit caches
  */
-const cleanupStaleData = () => {
+const cleanupRateLimitCaches = () => {
   const now = Date.now();
-  
-  // Cleanup live sessions
-  for (const [vId, session] of liveVisitorsMap.entries()) {
-    if (now - session.lastSeen > LIVE_SESSION_CUTOFF_MS) {
-      liveVisitorsMap.delete(vId);
-    }
-  }
-
-  // Cleanup rate limit store
   for (const [key, record] of rateLimitMap.entries()) {
     if (now - record.timestamp > RATE_LIMIT_WINDOW_MS) {
       rateLimitMap.delete(key);
     }
   }
-
-  // Cleanup deduplication store
   for (const [key, ts] of lastTrackedMap.entries()) {
     if (now - ts > 10 * 1000) {
       lastTrackedMap.delete(key);
     }
   }
 };
+setInterval(cleanupRateLimitCaches, 2 * 60 * 1000);
 
-// Periodic background cleanup every 2 minutes
-setInterval(cleanupStaleData, 2 * 60 * 1000);
+/**
+ * Standard HTTP Cache-Control headers to strictly prevent stale browser/proxy caching
+ */
+const setNoCacheHeaders = (res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+};
 
 /**
  * Generate privacy-preserving one-way hash of client IP
@@ -66,6 +62,15 @@ const hashIp = (rawIp) => {
   if (!rawIp) return 'unknown';
   const salt = 'cg_analytics_salt_2026';
   return crypto.createHash('sha256').update(rawIp + salt).digest('hex').substring(0, 16);
+};
+
+/**
+ * Detect search bots and scrapers from User-Agent
+ */
+const isBotUserAgent = (ua = '') => {
+  if (!ua) return false;
+  const botPattern = /bot|crawl|spider|slurp|facebookexternalhit|bingbot|googlebot|lighthouse|pingdom|headlesschrome|curl|wget|python|postman/i;
+  return botPattern.test(ua);
 };
 
 /**
@@ -84,16 +89,154 @@ const categorizeReferrer = (referrer = '') => {
 };
 
 /**
+ * Helper: Query live unique visitors count from active_sessions in MongoDB
+ * Uses a strict 60-second activity threshold and counts distinct visitorIds (1 user with 3 tabs = 1 live visitor)
+ */
+export const getLiveVisitorsCount = async () => {
+  try {
+    const threshold = new Date(Date.now() - 60 * 1000);
+    const distinctVisitors = await ActiveSession.distinct('visitorId', { 
+      lastSeen: { $gte: threshold } 
+    });
+    return distinctVisitors.length;
+  } catch (err) {
+    console.error('[getLiveVisitorsCount Error]:', err.message);
+    return 0;
+  }
+};
+
+/**
+ * Unified Analytics Metric Engine
+ * Generates identical, synchronized numbers for today, yesterday, monthly, all-time, and live visitors.
+ * All day boundaries are strictly calculated in IST (Asia/Kolkata, UTC+5:30).
+ */
+export const getUnifiedAnalyticsSnapshot = async () => {
+  const todayDate = getTodayKey();
+  const yesterdayDate = getYesterdayKey();
+  const monthStartDate = getMonthStartKey();
+
+  const { start: todayStart, end: todayEnd } = getISTDayBoundaries(todayDate);
+  const { start: yestStart, end: yestEnd } = getISTDayBoundaries(yesterdayDate);
+  const { start: monthStart } = getISTDayBoundaries(monthStartDate);
+
+  // Parallel execution across MongoDB Atlas
+  const [
+    todayVisitorsList,
+    todayPageViews,
+    yesterdayVisitorsList,
+    yesterdayPageViews,
+    monthVisitorsList,
+    totalVisitorsList,
+    totalPageViewsAllTime,
+    liveVisitorsCount
+  ] = await Promise.all([
+    // Today's Unique Visitors (distinct visitorId in IST range or date key)
+    PageView.distinct('visitorId', {
+      $or: [
+        { date: todayDate },
+        { timestamp: { $gte: todayStart, $lte: todayEnd } }
+      ]
+    }),
+    // Today's Page Views
+    PageView.countDocuments({
+      $or: [
+        { date: todayDate },
+        { timestamp: { $gte: todayStart, $lte: todayEnd } }
+      ]
+    }),
+    // Yesterday's Unique Visitors
+    PageView.distinct('visitorId', {
+      $or: [
+        { date: yesterdayDate },
+        { timestamp: { $gte: yestStart, $lte: yestEnd } }
+      ]
+    }),
+    // Yesterday's Page Views
+    PageView.countDocuments({
+      $or: [
+        { date: yesterdayDate },
+        { timestamp: { $gte: yestStart, $lte: yestEnd } }
+      ]
+    }),
+    // This Month's Unique Visitors
+    PageView.distinct('visitorId', {
+      $or: [
+        { date: { $gte: monthStartDate, $lte: todayDate } },
+        { timestamp: { $gte: monthStart, $lte: todayEnd } }
+      ]
+    }),
+    // Total Unique Visitors All Time (distinct visitorId across the entire collection)
+    PageView.distinct('visitorId'),
+    // Total Page Views All Time
+    PageView.countDocuments(),
+    // Current Active Live Visitors
+    getLiveVisitorsCount()
+  ]);
+
+  let todayVisitors = todayVisitorsList.length;
+  let yesterdayVisitors = yesterdayVisitorsList.length;
+  let thisMonthVisitors = monthVisitorsList.length;
+  let totalVisitors = totalVisitorsList.length;
+
+  // MATHEMATICAL INVARIANT CONSISTENCY GUARD:
+  // Total Visitors (all-time) must NEVER be less than any sub-range unique count!
+  if (todayVisitors > totalVisitors) {
+    console.warn(`[Analytics Consistency Guard] todayVisitors (${todayVisitors}) > totalVisitors (${totalVisitors}). Reconciling.`);
+    totalVisitors = todayVisitors;
+  }
+  if (yesterdayVisitors > totalVisitors) {
+    console.warn(`[Analytics Consistency Guard] yesterdayVisitors (${yesterdayVisitors}) > totalVisitors (${totalVisitors}). Reconciling.`);
+    totalVisitors = yesterdayVisitors;
+  }
+  if (thisMonthVisitors > totalVisitors) {
+    console.warn(`[Analytics Consistency Guard] thisMonthVisitors (${thisMonthVisitors}) > totalVisitors (${totalVisitors}). Reconciling.`);
+    totalVisitors = thisMonthVisitors;
+  }
+
+  // Calculate percentage changes
+  let visitorGrowthPct = 0;
+  if (yesterdayVisitors > 0) {
+    visitorGrowthPct = Math.round(((todayVisitors - yesterdayVisitors) / yesterdayVisitors) * 100);
+  } else if (todayVisitors > 0) {
+    visitorGrowthPct = 100;
+  }
+
+  let viewsGrowthPct = 0;
+  if (yesterdayPageViews > 0) {
+    viewsGrowthPct = Math.round(((todayPageViews - yesterdayPageViews) / yesterdayPageViews) * 100);
+  } else if (todayPageViews > 0) {
+    viewsGrowthPct = 100;
+  }
+
+  return {
+    todayVisitors,
+    todayPageViews,
+    yesterdayVisitors,
+    yesterdayPageViews,
+    thisMonthVisitors,
+    totalVisitors,
+    totalPageViews: totalPageViewsAllTime,
+    liveVisitors: liveVisitorsCount,
+    visitorGrowthPct,
+    viewsGrowthPct,
+    todayDate,
+    yesterdayDate,
+    monthStartDate,
+    timestamp: new Date().toISOString()
+  };
+};
+
+/**
  * @route   POST /api/analytics/track
  * @desc    Record page view event from public website
  * @access  Public
  */
 export const trackPageView = async (req, res) => {
+  setNoCacheHeaders(res);
   try {
-    cleanupStaleData();
-
     const rawIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || req.ip || '127.0.0.1';
     const ipHash = hashIp(rawIp);
+    const userAgent = req.headers['user-agent'] || '';
 
     const {
       visitorId,
@@ -105,8 +248,9 @@ export const trackPageView = async (req, res) => {
       device = 'desktop',
       browser = 'Other',
       os = 'Other',
+      isBot = false,
       isHeartbeat = false
-    } = req.body;
+    } = req.body || {};
 
     if (!visitorId || typeof visitorId !== 'string') {
       return res.status(400).json({ success: false, message: 'visitorId is required' });
@@ -115,28 +259,43 @@ export const trackPageView = async (req, res) => {
     const cleanVisitorId = visitorId.trim().substring(0, 64);
     const cleanSessionId = (sessionId || cleanVisitorId).toString().trim().substring(0, 64);
     const cleanPath = (path || '/').split('?')[0].trim().substring(0, 200) || '/';
-    const now = Date.now();
+    const safeDevice = ['desktop', 'mobile', 'tablet'].includes(device) ? device : 'desktop';
 
-    // 1. Maintain in-memory live visitor session
-    liveVisitorsMap.set(cleanVisitorId, {
-      lastSeen: now,
-      path: cleanPath,
-      device: ['desktop', 'mobile', 'tablet'].includes(device) ? device : 'desktop',
-      sessionId: cleanSessionId
-    });
+    // 1. Filter out bots and admin/dashboard page visits
+    if (isBot || isBotUserAgent(userAgent)) {
+      return res.json({ success: true, filtered: 'bot' });
+    }
+    if (cleanPath.startsWith('/admin') || cleanPath.startsWith('/dashboard') || cleanPath.startsWith('/login')) {
+      return res.json({ success: true, filtered: 'admin_path' });
+    }
 
-    // If request is purely a heartbeat keeping the session alive, update memory and return early
+    // 2. Upsert active session in MongoDB Atlas for live visitor tracking
+    await ActiveSession.updateOne(
+      { sessionId: cleanSessionId },
+      { 
+        $set: { 
+          visitorId: cleanVisitorId, 
+          path: cleanPath, 
+          device: safeDevice, 
+          lastSeen: new Date() 
+        } 
+      },
+      { upsert: true }
+    );
+
+    // If pure heartbeat, return immediately
     if (isHeartbeat) {
       return res.json({ success: true, live: true });
     }
 
-    // 2. Rate limiting protection against bots/spam
+    const now = Date.now();
+
+    // 3. Rate limiting protection
     const rateLimitKey = `${cleanVisitorId}_${ipHash}`;
     const rateRecord = rateLimitMap.get(rateLimitKey);
     if (rateRecord) {
       if (now - rateRecord.timestamp < RATE_LIMIT_WINDOW_MS) {
         if (rateRecord.count >= MAX_REQUESTS_PER_MINUTE) {
-          // Exceeded limit: quietly acknowledge without writing to DB
           return res.json({ success: true, throttled: true });
         }
         rateRecord.count += 1;
@@ -147,7 +306,7 @@ export const trackPageView = async (req, res) => {
       rateLimitMap.set(rateLimitKey, { timestamp: now, count: 1 });
     }
 
-    // 3. Deduplication protection against React Strict Mode / rapid double rendering (within 3 seconds)
+    // 4. Deduplication protection against React StrictMode & double rendering
     const dedupKey = `${cleanVisitorId}_${cleanPath}`;
     const lastTrackedTime = lastTrackedMap.get(dedupKey);
     if (lastTrackedTime && (now - lastTrackedTime < 3000)) {
@@ -155,16 +314,15 @@ export const trackPageView = async (req, res) => {
     }
     lastTrackedMap.set(dedupKey, now);
 
-    // 4. Calculate date in Indian Standard Time (IST)
+    // 5. IST Date formatting
     const todayDate = getTodayKey();
     const referrerCategory = categorizeReferrer(referrer);
-    const safeDevice = ['desktop', 'mobile', 'tablet'].includes(device) ? device : 'desktop';
 
     // Check if visitor has visited before (New vs Returning)
     const previousVisitCount = await PageView.countDocuments({ visitorId: cleanVisitorId });
     const isNewVisitor = previousVisitCount === 0;
 
-    // 5. Save Granular PageView Event into MongoDB
+    // 6. Save granular PageView event
     await PageView.create({
       visitorId: cleanVisitorId,
       sessionId: cleanSessionId,
@@ -182,12 +340,11 @@ export const trackPageView = async (req, res) => {
       timestamp: new Date()
     });
 
-    // 6. Update DailyMetric summary record atomically
+    // 7. Update DailyMetric summary atomically
     const incObj = {
       totalPageViews: 1,
       [`${safeDevice}Views`]: 1
     };
-
     if (isNewVisitor) {
       incObj.newVisitorsCount = 1;
     } else {
@@ -203,8 +360,80 @@ export const trackPageView = async (req, res) => {
     return res.json({ success: true });
   } catch (err) {
     console.error('[analyticsController trackPageView Error]:', err.message);
-    // Never fail public client navigation on analytics error
     return res.status(200).json({ success: false, error: err.message });
+  }
+};
+
+/**
+ * @route   POST /api/analytics/heartbeat
+ * @desc    Keep active session alive in active_sessions collection
+ * @access  Public
+ */
+export const recordHeartbeat = async (req, res) => {
+  setNoCacheHeaders(res);
+  try {
+    const { visitorId, sessionId, path = '/', device = 'desktop', isBot = false } = req.body || {};
+    const userAgent = req.headers['user-agent'] || '';
+
+    if (!visitorId || !sessionId) {
+      return res.status(400).json({ success: false, message: 'visitorId and sessionId are required' });
+    }
+
+    const cleanPath = (path || '/').split('?')[0].trim().substring(0, 200) || '/';
+    if (isBot || isBotUserAgent(userAgent) || cleanPath.startsWith('/admin') || cleanPath.startsWith('/dashboard')) {
+      return res.json({ success: true, filtered: true });
+    }
+
+    const cleanVisitorId = visitorId.trim().substring(0, 64);
+    const cleanSessionId = sessionId.trim().substring(0, 64);
+    const safeDevice = ['desktop', 'mobile', 'tablet'].includes(device) ? device : 'desktop';
+
+    await ActiveSession.updateOne(
+      { sessionId: cleanSessionId },
+      { 
+        $set: { 
+          visitorId: cleanVisitorId, 
+          path: cleanPath, 
+          device: safeDevice, 
+          lastSeen: new Date() 
+        } 
+      },
+      { upsert: true }
+    );
+
+    return res.json({ success: true, live: true });
+  } catch (err) {
+    console.error('[analyticsController recordHeartbeat Error]:', err.message);
+    return res.status(200).json({ success: false });
+  }
+};
+
+/**
+ * @route   POST /api/analytics/leave
+ * @desc    Remove closed tab/session immediately from active_sessions
+ * @access  Public (called via navigator.sendBeacon or unload)
+ */
+export const recordLeave = async (req, res) => {
+  setNoCacheHeaders(res);
+  try {
+    let payload = req.body;
+    // Parse beacon string payload if needed
+    if (typeof req.body === 'string') {
+      try {
+        payload = JSON.parse(req.body);
+      } catch (e) {
+        payload = {};
+      }
+    }
+
+    const { sessionId } = payload || {};
+    if (sessionId) {
+      await ActiveSession.deleteOne({ sessionId: sessionId.toString().trim() });
+    }
+
+    return res.json({ success: true });
+  } catch (err) {
+    return res.json({ success: true });
   }
 };
 
@@ -214,74 +443,12 @@ export const trackPageView = async (req, res) => {
  * @access  Admin Private
  */
 export const getAnalyticsSummary = async (req, res) => {
+  setNoCacheHeaders(res);
   try {
-    cleanupStaleData();
-
-    const todayDate = getTodayKey();
-    const yesterdayDate = getYesterdayKey();
-    const monthStartDate = getMonthStartKey();
-
-    // 1. Parallel execution for high speed
-    const [
-      todayUniqueVisitors,
-      todayPageViews,
-      yesterdayUniqueVisitors,
-      yesterdayPageViews,
-      monthUniqueVisitors,
-      totalUniqueVisitors,
-      totalPageViewsAllTime
-    ] = await Promise.all([
-      // Today's Unique Visitors
-      PageView.distinct('visitorId', { date: todayDate }).then(arr => arr.length),
-      // Today's Page Views
-      PageView.countDocuments({ date: todayDate }),
-      // Yesterday's Unique Visitors
-      PageView.distinct('visitorId', { date: yesterdayDate }).then(arr => arr.length),
-      // Yesterday's Page Views
-      PageView.countDocuments({ date: yesterdayDate }),
-      // This Month's Unique Visitors (from 1st of month to today)
-      PageView.distinct('visitorId', { date: { $gte: monthStartDate, $lte: todayDate } }).then(arr => arr.length),
-      // Total Unique Visitors across all time
-      PageView.distinct('visitorId').then(arr => arr.length),
-      // Total Page Views across all time
-      PageView.countDocuments()
-    ]);
-
-    // Live active visitors (current active sessions in past 5 minutes)
-    const liveVisitorsCount = liveVisitorsMap.size;
-
-    // Calculate percentage changes
-    let visitorGrowthPct = 0;
-    if (yesterdayUniqueVisitors > 0) {
-      visitorGrowthPct = Math.round(((todayUniqueVisitors - yesterdayUniqueVisitors) / yesterdayUniqueVisitors) * 100);
-    } else if (todayUniqueVisitors > 0) {
-      visitorGrowthPct = 100;
-    }
-
-    let viewsGrowthPct = 0;
-    if (yesterdayPageViews > 0) {
-      viewsGrowthPct = Math.round(((todayPageViews - yesterdayPageViews) / yesterdayPageViews) * 100);
-    } else if (todayPageViews > 0) {
-      viewsGrowthPct = 100;
-    }
-
+    const data = await getUnifiedAnalyticsSnapshot();
     return res.json({
       success: true,
-      data: {
-        todayVisitors: todayUniqueVisitors,
-        todayPageViews: todayPageViews,
-        yesterdayVisitors: yesterdayUniqueVisitors,
-        yesterdayPageViews: yesterdayPageViews,
-        thisMonthVisitors: monthUniqueVisitors,
-        totalVisitors: totalUniqueVisitors,
-        totalPageViews: totalPageViewsAllTime,
-        liveVisitors: liveVisitorsCount,
-        visitorGrowthPct,
-        viewsGrowthPct,
-        todayDate,
-        yesterdayDate,
-        monthStartDate
-      }
+      data
     });
   } catch (err) {
     console.error('[analyticsController getAnalyticsSummary Error]:', err.message);
@@ -295,6 +462,7 @@ export const getAnalyticsSummary = async (req, res) => {
  * @access  Admin Private
  */
 export const getDailyAnalytics = async (req, res) => {
+  setNoCacheHeaders(res);
   try {
     const { range = '7d', startDate, endDate, grouping = 'daily' } = req.query;
     let dateKeys = [];
@@ -308,7 +476,6 @@ export const getDailyAnalytics = async (req, res) => {
       const today = getTodayKey();
       dateKeys = getDateRangeKeys(monthStart, today);
     } else {
-      // Default to 7 days
       dateKeys = getPastNDaysKeys(7);
     }
 
@@ -316,19 +483,48 @@ export const getDailyAnalytics = async (req, res) => {
       dateKeys = getPastNDaysKeys(7);
     }
 
-    // Aggregate page views and unique visitors by date
+    const firstKey = dateKeys[0];
+    const lastKey = dateKeys[dateKeys.length - 1];
+    const { start: rangeStartDate } = getISTDayBoundaries(firstKey);
+    const { end: rangeEndDate } = getISTDayBoundaries(lastKey);
+
+    const matchFilter = {
+      $or: [
+        { date: { $in: dateKeys } },
+        { timestamp: { $gte: rangeStartDate, $lte: rangeEndDate } }
+      ]
+    };
+
+    // MongoDB Aggregation using Asia/Kolkata timezone
     const aggResults = await PageView.aggregate([
-      { $match: { date: { $in: dateKeys } } },
+      { $match: matchFilter },
+      {
+        $project: {
+          visitorId: 1,
+          istDate: {
+            $ifNull: [
+              '$date',
+              {
+                $dateToString: {
+                  format: '%Y-%m-%d',
+                  date: '$timestamp',
+                  timezone: 'Asia/Kolkata'
+                }
+              }
+            ]
+          }
+        }
+      },
       {
         $group: {
-          _id: '$date',
+          _id: '$istDate',
           pageViews: { $sum: 1 },
           visitorsSet: { $addToSet: '$visitorId' }
         }
       }
     ]);
 
-    // Build map of results
+    // Build map of aggregated daily results
     const dataMap = new Map();
     aggResults.forEach(item => {
       dataMap.set(item._id, {
@@ -340,9 +536,9 @@ export const getDailyAnalytics = async (req, res) => {
     // Populate full timeline ensuring zero counts for empty days
     const dailyPoints = dateKeys.map(dKey => {
       const item = dataMap.get(dKey) || { pageViews: 0, uniqueVisitors: 0 };
-      const dateObj = new Date(dKey);
-      const dayName = isNaN(dateObj.getTime()) ? dKey : dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-      const formattedDate = isNaN(dateObj.getTime()) ? dKey : dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const dateObj = new Date(`${dKey}T12:00:00+05:30`);
+      const dayName = isNaN(dateObj.getTime()) ? dKey : dateObj.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'Asia/Kolkata' });
+      const formattedDate = isNaN(dateObj.getTime()) ? dKey : dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'Asia/Kolkata' });
 
       return {
         date: dKey,
@@ -354,7 +550,7 @@ export const getDailyAnalytics = async (req, res) => {
       };
     });
 
-    // Handle weekly or monthly grouping if requested
+    // Grouping: weekly or monthly
     let chartData = dailyPoints;
     if (grouping === 'weekly' && dailyPoints.length > 7) {
       const weeklyBuckets = [];
@@ -383,16 +579,30 @@ export const getDailyAnalytics = async (req, res) => {
       });
       chartData = Array.from(monthMap.entries()).map(([mKey, vals]) => ({
         date: mKey,
-        label: new Date(`${mKey}-01`).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-        shortLabel: new Date(`${mKey}-01`).toLocaleDateString('en-US', { month: 'short' }),
+        label: new Date(`${mKey}-01T12:00:00+05:30`).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }),
+        shortLabel: new Date(`${mKey}-01T12:00:00+05:30`).toLocaleDateString('en-US', { month: 'short', timeZone: 'Asia/Kolkata' }),
         pageViews: vals.pageViews,
         uniqueVisitors: vals.uniqueVisitors
       }));
     }
 
-    // Calculate totals for the selected period
+    // CRITICAL MATHEMATICAL FIX:
+    // Period total unique visitors MUST BE the distinct visitorId set across the entire period,
+    // NEVER the simple sum of daily uniques (which inflates the number when users return across days)!
+    const [periodDistinctVisitors, allTimeTotalVisitors] = await Promise.all([
+      PageView.distinct('visitorId', matchFilter),
+      PageView.distinct('visitorId')
+    ]);
+
     const totalViewsInPeriod = dailyPoints.reduce((sum, p) => sum + p.pageViews, 0);
-    const totalVisitorsInPeriod = dailyPoints.reduce((sum, p) => sum + p.uniqueVisitors, 0);
+    let totalVisitorsInPeriod = periodDistinctVisitors.length;
+    const allTimeCount = allTimeTotalVisitors.length;
+
+    // Mathematical consistency check: Period uniques can never exceed All-Time total
+    if (totalVisitorsInPeriod > allTimeCount) {
+      console.warn(`[Analytics Consistency Guard] Period uniques (${totalVisitorsInPeriod}) > All-time (${allTimeCount}). Normalizing.`);
+      totalVisitorsInPeriod = allTimeCount;
+    }
 
     return res.json({
       success: true,
@@ -421,26 +631,36 @@ export const getDailyAnalytics = async (req, res) => {
  * @access  Admin Private
  */
 export const getTopPages = async (req, res) => {
+  setNoCacheHeaders(res);
   try {
     const { range = '7d', startDate, endDate, limit = 10 } = req.query;
     let matchFilter = {};
 
     if (range === 'today') {
-      matchFilter.date = getTodayKey();
+      const today = getTodayKey();
+      const { start, end } = getISTDayBoundaries(today);
+      matchFilter = { $or: [{ date: today }, { timestamp: { $gte: start, $lte: end } }] };
     } else if (range === 'yesterday') {
-      matchFilter.date = getYesterdayKey();
+      const yesterday = getYesterdayKey();
+      const { start, end } = getISTDayBoundaries(yesterday);
+      matchFilter = { $or: [{ date: yesterday }, { timestamp: { $gte: start, $lte: end } }] };
     } else if (range === '30d') {
       const keys = getPastNDaysKeys(30);
-      matchFilter.date = { $in: keys };
+      const { start } = getISTDayBoundaries(keys[0]);
+      const { end } = getISTDayBoundaries(keys[keys.length - 1]);
+      matchFilter = { $or: [{ date: { $in: keys } }, { timestamp: { $gte: start, $lte: end } }] };
     } else if (range === 'custom' && startDate && endDate) {
       const keys = getDateRangeKeys(startDate, endDate);
-      matchFilter.date = { $in: keys };
+      const { start } = getISTDayBoundaries(keys[0]);
+      const { end } = getISTDayBoundaries(keys[keys.length - 1]);
+      matchFilter = { $or: [{ date: { $in: keys } }, { timestamp: { $gte: start, $lte: end } }] };
     } else if (range === 'all') {
-      // all time
+      matchFilter = {};
     } else {
-      // default 7d
       const keys = getPastNDaysKeys(7);
-      matchFilter.date = { $in: keys };
+      const { start } = getISTDayBoundaries(keys[0]);
+      const { end } = getISTDayBoundaries(keys[keys.length - 1]);
+      matchFilter = { $or: [{ date: { $in: keys } }, { timestamp: { $gte: start, $lte: end } }] };
     }
 
     const totalViewsInRange = await PageView.countDocuments(matchFilter);
@@ -464,7 +684,6 @@ export const getTopPages = async (req, res) => {
       const uniqueVisitors = p.visitorsSet.length;
       const percentage = totalViewsInRange > 0 ? Math.round((views / totalViewsInRange) * 1000) / 10 : 0;
       
-      // Generate clean friendly title
       let friendlyName = p.latestTitle || p._id;
       if (p._id === '/') friendlyName = 'Home Page';
       else if (p._id === '/courses') friendlyName = 'Courses Catalog';
@@ -496,17 +715,19 @@ export const getTopPages = async (req, res) => {
 
 /**
  * @route   GET /api/analytics/realtime
- * @desc    Get live active visitors currently browsing the website
+ * @desc    Get live active visitors currently browsing the website from MongoDB Atlas
  * @access  Admin Private
  */
 export const getRealtimeAnalytics = async (req, res) => {
+  setNoCacheHeaders(res);
   try {
-    cleanupStaleData();
+    const threshold = new Date(Date.now() - 60 * 1000);
+    const activeList = await ActiveSession.find({ lastSeen: { $gte: threshold } }).lean();
 
-    const activeList = Array.from(liveVisitorsMap.values());
-    const liveCount = activeList.length;
+    // Group unique visitors (1 user with multiple tabs = 1 live visitor)
+    const distinctVisitorIds = new Set(activeList.map(s => s.visitorId));
+    const liveCount = distinctVisitorIds.size;
 
-    // Group active visitors by current page
     const pageCounts = {};
     const deviceCounts = { desktop: 0, mobile: 0, tablet: 0 };
 
@@ -543,11 +764,19 @@ export const getRealtimeAnalytics = async (req, res) => {
  * @access  Admin Private
  */
 export const getVisitorInsights = async (req, res) => {
+  setNoCacheHeaders(res);
   try {
     const { range = '30d' } = req.query;
     const dateKeys = range === '7d' ? getPastNDaysKeys(7) : getPastNDaysKeys(30);
 
-    const matchFilter = { date: { $in: dateKeys } };
+    const { start } = getISTDayBoundaries(dateKeys[0]);
+    const { end } = getISTDayBoundaries(dateKeys[dateKeys.length - 1]);
+    const matchFilter = {
+      $or: [
+        { date: { $in: dateKeys } },
+        { timestamp: { $gte: start, $lte: end } }
+      ]
+    };
 
     // 1. Device distribution
     const deviceAgg = await PageView.aggregate([
@@ -575,18 +804,35 @@ export const getVisitorInsights = async (req, res) => {
       { $sort: { count: -1 } }
     ]);
 
-    // 4. Traffic by Day of the Week
+    // 4. Traffic by Day of the Week in Asia/Kolkata timezone
     const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const dayCounts = { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 };
 
-    const allVisits = await PageView.find(matchFilter, 'date').lean();
-    allVisits.forEach(v => {
-      if (v.date) {
-        const dObj = new Date(v.date);
-        if (!isNaN(dObj.getTime())) {
-          const dName = daysOfWeek[dObj.getDay()];
-          dayCounts[dName] = (dayCounts[dName] || 0) + 1;
+    const dayOfWeekAgg = await PageView.aggregate([
+      { $match: matchFilter },
+      {
+        $project: {
+          dayOfWeek: {
+            $dayOfWeek: {
+              date: '$timestamp',
+              timezone: 'Asia/Kolkata'
+            }
+          }
         }
+      },
+      {
+        $group: {
+          _id: '$dayOfWeek',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // $dayOfWeek returns 1 for Sunday, 2 for Monday, ..., 7 for Saturday
+    dayOfWeekAgg.forEach(item => {
+      if (item._id >= 1 && item._id <= 7) {
+        const dName = daysOfWeek[item._id - 1];
+        dayCounts[dName] = item.count;
       }
     });
 
@@ -613,4 +859,78 @@ export const getVisitorInsights = async (req, res) => {
     console.error('[analyticsController getVisitorInsights Error]:', err.message);
     return res.status(500).json({ success: false, message: err.message });
   }
+};
+
+/**
+ * @route   GET /api/analytics/stream
+ * @desc    Server-Sent Events (SSE) stream pushing latest live statistics every 5 seconds
+ *          with automatic MongoDB change detection
+ * @access  Admin Private
+ */
+export const streamAnalytics = async (req, res) => {
+  // Configure Server-Sent Events headers
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform, no-store');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no'); // Disable proxy buffering in Nginx
+  res.flushHeaders?.();
+
+  let isAlive = true;
+
+  const sendEvent = (eventData) => {
+    if (!isAlive) return;
+    try {
+      res.write(`data: ${JSON.stringify(eventData)}\n\n`);
+    } catch (e) {
+      isAlive = false;
+    }
+  };
+
+  // Push immediate initial snapshot upon connecting
+  try {
+    const initialStats = await getUnifiedAnalyticsSnapshot();
+    sendEvent({ type: 'snapshot', data: initialStats });
+  } catch (err) {
+    console.warn('[streamAnalytics Initial Push Error]:', err.message);
+  }
+
+  // Periodic push every 5 seconds
+  const intervalId = setInterval(async () => {
+    if (!isAlive) {
+      clearInterval(intervalId);
+      return;
+    }
+    try {
+      const stats = await getUnifiedAnalyticsSnapshot();
+      sendEvent({ type: 'update', data: stats });
+    } catch (err) {
+      // Continue next tick
+    }
+  }, 5000);
+
+  // Bonus: Watch active_sessions via MongoDB Change Stream if supported by replica set (Atlas)
+  let changeStream = null;
+  try {
+    if (mongoose.connection.readyState === 1 && typeof ActiveSession.watch === 'function') {
+      changeStream = ActiveSession.watch();
+      changeStream.on('change', async () => {
+        if (!isAlive) return;
+        try {
+          const stats = await getUnifiedAnalyticsSnapshot();
+          sendEvent({ type: 'update', data: stats });
+        } catch (err) {}
+      });
+    }
+  } catch (e) {
+    // Change streams are not available on local single-node mongodb, 5s interval is primary
+  }
+
+  req.on('close', () => {
+    isAlive = false;
+    clearInterval(intervalId);
+    if (changeStream) {
+      changeStream.close().catch(() => {});
+    }
+    res.end();
+  });
 };

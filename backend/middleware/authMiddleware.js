@@ -16,11 +16,15 @@ import { Admin } from '../models/Admin.js';
  * Blocks unauthorized direct scrapers and unauthorized callers.
  */
 export const validateApiKey = (req, res, next) => {
-  // Allow health checks, preflight OPTIONS, and realtime SSE stream
+  // Allow health checks, preflight OPTIONS, and realtime SSE streams / public beacons
   const p = req.originalUrl || req.path || '';
   if (
     p.includes('/health') ||
     p.includes('/realtime/stream') ||
+    p.includes('/analytics/stream') ||
+    p.includes('/analytics/heartbeat') ||
+    p.includes('/analytics/leave') ||
+    p.includes('/analytics/track') ||
     p.includes('/events') ||
     req.method === 'OPTIONS'
   ) {
@@ -52,7 +56,7 @@ export const validateApiKey = (req, res, next) => {
 };
 
 /**
- * Extract token from cookies or authorization headers
+ * Extract token from cookies, authorization headers, or URL query param (for SSE EventSource)
  * @param {Object} req - Express request
  * @returns {string|null} Token or null
  */
@@ -71,6 +75,11 @@ export const extractToken = (req) => {
   }
   if (authHeader && !authHeader.includes(' ')) {
     return authHeader.trim();
+  }
+
+  // 3. Check query parameter (crucial for browser EventSource SSE connections)
+  if (req.query && req.query.token) {
+    return req.query.token;
   }
 
   return null;
@@ -139,7 +148,7 @@ export const requireAdmin = async (req, res, next) => {
 
     // 2. Fallback check against database for backwards-compatible active session transition
     // Note: strictly requires matching admin record in MongoDB Atlas
-    const adminEmail = req.headers['x-admin-email'];
+    const adminEmail = req.headers['x-admin-email'] || req.query?.adminEmail;
     if (adminEmail && (token.startsWith('cg-admin-jwt-') || token.startsWith('fallback-token-'))) {
       const cleanEmail = adminEmail.toLowerCase().trim();
       const admin = await Admin.findOne({ email: cleanEmail });
