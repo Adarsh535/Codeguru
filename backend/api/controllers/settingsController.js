@@ -13,8 +13,8 @@ export const getSettings = async (req, res) => {
     if (!settings) {
       settings = await Settings.create({
         adminPhone: '9670912923',
-        adminEmail: 'admin@codeguru.com',
-        siteTitle: 'CodeGuru Student Placement & Learning Platform',
+        adminEmail: 'info@codegurru.in',
+        siteTitle: 'CodeGurru Student Placement & Learning Platform',
         whatsappNotificationEnabled: true,
         autoWhatsappRedirect: true,
         showMyBatchNav: true

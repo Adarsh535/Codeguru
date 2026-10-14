@@ -6,7 +6,7 @@ export default function Logo({ className = "h-8" }) {
       <div className="p-1 xxs:p-1.5 rounded-xl xxs:rounded-2xl bg-white/90 border border-slate-200/90 shadow-2xs group-hover:shadow-xs group-hover:border-cyan-300 transition-all duration-300 flex items-center justify-center">
         <img
           src="/logo-icon.png"
-          alt="CodeGuru Logo"
+          alt="CodeGurru Logo"
           className={`${className} object-contain rounded-lg filter drop-shadow-xs`}
         />
       </div>

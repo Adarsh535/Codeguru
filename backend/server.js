@@ -116,7 +116,7 @@ app.get('/api/health', (req, res) => {
 
   res.json({
     success: true,
-    status: 'CodeGuru Backend API is running cleanly',
+    status: 'CodeGurru Backend API is running cleanly',
     database: {
       connected: isConnected,
       mode: isAtlas ? 'cloud' : 'local',
@@ -165,6 +165,6 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🔒 CodeGuru REST API Backend running securely on port ${PORT}`);
+  console.log(`🔒 CodeGurru REST API Backend running securely on port ${PORT}`);
   console.log(`📍 Base API URL: http://localhost:${PORT}/api`);
 });

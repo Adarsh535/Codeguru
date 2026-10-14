@@ -18,7 +18,7 @@ const DEFAULT_SLIDES = [
   {
     id: 'default-2',
     type: 'video',
-    title: 'CodeGuru Official Video 🎥',
+    title: 'CodeGurru Official Video 🎥',
     subtitle: 'Watch Exclusive Campus Placement & Tech Drive Highlights',
     videoUrl: '/codeguru%20video.mp4',
     poster: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',

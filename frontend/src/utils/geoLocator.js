@@ -160,7 +160,7 @@ export async function detectStudentRealLocation(forceRefresh = false) {
               // PRIMARY: Nominatim (OpenStreetMap) — free, accurate, no API key needed
               const nominatimRes = await fetch(
                 `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`,
-                { headers: { 'Accept-Language': 'en', 'User-Agent': 'CodeGuru-App/1.0' } }
+                { headers: { 'Accept-Language': 'en', 'User-Agent': 'CodeGurru-App/1.0' } }
               );
               if (nominatimRes.ok) {
                 const data = await nominatimRes.json();

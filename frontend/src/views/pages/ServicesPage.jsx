@@ -3,182 +3,225 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-  Layers,
-  Sparkles,
-  ArrowLeft,
-  Rocket,
-  Bell,
-  CheckCircle2,
-  PhoneCall,
-  Briefcase,
+  Code2,
+  Smartphone,
+  Wrench,
   GraduationCap,
-  Cloud,
-  Code2
+  Sparkles,
+  PhoneCall,
+  CheckCircle2,
+  Clock,
+  ArrowRight,
+  ShieldCheck,
+  Cpu,
+  Layers
 } from 'lucide-react';
+import { BUSINESS_CONFIG } from '../../config/business';
 
 export default function ServicesPage({ onOpenContactModal }) {
-  const [email, setEmail] = useState('');
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [selectedService, setSelectedService] = useState('all');
 
-  const handleNotify = (e) => {
-    e.preventDefault();
-    if (email.trim()) {
-      setIsSubscribed(true);
-      setTimeout(() => {
-        setEmail('');
-      }, 3500);
-    }
-  };
-
-  const upcomingServices = [
+  const servicesList = [
     {
-      icon: Briefcase,
-      title: 'Corporate Training',
-      desc: 'Tailored technology upskilling programs for enterprise teams.'
-    },
-    {
+      id: 'software',
       icon: Code2,
-      title: 'Custom Software Development',
-      desc: 'Full-stack bespoke web and mobile applications for modern business.'
+      category: 'SOFTWARE ENGINEERING',
+      title: 'Custom Web & Software Development',
+      badge: 'POPULAR B2B',
+      badgeStyle: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+      description: 'End-to-end bespoke web applications, enterprise ERPs, and cloud SaaS platforms engineered by UK VK Pvt. Ltd.',
+      features: [
+        'Full Stack Architecture (MERN, Next.js, Python, Java)',
+        'Custom Business Billing & GST Inventory Software',
+        'High-Converting E-Commerce & Commercial Portals',
+        'Cloud Database Design, REST & GraphQL APIs'
+      ],
+      deliverables: 'Live Deployment, Cloud Security, 6 Months Free Maintenance'
     },
     {
+      id: 'mobile',
+      icon: Smartphone,
+      category: 'APP ENGINEERING',
+      title: 'Mobile App Development (Android & iOS)',
+      badge: 'HIGH DEMAND',
+      badgeStyle: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+      description: 'Native and cross-platform mobile apps built with React Native and Flutter for startups and established enterprises.',
+      features: [
+        'User-Friendly Modern UI/UX Interactive Screens',
+        'Push Notifications, Payment Gateway & OTP Integration',
+        'Offline Sync, Realtime WebSockets & Geo-Tracking',
+        'Google Play Store & Apple App Store Publishing'
+      ],
+      deliverables: 'Source Code, Admin Dashboard, Store Approval Support'
+    },
+    {
+      id: 'repair',
+      icon: Wrench,
+      category: 'HARDWARE & DIAGNOSTICS',
+      title: 'Computer & Laptop Repair Service',
+      badge: 'SAME-DAY FIX',
+      badgeStyle: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      description: 'Certified hardware technicians providing same-day doorstep diagnostics, chip-level motherboard repair, and screen replacements in Lucknow & Ayodhya.',
+      features: [
+        'Broken Laptop Screen & Display Panel Replacement',
+        'Chip-Level Motherboard Diagnostics & Liquid Spill Fix',
+        'Slow Laptop Speed Fix: SSD Upgrade & RAM Expansion',
+        'Genuine Battery, Keyboard & Hinge Replacement'
+      ],
+      deliverables: 'Doorstep Pickup & Drop, 90-Day Service Warranty, Genuine Spares'
+    },
+    {
+      id: 'training',
       icon: GraduationCap,
-      title: 'Campus Hiring Drives',
-      desc: 'Connecting top colleges with leading IT hiring companies.'
-    },
-    {
-      icon: Cloud,
-      title: 'Cloud & DevOps Solutions',
-      desc: 'Architecture migration, Docker, Kubernetes & CI/CD deployment.'
+      category: 'VOCATIONAL EDUCATION',
+      title: 'Job-Ready IT Training & Corporate Upskilling',
+      badge: '100% PLACEMENT',
+      badgeStyle: 'bg-amber-50 text-amber-700 border-amber-200',
+      description: 'Immersive coding bootcamps for engineering students, BCA freshers, and corporate teams with daily live mentorship and hiring drives.',
+      features: [
+        'MERN Stack, Python AI/ML, Java, C++ & DSA',
+        '4+ Production-Grade Capstones with Cloud Deployments',
+        'Mock Technical Interviews & Resume Polishing',
+        'Direct Campus Recruitment Drives across UP'
+      ],
+      deliverables: 'Industry Certificate, Verified Portfolio, Lifetime Placement Support'
     }
   ];
 
+  const handleCall = () => {
+    window.location.href = `tel:${BUSINESS_CONFIG.contact.primaryPhone.replace(/\s+/g, '')}`;
+  };
+
+  const handleWhatsApp = () => {
+    window.open(`https://wa.me/917238829360?text=Hello%20CodeGurru%2C%20I%20am%20interested%20in%20your%20services`, '_blank');
+  };
+
   return (
-    <div className="min-h-[85vh] flex flex-col items-center justify-center px-4 py-10 sm:py-16 bg-gradient-to-b from-slate-50 via-white to-orange-50/40 relative overflow-hidden">
+    <div className="w-full bg-slate-50 min-h-screen pb-16">
       
-      {/* BACKGROUND AMBIENT GLOWS */}
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-tr from-orange-400/15 via-amber-300/15 to-transparent rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-10 right-10 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* HERO SECTION */}
+      <div className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white px-4 pt-12 pb-16 sm:pb-20 relative overflow-hidden select-none">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="relative w-full max-w-2xl mx-auto text-center flex flex-col items-center">
-        
-        {/* ANIMATED ICON BADGE */}
-        <div className="relative mb-6">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-orange-500 to-amber-400 p-0.5 shadow-xl shadow-orange-500/25 flex items-center justify-center">
-            <div className="w-full h-full bg-slate-950 rounded-[22px] flex items-center justify-center">
-              <Layers className="w-10 h-10 sm:w-12 sm:h-12 text-orange-400 stroke-[2.2]" />
-            </div>
+        <div className="max-w-5xl mx-auto text-center relative z-10 flex flex-col items-center">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-[10px] sm:text-xs font-black uppercase tracking-wider mb-3">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>UK VK PVT. LTD. ENTERPRISE ECOSYSTEM</span>
           </div>
-          <div className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white p-1.5 rounded-full shadow-md animate-bounce">
-            <Sparkles className="w-4 h-4 fill-white stroke-none" />
+
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black font-heading tracking-tight mb-3">
+            IT Services, Custom Software &amp; Tech Care
+          </h1>
+
+          <p className="text-xs sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed mb-6 font-normal">
+            From high-scale web development and mobile applications to job-guaranteed coding bootcamps and rapid doorstep laptop repairs across Uttar Pradesh.
+          </p>
+
+          {/* QUICK ACTION BUTTONS */}
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={handleWhatsApp}
+              className="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs sm:text-sm uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2 cursor-pointer"
+            >
+              <span>💬 Instant WhatsApp Quote</span>
+            </button>
+            <button
+              onClick={handleCall}
+              className="bg-white/10 hover:bg-white/20 active:scale-95 text-white font-bold px-5 py-2.5 rounded-xl text-xs sm:text-sm uppercase tracking-wider transition-all border border-white/20 flex items-center gap-2 cursor-pointer"
+            >
+              <PhoneCall className="w-4 h-4 text-amber-400" />
+              <span>Call Helpline: +91 72388 29360</span>
+            </button>
           </div>
         </div>
+      </div>
 
-        {/* PILL STATUS */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100/90 border border-orange-200/90 text-orange-700 text-[11px] sm:text-xs font-black tracking-wide uppercase mb-4 shadow-2xs">
-          <Rocket className="w-3.5 h-3.5 text-orange-600" />
-          <span>Services Portal Under Development</span>
-        </div>
-
-        {/* PRIMARY HEADING */}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-3">
-          Coming Soon
-        </h1>
-
-        {/* SUBTITLE */}
-        <p className="text-sm sm:text-base text-slate-600 max-w-md mx-auto leading-relaxed mb-8 font-medium">
-          We are crafting premium <strong className="text-slate-900 font-extrabold">Corporate Training</strong> &{' '}
-          <strong className="text-slate-900 font-extrabold">IT Consultancy Services</strong> to accelerate business and student growth.
-        </p>
-
-        {/* UPCOMING SERVICES GRID TEASER */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full mb-8 text-left">
-          {upcomingServices.map((srv, idx) => {
-            const Icon = srv.icon;
+      {/* SERVICES CARDS GRID */}
+      <div className="max-w-6xl mx-auto px-4 -mt-8 relative z-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {servicesList.map((service) => {
+            const Icon = service.icon;
             return (
               <div
-                key={idx}
-                className="bg-white border border-slate-200/80 rounded-2xl p-3.5 sm:p-4 shadow-2xs hover:shadow-xs transition-shadow flex items-start gap-3"
+                key={service.id}
+                className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col justify-between"
               >
-                <div className="w-9 h-9 rounded-xl bg-orange-50 border border-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-4.5 h-4.5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-1 mb-1">
-                    <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm truncate">
-                      {srv.title}
-                    </h3>
-                    <span className="text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-200/60 px-1.5 py-0.2 rounded-md">
-                      Soon
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-slate-900 text-amber-400 flex items-center justify-center shadow-xs">
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="text-[9px] font-black tracking-wider text-slate-400 uppercase block">
+                          {service.category}
+                        </span>
+                        <h2 className="text-base sm:text-lg font-black text-slate-900 font-heading leading-snug">
+                          {service.title}
+                        </h2>
+                      </div>
+                    </div>
+                    <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${service.badgeStyle} shrink-0`}>
+                      {service.badge}
                     </span>
                   </div>
-                  <p className="text-[11px] sm:text-xs text-slate-500 leading-snug line-clamp-2">
-                    {srv.desc}
+
+                  <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed mb-4">
+                    {service.description}
                   </p>
+
+                  <div className="space-y-2 mb-5">
+                    {service.features.map((feat, i) => (
+                      <div key={i} className="flex items-start gap-2 text-xs text-slate-700">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                        <span className="font-semibold">{feat}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <div className="text-[10px] text-slate-500 font-medium">
+                    <strong className="text-slate-800">Support:</strong> {service.deliverables}
+                  </div>
+                  <button
+                    onClick={onOpenContactModal}
+                    className="bg-slate-900 hover:bg-amber-500 hover:text-slate-950 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-lg uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer shrink-0"
+                  >
+                    <span>Inquire Now</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* NOTIFY ME EMAIL FORM */}
-        <form onSubmit={handleNotify} className="w-full max-w-md mb-8">
-          {isSubscribed ? (
-            <div className="flex items-center justify-center gap-2 py-3 px-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-700 text-xs sm:text-sm font-bold animate-in fade-in">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-              <span>Thank you! We'll notify you as soon as services go live.</span>
+        {/* BOTTOM GUARANTEE BANNER */}
+        <div className="mt-8 bg-gradient-to-r from-amber-50 via-white to-amber-50 border border-amber-200/90 rounded-2xl p-4 sm:p-6 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 shadow-xs">
+              <ShieldCheck className="w-6 h-6" />
             </div>
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="email"
-                required
-                placeholder="Enter your email to get notified"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 focus:outline-none rounded-xl sm:rounded-full px-4 py-2.5 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 shadow-2xs transition-all"
-              />
-              <button
-                type="submit"
-                className="bg-orange-500 hover:bg-orange-600 text-white font-black text-xs sm:text-sm px-6 py-2.5 rounded-xl sm:rounded-full shadow-md shadow-orange-500/25 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
-              >
-                <Bell className="w-4 h-4" />
-                <span>Notify Me</span>
-              </button>
+            <div>
+              <h3 className="text-sm sm:text-base font-black text-slate-900 font-heading">
+                100% Quality &amp; Satisfaction Guarantee
+              </h3>
+              <p className="text-xs text-slate-600 mt-0.5">
+                Operated with pride by UK VK Pvt. Ltd. Serving Lucknow, Ayodhya, and clients across Uttar Pradesh.
+              </p>
             </div>
-          )}
-        </form>
-
-        {/* ACTION BUTTONS */}
-        <div className="flex flex-wrap items-center justify-center gap-2.5 w-full">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-extrabold transition-colors cursor-pointer"
+          </div>
+          <button
+            onClick={onOpenContactModal}
+            className="bg-amber-400 hover:bg-amber-500 active:scale-95 text-slate-950 font-black text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-xs transition-all shrink-0 cursor-pointer"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Home</span>
-          </Link>
-
-          <Link
-            href="/courses"
-            className="inline-flex items-center gap-1.5 px-5 sm:px-6 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-extrabold shadow-sm transition-transform hover:-translate-y-0.5 active:scale-95 cursor-pointer"
-          >
-            <span>Explore Courses</span>
-          </Link>
-
-          {onOpenContactModal && (
-            <button
-              type="button"
-              onClick={onOpenContactModal}
-              className="inline-flex items-center gap-1.5 px-5 sm:px-6 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-extrabold shadow-sm shadow-blue-500/20 transition-transform hover:-translate-y-0.5 active:scale-95 cursor-pointer"
-            >
-              <PhoneCall className="w-3.5 h-3.5" />
-              <span>Contact Us</span>
-            </button>
-          )}
+            Connect with Experts
+          </button>
         </div>
-
       </div>
+
     </div>
   );
 }

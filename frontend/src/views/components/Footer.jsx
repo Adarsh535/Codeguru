@@ -12,6 +12,7 @@ import {
   Globe,
   BookOpen
 } from 'lucide-react';
+import { BUSINESS_CONFIG } from '../../config/business';
 
 export default function Footer({ selectedLocation, onOpenLocationModal, onOpenContactModal }) {
 
@@ -114,11 +115,11 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
           {/* COLUMN 1: BRAND & CONTACT INFO (5 cols) */}
           <div className="lg:col-span-5 flex flex-col gap-5">
             <div className="flex items-center gap-3 cursor-pointer group" onClick={onOpenContactModal}>
-              <div className="w-12 h-12 rounded-xl bg-[#090d16] border-1.5 border-amber-500/70 shadow-lg shadow-amber-500/10 p-1 flex items-center justify-center group-hover:border-amber-400 group-hover:scale-105 transition-all">
+              <div className="w-12 h-12 flex items-center justify-center group-hover:scale-105 transition-all">
                 <img
                   src="/logo.png"
-                  alt="CodeGuru Logo"
-                  className="w-full h-full object-contain rounded-lg"
+                  alt="CodeGurru Logo"
+                  className="w-full h-full object-contain"
                   onError={(e) => { e.target.src = '/logo-icon.png'; }}
                 />
               </div>
@@ -127,14 +128,44 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
                   CODE<span className="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">GURRU</span>
                 </span>
                 <span className="text-[10px] text-amber-400 font-extrabold uppercase tracking-widest mt-0.5">
-                  CODEGURU PLACEMENT ACADEMY
+                  CODEGURRU ACADEMY • UK VK PVT. LTD.
                 </span>
               </div>
             </div>
 
             <p className="text-slate-300 text-xs leading-relaxed font-normal">
-              Providing industry-leading IT training, full stack web development bootcamps, and guaranteed 100% placement assistance to engineering students & IT job seekers since 2020.
+              CodeGurru (UK VK Pvt. Ltd.) is Uttar Pradesh's premier IT academy &amp; tech center, founded by Kishan Pandey. Providing 100% placement IT bootcamps, custom software development, and rapid computer &amp; laptop repair.
             </p>
+
+            {/* Direct Contact & Branch Badges */}
+            <div className="flex flex-col gap-2 pt-2 border-t border-slate-800/80 text-xs text-slate-300">
+              <div className="flex items-start gap-2">
+                <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                <span className="text-[11px] leading-snug">
+                  <strong>Campus &amp; Office:</strong> {BUSINESS_CONFIG.branches[0].fullAddress}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <a href={`tel:${BUSINESS_CONFIG.contact.primaryPhone.replace(/\s+/g, '')}`} className="text-[11px] font-bold text-white hover:text-amber-400 transition-colors">
+                  {BUSINESS_CONFIG.contact.primaryPhone}
+                </a>
+                <span className="text-slate-600">/</span>
+                <a href={`tel:${BUSINESS_CONFIG.contact.secondaryPhone.replace(/\s+/g, '')}`} className="text-[11px] font-bold text-white hover:text-amber-400 transition-colors">
+                  {BUSINESS_CONFIG.contact.secondaryPhone}
+                </a>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                <a href={`mailto:${BUSINESS_CONFIG.contact.email}`} className="text-[11px] font-bold text-slate-200 hover:text-amber-400 transition-colors">
+                  {BUSINESS_CONFIG.contact.email}
+                </a>
+                <span className="text-slate-600">•</span>
+                <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-amber-400" /> {BUSINESS_CONFIG.contact.workingHours}
+                </span>
+              </div>
+            </div>
 
           </div>
 
@@ -290,7 +321,7 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
         {/* BOTTOM COPYRIGHT & LEGAL BAR */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 text-xs text-slate-400 font-medium">
           <div className="flex items-center gap-1.5 text-center sm:text-left">
-            <span>© {new Date().getFullYear()} CodeGuru Technologies Private Limited. All Rights Reserved.</span>
+            <span>© {new Date().getFullYear()} CodeGurru (UK VK Pvt. Ltd.). All Rights Reserved. Founded by Kishan Pandey.</span>
           </div>
 
           <div className="flex items-center gap-4 text-slate-300 font-semibold text-xs">

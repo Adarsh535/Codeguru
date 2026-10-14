@@ -150,7 +150,7 @@ export async function sendOtpSMS(toPhone, customOtp = null) {
         },
         body: JSON.stringify({
           route: 'q',
-          message: `Your CodeGuru login OTP is ${otpCode}. Valid for 10 minutes. Do not share with anyone.`,
+          message: `Your CodeGurru login OTP is ${otpCode}. Valid for 10 minutes. Do not share with anyone.`,
           language: 'english',
           flash: '0',
           numbers: cleanPhone
@@ -190,7 +190,7 @@ export async function sendOtpSMS(toPhone, customOtp = null) {
   if (twofactorKey) {
     try {
       console.log(`🚀 Sending via 2Factor.in Gateway...`);
-      const response = await fetch(`https://2factor.in/API/V1/${twofactorKey}/SMS/+91${cleanPhone}/${otpCode}/CodeGuru`, {
+      const response = await fetch(`https://2factor.in/API/V1/${twofactorKey}/SMS/+91${cleanPhone}/${otpCode}/CodeGurru`, {
         method: 'GET'
       });
       const resData = await response.json();
@@ -235,7 +235,7 @@ export async function sendOtpSMS(toPhone, customOtp = null) {
   }
 
   // 4. Twilio Standard SMS Fallback
-  const messageText = `Your CodeGuru Login Verification OTP is ${otpCode}. Valid for 10 minutes.`;
+  const messageText = `Your CodeGurru Login Verification OTP is ${otpCode}. Valid for 10 minutes.`;
   const fallbackResult = await sendRealSMS(cleanPhone, messageText);
   if (fallbackResult.success) {
     return { success: true, provider: fallbackResult.provider, otp: otpCode, response: fallbackResult.response };

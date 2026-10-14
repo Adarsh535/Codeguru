@@ -263,7 +263,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
             <div className="w-8 h-8 rounded-full border border-slate-200 bg-white p-0.5 shadow-2xs overflow-hidden flex-shrink-0 flex items-center justify-center">
               <img
                 src="/logo-icon.png"
-                alt="CodeGuru Logo"
+                alt="CodeGurru Logo"
                 className="w-full h-full object-contain rounded-full"
                 onError={(e) => {
                   e.target.src = '/logo.png';

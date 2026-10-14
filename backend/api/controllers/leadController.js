@@ -87,7 +87,7 @@ export const addLead = async (req, res) => {
       location: req.body.location || 'Ayodhya, UP',
       course: req.body.course || 'Full Stack Web Development',
       status: req.body.status || 'New',
-      notes: req.body.notes || 'Inquired from CodeGuru Portal'
+      notes: req.body.notes || 'Inquired from CodeGurru Portal'
     });
 
     // Realtime SSE Broadcast for instant live dashboard update across all open admins & tabs
@@ -98,7 +98,7 @@ export const addLead = async (req, res) => {
     const adminPhone = settings?.adminPhone || '9670912923';
 
     // Format text message for Cellular SIM SMS Delivery
-    const smsMessage = `CodeGuru Alert: New Query! Student: ${lead.name}, Phone: ${lead.phone}, Course: ${lead.course}, Location: ${lead.location}`;
+    const smsMessage = `CodeGurru Alert: New Query! Student: ${lead.name}, Phone: ${lead.phone}, Course: ${lead.course}, Location: ${lead.location}`;
 
     // Dispatch Real SMS Gateway Service
     sendRealSMS(adminPhone, smsMessage).catch(err => {

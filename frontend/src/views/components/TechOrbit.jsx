@@ -79,16 +79,16 @@ export default function TechOrbit({
         })}
       </div>
 
-      {/* Center Master CodeGuru Logo - ENLARGED */}
+      {/* Center Master CodeGurru Logo - ENLARGED */}
       <div
         suppressHydrationWarning
         className="tech-orbit__center"
         onClick={onOpenContactModal}
-        title="Click to Inquire with CodeGuru"
+        title="Click to Inquire with CodeGurru"
       >
         <img
           src={centerImageSrc}
-          alt="CodeGuru Master Logo"
+          alt="CodeGurru Master Logo"
           className="tech-orbit__image"
         />
       </div>

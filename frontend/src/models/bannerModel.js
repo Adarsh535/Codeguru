@@ -13,7 +13,7 @@ export const FALLBACK_BANNERS = [
     id: 'b-1',
     type: 'image',
     title: 'STAR ACHIEVERS & PLACEMENT DRIVES 2026',
-    subtitle: 'CodeGuru Alumni placed at Top MNCs & Unicorn Startups with packages up to 18.5 LPA',
+    subtitle: 'CodeGurru Alumni placed at Top MNCs & Unicorn Startups with packages up to 18.5 LPA',
     imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1400&q=80',
     badge: 'TOP PLACEMENTS 2026',
     badgeColor: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-400 text-slate-950 font-black border-amber-300 shadow-md',

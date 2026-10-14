@@ -56,18 +56,9 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
         
         {/* HEADING */}
         <div className="flex justify-between items-center px-4 md:px-8 mb-3 sm:mb-4">
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 flex-shrink-0 relative flex items-center justify-center rounded-xl bg-amber-50/70 p-0.5 border border-amber-200/60 shadow-2xs">
-              <img
-                src="/images/top-achiever-trophy.png"
-                alt="Top Placements Trophy"
-                className="w-full h-full object-contain rounded-lg hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-            <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight font-heading">
-              Top Placements & Achievers
-            </h2>
-          </div>
+          <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight font-heading">
+            Top Placements & Achievers
+          </h2>
           <span className="text-emerald-800 font-extrabold text-[9.5px] sm:text-xs uppercase tracking-widest hidden sm:block bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
             100% Verified Placements
           </span>
@@ -120,11 +111,22 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
                     </p>
                   </div>
 
-                  {/* FOOTER ROLE ROW */}
-                  <div className="flex items-center pt-2 mt-2 border-t border-slate-100 w-full">
-                    <span className="text-[9.5px] sm:text-[10px] font-bold text-slate-700 truncate">
-                      {student.company ? `${student.company}${student.package ? ` (${student.package})` : ''}` : (student.batch || 'Placed Student')}
+                  {/* FOOTER COMPANY & PACKAGE DETAILS WITH CLEAN GAP */}
+                  <div className="pt-2 mt-2 border-t border-slate-100 w-full flex flex-col gap-1.5">
+                    <span className="text-[10.5px] sm:text-[11.5px] font-extrabold text-slate-800 truncate" title={student.company || student.batch}>
+                      {student.company || student.batch || 'Placed Student'}
                     </span>
+
+                    {student.package && (
+                      <div className="flex items-center justify-between gap-1 pt-0.5">
+                        <span className="text-[8.5px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                          Package
+                        </span>
+                        <span className="text-[9.5px] sm:text-[10.5px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/80 shrink-0 shadow-2xs">
+                          {student.package.startsWith('₹') ? student.package : `₹ ${student.package}`}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

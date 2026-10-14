@@ -12,7 +12,7 @@ const DEFAULT_MEMBERS = [
     tag: '#TEAMCODEGURRU',
     photo: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=500&fit=crop&crop=faces',
     bio: 'Overseeing content strategy, community engagement, and brand awareness.',
-    phone: '9198483...'
+    phone: '7238829360'
   },
   {
     id: 'aman',
@@ -21,16 +21,16 @@ const DEFAULT_MEMBERS = [
     tag: '#TEAMCODEGURRU',
     photo: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=500&fit=crop&crop=faces',
     bio: 'Specializing in React, Node.js and architecting scalable enterprise systems.',
-    phone: '9198483...'
+    phone: '7238829360'
   },
   {
     id: 'kishan',
-    name: 'Kishan Sharma',
+    name: 'Kishan Pandey',
     role: 'Founder & CEO',
     tag: '#FOUNDER',
     photo: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=400&h=500&fit=crop&crop=faces',
     bio: 'Driving technical excellence and high-yield student success initiatives.',
-    phone: '9198483...'
+    phone: '7238829360'
   },
   {
     id: 'priya',
@@ -39,7 +39,7 @@ const DEFAULT_MEMBERS = [
     tag: '#DESIGNTEAM',
     photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=500&fit=crop&crop=faces',
     bio: 'Ensuring premium layouts and seamless, beautiful user experiences.',
-    phone: '9198483...'
+    phone: '7238829360'
   }
 ];
 
@@ -61,7 +61,7 @@ export default function OurTeamSlider({ onOpenContactModal }) {
             photo: item.photoUrl || item.photo || item.image || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=500&fit=crop&crop=faces',
             specialization: item.specialization || '',
             bio: item.bio || item.specialization || '',
-            phone: item.phone || '9198483...'
+            phone: item.phone || '7238829360'
           }));
           setTeamMembers(formatted);
         }

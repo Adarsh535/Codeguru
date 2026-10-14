@@ -11,8 +11,8 @@ const branchSchema = new mongoose.Schema({
   title: { type: String, required: true },
   address: { type: String, required: true },
   category: { type: String, default: 'REGIONAL BRANCH & CAMPUS' },
-  phone: { type: String, default: '+91 9876543210' },
-  email: { type: String, default: 'info@codeguru.com' }
+  phone: { type: String, default: '+91 72388 29360' },
+  email: { type: String, default: 'info@codegurru.in' }
 }, {
   timestamps: true
 });

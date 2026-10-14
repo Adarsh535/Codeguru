@@ -250,11 +250,24 @@ export const connectDB = async () => {
     const branchCount = await Branch.countDocuments();
     if (branchCount === 0) {
       await Branch.create({
-        title: 'Ayodhya HQ Campus',
-        address: 'CodeGuru Tower, Near Naya Ghat Bypass Road, Ayodhya, UP - 224123',
-        category: 'HEADQUARTERS & MAIN CAMPUS'
+        title: 'Ayodhya Branch Office',
+        address: 'Near Saket College Petrol Pump, Ayodhya, Uttar Pradesh',
+        phone: '+91 72388 29360, +91 72388 29132',
+        category: 'REGIONAL TECH HUB & CAMPUS'
       });
       console.log(`🏢 Branches collection initialized in 'branches'`);
+    } else {
+      await Branch.updateMany(
+        {},
+        {
+          $set: {
+            title: 'Ayodhya Branch Office',
+            address: 'Near Saket College Petrol Pump, Ayodhya, Uttar Pradesh',
+            phone: '+91 72388 29360, +91 72388 29132',
+            category: 'REGIONAL TECH HUB & CAMPUS'
+          }
+        }
+      );
     }
 
     // 8. Initialize 'navmenus' collection

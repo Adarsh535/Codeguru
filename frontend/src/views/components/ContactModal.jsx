@@ -53,33 +53,43 @@ export default function ContactModal({ isOpen, onClose }) {
   const contactOptions = [
     {
       id: 'call',
-      name: 'Direct Call',
-      subtitle: '+91 98765 43210',
+      name: 'Direct Call (Line 1)',
+      subtitle: '+91 72388 29360',
       icon: PhoneIcon,
       bgColor: 'bg-emerald-500',
       actionText: 'CALL NOW',
       actionStyle: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-600 hover:text-white',
-      link: 'tel:+919876543210'
+      link: 'tel:+917238829360'
+    },
+    {
+      id: 'call2',
+      name: 'Direct Call (Line 2)',
+      subtitle: '+91 72388 29132',
+      icon: PhoneIcon,
+      bgColor: 'bg-teal-500',
+      actionText: 'CALL NOW',
+      actionStyle: 'bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-600 hover:text-white',
+      link: 'tel:+917238829132'
     },
     {
       id: 'whatsapp',
       name: 'WhatsApp Support',
-      subtitle: 'Instant Chat Helper',
+      subtitle: '+91 72388 29360',
       icon: WhatsAppIcon,
       bgColor: 'bg-emerald-600',
       actionText: 'CHAT NOW',
       actionStyle: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-600 hover:text-white',
-      link: 'https://wa.me/919876543210'
+      link: 'https://wa.me/917238829360'
     },
     {
       id: 'email',
       name: 'Email Desk',
-      subtitle: 'support@codeguru.com',
+      subtitle: 'info@codegurru.in',
       icon: EmailIcon,
       bgColor: 'bg-rose-500',
       actionText: 'SEND MAIL',
       actionStyle: 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-600 hover:text-white',
-      link: 'mailto:support@codeguru.com'
+      link: 'mailto:info@codegurru.in'
     },
     {
       id: 'telegram',
@@ -94,32 +104,32 @@ export default function ContactModal({ isOpen, onClose }) {
     {
       id: 'instagram',
       name: 'Instagram',
-      subtitle: '@codeguru_official',
+      subtitle: '@codegurru_official',
       icon: InstagramIcon,
       bgColor: 'bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600',
       actionText: 'FOLLOW US',
       actionStyle: 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-600 hover:text-white',
-      link: 'https://instagram.com'
+      link: 'https://instagram.com/codegurru_official'
     },
     {
       id: 'linkedin',
       name: 'LinkedIn',
-      subtitle: 'CodeGuru Network',
+      subtitle: 'CodeGurru Network',
       icon: LinkedInIcon,
       bgColor: 'bg-blue-600',
       actionText: 'CONNECT',
       actionStyle: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-600 hover:text-white',
-      link: 'https://linkedin.com'
+      link: 'https://linkedin.com/company/codegurru'
     },
     {
       id: 'twitter',
       name: 'Twitter (X)',
-      subtitle: '@codeguru_app',
+      subtitle: '@codegurru_in',
       icon: TwitterIcon,
       bgColor: 'bg-slate-900',
       actionText: 'FOLLOW',
       actionStyle: 'bg-slate-100 text-slate-800 border-slate-300 hover:bg-slate-900 hover:text-white',
-      link: 'https://twitter.com'
+      link: 'https://twitter.com/codegurru_in'
     },
     {
       id: 'facebook',
@@ -161,7 +171,7 @@ export default function ContactModal({ isOpen, onClose }) {
               </div>
               <div>
                 <h3 className="text-sm sm:text-base font-extrabold text-slate-900 font-heading tracking-tight flex items-center gap-2">
-                  Connect with CodeGuru
+                  Connect with CodeGurru
                   <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 rounded-full border border-amber-300/90 shadow-2xs">
                     24/7
                   </span>
@@ -190,8 +200,8 @@ export default function ContactModal({ isOpen, onClose }) {
               <a
                 key={item.id}
                 href={item.link}
-                target="_blank"
-                rel="noopener noreferrer"
+                target={item.link.startsWith('tel:') ? undefined : '_blank'}
+                rel={item.link.startsWith('tel:') ? undefined : 'noopener noreferrer'}
                 onClick={handleClose}
                 style={{ animationDelay: `${index * 30}ms` }}
                 className="p-3 rounded-2xl bg-white hover:bg-amber-50/30 border border-slate-200/90 hover:border-amber-400 shadow-2xs hover:shadow-xs flex items-center justify-between transition-all duration-200 group text-left active:scale-[0.98]"

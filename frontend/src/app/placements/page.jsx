@@ -1,25 +1,27 @@
 import TopPlacementSlider from '../../views/components/TopPlacementSlider';
 import CompanyLogoSlider from '../../views/components/CompanyLogoSlider';
 import ContactUsSection from '../../views/components/ContactUsSection';
+import { BUSINESS_CONFIG } from '../../config/business';
 
 export const metadata = {
-  title: 'Student Placements & Hiring Partners | CodeGuru Success Stories',
+  title: 'Student Placements & Hiring Partners | CodeGurru Success Stories',
   description:
-    'See our placed students working at MNCs like TCS, Wipro, Infosys, Paytm, and Amazon with high salary packages. CodeGuru guarantees 100% placement support.',
+    'Explore verified student placements at MNCs & startups from CodeGurru (UK VK Pvt. Ltd.) in Lucknow & Ayodhya with high salary packages up to 18.5 LPA.',
   keywords: [
-    'CodeGuru Placements',
-    'CodeGuru Student Salary',
-    'IT Job Placement Guarantee',
-    'CodeGuru Hiring Partners',
+    'CodeGurru Placements',
+    'CodeGurru Student Salary',
+    'IT Job Placement Guarantee Lucknow',
+    'CodeGurru Hiring Partners',
     'Top Placed Students IT Ayodhya',
+    'UK VK Pvt. Ltd. Placement Drives',
   ],
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/placements`,
+    canonical: 'https://codegurru.in/placements',
   },
   openGraph: {
-    title: 'CodeGuru Placements | 100% IT Job Placement Success Stories',
-    description: 'Explore verified student placement stories and corporate hiring networks at CodeGuru.',
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/placements`,
+    title: 'CodeGurru Placements | 100% IT Job Placement Success Stories',
+    description: 'Explore verified student placement stories and corporate hiring networks at CodeGurru (UK VK Pvt. Ltd.).',
+    url: 'https://codegurru.in/placements',
   },
 };
 

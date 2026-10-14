@@ -162,7 +162,7 @@ export const placementModel = {
         return data.data.map((item, idx) => ({
           id: item._id || item.id || idx,
           name: item.studentName || item.name || 'Student Achiever',
-          college: item.collegeName || item.college || 'CodeGuru Alumni',
+          college: item.collegeName || item.college || 'CodeGurru Alumni',
           photo: item.studentPhoto || item.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
           company: item.companyName || item.company || 'Top Tech MNC',
           companyLogo: item.companyLogo || 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?auto=format&fit=crop&w=100&q=80',

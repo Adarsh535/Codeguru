@@ -348,33 +348,33 @@ export default function BottomBarOtpSheet({
       {/* SECTION 1: BADHA CARD (BACKGROUND ELEVATED CARD / FRAME)        */}
       {/* ============================================================== */}
       <div 
-        className={`relative z-10 w-full max-w-[440px] mx-auto rounded-t-[36px] sm:rounded-[38px] p-2.5 sm:p-3 bg-gradient-to-b from-slate-200/90 via-slate-100/95 to-slate-200/90 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] border-t sm:border border-white/60 backdrop-blur-md transform transition-all duration-300 ease-out ${
+        className={`relative z-10 w-full max-w-[440px] mx-auto rounded-t-[36px] sm:rounded-[40px] p-2.5 sm:p-3.5 bg-gradient-to-b from-slate-200/95 via-slate-100/95 to-slate-200/95 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.45)] border-t sm:border border-white/70 backdrop-blur-xl transform transition-all duration-300 ease-out ${
           isClosing ? 'translate-y-full sm:scale-95 opacity-0' : 'translate-y-0 sm:scale-100 opacity-100'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* TOP DRAG HANDLE */}
+        {/* TOP DRAG HANDLE ON BADHA CARD */}
         <div className="pt-0.5 pb-2 flex justify-center cursor-pointer" onClick={handleClose}>
-          <div className="w-12 h-1.5 bg-slate-400/40 rounded-full hover:bg-slate-400 transition-colors" />
+          <div className="w-12 h-1.5 bg-slate-400/50 rounded-full hover:bg-slate-400 transition-colors" />
         </div>
 
         {/* ============================================================== */}
         {/* SECTION 2: CHHOTA CARD (INNER WHITE CARD WITH FULL OTP SYSTEM)  */}
         {/* ============================================================== */}
         <div 
-          className="relative w-full bg-white rounded-[28px] sm:rounded-[30px] shadow-[0_10px_30px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.05)] border border-slate-100/80 px-6 sm:px-7 pt-5 pb-6 overflow-hidden flex flex-col"
+          className="relative w-full bg-white rounded-[28px] sm:rounded-[30px] shadow-[0_12px_36px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100/80 px-6 sm:px-7 pt-5 pb-6 overflow-hidden flex flex-col"
           style={{
-            background: 'radial-gradient(circle at 50% 12%, rgba(249, 115, 22, 0.14) 0%, rgba(255, 255, 255, 0) 65%), #ffffff'
+            background: 'radial-gradient(circle at 50% 10%, rgba(249, 115, 22, 0.08) 0%, rgba(255, 255, 255, 0) 65%), #ffffff'
           }}
         >
-          {/* FLOATING DARK CIRCULAR CLOSE (X) BUTTON DIRECTLY ON OTP CARD */}
+          {/* FLOATING LIGHT CIRCULAR CLOSE (X) BUTTON */}
           <button
             type="button"
             onClick={handleClose}
-            className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-20 w-8 h-8 rounded-full bg-[#111827] hover:bg-black text-white flex items-center justify-center shadow-md border border-white/20 transition-all active:scale-90 cursor-pointer"
+            className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-20 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-all active:scale-90 cursor-pointer"
             title="Close"
           >
-            <CloseIcon className="!w-4 !h-4 text-white" />
+            <CloseIcon className="!w-4 !h-4 text-slate-700" />
           </button>
 
         {/* ---------------- ALREADY LOGGED IN VIEW ---------------- */}
@@ -429,28 +429,36 @@ export default function BottomBarOtpSheet({
           /* ---------------- STEP 1: WELCOME BACK (EXACT 1-TO-1 MATCH TO REFERENCE IMAGE) ---------------- */
           <form onSubmit={handleSendOtp} className="flex flex-col">
             
-            {/* HERO PHONE ICON SQUIRCLE */}
-            <div className="w-16 h-16 rounded-[22px] bg-gradient-to-br from-[#fb923c] via-[#f97316] to-[#ea580c] text-white flex items-center justify-center shadow-lg shadow-orange-500/35 mx-auto mt-1 mb-4">
-              <svg 
-                className="w-7 h-7 text-white" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white" 
-                strokeWidth="2.4" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              >
-                <rect x="5.5" y="2.5" width="13" height="19" rx="3.5" ry="3.5" />
-                <line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="3" />
-              </svg>
+            {/* SOCIAL PROOF AVATAR CLUSTER */}
+            <div className="flex items-center justify-center -space-x-2 pt-1 mb-2 select-none">
+              <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f97316] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                R
+              </span>
+              <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#8b5cf6] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                A
+              </span>
+              <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0ea5e9] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                S
+              </span>
+              <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#10b981] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                P
+              </span>
+              <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0f172a] text-white font-black text-[11px] sm:text-xs flex items-center justify-center ring-2 ring-white shadow-xs">
+                5k+
+              </span>
             </div>
 
+            {/* SOCIAL PROOF SUB-BANNER */}
+            <p className="text-center text-xs sm:text-[13px] text-slate-600 font-medium mb-4 select-none">
+              Join <strong className="text-orange-500 font-black">5000+</strong> students learning with us
+            </p>
+
             {/* HEADLINE & SUBTITLE */}
-            <div className="text-center mb-6">
-              <h2 className="text-[25px] sm:text-[27px] font-black text-slate-900 tracking-tight">
+            <div className="text-center mb-5">
+              <h2 className="text-[25px] sm:text-[27px] font-black text-slate-900 tracking-tight font-heading">
                 Welcome Back
               </h2>
-              <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
+              <p className="text-xs sm:text-[13.5px] font-medium text-slate-500 mt-1">
                 Enter your WhatsApp number to continue
               </p>
             </div>
@@ -462,53 +470,44 @@ export default function BottomBarOtpSheet({
               </div>
             )}
 
-            {/* MOBILE NUMBER INPUT */}
-            <div className="flex flex-col gap-1.5 mb-5">
-              <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
-                MOBILE NUMBER
-              </label>
-              <div className="bg-[#f8fafc] border border-slate-200/90 rounded-2xl px-4 py-3.5 flex items-center gap-3 focus-within:bg-white focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/15 transition-all">
-                <div className="flex items-center gap-1.5 text-xs font-black text-slate-700 select-none shrink-0">
-                  <span>IN</span>
-                  <span>+91</span>
-                </div>
-                <div className="h-5 w-[1px] bg-slate-200 shrink-0" />
-                <input
-                  ref={phoneInputRef}
-                  type="tel"
-                  inputMode="numeric"
-                  maxLength={10}
-                  value={phone}
-                  onChange={(e) => {
-                    const clean = e.target.value.replace(/[^0-9]/g, '');
-                    setPhone(clean);
-                    if (errorMsg) setErrorMsg('');
-                  }}
-                  placeholder="5151222032"
-                  className="w-full bg-transparent text-lg font-bold text-slate-900 placeholder-slate-300 outline-none tracking-wide"
-                />
-                {phone && (
-                  <button
-                    type="button"
-                    onClick={() => { setPhone(''); if (errorMsg) setErrorMsg(''); }}
-                    className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/80 transition-colors cursor-pointer shrink-0"
-                    title="Clear number"
-                  >
-                    <CloseIcon className="!w-4 !h-4" />
-                  </button>
-                )}
+            {/* PHONE NUMBER INPUT CARD */}
+            <div className="bg-white border border-slate-200/90 hover:border-slate-300 focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/10 rounded-2xl px-4 py-3 sm:py-3.5 flex items-center gap-3 transition-all mb-4 shadow-xs">
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-black text-slate-900 select-none shrink-0">
+                <span className="font-extrabold text-slate-900">IN</span>
+                <span className="font-extrabold text-slate-900">+91</span>
               </div>
+              <div className="h-5 w-[1px] bg-slate-200 shrink-0" />
+              <input
+                ref={phoneInputRef}
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                value={phone}
+                onChange={(e) => {
+                  const clean = e.target.value.replace(/[^0-9]/g, '');
+                  setPhone(clean);
+                  if (errorMsg) setErrorMsg('');
+                }}
+                placeholder="98765 43210"
+                className="w-full bg-transparent text-base sm:text-lg font-bold text-slate-900 placeholder:text-slate-400 outline-none tracking-wide"
+              />
+              {phone && (
+                <button
+                  type="button"
+                  onClick={() => { setPhone(''); if (errorMsg) setErrorMsg(''); }}
+                  className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+                  title="Clear number"
+                >
+                  <CloseIcon className="!w-4 !h-4" />
+                </button>
+              )}
             </div>
 
             {/* SUBMIT BUTTON */}
             <button
               type="submit"
               disabled={loading || phone.length < 10}
-              className={`w-full py-4 px-4 rounded-2xl text-base font-black text-white flex items-center justify-center gap-2 shadow-md shadow-orange-500/25 transition-all cursor-pointer ${
-                loading || phone.length < 10
-                  ? 'bg-orange-300 text-white/80 cursor-not-allowed shadow-none'
-                  : 'bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] active:scale-[0.98]'
-              }`}
+              className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-base sm:text-[17px] tracking-wide shadow-[0_8px_20px_rgba(249,115,22,0.28)] hover:shadow-[0_10px_24px_rgba(249,115,22,0.38)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -524,8 +523,8 @@ export default function BottomBarOtpSheet({
             </button>
 
             {/* TERMS & PRIVACY */}
-            <p className="text-[11px] sm:text-xs text-slate-400 text-center font-medium mt-4 sm:mt-5 leading-relaxed">
-              By continuing, you agree to our Terms of Service & Privacy Policy
+            <p className="text-[11px] sm:text-xs text-slate-400 text-center font-medium mt-4 sm:mt-5 leading-relaxed select-none">
+              By continuing, you agree to our Terms &amp; Privacy Policy
             </p>
           </form>
 

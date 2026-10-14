@@ -155,7 +155,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
   };
 
   // Generate UPI QR Code image URL dynamically
-  const upiQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=codeguru@upi%26pn=CodeGuru%20Academy%26am=${numericFee}%26cu=INR`;
+  const upiQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=codegurru@upi%26pn=CodeGurru%20Academy%26am=${numericFee}%26cu=INR`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md animate-fadeIn">
@@ -379,13 +379,13 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
                   <div className="inline-block p-3 bg-white border-2 border-slate-900 rounded-2xl shadow-md relative">
                     <img src={upiQrUrl} alt="UPI Payment QR Code" className="w-36 h-36 mx-auto rounded-lg" />
                     <span className="absolute -bottom-2 bg-amber-400 text-slate-950 text-[9px] font-black px-2 py-0.5 rounded-full border border-slate-900">
-                      CodeGuru Verified UPI
+                      CodeGurru Verified UPI
                     </span>
                   </div>
 
                   <div className="flex items-center justify-center gap-2 pt-1">
                     <span className="font-mono text-xs text-slate-800 font-bold bg-white px-3 py-1 rounded-lg border border-slate-200">
-                      codeguru@upi
+                      codegurru@upi
                     </span>
                     <button
                       type="button"

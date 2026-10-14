@@ -94,17 +94,17 @@ export default function Navbar({
           
           {/* LEFT SIDE: LOGO ICON, LOGO TEXT, AND LOCATION */}
           <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-shrink-0">
-            {/* Logo Icon (Image 1 Style: Squircle with Golden Border) */}
+            {/* Logo Icon */}
             <button
               suppressHydrationWarning
               onClick={handleBrandClick}
-              className="w-9 h-9 min-w-[36px] sm:w-11 sm:h-11 md:w-12 md:h-12 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-xl bg-[#090d16] border-1.5 border-amber-500/70 shadow-md shadow-amber-500/10 cursor-pointer hover:scale-105 active:scale-95 transition-all p-0.5"
-              title="CodeGuru Home"
+              className="w-8 h-8 min-w-[32px] sm:w-11 sm:h-11 md:w-12 md:h-12 flex-shrink-0 flex items-center justify-center bg-transparent cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+              title="CodeGurru Home"
             >
               <img
                 src="/logo.png"
                 alt="CODE GURRU"
-                className="w-full h-full object-contain rounded-lg"
+                className="w-full h-full object-contain drop-shadow-xs"
                 onError={(e) => {
                   e.target.src = '/logo-icon.png';
                 }}
@@ -116,7 +116,7 @@ export default function Navbar({
               <div
                 onClick={handleBrandClick}
                 className="flex items-center cursor-pointer min-w-0"
-                title="CodeGuru Home"
+                title="CodeGurru Home"
               >
                 <span className="text-[17px] min-[360px]:text-[19px] sm:text-xl md:text-2xl font-black tracking-tight font-heading leading-tight flex items-center gap-1 select-none">
                   <span className="text-slate-900">CODE</span>
@@ -178,6 +178,24 @@ export default function Navbar({
             >
               Placements
             </Link>
+            <Link
+              href="/about"
+              onClick={() => setActiveTab && setActiveTab('about')}
+              className={`px-3 py-2 rounded-xl font-bold text-xs lg:text-sm transition-colors ${
+                pathname === '/about' ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:text-orange-600 hover:bg-slate-50'
+              }`}
+            >
+              About
+            </Link>
+            <Link
+              href="/contact"
+              onClick={() => setActiveTab && setActiveTab('contact')}
+              className={`px-3 py-2 rounded-xl font-bold text-xs lg:text-sm transition-colors ${
+                pathname === '/contact' ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:text-orange-600 hover:bg-slate-50'
+              }`}
+            >
+              Contact
+            </Link>
             {user && showMyBatch && (
               <Link
                 href="/my-batch"
@@ -199,45 +217,53 @@ export default function Navbar({
                 <button
                   suppressHydrationWarning
                   onClick={handleProfileClick}
-                  className="flex items-center justify-center gap-1 sm:gap-2 px-2 py-1 sm:px-4 sm:py-2 rounded-full border border-gray-200 text-slate-800 font-bold text-[9px] sm:text-sm bg-white hover:bg-gray-50 transition-colors shadow-xs cursor-pointer active:scale-95"
+                  className="flex items-center justify-center gap-1.5 sm:gap-2.5 pl-1.5 sm:pl-2 pr-2.5 sm:pr-3 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl bg-white border border-slate-200/90 border-l-[3.5px] border-l-orange-500 text-slate-800 shadow-2xs hover:shadow-xs transition-all cursor-pointer active:scale-95 group"
                   title="View Profile"
                 >
-                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-r from-orange-400 to-orange-600 text-white font-black flex items-center justify-center text-[10px] sm:text-xs">
+                  <span className="w-6 h-6 sm:w-7 sm:h-7 min-w-[24px] min-h-[24px] sm:min-w-[28px] sm:min-h-[28px] aspect-square rounded-lg sm:rounded-xl bg-orange-500 text-white font-black flex items-center justify-center text-xs sm:text-sm shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
                     {user.name?.[0] || 'U'}
                   </span>
-                  <span className="truncate max-w-[80px] sm:max-w-[120px]">{user.name}</span>
+                  <span className="font-extrabold text-slate-900 text-xs sm:text-sm capitalize tracking-tight truncate max-w-[75px] sm:max-w-[115px]">
+                    {user.name}
+                  </span>
                 </button>
 
                 <button
                   suppressHydrationWarning
                   onClick={handleLogout}
-                  className="p-1.5 sm:px-3 sm:py-2 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold text-[9px] sm:text-xs transition-colors flex items-center gap-1 cursor-pointer active:scale-95"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md shadow-red-500/30 hover:shadow-lg hover:shadow-red-500/40 flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0"
                   title="Logout"
                 >
-                  <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Logout</span>
+                  <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white stroke-[2.2]" />
                 </button>
               </div>
             ) : (
-              <>
+              <div className="inline-flex items-stretch rounded-full bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all duration-300 overflow-hidden flex-shrink-0 animate-glow-pulse">
+                {/* LOGIN BUTTON */}
                 <button
                   suppressHydrationWarning
                   onClick={onOpenLogin || onOpenContactModal}
-                  className="flex items-center justify-center gap-1 sm:gap-2 px-2 py-1 min-[360px]:px-2.5 min-[360px]:py-1.5 sm:px-5 sm:py-2 rounded-full border border-gray-200 text-slate-700 font-bold text-[10px] min-[360px]:text-xs sm:text-sm hover:bg-gray-50 transition-colors shadow-xs bg-white whitespace-nowrap active:scale-95 flex-shrink-0 cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 text-slate-800 hover:text-slate-950 hover:bg-slate-50 font-extrabold text-[11px] sm:text-sm transition-all duration-200 cursor-pointer active:scale-95 group"
+                  title="Student Login"
                 >
-                  <LogIn className="text-teal-600 w-3 h-3 min-[360px]:w-3.5 min-[360px]:h-3.5 sm:w-[18px] sm:h-[18px] flex-shrink-0" />
-                  <span>Login</span>
+                  <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-900 stroke-[2.3] group-hover:translate-x-0.5 transition-transform duration-200 shrink-0" />
+                  <span className="font-extrabold text-slate-900 tracking-tight">Login</span>
                 </button>
 
+                {/* REGISTER BUTTON */}
                 <button
                   suppressHydrationWarning
                   onClick={onOpenRegister || onOpenInquiryModal}
-                  className="flex items-center justify-center gap-1 sm:gap-2 px-2 py-1 min-[360px]:px-2.5 min-[360px]:py-1.5 sm:px-5 sm:py-2 rounded-full text-white font-bold text-[10px] min-[360px]:text-xs sm:text-sm bg-gradient-to-r from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 transition-all shadow-xs active:scale-95 whitespace-nowrap flex-shrink-0 cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-1.5 sm:py-2 bg-gradient-to-r from-orange-500 via-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-extrabold text-[11px] sm:text-sm transition-all duration-200 cursor-pointer active:scale-95 group relative overflow-hidden"
+                  title="New Registration"
                 >
-                  <UserPlus className="text-white w-3 h-3 min-[360px]:w-3.5 min-[360px]:h-3.5 sm:w-[18px] sm:h-[18px] flex-shrink-0" />
-                  <span>Register</span>
+                  {/* Subtle Light Shimmer Sweep Animation */}
+                  <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 animate-btn-shimmer pointer-events-none" />
+
+                  <UserPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white stroke-[2.3] group-hover:scale-110 group-hover:rotate-6 transition-transform duration-200 shrink-0 relative z-10" />
+                  <span className="font-extrabold text-white tracking-tight relative z-10">Register</span>
                 </button>
-              </>
+              </div>
             )}
           </div>
 

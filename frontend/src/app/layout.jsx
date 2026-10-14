@@ -1,33 +1,41 @@
 import '../index.css';
 import '../models/apiClient';
 import ClientShell from './ClientShell';
+import { BUSINESS_CONFIG } from '../config/business';
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://codegurru.in'),
   title: {
-    default: 'CodeGuru | Full Stack Web Development & IT Placement Academy',
-    template: '%s | CodeGuru Placement Academy',
+    default: 'CodeGurru | Best IT Training, Software Development & Laptop Repair',
+    template: '%s | CodeGurru (UK VK Pvt. Ltd.)',
   },
   description:
-    'CodeGuru is India’s premier IT learning & placement academy offering industry-aligned Full Stack Web Development (MERN, Java, Python), Cloud Computing, Data Science, and guaranteed placement drives.',
+    'CodeGurru (UK VK Pvt. Ltd.) is Uttar Pradesh’s premier tech hub founded by Kishan Pandey. Offering 100% placement IT bootcamps, custom software development & same-day laptop repair.',
   keywords: [
-    'CodeGuru',
-    'Code Guru Placement',
-    'Full Stack Web Development Course',
-    'MERN Stack Institute Ayodhya',
-    'Java Full Stack Training',
-    'Python Coding Academy',
-    'IT Job Placement Guarantee',
-    'Software Engineer Coaching',
-    'CodeGuru Learning Platform',
+    'CodeGurru',
+    'Code Gurru',
+    'UK VK Pvt. Ltd.',
+    'Kishan Pandey CodeGurru',
+    'Best IT Training Institute Lucknow',
+    'Full Stack Web Development Course Ayodhya',
+    'MERN Stack Coaching Lucknow',
+    'Python AI Machine Learning Course Uttar Pradesh',
+    'Laptop Repair in Lucknow',
+    'Laptop Repair in Ayodhya',
+    'Software Development Company in Lucknow',
+    'IT Job Placement Guarantee UP',
   ],
-  authors: [{ name: 'CodeGuru Academy', url: 'https://codeguru.com' }],
-  creator: 'CodeGuru Education',
-  publisher: 'CodeGuru Placement Services',
+  authors: [{ name: 'CodeGurru (UK VK Pvt. Ltd.)', url: 'https://codegurru.in' }],
+  creator: 'Kishan Pandey, Founder & CEO CodeGurru',
+  publisher: 'UK VK Pvt. Ltd.',
   formatDetection: {
-    email: false,
+    email: true,
     address: true,
     telephone: true,
+  },
+  icons: {
+    icon: '/logo.png?v=4',
+    apple: '/logo.png?v=4',
   },
   robots: {
     index: true,
@@ -43,17 +51,17 @@ export const metadata = {
     },
   },
   openGraph: {
-    title: 'CodeGuru | Full Stack Web Development & IT Placement Academy',
+    title: 'CodeGurru | Best IT Training, Software Development & Laptop Repair',
     description:
-      'Master Full Stack Development with live real-world projects, expert 1-on-1 mentorship, and 100% placement assistance at CodeGuru.',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-    siteName: 'CodeGuru Platform',
+      'CodeGurru (UK VK Pvt. Ltd.) delivers job-oriented IT training (MERN, Python AI, Java), custom software development, and rapid computer/laptop repair across Uttar Pradesh.',
+    url: 'https://codegurru.in',
+    siteName: 'CodeGurru (UK VK Pvt. Ltd.)',
     images: [
       {
         url: '/logo.png',
         width: 800,
         height: 600,
-        alt: 'CodeGuru IT Training & Placement Academy Logo',
+        alt: 'CodeGurru - IT Training, Software Development & Computer Repair',
       },
     ],
     locale: 'en_IN',
@@ -61,45 +69,125 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CodeGuru | Full Stack Web Development & IT Placement Academy',
+    title: 'CodeGurru | IT Training, Software Development & Laptop Repair',
     description:
-      'Learn Coding, Full Stack MERN, Java, and Python with Guaranteed Placement Support at CodeGuru.',
+      'Learn Coding, Full Stack MERN, Java, and Python with Guaranteed Placement Support at CodeGurru (UK VK Pvt. Ltd.).',
     images: ['/logo.png'],
-    creator: '@CodeGuruIndia',
+    creator: '@CodeGurru',
   },
   alternates: {
-    canonical: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+    canonical: 'https://codegurru.in',
   },
 };
 
 export default function RootLayout({ children }) {
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'EducationalOrganization',
-    name: 'CodeGuru Placement & Learning Platform',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-    logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/logo.png`,
-    sameAs: [
-      'https://facebook.com/codeguru',
-      'https://instagram.com/codeguru',
-      'https://linkedin.com/company/codeguru',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': 'https://codegurru.in/#organization',
+        name: BUSINESS_CONFIG.brandName,
+        legalName: BUSINESS_CONFIG.legalName,
+        alternateName: BUSINESS_CONFIG.alternateNames,
+        url: BUSINESS_CONFIG.urls.siteUrl,
+        logo: BUSINESS_CONFIG.urls.logo,
+        founder: {
+          '@type': 'Person',
+          name: BUSINESS_CONFIG.founder.name,
+          jobTitle: BUSINESS_CONFIG.founder.role,
+        },
+        contactPoint: [
+          {
+            '@type': 'ContactPoint',
+            telephone: BUSINESS_CONFIG.contact.primaryPhone,
+            contactType: 'customer support',
+            areaServed: 'IN',
+            availableLanguage: ['en', 'hi'],
+          },
+        ],
+        sameAs: [
+          BUSINESS_CONFIG.socialLinks.facebook,
+          BUSINESS_CONFIG.socialLinks.instagram,
+          BUSINESS_CONFIG.socialLinks.linkedin,
+          BUSINESS_CONFIG.socialLinks.youtube,
+        ],
+      },
+      {
+        '@type': 'EducationalOrganization',
+        '@id': 'https://codegurru.in/#ayodhya-campus',
+        name: `${BUSINESS_CONFIG.brandName} - Ayodhya Campus`,
+        parentOrganization: { '@id': 'https://codegurru.in/#organization' },
+        url: BUSINESS_CONFIG.urls.siteUrl,
+        telephone: BUSINESS_CONFIG.contact.primaryPhone,
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: BUSINESS_CONFIG.branches[0].streetAddress,
+          addressLocality: BUSINESS_CONFIG.branches[0].city,
+          addressRegion: BUSINESS_CONFIG.branches[0].state,
+          postalCode: BUSINESS_CONFIG.branches[0].postalCode,
+          addressCountry: BUSINESS_CONFIG.branches[0].country,
+        },
+        geo: {
+          '@type': 'GeoCoordinates',
+          latitude: BUSINESS_CONFIG.branches[0].geo.latitude,
+          longitude: BUSINESS_CONFIG.branches[0].geo.longitude,
+        },
+        openingHoursSpecification: [
+          {
+            '@type': 'OpeningHoursSpecification',
+            dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            opens: '10:00',
+            closes: '19:00',
+          },
+        ],
+      },
+      {
+        '@type': 'LocalBusiness',
+        '@id': 'https://codegurru.in/#localbusiness',
+        name: `${BUSINESS_CONFIG.brandName} - IT Training, Development & Computer Repair`,
+        parentOrganization: { '@id': 'https://codegurru.in/#organization' },
+        url: BUSINESS_CONFIG.urls.siteUrl,
+        telephone: BUSINESS_CONFIG.contact.primaryPhone,
+        priceRange: '₹₹',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: BUSINESS_CONFIG.branches[0].streetAddress,
+          addressLocality: BUSINESS_CONFIG.branches[0].city,
+          addressRegion: BUSINESS_CONFIG.branches[0].state,
+          postalCode: BUSINESS_CONFIG.branches[0].postalCode,
+          addressCountry: BUSINESS_CONFIG.branches[0].country,
+        },
+        geo: {
+          '@type': 'GeoCoordinates',
+          latitude: BUSINESS_CONFIG.branches[0].geo.latitude,
+          longitude: BUSINESS_CONFIG.branches[0].geo.longitude,
+        },
+        openingHoursSpecification: [
+          {
+            '@type': 'OpeningHoursSpecification',
+            dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            opens: '10:00',
+            closes: '19:00',
+          },
+        ],
+      },
+      {
+        '@type': 'WebSite',
+        '@id': 'https://codegurru.in/#website',
+        url: BUSINESS_CONFIG.urls.siteUrl,
+        name: BUSINESS_CONFIG.brandName,
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: `${BUSINESS_CONFIG.urls.siteUrl}/courses?search={search_term_string}`,
+          'query-input': 'required name=search_term_string',
+        },
+      },
     ],
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: 'Ayodhya',
-      addressRegion: 'Uttar Pradesh',
-      addressCountry: 'IN',
-    },
-    description:
-      'CodeGuru provides industry-standard IT software development training, full stack web development bootcamps, and 100% placement drive assistance.',
-    offers: {
-      '@type': 'Offer',
-      category: 'IT Software Training & Job Placement',
-    },
   };
 
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="en-IN" className="scroll-smooth" suppressHydrationWarning>
       <head>
         <meta
           httpEquiv="Content-Security-Policy"

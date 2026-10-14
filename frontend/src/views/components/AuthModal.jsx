@@ -359,159 +359,173 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'otp', onAuth
       {/* SECTION 1: BADHA CARD (BACKGROUND ELEVATED CARD / FRAME)        */}
       {/* ============================================================== */}
       <div
-        className="relative w-full max-w-[430px] rounded-[34px] sm:rounded-[38px] p-2.5 sm:p-3 bg-gradient-to-b from-slate-100/90 via-slate-200/80 to-slate-300/80 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.4)] backdrop-blur-xl border border-white/40 transition-all transform scale-100"
+        className="relative w-full max-w-[440px] rounded-[36px] sm:rounded-[40px] p-2.5 sm:p-3.5 bg-gradient-to-b from-slate-100/95 via-slate-200/90 to-slate-300/90 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.4)] backdrop-blur-xl border border-white/50 transition-all transform scale-100"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* TOP SHEET PULL BAR */}
-        <div className="w-12 h-1.5 bg-slate-400/40 rounded-full mx-auto mt-1 mb-2" />
+        {/* TOP SHEET PULL BAR ON BADHA CARD */}
+        <div className="w-12 h-1.5 bg-slate-400/50 rounded-full mx-auto mt-0.5 mb-2.5" />
 
         {/* ============================================================== */}
         {/* SECTION 2: CHHOTA CARD (INNER WHITE CARD WITH FULL OTP SYSTEM)  */}
         {/* ============================================================== */}
-        <div className="relative w-full bg-white rounded-[28px] sm:rounded-[30px] shadow-[0_12px_36px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden border border-slate-100/80 flex flex-col">
-
-          {/* FLOATING DARK CIRCULAR CLOSE (X) BUTTON ON OTP CARD */}
+        <div
+          className="relative w-full bg-white rounded-[28px] sm:rounded-[30px] shadow-[0_12px_36px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden border border-slate-100/80 p-6 sm:p-7 flex flex-col"
+          style={{
+            background: 'radial-gradient(circle at 50% 10%, rgba(249, 115, 22, 0.08) 0%, rgba(255, 255, 255, 0) 65%), #ffffff'
+          }}
+        >
+          {/* FLOATING LIGHT CIRCULAR CLOSE (X) BUTTON */}
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-20 w-8 h-8 rounded-full bg-[#111827] hover:bg-black text-white flex items-center justify-center shadow-md border border-white/20 transition-all active:scale-90 cursor-pointer"
+            className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-all active:scale-90 cursor-pointer"
             title="Close modal"
           >
-            <CloseIcon className="!w-4 !h-4 text-white" />
+            <CloseIcon className="!w-4 !h-4 text-slate-700" />
           </button>
 
-          {/* TOP GLOW ACCENT BACKGROUND */}
-          <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-transparent pointer-events-none" />
+        {/* MAIN INNER CONTENT CONTAINER */}
+        <div className="relative z-10 w-full flex flex-col items-center">
 
-          {/* MAIN INNER CONTENT CONTAINER */}
-          <div className="relative z-10 px-5 pt-8 pb-6 sm:px-7 sm:pt-9 sm:pb-7 flex flex-col items-center">
-
-            {/* SUCCESS VIEW */}
-            {isSuccess ? (
-              <div className="py-8 text-center flex flex-col items-center gap-3 animate-fadeIn">
-                <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center shadow-md animate-bounce">
-                  <CheckCircleRoundedIcon className="!w-10 !h-10 text-emerald-500" />
-                </div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">
-                  Welcome to CodeGuru!
-                </h3>
-                <p className="text-xs text-slate-500 max-w-xs">
-                  Your phone has been verified. Taking you to your dashboard...
-                </p>
+          {/* SUCCESS VIEW */}
+          {isSuccess ? (
+            <div className="py-8 text-center flex flex-col items-center gap-3 animate-fadeIn">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center shadow-md animate-bounce">
+                <CheckCircleRoundedIcon className="!w-10 !h-10 text-emerald-500" />
               </div>
-            ) : authMethod === 'otp' ? (
-              /* ============================================================ */
-              /* OTP FLOW: PHONE INPUT / VERIFY OTP                          */
-              /* ============================================================ */
-              <>
-                {/* AMBER SQUIRCLE APP ICON */}
-                <div className="w-[68px] h-[68px] sm:w-[72px] sm:h-[72px] rounded-[22px] bg-gradient-to-br from-[#ffb422] to-[#f97316] flex items-center justify-center shadow-[0_10px_25px_rgba(249,115,22,0.35)] mb-4 transform hover:scale-105 transition-all">
-                  <SmartphoneRoundedIcon className="!w-9 !h-9 text-white drop-shadow-sm" />
-                </div>
+              <h3 className="text-xl font-black text-slate-900 tracking-tight">
+                Welcome to CodeGurru!
+              </h3>
+              <p className="text-xs text-slate-500 max-w-xs">
+                Your phone has been verified. Taking you to your dashboard...
+              </p>
+            </div>
+          ) : authMethod === 'otp' ? (
+            /* ============================================================ */
+            /* OTP FLOW: PHONE INPUT / VERIFY OTP                          */
+            /* ============================================================ */
+            <>
+              {/* SOCIAL PROOF AVATAR CLUSTER */}
+              <div className="flex items-center justify-center -space-x-2 pt-1 mb-2 select-none">
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f97316] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                  R
+                </span>
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#8b5cf6] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                  A
+                </span>
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0ea5e9] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                  S
+                </span>
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#10b981] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                  P
+                </span>
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0f172a] text-white font-black text-[11px] sm:text-xs flex items-center justify-center ring-2 ring-white shadow-xs">
+                  5k+
+                </span>
+              </div>
 
-                {/* HEADING & SUBTITLE */}
-                <h2 className="text-2xl sm:text-[26px] font-black tracking-tight text-slate-900 text-center mb-1 font-heading">
-                  {step === 'phone' ? 'Welcome Back' : 'Verify Code'}
-                </h2>
-                <p className="text-xs sm:text-[13px] text-slate-500 text-center mb-6 font-medium">
-                  {step === 'phone' ? (
-                    'Enter your WhatsApp number to continue'
-                  ) : (
-                    <span className="flex items-center justify-center gap-1.5 flex-wrap">
-                      <span>Code sent to</span>
-                      <strong className="text-slate-800 font-bold">+91 {phone}</strong>
+              {/* SOCIAL PROOF SUB-BANNER */}
+              <p className="text-center text-xs sm:text-[13px] text-slate-600 font-medium mb-4 select-none">
+                Join <strong className="text-orange-500 font-black">5000+</strong> students learning with us
+              </p>
+
+              {/* HEADING & SUBTITLE */}
+              <h2 className="text-2xl sm:text-[27px] font-black tracking-tight text-slate-900 text-center mb-1 font-heading">
+                {step === 'phone' ? 'Welcome Back' : 'Verify Code'}
+              </h2>
+              <p className="text-xs sm:text-[13.5px] text-slate-500 text-center mb-5 font-medium">
+                {step === 'phone' ? (
+                  'Enter your WhatsApp number to continue'
+                ) : (
+                  <span className="flex items-center justify-center gap-1.5 flex-wrap">
+                    <span>Code sent to</span>
+                    <strong className="text-slate-800 font-bold">+91 {phone}</strong>
+                    <button
+                      type="button"
+                      onClick={() => { setStep('phone'); setErrorMessage(''); }}
+                      className="text-orange-600 hover:text-orange-700 font-bold inline-flex items-center gap-0.5 ml-1 text-xs underline cursor-pointer"
+                    >
+                      <EditRoundedIcon className="!w-3 !h-3" /> Edit
+                    </button>
+                  </span>
+                )}
+              </p>
+
+              {/* ERROR ALERT */}
+              {errorMessage && (
+                <div className="w-full mb-4 px-3.5 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-semibold flex items-center gap-2 animate-fadeIn">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              {/* SUCCESS ALERT (E.G. OTP SENT) */}
+              {successMessage && !errorMessage && (
+                <div className="w-full mb-4 px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold flex items-center gap-2 animate-fadeIn">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                  <span>{successMessage}</span>
+                </div>
+              )}
+
+              {/* STEP 1: PHONE NUMBER FORM */}
+              {step === 'phone' && (
+                <form onSubmit={handleSendOtp} className="w-full flex flex-col">
+                  {/* INPUT FIELD CONTAINER */}
+                  <div className="relative flex items-center bg-white hover:border-slate-300 focus-within:border-orange-500 rounded-2xl border border-slate-200/90 focus-within:ring-4 focus-within:ring-orange-500/10 transition-all px-4 py-3 sm:py-3.5 mb-4 shadow-xs">
+                    {/* COUNTRY CODE PILL */}
+                    <div className="flex items-center gap-1.5 text-slate-900 font-black text-sm select-none shrink-0">
+                      <span className="font-extrabold text-slate-900">IN</span>
+                      <span className="font-extrabold text-slate-900">+91</span>
+                    </div>
+                    <div className="h-5 w-[1px] bg-slate-200 mx-3 shrink-0" />
+                    {/* PHONE NUMBER INPUT */}
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      value={phone}
+                      onChange={handlePhoneChange}
+                      placeholder="98765 43210"
+                      maxLength={10}
+                      autoFocus
+                      className="w-full bg-transparent text-base sm:text-lg font-bold text-slate-900 tracking-wider placeholder:text-slate-400 placeholder:font-normal focus:outline-none"
+                    />
+                    {phone && (
                       <button
                         type="button"
-                        onClick={() => { setStep('phone'); setErrorMessage(''); }}
-                        className="text-amber-600 hover:text-amber-700 font-bold inline-flex items-center gap-0.5 ml-1 text-xs underline cursor-pointer"
+                        onClick={() => { setPhone(''); setErrorMessage(''); }}
+                        className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+                        title="Clear number"
                       >
-                        <EditRoundedIcon className="!w-3 !h-3" /> Edit
+                        <CloseIcon className="!w-4 !h-4" />
                       </button>
-                    </span>
-                  )}
-                </p>
-
-                {/* ERROR ALERT */}
-                {errorMessage && (
-                  <div className="w-full mb-4 px-3.5 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-semibold flex items-center gap-2 animate-fadeIn">
-                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0" />
-                    <span>{errorMessage}</span>
+                    )}
                   </div>
-                )}
 
-                {/* SUCCESS ALERT (E.G. OTP SENT) */}
-                {successMessage && !errorMessage && (
-                  <div className="w-full mb-4 px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold flex items-center gap-2 animate-fadeIn">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                    <span>{successMessage}</span>
-                  </div>
-                )}
+                  {/* SUBMIT ACTION BUTTON */}
+                  <button
+                    type="submit"
+                    disabled={loading || phone.length !== 10}
+                    className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-base sm:text-[17px] tracking-wide shadow-[0_8px_20px_rgba(249,115,22,0.28)] hover:shadow-[0_10px_24px_rgba(249,115,22,0.38)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Submitting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Submit</span>
+                        <ArrowForwardRoundedIcon className="!w-5 !h-5" />
+                      </>
+                    )}
+                  </button>
 
-                {/* STEP 1: PHONE NUMBER FORM */}
-                {step === 'phone' && (
-                  <form onSubmit={handleSendOtp} className="w-full flex flex-col gap-4">
-                    {/* INPUT FIELD CONTAINER */}
-                    <div className="w-full text-left">
-                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-2 pl-1">
-                        MOBILE NUMBER
-                      </label>
-                      <div className="relative flex items-center bg-[#f8fafc] hover:bg-[#f1f5f9] focus-within:bg-white rounded-2xl border border-slate-200/90 focus-within:border-amber-400 focus-within:ring-4 focus-within:ring-amber-500/15 transition-all p-1">
-                        {/* COUNTRY CODE PILL */}
-                        <div className="flex items-center gap-1 px-3.5 py-2.5 text-slate-700 font-black text-sm select-none border-r border-slate-200">
-                          <span className="text-slate-800">IN +91</span>
-                        </div>
-                        {/* PHONE NUMBER INPUT */}
-                        <input
-                          type="tel"
-                          inputMode="numeric"
-                          value={phone}
-                          onChange={handlePhoneChange}
-                          placeholder="9876543210"
-                          maxLength={10}
-                          autoFocus
-                          className="w-full py-2.5 px-3.5 bg-transparent text-base sm:text-lg font-bold text-slate-900 tracking-wider placeholder:text-slate-300 placeholder:font-normal focus:outline-none"
-                        />
-                        {phone && (
-                          <button
-                            type="button"
-                            onClick={() => { setPhone(''); setErrorMessage(''); }}
-                            className="p-1 mr-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/80 transition-colors cursor-pointer shrink-0"
-                            title="Clear number"
-                          >
-                            <CloseIcon className="!w-4 !h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* SUBMIT ACTION BUTTON */}
-                    <button
-                      type="submit"
-                      disabled={loading || phone.length !== 10}
-                      className="w-full mt-1 py-3.5 sm:py-4 px-6 rounded-2xl bg-gradient-to-r from-[#ffb422] to-[#f97316] hover:from-[#f59e0b] hover:to-[#ea580c] active:scale-[0.99] text-white font-black text-sm sm:text-base tracking-wide shadow-[0_8px_20px_rgba(249,115,22,0.35)] hover:shadow-[0_10px_26px_rgba(249,115,22,0.45)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
-                    >
-                      {loading ? (
-                        <>
-                          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          <span>Submitting...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Submit</span>
-                          <ArrowForwardRoundedIcon className="!w-5 !h-5" />
-                        </>
-                      )}
-                    </button>
-
-                    {/* LEGAL FOOTER DISCLAIMER */}
-                    <p className="text-[11px] text-slate-400 text-center leading-relaxed mt-1 px-2 font-medium">
-                      By continuing, you agree to our{' '}
-                      <span className="text-slate-600 font-semibold hover:underline cursor-pointer">Terms of Service</span>
-                      {' '}&amp;{' '}
-                      <span className="text-slate-600 font-semibold hover:underline cursor-pointer">Privacy Policy</span>
-                    </p>
-                  </form>
-                )}
+                  {/* TERMS & PRIVACY */}
+                  <p className="text-[11px] sm:text-xs text-slate-400 text-center font-medium mt-4 sm:mt-5 leading-relaxed select-none">
+                    By continuing, you agree to our Terms &amp; Privacy Policy
+                  </p>
+                </form>
+              )}
 
                 {/* STEP 2: VERIFY OTP FORM */}
                 {step === 'verify' && (

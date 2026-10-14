@@ -10,18 +10,22 @@ import OurBranchesSection from '../views/components/OurBranchesSection';
 import ContactUsSection from '../views/components/ContactUsSection';
 
 export const metadata = {
-  title: 'CodeGuru | Home - Premier IT Software Training & Placement Institute',
+  title: 'CodeGurru | Best IT Training, Software Development & Laptop Repair',
   description:
-    'Welcome to CodeGuru! Learn Full Stack MERN Development, Java, Python, and get placed in top IT MNCs with our 100% placement support.',
+    'CodeGurru (UK VK Pvt. Ltd.) is Uttar Pradesh’s top IT ecosystem founded by Kishan Pandey. Offering 100% placement IT courses, custom software & laptop repair in Lucknow & Ayodhya.',
   keywords: [
-    'CodeGuru Home',
-    'IT Training Institute',
+    'CodeGurru',
+    'Code Gurru',
+    'UK VK Pvt. Ltd.',
+    'Kishan Pandey CodeGurru',
+    'IT Training Institute Lucknow',
     'Best Full Stack Course Ayodhya',
-    'Software Training Ayodhya',
-    'Code Guru Placements',
+    'Software Training Uttar Pradesh',
+    'Laptop Repair Lucknow',
+    'CodeGurru Placements',
   ],
   alternates: {
-    canonical: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+    canonical: 'https://codegurru.in',
   },
 };
 

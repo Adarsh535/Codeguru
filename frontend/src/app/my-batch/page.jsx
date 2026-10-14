@@ -1,12 +1,12 @@
 import MyBatchPage from '../../views/pages/MyBatchPage';
 
 export const metadata = {
-  title: 'My Batch Portal | CodeGuru Student Portal & Schedule',
+  title: 'My Batch Portal | CodeGurru Student Portal & Schedule',
   description:
-    'Access your enrolled CodeGuru student batch, live classes schedule, assignment submissions, mentor support, and course progress.',
+    'Access your enrolled CodeGurru student batch, live classes schedule, assignment submissions, mentor support, and course progress.',
   keywords: [
-    'CodeGuru My Batch',
-    'Student Portal CodeGuru',
+    'CodeGurru My Batch',
+    'Student Portal CodeGurru',
     'Batch Schedule',
     'Enrolled Student Dashboard',
   ],

@@ -1,24 +1,26 @@
 import CategoryNavbar from '../../views/components/CategoryNavbar';
+import { BUSINESS_CONFIG } from '../../config/business';
 
 export const metadata = {
-  title: 'Courses Catalog | CodeGuru Full Stack, Java, Python & Cloud Courses',
+  title: 'Job-Oriented IT Courses in Lucknow & Ayodhya | CodeGurru',
   description:
-    'Explore CodeGuru’s job-ready IT courses: MERN Full Stack, Java Enterprise, Python Data Science, React Native, and DevOps with guaranteed placement drives.',
+    'Explore CodeGurru’s (UK VK Pvt. Ltd.) job-ready IT courses: MERN Stack, Python AI/ML, Java, C++ & DSA, React.js, and Robotics with 100% placement support.',
   keywords: [
-    'CodeGuru Courses',
-    'Full Stack Web Development Course',
-    'MERN Stack Course',
-    'Java Full Stack Certification',
-    'Python Coding Classes',
+    'CodeGurru Courses',
+    'Full Stack Web Development Course Lucknow',
+    'MERN Stack Course Ayodhya',
+    'Python AI Machine Learning Course Uttar Pradesh',
+    'C++ DSA Coding Classes Lucknow',
+    'Java SpringBoot Coaching UP',
     'Software Engineer Bootcamp',
   ],
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/courses`,
+    canonical: 'https://codegurru.in/courses',
   },
   openGraph: {
-    title: 'CodeGuru Courses | Master Software Engineering & Full Stack Web Dev',
-    description: 'Explore live hands-on IT courses designed by industry experts with guaranteed placement drives.',
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/courses`,
+    title: 'CodeGurru Courses | Master Software Engineering & Full Stack Web Dev',
+    description: 'Explore live hands-on IT courses designed by industry experts with guaranteed placement drives by UK VK Pvt. Ltd.',
+    url: 'https://codegurru.in/courses',
   },
 };
 
@@ -26,35 +28,21 @@ export default function CoursesPage({ onOpenContactModal, onOpenEnrollModal }) {
   const courseJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    itemListElement: [
-      {
-        '@type': 'Course',
-        name: 'Full Stack Web Development (MERN)',
-        description: 'Comprehensive Full Stack Web Development course covering React, Node.js, Express, MongoDB, and Next.js.',
-        provider: {
-          '@type': 'Organization',
-          name: 'CodeGuru Academy',
-        },
+    itemListElement: BUSINESS_CONFIG.courses.map((courseName, idx) => ({
+      '@type': 'Course',
+      position: idx + 1,
+      name: courseName,
+      description: `Job-oriented practical certification in ${courseName} offered by CodeGurru (UK VK Pvt. Ltd.) with live projects and 100% placement support.`,
+      provider: {
+        '@type': 'EducationalOrganization',
+        name: 'CodeGurru Academy (UK VK Pvt. Ltd.)',
+        sameAs: 'https://codegurru.in',
       },
-      {
-        '@type': 'Course',
-        name: 'Java Full Stack Software Engineering',
-        description: 'Master Core & Advanced Java, Spring Boot, Microservices, and SQL/NoSQL databases with live projects.',
-        provider: {
-          '@type': 'Organization',
-          name: 'CodeGuru Academy',
-        },
+      hasCourseInstance: {
+        '@type': 'CourseInstance',
+        courseMode: ['Onsite', 'Blended'],
       },
-      {
-        '@type': 'Course',
-        name: 'Python Data Science & AI',
-        description: 'Learn Python programming, Data Analysis, Machine Learning, and AI fundamentals with 1-on-1 mentorship.',
-        provider: {
-          '@type': 'Organization',
-          name: 'CodeGuru Academy',
-        },
-      },
-    ],
+    })),
   };
 
   return (

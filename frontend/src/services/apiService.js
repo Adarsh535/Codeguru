@@ -42,7 +42,7 @@ export const apiService = {
   getPlacements: () => placementModel.getPlacements(),
 
   /**
-   * API: Fetch CodeGuru Team Members & Mentors
+   * API: Fetch CodeGurru Team Members & Mentors
    * @route GET http://localhost:5000/api/team
    */
   getTeam: () => teamModel.getTeam(),

@@ -214,7 +214,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
                 </span>
               </div>
               <h1 className="text-xl sm:text-2xl font-black font-heading text-white tracking-tight">
-                {user?.name || 'CodeGuru Student'}
+                {user?.name || 'CodeGurru Student'}
               </h1>
               <p className="text-xs text-slate-300 font-medium">
                 {user?.email || 'student@codeguru.com'} • Active Student Account
@@ -380,7 +380,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase bg-amber-400/10 px-2.5 py-1 rounded-md border border-amber-400/20">
-                        Official CodeGuru Graduation Certificate
+                        Official CodeGurru Graduation Certificate
                       </span>
                       <h3 className="text-lg font-black text-white mt-2 font-heading">
                         {studentCert.course}
@@ -423,13 +423,13 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
 
                   {studentCert.status === 'Pending Approval' && (
                     <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-200 text-xs font-medium leading-relaxed">
-                      ⏳ <strong>Status: Processing / Waiting for Admin Approval:</strong> Your 6-month course duration is 100% complete! Your certificate has been submitted for CodeGuru Admin approval. Once Admin approves, your download button will become active immediately.
+                      ⏳ <strong>Status: Processing / Waiting for Admin Approval:</strong> Your 6-month course duration is 100% complete! Your certificate has been submitted for CodeGurru Admin approval. Once Admin approves, your download button will become active immediately.
                     </div>
                   )}
 
                   {studentCert.status === 'Approved' && (
                     <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 text-xs font-medium leading-relaxed">
-                      🎉 <strong>Approved & Issued:</strong> Congratulations! Your official CodeGuru Certificate of Achievement has been approved by Admin and is ready for download/printing.
+                      🎉 <strong>Approved & Issued:</strong> Congratulations! Your official CodeGurru Certificate of Achievement has been approved by Admin and is ready for download/printing.
                     </div>
                   )}
 
@@ -474,7 +474,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
                     <PictureAsPdfIcon className="text-rose-500" />
                     <span>Downloadable Study Notes & Cheatsheets</span>
                   </div>
-                  <p className="text-slate-500">Download official CodeGuru chapter PDF notes & code snippets.</p>
+                  <p className="text-slate-500">Download official CodeGurru chapter PDF notes & code snippets.</p>
                   <button onClick={() => alert('Downloading Batch Notes PDF...')} className="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-xl text-xs">
                     Download Notes PDF
                   </button>

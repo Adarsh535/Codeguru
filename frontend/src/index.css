@@ -310,3 +310,30 @@ html.dark .border-slate-100 {
 
 /* Continuous orbit spin without hover pause */
 
+/* Dual Action Capsule Shimmer & Glow Animation */
+@keyframes buttonShimmerSweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  35%, 100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+.animate-btn-shimmer {
+  animation: buttonShimmerSweep 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes capsulePulseGlow {
+  0%, 100% {
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+  }
+  50% {
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.22);
+  }
+}
+
+.animate-glow-pulse {
+  animation: capsulePulseGlow 3s ease-in-out infinite;
+}
+

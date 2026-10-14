@@ -106,7 +106,7 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
             <div className="w-7 h-7 xxs:w-8 xxs:h-8 rounded-full bg-white border border-slate-200/90 p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
               <img
                 src="/logo-icon.png"
-                alt="CodeGuru Mascot"
+                alt="CodeGurru Mascot"
                 className="w-full h-full object-contain rounded-full"
               />
             </div>

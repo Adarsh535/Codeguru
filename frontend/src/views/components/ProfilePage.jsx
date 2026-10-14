@@ -12,6 +12,8 @@ import HelpIcon from '@mui/icons-material/Help';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CallIcon from '@mui/icons-material/Call';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 
 export default function ProfilePage({ onOpenContactModal }) {
   const [user, setUser] = useState(null);
@@ -49,6 +51,31 @@ export default function ProfilePage({ onOpenContactModal }) {
     confirmPassword: ''
   });
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [callNotice, setCallNotice] = useState(null);
+
+  const handleCallSupport = (e, phone = '+917238829360') => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        navigator.clipboard.writeText(phone);
+      }
+    } catch (err) {}
+    setCallNotice(phone);
+    setTimeout(() => setCallNotice(null), 3500);
+    window.location.href = `tel:${phone}`;
+  };
+
+  const handleWhatsAppRedirect = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const url = 'https://wa.me/917238829360?text=Hello%20CodeGurru%2C%20I%20need%20support%20assistance';
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   const toggleTheme = () => {
     setIsDarkMode((prev) => {
@@ -209,14 +236,14 @@ export default function ProfilePage({ onOpenContactModal }) {
       {/* MODAL POPUPS FOR EACH POLICY & AUTH */}
       {activeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="bg-white rounded-3xl p-5 xxs:p-6 w-full max-w-md shadow-2xl border border-slate-100 relative max-h-[85vh] flex flex-col justify-between overflow-hidden">
+          <div className="bg-white rounded-3xl p-5 xxs:p-6 w-full max-w-lg sm:max-w-xl shadow-2xl border border-slate-100 relative max-h-[88vh] flex flex-col justify-between overflow-hidden">
             
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
               <h3 className="text-base xxs:text-lg font-black text-slate-900 font-heading">
                 {activeModal === 'auth'
                   ? authMode === 'login'
-                    ? 'Login to CodeGuru'
+                    ? 'Login to CodeGurru'
                     : 'Create New Account'
                   : menuItems.find((i) => i.id === activeModal)?.title || 'Settings'}
               </h3>
@@ -229,7 +256,7 @@ export default function ProfilePage({ onOpenContactModal }) {
             </div>
 
             {/* Modal Body */}
-            <div className="overflow-y-auto flex-1 pr-1 text-slate-700 text-xs xxs:text-sm space-y-3">
+            <div className="overflow-y-auto flex-1 pr-2 text-slate-700 text-xs xxs:text-sm space-y-4">
               {activeModal === 'auth' && (
                 <div>
                   {isSuccess ? (
@@ -287,38 +314,188 @@ export default function ProfilePage({ onOpenContactModal }) {
                 </div>
               )}
 
+              {/* 1. ABOUT US (PAGE-LENGTH DETAILED CONTENT) */}
               {activeModal === 'about' && (
-                <div className="space-y-2">
-                  <p className="font-semibold text-slate-800">
-                    Welcome to CodeGuru - India's leading coding & career placement academy!
-                  </p>
-                  <p className="text-slate-600 text-xs leading-relaxed">
-                    We empower students and working professionals with industry-ready software engineering, cloud computing, and full-stack development skills to crack top TECH CTC placements up to 50 LPA.
-                  </p>
-                </div>
-              )}
-
-              {activeModal === 'refund' && (
-                <div className="space-y-2">
-                  <p className="font-semibold text-slate-800">7-Day Money-Back Guarantee</p>
-                  <p className="text-slate-600 text-xs leading-relaxed">
-                    If you are not satisfied with any registered course module within 7 days of enrollment, you can submit a refund request for 100% full refund with zero questions asked.
-                  </p>
-                </div>
-              )}
-
-              {activeModal === 'settings' && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                    <span className="font-bold text-xs text-slate-800">Push Notifications</span>
-                    <input type="checkbox" defaultChecked className="toggle-checkbox accent-amber-500" />
+                <div className="space-y-4 text-xs xxs:text-[13px] text-slate-700 leading-relaxed pr-1">
+                  <div className="p-3.5 bg-indigo-50/80 border border-indigo-100 rounded-2xl">
+                    <h4 className="font-black text-indigo-950 text-sm mb-1">
+                      CodeGurru IT Training, Software Development &amp; Tech Academy
+                    </h4>
+                    <p className="text-indigo-800 text-xs font-medium">
+                      CodeGurru (UK VK Pvt. Ltd.) is an IT training, software development and computer repair company based in Uttar Pradesh, founded by Kishan Pandey. Providing 100% job-oriented bootcamps and enterprise technology services.
+                    </p>
                   </div>
-                  {/* WORKING DARK / LIGHT MODE TOGGLE SWITCH */}
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-indigo-600 flex items-center gap-1.5">
+                      <span>●</span> Who We Are &amp; Our Core Vision
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-indigo-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Bridging the Industry Gap:</strong> Established to eliminate the mismatch between standard university theory and modern high-scale software engineering requirements.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-indigo-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Comprehensive Tech Tracks:</strong> We provide rigorous, hands-on immersive bootcamps covering MERN Stack, Python AI/ML, Cloud DevOps, Java SpringBoot, and Android/iOS Development.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-indigo-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Proven Alumni Success:</strong> Over 5,000+ alumni have transitioned into prominent tech roles across leading product MNCs, unicorns, and high-growth startups with packages up to 50 LPA.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-indigo-600 flex items-center gap-1.5">
+                      <span>●</span> Key Training Pillars &amp; Methodology
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-indigo-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Industry-Vetted Curriculum:</strong> Curriculum modules updated quarterly in consultation with senior tech leads, engineering directors, and system architects.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-indigo-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Production-Grade Capstone Projects:</strong> Every student builds and ships 4+ full-stack web and mobile applications with live deployments, CI/CD pipelines, and cloud databases.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-indigo-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>1-on-1 Daily Mentorship:</strong> Direct access to senior software mentors for daily live code debugging, architecture reviews, and personalized learning guidance.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-indigo-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Rigorous Placement Preparation:</strong> In-depth Data Structures &amp; Algorithms (DSA) training, system design sessions, mock technical interviews, and resume building workshops.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-indigo-600 flex items-center gap-1.5">
+                      <span>●</span> Campus Infrastructure &amp; Contact
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-indigo-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Hi-Tech Learning Center:</strong> Centrally air-conditioned computer labs with dual-display workstations, dedicated gigabit fiber internet, and cafeteria.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-indigo-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Official Campus Address:</strong> Near Saket College Petrol Pump, Ayodhya, Uttar Pradesh.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-indigo-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Head Office &amp; Tech Center:</strong> Regional Tech Center, Lucknow, Uttar Pradesh 226012.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-indigo-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Student Helplines:</strong> +91 72388 29360 / +91 72388 29132 | <a href="mailto:info@codegurru.in" className="text-indigo-600 font-bold hover:underline">info@codegurru.in</a></span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* 2. REFUND POLICY (PAGE-LENGTH DETAILED CONTENT) */}
+              {activeModal === 'refund' && (
+                <div className="space-y-4 text-xs xxs:text-[13px] text-slate-700 leading-relaxed pr-1">
+                  <div className="p-3.5 bg-rose-50/80 border border-rose-100 rounded-2xl">
+                    <h4 className="font-black text-rose-950 text-sm mb-1">
+                      7-Day 100% Money-Back Guarantee
+                    </h4>
+                    <p className="text-rose-800 text-xs font-medium">
+                      We believe in absolute student satisfaction. If our training methodology does not meet your expectations, claim a 100% full refund within the first 7 days.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-rose-600 flex items-center gap-1.5">
+                      <span>●</span> Refund Eligibility Criteria
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>7-Day Window:</strong> Refund claims must be formally lodged within 7 calendar days of the official batch orientation/start date.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Attendance Threshold:</strong> The student must have attended no more than 25% of total live classroom or lab hours during the initial 7-day period.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Return of Physical Kits:</strong> Any issued student ID card, RFID pass, printed book modules, or hardware kits must be returned in good condition.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Original Enrollment Verification:</strong> The applicant must provide proof of original tuition payment and registered student identification number.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-rose-600 flex items-center gap-1.5">
+                      <span>●</span> Non-Refundable Situations
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Requests Beyond 7 Days:</strong> Any refund request submitted after 7 calendar days from batch commencement is strictly non-refundable under all circumstances.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Course Completion &amp; Certificates:</strong> Once any course module certification, test credentials, or placement drives have been accessed, refund rights are forfeited.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Disciplinary Suspensions:</strong> Students suspended or dismissed due to code of conduct violations or academic fraud are ineligible for tuition reimbursement.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-rose-600 flex items-center gap-1.5">
+                      <span>●</span> Refund Processing &amp; Disbursement
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Payment Channel:</strong> All approved refunds are transferred directly back to the original source method (Bank Account, UPI, or Credit/Debit Card).</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Turnaround Timeline:</strong> Approved claims are initiated within 48 hours and typically credit to your bank account within 5 to 7 working days.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Free Batch Rollover Alternative:</strong> Students may opt for a 1-time free batch transfer to upcoming cohorts if facing scheduling or academic conflicts.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>How to Apply:</strong> Email your registered Student ID to <a href="mailto:info@codegurru.in" className="text-rose-700 font-bold hover:underline">info@codegurru.in</a> or call our finance desk at +91 72388 29360.</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* 3. SETTINGS (INTERACTIVE CONTROLS + COMPREHENSIVE SETTINGS) */}
+              {activeModal === 'settings' && (
+                <div className="space-y-4 text-xs xxs:text-[13px] text-slate-700 leading-relaxed pr-1">
+                  <div className="p-3.5 bg-slate-100/90 border border-slate-200/80 rounded-2xl">
+                    <h4 className="font-black text-slate-900 text-sm mb-1">
+                      Account Preferences &amp; Platform Controls
+                    </h4>
+                    <p className="text-slate-600 text-xs font-medium">
+                      Customize your learning experience, notification channels, account security, and visual theme settings.
+                    </p>
+                  </div>
+
+                  {/* Visual Theme Switcher */}
                   <div className="flex items-center justify-between py-2 border-b border-slate-100">
                     <div className="flex flex-col">
-                      <span className="font-bold text-xs text-slate-800">App Theme</span>
-                      <span className="text-[10px] font-bold text-amber-600">
-                        {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+                      <span className="font-bold text-xs text-slate-900">App Theme Preference</span>
+                      <span className="text-[10px] font-semibold text-slate-500">
+                        {isDarkMode ? 'Dark Theme (Reduced Eye Strain)' : 'Light Theme (Classic Clean)'}
                       </span>
                     </div>
 
@@ -340,17 +517,47 @@ export default function ProfilePage({ onOpenContactModal }) {
                     </button>
                   </div>
 
-                  {/* CHANGE / CREATE NEW PASSWORD SECTION */}
-                  <div className="py-2 border-b border-slate-100 space-y-2.5">
+                  {/* Notification Channels */}
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-slate-700 flex items-center gap-1.5">
+                      <span>●</span> Notification Preferences
+                    </h5>
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-xs text-slate-900">WhatsApp Class Reminders</span>
+                          <span className="text-[10px] text-slate-500">Daily batch timings, lab notices, and schedule updates</span>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle-checkbox accent-emerald-600 w-4 h-4" />
+                      </div>
+                      <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-xs text-slate-900">Placement Drive Alerts</span>
+                          <span className="text-[10px] text-slate-500">Instant notifications for new recruitment drives and eligibility criteria</span>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle-checkbox accent-emerald-600 w-4 h-4" />
+                      </div>
+                      <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-xs text-slate-900">Weekly Performance Report</span>
+                          <span className="text-[10px] text-slate-500">Email digest summarizing attendance, project scores, and quiz ranks</span>
+                        </div>
+                        <input type="checkbox" defaultChecked className="toggle-checkbox accent-emerald-600 w-4 h-4" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Change Password Form */}
+                  <div className="py-2 border-t border-slate-100 space-y-2.5">
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
-                        <span className="font-bold text-xs text-slate-800">Account Security</span>
-                        <span className="text-[10px] font-semibold text-slate-400">Change or Create New Password</span>
+                        <span className="font-bold text-xs text-slate-900">Account Security</span>
+                        <span className="text-[10px] font-semibold text-slate-500">Change or Create New Password</span>
                       </div>
                       <button
                         type="button"
                         onClick={() => setShowPasswordForm(!showPasswordForm)}
-                        className="text-xs font-black text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                        className="text-xs font-black text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer border border-amber-200"
                       >
                         {showPasswordForm ? 'Hide' : 'Change Password'}
                       </button>
@@ -412,55 +619,362 @@ export default function ProfilePage({ onOpenContactModal }) {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between py-2">
-                    <span className="font-bold text-xs text-slate-800">App Version</span>
-                    <span className="text-xs text-slate-400 font-bold">v2.4.0</span>
+                  {/* App Version Info */}
+                  <div className="flex items-center justify-between py-2 border-t border-slate-100">
+                    <span className="font-bold text-xs text-slate-800">App Diagnostics</span>
+                    <span className="text-xs text-slate-500 font-bold">CodeGurru Engine v2.5.0 (Cloud Sync: OK)</span>
                   </div>
                 </div>
               )}
 
+              {/* 4. PRIVACY POLICY (PAGE-LENGTH DETAILED CONTENT) */}
               {activeModal === 'privacy' && (
-                <div className="space-y-2">
-                  <p className="font-semibold text-slate-800">Data Privacy & Security</p>
-                  <p className="text-slate-600 text-xs leading-relaxed">
-                    Your personal details, contact number, and academic records are 100% encrypted and protected under strict privacy protocols. We never sell or share your data with third parties.
-                  </p>
+                <div className="space-y-4 text-xs xxs:text-[13px] text-slate-700 leading-relaxed pr-1">
+                  <div className="p-3.5 bg-emerald-50/80 border border-emerald-100 rounded-2xl">
+                    <h4 className="font-black text-emerald-950 text-sm mb-1">
+                      Data Privacy &amp; Student Protection Policy
+                    </h4>
+                    <p className="text-emerald-800 text-xs font-medium">
+                      CodeGurru enforces strict enterprise security and data privacy protocols to protect student personal, academic, and payment records.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-emerald-600 flex items-center gap-1.5">
+                      <span>●</span> Information We Collect
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Identity &amp; Contact Details:</strong> Full legal name, phone number, WhatsApp contact, verified email address, and home city.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Academic Background:</strong> Degree, college name, branch, graduation year, and aggregate percentage scores for placement matching.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Learning Activity:</strong> Assignment submissions, project code commits, weekly quiz scores, and batch attendance logs.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Financial Records:</strong> Invoices, payment receipts, and transaction reference numbers (raw card/UPI PIN data is never captured).</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-emerald-600 flex items-center gap-1.5">
+                      <span>●</span> How We Use Your Information
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Classroom &amp; LMS Provisioning:</strong> Authenticating student profiles on portal dashboards and allocating lab workstation seats.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Direct Placement Submissions:</strong> Forwarding qualified student resumes and project portfolios to partner hiring HRs upon candidate approval.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Operational Communications:</strong> Delivering class rescheduling notices, test links, project deadlines, and fee receipts.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-emerald-600 flex items-center gap-1.5">
+                      <span>●</span> Zero-Spam Guarantee &amp; Security Protocols
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>No Data Selling:</strong> We strictly never sell, trade, or share your contact data with telemarketers or third-party advertising brokers.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>256-Bit SSL/TLS Encryption:</strong> All communications between your browser and our servers are encrypted via high-grade TLS protocols.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-emerald-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Student Data Rights:</strong> Students have the absolute right to view, modify, download, or delete their profile data by writing to <a href="mailto:info@codegurru.in" className="text-emerald-700 font-bold hover:underline">info@codegurru.in</a>.</span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               )}
 
+              {/* 5. CANCELLATION POLICY (PAGE-LENGTH DETAILED CONTENT) */}
               {activeModal === 'cancellation' && (
-                <div className="space-y-2">
-                  <p className="font-semibold text-slate-800">Easy Cancellation</p>
-                  <p className="text-slate-600 text-xs leading-relaxed">
-                    Course registrations and subscription plans can be cancelled anytime before batch commencement directly from your student portal or by contacting campus helpdesk.
-                  </p>
+                <div className="space-y-4 text-xs xxs:text-[13px] text-slate-700 leading-relaxed pr-1">
+                  <div className="p-3.5 bg-rose-50/80 border border-rose-100 rounded-2xl">
+                    <h4 className="font-black text-rose-950 text-sm mb-1">
+                      Batch Cancellation &amp; Deferral Policy
+                    </h4>
+                    <p className="text-rose-800 text-xs font-medium">
+                      Clear, flexible rules for course cancellations, batch freeze requests, and academic deferrals.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-rose-600 flex items-center gap-1.5">
+                      <span>●</span> Cancellation Prior to Batch Orientation
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Full 100% Refund:</strong> Cancel at least 24 hours prior to the batch orientation session to receive a full refund with zero deductions.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Free Seat Transfer:</strong> Alternatively, rollover your full tuition credit to any upcoming batch within the next 6 months at zero fee.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-rose-600 flex items-center gap-1.5">
+                      <span>●</span> Course Freeze &amp; Batch Deferral
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>College Exam Freeze:</strong> Enrolled students facing university semester exams or medical emergencies can pause their batch for up to 6 months.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Seamless Resumption:</strong> When ready to resume, rejoin from the exact same curriculum module in any parallel active batch.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>No Extra Charges:</strong> Batch deferral requests are granted free of cost once per registered student upon submitting written notice.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-rose-600 flex items-center gap-1.5">
+                      <span>●</span> Cancellation Process &amp; Key Conditions
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Cancellation Submission:</strong> Requests must be submitted via the student dashboard or handed in person at our Ayodhya Campus front desk.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Placement Cell Status:</strong> Formal cancellation of enrolment leads to immediate de-registration from the CodeGurru Placement Assistance network.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Helpline Support:</strong> For cancellation queries or emergency deferral requests, call our student desk at +91 72388 29360.</span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               )}
 
+              {/* 6. TERMS & CONDITIONS (PAGE-LENGTH DETAILED CONTENT) */}
               {activeModal === 'terms' && (
-                <div className="space-y-2">
-                  <p className="font-semibold text-slate-800">Terms of Service</p>
-                  <p className="text-slate-600 text-xs leading-relaxed">
-                    By accessing CodeGuru learning platform and offline campus facilities, you agree to abide by our student code of conduct, intellectual property rights, and placement assistance guidelines.
-                  </p>
+                <div className="space-y-4 text-xs xxs:text-[13px] text-slate-700 leading-relaxed pr-1">
+                  <div className="p-3.5 bg-amber-50/80 border border-amber-100 rounded-2xl">
+                    <h4 className="font-black text-amber-950 text-sm mb-1">
+                      Institutional Terms of Service &amp; Campus Code
+                    </h4>
+                    <p className="text-amber-800 text-xs font-medium">
+                      Please review the operational terms, academic standards, and campus rules governing student enrollment at CodeGurru Academy.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-amber-600 flex items-center gap-1.5">
+                      <span>●</span> 1. Academic Standards &amp; Attendance Rules
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-amber-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Minimum 80% Attendance:</strong> Students must maintain an attendance record of at least 80% to remain eligible for placement drives and course certification.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-amber-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Mandatory Capstones:</strong> Successful graduation requires completion of 4 end-to-end production projects and passing weekly evaluation quizzes.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-amber-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Academic Integrity:</strong> Plagiarism or submitting unauthorized code from third parties during exams will result in disqualification.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-amber-600 flex items-center gap-1.5">
+                      <span>●</span> 2. Campus &amp; Lab Guidelines
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-amber-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Equipment Care:</strong> High-end desktop workstations and campus fiber networking must be treated with care and used purely for coding activities.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-amber-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Zero-Tolerance Misconduct:</strong> CodeGurru enforces zero tolerance toward any harassment, ragging, or disruptive behavior within campus premises.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-amber-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Campus ID Mandatory:</strong> Students must carry physical or digital CodeGurru identity passes when entering offline labs.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-amber-600 flex items-center gap-1.5">
+                      <span>●</span> 3. Intellectual Property &amp; Legal Jurisdiction
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-amber-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Proprietary Curriculum:</strong> Lecture recordings, course slides, assessment tests, and internal repositories are the exclusive IP of CodeGurru.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-amber-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Placement Assistance Obligations:</strong> CodeGurru guarantees interview opportunities with hiring partners; final employment offers depend on student technical interview performance.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-amber-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Governing Law:</strong> All legal matters and disputes are subject to the exclusive jurisdiction of the civil courts of Ayodhya, Uttar Pradesh.</span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               )}
 
+              {/* 7. HELP & SUPPORT (PAGE-LENGTH DETAILED CONTENT) */}
               {activeModal === 'help' && (
-                <div className="space-y-3">
-                  <p className="font-semibold text-slate-800">Need Assistance?</p>
-                  <p className="text-slate-600 text-xs">
-                    Our student support team is available 24/7 to answer your queries regarding courses, fees, or placement drives.
-                  </p>
-                  <button
-                    onClick={() => {
-                      setActiveModal(null);
-                      onOpenContactModal();
-                    }}
-                    className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider transition-colors cursor-pointer"
-                  >
-                    Contact Support Team
-                  </button>
+                <div className="space-y-4 text-xs xxs:text-[13px] text-slate-700 leading-relaxed pr-1">
+                  <div className="p-3.5 bg-purple-50/80 border border-purple-100 rounded-2xl">
+                    <h4 className="font-black text-purple-950 text-sm mb-1">
+                      24/7 Student Helpdesk &amp; Support Cell
+                    </h4>
+                    <p className="text-purple-800 text-xs font-medium">
+                      We are always here to assist you with curriculum doubts, project debugging, batch rescheduling, and placement drives.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-purple-600 flex items-center gap-1.5">
+                      <span>●</span> Support Channels &amp; Assistance Desks
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-purple-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Technical Doubt Clearing:</strong> 1-on-1 mentor desks active Mon–Sat (10:00 AM – 7:00 PM) for real-time bug fixing and project code reviews.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-purple-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Placement &amp; Resume Help:</strong> Weekly resume polishing sessions, GitHub portfolio audits, and mock technical interview slots.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-purple-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Batch &amp; Timings Support:</strong> Assistance with batch scheduling, room allocations, class deferrals, and recording access.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-purple-600 flex items-center gap-1.5">
+                      <span>●</span> Direct Campus Coordinates
+                    </h5>
+                    <ul className="space-y-2 pl-1">
+                      <li className="flex items-start gap-2">
+                        <span className="text-purple-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Ayodhya Campus:</strong> Near Saket College Petrol Pump, Ayodhya, Uttar Pradesh.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-purple-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Lucknow Head Office:</strong> Regional Tech Center, Lucknow, Uttar Pradesh 226012.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-purple-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Working Hours:</strong> Mon–Sat 10:00 AM – 7:00 PM (Helplines 24/7 Active)</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-purple-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span>
+                          <strong>Direct Phone Lines:</strong>{' '}
+                          <button
+                            type="button"
+                            onClick={(e) => handleCallSupport(e, '+917238829360')}
+                            className="text-purple-700 font-bold hover:underline cursor-pointer inline-flex items-center gap-1 active:scale-95 transition-transform"
+                          >
+                            <CallIcon className="!w-3.5 !h-3.5 text-purple-600" />
+                            <span>+91 72388 29360</span>
+                          </button>{' '}
+                          /{' '}
+                          <button
+                            type="button"
+                            onClick={(e) => handleCallSupport(e, '+917238829132')}
+                            className="text-purple-700 font-bold hover:underline cursor-pointer inline-flex items-center gap-1 active:scale-95 transition-transform"
+                          >
+                            <CallIcon className="!w-3.5 !h-3.5 text-purple-600" />
+                            <span>+91 72388 29132</span>
+                          </button>
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-purple-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span>
+                          <strong>WhatsApp Desk:</strong>{' '}
+                          <button
+                            type="button"
+                            onClick={handleWhatsAppRedirect}
+                            className="text-emerald-700 font-bold hover:underline cursor-pointer inline-flex items-center gap-1 active:scale-95 transition-transform"
+                          >
+                            <WhatsAppIcon className="!w-3.5 !h-3.5 text-emerald-600" />
+                            <span>+91 7238829360 (Instant Support)</span>
+                          </button>
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-purple-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span><strong>Official Email Support:</strong> <a href="mailto:info@codegurru.in" className="text-purple-700 font-bold hover:underline">info@codegurru.in</a></span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Quick Action Buttons */}
+                  <div className="pt-2 space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => handleCallSupport(e, '+917238829360')}
+                        className="bg-purple-600 hover:bg-purple-700 active:scale-95 text-white font-black py-2.5 px-3 rounded-xl text-xs uppercase tracking-wider text-center transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer select-none"
+                        title="Click to Call +91 72388 29360"
+                      >
+                        <CallIcon className="!w-4 !h-4 text-white" />
+                        <span>Call Support</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleWhatsAppRedirect}
+                        className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black py-2.5 px-3 rounded-xl text-xs uppercase tracking-wider text-center transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer select-none"
+                        title="Click to Open WhatsApp Chat"
+                      >
+                        <WhatsAppIcon className="!w-4 !h-4 text-white" />
+                        <span>WhatsApp</span>
+                      </button>
+                    </div>
+
+                    {callNotice && (
+                      <div className="bg-purple-50 border border-purple-200 text-purple-900 px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between animate-fadeIn">
+                        <span className="flex items-center gap-1.5">
+                          <CallIcon className="!w-3.5 !h-3.5 text-purple-600 animate-pulse" />
+                          <span>Connecting / Copied: <strong>{callNotice}</strong></span>
+                        </span>
+                        <span className="text-[10px] bg-purple-200/80 text-purple-900 px-1.5 py-0.5 rounded font-black uppercase tracking-wider">Dialing</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -469,7 +983,7 @@ export default function ProfilePage({ onOpenContactModal }) {
             <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end">
               <button
                 onClick={() => setActiveModal(null)}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition-colors cursor-pointer"
               >
                 Close
               </button>

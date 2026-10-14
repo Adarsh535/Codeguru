@@ -2,7 +2,7 @@
  * ============================================================================
  * FRONTEND VISITOR TRACKER (frontend/src/utils/visitorTracker.js)
  * ============================================================================
- * Privacy-conscious client-side tracking service for CodeGuru website.
+ * Privacy-conscious client-side tracking service for CodeGurru website.
  * Manages stable UUID visitor IDs with localStorage & cookie fallback, tab session IDs,
  * automatic route change logging, active presence heartbeats, and unload beacon leave events.
  */
@@ -201,7 +201,7 @@ export async function trackPageView(pathname = '/') {
     const browser = detectBrowser();
     const os = detectOS();
     const referrer = document.referrer ? (document.referrer.includes(window.location.host) ? 'Direct' : document.referrer) : 'Direct';
-    const title = document.title || 'CodeGuru';
+    const title = document.title || 'CodeGurru';
     const url = window.location.href;
 
     const payload = {

@@ -146,15 +146,15 @@ export default function SkillsCircleSection({ onOpenContactModal }) {
             })}
           </div>
 
-          {/* CENTER IMAGE: CODEGURU GURU AVATAR (REPLACED GIRL PHOTO) */}
+          {/* CENTER IMAGE: CODEGURRU GURU AVATAR (REPLACED GIRL PHOTO) */}
           <div
             onClick={onOpenContactModal}
             className="relative w-[58%] h-[58%] rounded-full overflow-hidden flex items-center justify-center shadow-2xl border-4 border-amber-400/90 bg-slate-950 z-10 cursor-pointer group hover:scale-105 hover:border-amber-300 hover:shadow-[0_0_45px_rgba(245,158,11,0.4)] transition-all duration-300"
-            title="Click to Inquire with CodeGuru"
+            title="Click to Inquire with CodeGurru"
           >
             <img
               src="/images/codeguru-guru-logo.png"
-              alt="CodeGuru Master Guru"
+              alt="CodeGurru Master Guru"
               className="w-full h-full object-cover object-center transform scale-100 group-hover:scale-108 transition-transform duration-500"
             />
           </div>
