@@ -1,81 +1,98 @@
 /**
  * ============================================================================
- * SCRIPT: CREATE / SEED ADMIN USER (scripts/createAdmin.js)
+ * SCRIPT: CREATE / UPDATE ADMIN USER (scripts/createAdmin.js)
  * ============================================================================
- * Command-line script to create or update master admin credentials in MongoDB.
- *
  * Usage:
- *   node scripts/createAdmin.js [email] [password] [name]
- *   npm run seed:admin
+ *   node scripts/createAdmin.js --email admin@example.com --password YourSecurePassword123
  */
 
 import 'dotenv/config';
-import dns from 'dns';
-try { dns.setServers(['8.8.8.8', '1.1.1.1']); } catch (_) {}
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { Admin } from '../models/Admin.js';
-import { getSanitizedUri } from '../config/db.js';
 
-async function createOrUpdateAdmin() {
+function parseArgs() {
   const args = process.argv.slice(2);
-  const email = (args[0] || process.env.ADMIN_EMAIL || 'admin@codeguru.com').toLowerCase().trim();
-  const rawPassword = args[1] || process.env.ADMIN_PASSWORD || 'admin123';
-  const name = args[2] || 'Super Admin';
+  const parsed = {};
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--email' && args[i + 1]) {
+      parsed.email = args[i + 1];
+      i++;
+    } else if (args[i] === '--password' && args[i + 1]) {
+      parsed.password = args[i + 1];
+      i++;
+    } else if (args[i] === '--name' && args[i + 1]) {
+      parsed.name = args[i + 1];
+      i++;
+    } else if (args[i] === '--role' && args[i + 1]) {
+      parsed.role = args[i + 1];
+      i++;
+    }
+  }
+  return parsed;
+}
 
-  console.log('--------------------------------------------------');
-  console.log('🔐 CODEGURU ADMIN CREATION SCRIPT');
-  console.log('--------------------------------------------------');
+async function run() {
+  const { email, password, name = 'Master Admin', role = 'Master Admin' } = parseArgs();
 
-  const rawUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/codeguru_db';
-  const targetUri = getSanitizedUri(rawUri);
+  if (!email || !password) {
+    console.error('Error: Both --email and --password are strictly required.');
+    console.error('Usage: node scripts/createAdmin.js --email <email> --password <password> [--name <name>] [--role <role>]');
+    process.exit(1);
+  }
+
+  const cleanEmail = email.toLowerCase().trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(cleanEmail)) {
+    console.error('Error: Invalid email format.');
+    process.exit(1);
+  }
+
+  if (password.length < 8) {
+    console.error('Error: Password must be at least 8 characters long.');
+    process.exit(1);
+  }
+
+  const targetUri = process.env.MONGODB_URI;
+  if (!targetUri) {
+    console.error('Error: MONGODB_URI environment variable is required.');
+    process.exit(1);
+  }
 
   try {
-    console.log(`⏳ Connecting to MongoDB database (${targetUri.includes('127.0.0.1') ? 'Local' : 'Atlas Cloud'})...`);
-    await mongoose.connect(targetUri, {
-      serverSelectionTimeoutMS: 5000
-    });
-    console.log('✅ MongoDB connected successfully.');
+    console.log('Connecting to MongoDB...');
+    await mongoose.connect(targetUri, { serverSelectionTimeoutMS: 8000 });
 
-    const hashedPassword = await bcrypt.hash(rawPassword, 10);
-    const existingAdmin = await Admin.findOne({ email });
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const existing = await Admin.findOne({ email: cleanEmail });
 
-    if (existingAdmin) {
-      existingAdmin.name = name;
-      existingAdmin.password = hashedPassword;
-      existingAdmin.role = 'Master Admin';
-      await existingAdmin.save();
-      console.log(`🎉 Admin account UPDATED successfully!`);
+    if (existing) {
+      existing.name = name;
+      existing.password = hashedPassword;
+      existing.role = role;
+      existing.tokenVersion = (existing.tokenVersion || 0) + 1;
+      existing.isActive = true;
+      await existing.save();
+      console.log(`✅ Admin account '${cleanEmail}' updated successfully.`);
     } else {
       await Admin.create({
         name,
-        email,
+        email: cleanEmail,
         password: hashedPassword,
-        role: 'Master Admin'
+        role,
+        tokenVersion: 0,
+        isActive: true
       });
-      console.log(`🎉 Admin account CREATED successfully!`);
+      console.log(`✅ Admin account '${cleanEmail}' created successfully.`);
     }
 
-    console.log(`--------------------------------------------------`);
-    console.log(`📧 Email:    ${email}`);
-    console.log(`🔑 Password: [CONFIGURED SECURELY]`);
-    console.log(`👤 Name:     ${name}`);
-    console.log(`--------------------------------------------------`);
-
-  } catch (err) {
-    console.error('❌ Error creating admin user:', err.message);
-    if (err.message.includes('EBADNAME') || err.message.includes('connect ECONNREFUSED')) {
-      console.log('\n💡 HOW TO FIX THIS ERROR:');
-      console.log('1. Open file: backend/.env');
-      console.log('2. Find line: MONGODB_URI=mongodb+srv://av969998_db_user:xdtkojOhIUJwdp87@<CLUSTER_HOST>/codeguru_db');
-      console.log('3. Replace <CLUSTER_HOST> with your actual MongoDB Atlas cluster host (e.g. cluster0.abcde.mongodb.net)');
-      console.log('   (You can find your cluster address in MongoDB Atlas dashboard -> Database -> Connect -> Connect your application)');
-    }
-  } finally {
-    try { await mongoose.disconnect(); } catch (_) {}
-    console.log('👋 Database connection closed.');
+    await mongoose.disconnect();
     process.exit(0);
+  } catch (err) {
+    console.error('Error creating admin:', err.message);
+    try { await mongoose.disconnect(); } catch (_) {}
+    process.exit(1);
   }
 }
 
-createOrUpdateAdmin();
+run();

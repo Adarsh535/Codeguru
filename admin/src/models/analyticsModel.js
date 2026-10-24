@@ -6,7 +6,7 @@
  * Automatically injects Master Admin authorization token into request headers.
  */
 
-import { API_BASE } from './apiClient';
+import { API_BASE, getRealtimeTicket } from './apiClient';
 
 /**
  * Retrieve current active admin authentication token from sessionStorage
@@ -14,11 +14,12 @@ import { API_BASE } from './apiClient';
 function getAdminAuthHeaders() {
   const headers = { 'Content-Type': 'application/json' };
   try {
-    const raw = sessionStorage.getItem('codeguru_admin_session');
+    const raw = sessionStorage.getItem('codeguru_admin_session') || localStorage.getItem('codeguru_admin_session');
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed?.token) {
         headers['Authorization'] = `Bearer ${parsed.token}`;
+        headers['x-admin-token'] = parsed.token;
       }
       if (parsed?.email) {
         headers['x-admin-email'] = parsed.email;
@@ -62,6 +63,7 @@ export const analyticsModel = {
       const res = await fetch(`${API_BASE}/analytics/summary`, {
         method: 'GET',
         headers: getAdminAuthHeaders(),
+        credentials: 'include',
         cache: 'no-store'
       });
       const json = await res.json();
@@ -86,6 +88,7 @@ export const analyticsModel = {
       const res = await fetch(`${API_BASE}/analytics/daily?${queryParams.toString()}`, {
         method: 'GET',
         headers: getAdminAuthHeaders(),
+        credentials: 'include',
         cache: 'no-store'
       });
       const json = await res.json();
@@ -110,6 +113,7 @@ export const analyticsModel = {
       const res = await fetch(`${API_BASE}/analytics/top-pages?${queryParams.toString()}`, {
         method: 'GET',
         headers: getAdminAuthHeaders(),
+        credentials: 'include',
         cache: 'no-store'
       });
       const json = await res.json();
@@ -129,6 +133,7 @@ export const analyticsModel = {
       const res = await fetch(`${API_BASE}/analytics/realtime`, {
         method: 'GET',
         headers: getAdminAuthHeaders(),
+        credentials: 'include',
         cache: 'no-store'
       });
       const json = await res.json();
@@ -149,6 +154,7 @@ export const analyticsModel = {
       const res = await fetch(`${API_BASE}/analytics/insights?range=${range}`, {
         method: 'GET',
         headers: getAdminAuthHeaders(),
+        credentials: 'include',
         cache: 'no-store'
       });
       const json = await res.json();
@@ -168,25 +174,21 @@ export const analyticsModel = {
   subscribeStream: (onMessage, onStatusChange) => {
     if (typeof window === 'undefined') return () => {};
 
-    const token = getAdminAuthToken();
-    const email = getAdminEmail();
-    let streamUrl = `${API_BASE}/analytics/stream`;
-    const params = new URLSearchParams();
-    if (token) params.set('token', token);
-    if (email) params.set('adminEmail', email);
-
-    if (params.toString()) {
-      streamUrl += `?${params.toString()}`;
-    }
-
     let eventSource = null;
     let isSubscribed = true;
     let reconnectTimer = null;
 
-    const connect = () => {
+    const connect = async () => {
       if (!isSubscribed) return;
 
       try {
+        const ticket = await getRealtimeTicket();
+        if (!ticket) {
+          reconnectTimer = setTimeout(connect, 5000);
+          return;
+        }
+
+        const streamUrl = `${API_BASE}/analytics/stream?ticket=${encodeURIComponent(ticket)}`;
         eventSource = new EventSource(streamUrl);
 
         eventSource.onopen = () => {

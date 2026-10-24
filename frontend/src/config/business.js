@@ -31,8 +31,10 @@ export const BUSINESS_CONFIG = {
   urls: {
     siteUrl: 'https://codegurru.in',
     logo: 'https://codegurru.in/logo.png',
-    apiBase: 'https://369.codegurru.in/api'
+    apiBase: 'https://369.codegurru.in/api',
+    upiId: 'codegurru@upi'
   },
+  upiId: 'codegurru@upi',
 
   headOffice: {
     id: 'ayodhya-hq',
@@ -42,7 +44,7 @@ export const BUSINESS_CONFIG = {
     streetAddress: 'Near Saket College Petrol Pump',
     city: 'Ayodhya',
     state: 'Uttar Pradesh',
-    postalCode: '',
+    postalCode: '224123',
     country: 'IN',
     fullAddress: 'Near Saket College Petrol Pump, Ayodhya, Uttar Pradesh',
     phone: '+91 72388 29360, +91 72388 29132',
@@ -63,7 +65,7 @@ export const BUSINESS_CONFIG = {
       streetAddress: 'Near Saket College Petrol Pump',
       city: 'Ayodhya',
       state: 'Uttar Pradesh',
-      postalCode: '',
+      postalCode: '224123',
       country: 'IN',
       fullAddress: 'Near Saket College Petrol Pump, Ayodhya, Uttar Pradesh',
       phone: '+91 72388 29360, +91 72388 29132',

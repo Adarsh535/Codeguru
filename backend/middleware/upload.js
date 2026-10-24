@@ -33,6 +33,11 @@ const fileFilter = (req, file, cb) => {
     return cb(new Error('Invalid filename detected. Path traversal is forbidden.'), false);
   }
 
+  // Reject dangerous double extensions (AD-403)
+  if (/\.(php|phtml|exe|sh|bat|cmd|jsp|cgi|pl|py|svg)\./i.test(cleanFilename)) {
+    return cb(new Error('Invalid filename: Executable double extensions are forbidden.'), false);
+  }
+
   if (ALLOWED_MIMETYPES.includes(file.mimetype)) {
     cb(null, true);
   } else {

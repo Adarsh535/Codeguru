@@ -1,7 +1,7 @@
 import ProfilePage from '../../views/components/ProfilePage';
 
 export const metadata = {
-  title: 'Student Profile | CodeGurru Learning Account',
+  title: 'My Student Profile',
   description: 'Manage your CodeGurru account profile, enrolled batch details, certificates, and personal info.',
   robots: {
     index: false,

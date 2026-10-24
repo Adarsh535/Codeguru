@@ -1,31 +1,40 @@
+'use client';
+
 /**
  * ============================================================================
- * CONTROLLER LAYER: TEAM CONTROLLER (useTeamController.js)
+ * FRONTEND MVC: TEAM CONTROLLER (useTeamController.js)
  * ============================================================================
- * Custom hook handling team instructors fetching and slider navigation.
+ * Manages instructors, mentors, and team members state.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { teamModel } from '../models/teamModel';
 
 export function useTeamController() {
-  const [teamMembers, setTeamMembers] = useState([]);
+  const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const loadTeam = useCallback(async () => {
-    setLoading(true);
-    const data = await teamModel.getTeam();
-    setTeamMembers(data);
-    setLoading(false);
+  const fetchTeam = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await teamModel.getTeam();
+      if (Array.isArray(data) && data.length > 0) {
+        setTeam(data);
+      }
+    } catch (err) {
+      console.warn('[useTeamController] Error loading team:', err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    loadTeam();
-  }, [loadTeam]);
+    fetchTeam();
+  }, [fetchTeam]);
 
   return {
-    teamMembers,
+    team,
     loading,
-    refreshTeam: loadTeam
+    refreshTeam: fetchTeam
   };
 }

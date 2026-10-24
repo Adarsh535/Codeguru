@@ -74,16 +74,8 @@ export default function BannerSlider({ onOpenContactModal }) {
     window.addEventListener('codeguru_refresh_all', fetchBanners);
     window.addEventListener('focus', fetchBanners);
 
-    // 2. Continuous smart auto-refresh polling (every 4 seconds)
-    const interval = setInterval(() => {
-      if (typeof document !== 'undefined' && !document.hidden) {
-        fetchBanners();
-      }
-    }, 4000);
-
     return () => {
       isMounted = false;
-      clearInterval(interval);
       window.removeEventListener('codeguru_refresh_banners', fetchBanners);
       window.removeEventListener('codeguru_refresh_all', fetchBanners);
       window.removeEventListener('focus', fetchBanners);
@@ -101,12 +93,10 @@ export default function BannerSlider({ onOpenContactModal }) {
   useEffect(() => {
     const currentSlide = slides[currentIndex];
     const isVid = currentSlide && (currentSlide.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(currentSlide.mediaUrl || currentSlide.videoUrl || ''));
-    if (!currentSlide || !isVid) {
-      const timer = setInterval(() => {
-        handleNext();
-      }, 5000);
-      return () => clearInterval(timer);
-    }
+    const timer = setInterval(() => {
+      handleNext();
+    }, isVid ? 8000 : 5000);
+    return () => clearInterval(timer);
   }, [currentIndex, slides]);
 
   useEffect(() => {
@@ -195,6 +185,7 @@ export default function BannerSlider({ onOpenContactModal }) {
                 {isVideoSlide ? (
                   <div className="relative w-full h-full">
                     <video
+                      suppressHydrationWarning
                       ref={(el) => (videoRefs.current[index] = el)}
                       src={videoSource}
                       poster={slide.poster}
@@ -213,6 +204,39 @@ export default function BannerSlider({ onOpenContactModal }) {
                       alt={slide.title}
                       className="w-full h-full object-cover opacity-100 group-hover:scale-105 transition-transform duration-700"
                     />
+                  </div>
+                )}
+
+                {/* HEADLINE / SUBTITLE / CTA OVERLAY (F12) */}
+                {(slide.title || slide.subtitle) && (
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent flex flex-col justify-end p-6 sm:p-10 pointer-events-none">
+                    <div className="max-w-2xl space-y-2 pointer-events-auto">
+                      {slide.badge && (
+                        <span className="inline-block px-3 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider bg-amber-400 text-slate-950 shadow-md">
+                          {slide.badge}
+                        </span>
+                      )}
+                      <h2 className="text-xl sm:text-3xl md:text-4xl font-black text-white font-heading tracking-tight drop-shadow-md">
+                        {slide.title}
+                      </h2>
+                      {slide.subtitle && (
+                        <p className="text-xs sm:text-sm text-slate-200 line-clamp-2 drop-shadow">
+                          {slide.subtitle}
+                        </p>
+                      )}
+                      {slide.ctaText && (
+                        <div className="pt-2">
+                          <button
+                            suppressHydrationWarning
+                            type="button"
+                            onClick={onOpenContactModal}
+                            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg transition-transform hover:scale-105 cursor-pointer"
+                          >
+                            {slide.ctaText} →
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -246,8 +270,6 @@ export default function BannerSlider({ onOpenContactModal }) {
         })}
         </div>
 
-
-
         {/* BOTTOM PAGINATION DOTS */}
         <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-col items-center pointer-events-none">
           <div className="flex items-center gap-1.5 bg-slate-900/50 backdrop-blur-sm px-3 py-2 rounded-full pointer-events-auto">
@@ -260,6 +282,7 @@ export default function BannerSlider({ onOpenContactModal }) {
                   currentIndex === idx ? 'w-4 bg-[#facc15]' : 'w-1.5 bg-slate-400'
                 }`}
                 title={`Slide ${idx + 1}`}
+                aria-label={`Go to slide ${idx + 1}`}
               />
             ))}
           </div>

@@ -2,15 +2,11 @@
  * ============================================================================
  * UTILITY: REAL-TIME STUDENT GEOLOCATION DETECTOR (geoLocator.js)
  * ============================================================================
- * Detects the real, live physical location of the student filling the form.
- * 1. Checks High-Precision HTML5 Geolocation (GPS coords -> BigDataCloud reverse geocode)
- * 2. High-speed IP Geolocation fallback (ipwho.is / bigdatacloud client / freeipapi)
- * 3. Never serves random cities; captures actual city & state of the student.
+ * Primary Source: Browser HTML5 Geolocation API (navigator.geolocation)
+ * High accuracy, 10s timeout, fresh (maximumAge: 0).
+ * Reverse Geocoding: OpenStreetMap Nominatim with BigDataCloud fallback.
+ * Strictly avoids silent fallback to random/hardcoded cities for student inquiries.
  */
-
-// Cache detected location in memory
-let cachedLocation = null;
-let detectionPromise = null;
 
 export function getStateCode(stateName) {
   if (!stateName) return '';
@@ -36,48 +32,272 @@ export function getStateCode(stateName) {
   if (s.includes('assam')) return 'AS';
   if (s.includes('andhra pradesh')) return 'AP';
   if (s.includes('himachal')) return 'HP';
-  return stateName.slice(0, 2).toUpperCase();
+  return stateName.length <= 3 ? stateName.toUpperCase() : stateName.slice(0, 2).toUpperCase();
 }
 
 /**
- * Returns currently cached location string synchronously (e.g. 'Lucknow, UP')
+ * Reverse geocode latitude and longitude into City and State.
+ * Uses OpenStreetMap Nominatim as primary, BigDataCloud as secondary fallback.
  */
-export function getQuickLocationSync() {
-  if (cachedLocation?.name) return cachedLocation.name;
-  if (typeof window !== 'undefined') {
-    try {
-      const saved = localStorage.getItem('codeguru_detected_location') || localStorage.getItem('codeguru_selected_location');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed?.name) return parsed.name;
+export async function reverseGeocodeLatLng(latitude, longitude) {
+
+  // 1. Primary Reverse Geocoder: OpenStreetMap Nominatim
+  try {
+    const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`;
+    const res = await fetch(nominatimUrl, {
+      headers: {
+        'Accept-Language': 'en',
+        'User-Agent': 'CodeGurru-StudentInquiry/1.0'
       }
-    } catch (e) {}
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      console.log('[CodeGurru Geo] Reverse Geocode Response (Nominatim):', data);
+
+      const addr = data?.address || {};
+      // Prioritize most specific city/settlement names
+      const city =
+        addr.city ||
+        addr.town ||
+        addr.village ||
+        addr.municipality ||
+        addr.suburb ||
+        addr.city_district ||
+        addr.district ||
+        addr.county ||
+        addr.state_district ||
+        '';
+
+      const state = addr.state || '';
+      const stateCode = getStateCode(state);
+
+      if (city) {
+        console.log('[CodeGurru Geo] Resolved City (Nominatim):', { city, state, stateCode });
+        return {
+          city: city.trim(),
+          state: state.trim(),
+          stateCode,
+          provider: 'nominatim'
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('[CodeGurru Geo] Nominatim reverse geocode error:', err.message);
   }
-  return '';
+
+  // 2. Secondary Fallback: BigDataCloud Reverse Geocode
+  try {
+    const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
+    const res = await fetch(bdcUrl);
+
+    if (res.ok) {
+      const data = await res.json();
+      console.log('[CodeGurru Geo] Reverse Geocode Response (BigDataCloud):', data);
+
+      // Important: Do NOT use principalSubdivision (that is state, not city)
+      const city = data?.city || data?.locality || '';
+      const state = data?.principalSubdivision || '';
+      const stateCode = getStateCode(state);
+
+      if (city) {
+        console.log('[CodeGurru Geo] Resolved City (BigDataCloud):', { city, state, stateCode });
+        return {
+          city: city.trim(),
+          state: state.trim(),
+          stateCode,
+          provider: 'bigdatacloud'
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('[CodeGurru Geo] BigDataCloud reverse geocode error:', err.message);
+  }
+
+  return {
+    city: '',
+    state: '',
+    stateCode: '',
+    provider: 'none'
+  };
 }
 
 /**
- * Fast IP fallback lookup using accurate CORS-enabled Indian geolocation services
+ * High-accuracy student location fetcher for inquiries.
+ * - Always fresh (maximumAge: 0)
+ * - 10-second timeout
+ * - Browser Geolocation API as primary source
+ * - Returns detailed status so the inquiry form knows whether permission was allowed, denied, or timed out.
  */
-async function fetchIpLocation() {
-  // Service 1: ipwho.is (Fastest & most accurate for Indian cellular & broadband networks)
+export async function getFreshStudentLocation() {
+  if (typeof window === 'undefined') {
+    return { success: false, error: 'server_env', message: 'Window is not defined' };
+  }
+
+  // Geolocation requires secure context (HTTPS or localhost)
+  if (!window.isSecureContext) {
+    console.warn('[CodeGurru Geo] Warning: Browser Geolocation requires HTTPS or localhost');
+  }
+
+  if (!('geolocation' in navigator)) {
+    console.warn('[CodeGurru Geo] navigator.geolocation not supported by browser');
+    return { success: false, error: 'not_supported', message: 'Geolocation is not supported by your browser' };
+  }
+
+  return new Promise((resolve) => {
+    let resolved = false;
+
+    // Safety timeout in case browser hangs on prompt
+    const safetyTimer = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        console.warn('[CodeGurru Geo] Geolocation request timed out after 10000ms');
+        resolve({
+          success: false,
+          error: 'timeout',
+          message: 'Location detection timed out. Please enter your city manually.'
+        });
+      }
+    }, 10500);
+
+    try {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          if (resolved) return;
+          resolved = true;
+          clearTimeout(safetyTimer);
+
+          const { latitude, longitude, accuracy } = position.coords;
+
+          try {
+            const geoResult = await reverseGeocodeLatLng(latitude, longitude);
+
+            if (geoResult.city) {
+              const displayLocation = geoResult.stateCode
+                ? `${geoResult.city}, ${geoResult.stateCode}`
+                : `${geoResult.city}${geoResult.state ? `, ${geoResult.state}` : ''}`;
+
+              console.log('[CodeGurru Geo] Final City Saved:', {
+                city: geoResult.city,
+                state: geoResult.state,
+                displayLocation,
+                source: 'gps'
+              });
+
+              resolve({
+                success: true,
+                city: geoResult.city,
+                state: geoResult.state,
+                stateCode: geoResult.stateCode,
+                location: displayLocation,
+                latitude,
+                longitude,
+                accuracy,
+                source: 'gps',
+                isApproximate: false
+              });
+              return;
+            }
+
+            // GPS coordinates received but reverse geocoding failed to find a city
+            resolve({
+              success: false,
+              latitude,
+              longitude,
+              error: 'reverse_geocode_failed',
+              message: 'Could not resolve city name from coordinates. Please enter your city manually.'
+            });
+          } catch (geoErr) {
+            resolve({
+              success: false,
+              latitude,
+              longitude,
+              error: 'reverse_geocode_error',
+              message: geoErr.message
+            });
+          }
+        },
+        (error) => {
+          if (resolved) return;
+          resolved = true;
+          clearTimeout(safetyTimer);
+
+          let errorType = 'error';
+          let userMessage = 'Unable to retrieve your location.';
+
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorType = 'permission_denied';
+              userMessage = 'Location permission was denied. Please enter your city manually.';
+              console.warn('[CodeGurru Geo] Geolocation permission denied by user.');
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorType = 'position_unavailable';
+              userMessage = 'Location information is currently unavailable.';
+              console.warn('[CodeGurru Geo] Geolocation position unavailable.');
+              break;
+            case error.TIMEOUT:
+              errorType = 'timeout';
+              userMessage = 'Location request timed out.';
+              console.warn('[CodeGurru Geo] Geolocation request timed out.');
+              break;
+            default:
+              console.warn('[CodeGurru Geo] Geolocation error:', error.message);
+              break;
+          }
+
+          resolve({
+            success: false,
+            error: errorType,
+            message: userMessage
+          });
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    } catch (e) {
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(safetyTimer);
+        resolve({
+          success: false,
+          error: 'unexpected_error',
+          message: e.message
+        });
+      }
+    }
+  });
+}
+
+/**
+ * Optional IP-based lookup used ONLY as an approximate hint when GPS is denied/failed.
+ * Clearly tagged with source: 'ip' and isApproximate: true.
+ */
+export async function getApproximateIpLocation() {
+  // Service 1: ipwho.is
   try {
     const res = await fetch('https://ipwho.is/');
     if (res.ok) {
       const data = await res.json();
       if (data && data.success !== false && data.city) {
         const city = data.city.trim();
-        const state = data.region || 'Uttar Pradesh';
+        const state = data.region || '';
         const stateCode = data.region_code || getStateCode(state);
+        const name = `${city}, ${stateCode || state}`;
+        console.log('[CodeGurru Geo] IP Lookup (ipwho.is, approximate):', { city, state, name });
         return {
-          id: `auto-ip-${Date.now()}`,
-          name: `${city}, ${stateCode}`,
+          success: true,
           city,
           state,
           stateCode,
-          icon: '📍',
+          location: name,
+          latitude: data.latitude || null,
+          longitude: data.longitude || null,
           source: 'ip',
-          autoDetected: true
+          isApproximate: true
         };
       }
     }
@@ -90,195 +310,94 @@ async function fetchIpLocation() {
       const data = await res.json();
       const city = data.city || data.locality;
       if (city) {
-        const state = data.principalSubdivision || 'Uttar Pradesh';
+        const state = data.principalSubdivision || '';
         const stateCode = getStateCode(state);
+        const name = `${city}, ${stateCode || state}`;
+        console.log('[CodeGurru Geo] IP Lookup (BigDataCloud, approximate):', { city, state, name });
         return {
-          id: `auto-bdc-${Date.now()}`,
-          name: `${city}, ${stateCode}`,
+          success: true,
           city,
           state,
           stateCode,
-          icon: '📍',
+          location: name,
+          latitude: data.latitude || null,
+          longitude: data.longitude || null,
           source: 'ip',
-          autoDetected: true
+          isApproximate: true
         };
       }
     }
   } catch (e) {}
 
-  // Service 3: FreeIPAPI
-  try {
-    const res = await fetch('https://freeipapi.com/api/json');
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.cityName) {
-        const city = data.cityName.trim();
-        const state = data.regionName || 'Uttar Pradesh';
-        const stateCode = getStateCode(state);
-        return {
-          id: `auto-freeip-${Date.now()}`,
-          name: `${city}, ${stateCode}`,
-          city,
-          state,
-          stateCode,
-          icon: '📍',
-          source: 'ip',
-          autoDetected: true
-        };
-      }
-    }
-  } catch (e) {}
-
-  return null;
+  return { success: false, error: 'ip_failed' };
 }
 
 /**
- * Detects the real, actual location of the student
- * First tries GPS geolocation, then falls back to high-accuracy IP detection.
+ * Backward compatibility helper for placement filter / visitor display
  */
-export async function detectStudentRealLocation(forceRefresh = false) {
-  if (cachedLocation && !forceRefresh) {
-    return cachedLocation;
-  }
-
-  if (detectionPromise && !forceRefresh) {
-    return detectionPromise;
-  }
-
-  detectionPromise = (async () => {
-    // 1. Try Browser GPS Geolocation if available
-    let gpsResult = null;
-    if (typeof window !== 'undefined' && 'geolocation' in navigator) {
-      gpsResult = await new Promise((resolve) => {
-        const timer = setTimeout(() => resolve(null), 6000);
-        navigator.geolocation.getCurrentPosition(
-          async (pos) => {
-            clearTimeout(timer);
-            try {
-              const { latitude, longitude } = pos.coords;
-
-              // PRIMARY: Nominatim (OpenStreetMap) — free, accurate, no API key needed
-              const nominatimRes = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`,
-                { headers: { 'Accept-Language': 'en', 'User-Agent': 'CodeGurru-App/1.0' } }
-              );
-              if (nominatimRes.ok) {
-                const data = await nominatimRes.json();
-                const addr = data.address || {};
-                // Pick best city field (city > town > village > county)
-                const city = addr.city || addr.town || addr.village || addr.county || addr.state_district;
-                const state = addr.state || 'Uttar Pradesh';
-                if (city) {
-                  const stateCode = getStateCode(state);
-                  resolve({
-                    id: `auto-gps-${Date.now()}`,
-                    name: `${city}, ${stateCode}`,
-                    city,
-                    state,
-                    stateCode,
-                    latitude,
-                    longitude,
-                    icon: '📍',
-                    source: 'gps',
-                    autoDetected: true
-                  });
-                  return;
-                }
-              }
-
-              // FALLBACK: BigDataCloud if Nominatim fails
-              const bdcRes = await fetch(
-                `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-              );
-              if (bdcRes.ok) {
-                const data = await bdcRes.json();
-                const city = data.city || data.locality || data.principalSubdivision;
-                const state = data.principalSubdivision || 'Uttar Pradesh';
-                if (city) {
-                  const stateCode = getStateCode(state);
-                  resolve({
-                    id: `auto-gps-bdc-${Date.now()}`,
-                    name: `${city}, ${stateCode}`,
-                    city,
-                    state,
-                    stateCode,
-                    latitude,
-                    longitude,
-                    icon: '📍',
-                    source: 'gps',
-                    autoDetected: true
-                  });
-                  return;
-                }
-              }
-            } catch (err) {}
-            resolve(null);
-          },
-          () => {
-            clearTimeout(timer);
-            resolve(null);
-          },
-          { enableHighAccuracy: true, timeout: 5000, maximumAge: 60000 }
-        );
-      });
-    }
-
-    if (gpsResult) {
-      cachedLocation = gpsResult;
-      saveLocationToStorage(gpsResult);
-      return gpsResult;
-    }
-
-    // 2. High-speed IP Fallback (Captures real ISP node city of student)
-    const ipResult = await fetchIpLocation();
-    if (ipResult) {
-      cachedLocation = ipResult;
-      saveLocationToStorage(ipResult);
-      return ipResult;
-    }
-
-    // 3. Last fallback: Check previous stored location
+export function getQuickLocationSync() {
+  if (typeof window !== 'undefined') {
     try {
-      const stored = localStorage.getItem('codeguru_detected_location') || localStorage.getItem('codeguru_selected_location');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed?.name) {
-          cachedLocation = parsed;
-          return parsed;
-        }
+      const saved = localStorage.getItem('codeguru_selected_location') || localStorage.getItem('codeguru_detected_location');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.name) return parsed.name;
+        if (parsed?.city) return parsed.city;
       }
     } catch (e) {}
-
-    // Default if completely offline
-    const defaultLoc = {
-      id: 'loc-default',
-      name: 'Ayodhya, UP',
-      city: 'Ayodhya',
-      state: 'Uttar Pradesh (HQ)',
-      stateCode: 'UP',
-      icon: '📍',
-      source: 'default',
-      autoDetected: true
-    };
-    cachedLocation = defaultLoc;
-    return defaultLoc;
-  })();
-
-  try {
-    const result = await detectionPromise;
-    detectionPromise = null;
-    return result;
-  } catch (err) {
-    detectionPromise = null;
-    return { name: 'Ayodhya, UP', city: 'Ayodhya', state: 'Uttar Pradesh' };
   }
+  return '';
 }
 
-function saveLocationToStorage(loc) {
-  if (typeof window === 'undefined' || !loc) return;
-  try {
-    localStorage.setItem('codeguru_detected_location', JSON.stringify(loc));
-    localStorage.setItem('codeguru_selected_location', JSON.stringify(loc));
-    window.dispatchEvent(new CustomEvent('codeguru_location_updated', { detail: loc }));
-  } catch (e) {}
+/**
+ * Backward compatibility helper for placement filter
+ */
+export async function detectStudentRealLocation(forceRefresh = false) {
+  // Try fresh GPS first
+  const gpsRes = await getFreshStudentLocation();
+  if (gpsRes.success) {
+    const locObj = {
+      id: `gps-${Date.now()}`,
+      name: gpsRes.location,
+      city: gpsRes.city,
+      state: gpsRes.state,
+      stateCode: gpsRes.stateCode,
+      latitude: gpsRes.latitude,
+      longitude: gpsRes.longitude,
+      source: 'gps',
+      autoDetected: true
+    };
+    try {
+      localStorage.setItem('codeguru_selected_location', JSON.stringify(locObj));
+    } catch (e) {}
+    return locObj;
+  }
+
+  // Fallback to IP approximate
+  const ipRes = await getApproximateIpLocation();
+  if (ipRes.success) {
+    const locObj = {
+      id: `ip-${Date.now()}`,
+      name: ipRes.location,
+      city: ipRes.city,
+      state: ipRes.state,
+      stateCode: ipRes.stateCode,
+      latitude: ipRes.latitude,
+      longitude: ipRes.longitude,
+      source: 'ip',
+      autoDetected: true,
+      isApproximate: true
+    };
+    return locObj;
+  }
+
+  return {
+    id: 'loc-default',
+    name: 'Ayodhya, UP',
+    city: 'Ayodhya',
+    state: 'Uttar Pradesh (HQ)',
+    stateCode: 'UP',
+    source: 'default',
+    autoDetected: true
+  };
 }

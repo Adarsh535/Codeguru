@@ -18,7 +18,7 @@ import {
   getRealtimeAnalytics,
   getVisitorInsights
 } from '../controllers/analyticsController.js';
-import { requireAdmin } from '../../middleware/authMiddleware.js';
+import { requireAdmin, requireAdminOrTicket } from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -48,7 +48,7 @@ router.post('/leave', recordLeave);
  * @desc    Server-Sent Events (SSE) stream pushing real-time metrics every 5 seconds
  * @access  Admin Private
  */
-router.get('/stream', requireAdmin, streamAnalytics);
+router.get('/stream', requireAdminOrTicket, streamAnalytics);
 
 /**
  * @api    GET /api/analytics/summary

@@ -7,6 +7,7 @@
 
 import { Course } from '../../models/Course.js';
 import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
+import { recordAuditLog } from '../../services/auditService.js';
 
 /**
  * @route   GET /api/courses
@@ -17,11 +18,26 @@ export const getCourses = async (req, res) => {
   try {
     const isAll = req.query.all === 'true' || req.query.admin === 'true';
     const filter = isAll ? {} : { isActive: { $ne: false } };
+
+    // Search query handling with strict string sanitization and regex escaping (SQL/NoSQL injection safe)
+    if (req.query.search || req.query.q) {
+      const searchRaw = req.query.search || req.query.q;
+      if (typeof searchRaw === 'string') {
+        const cleanSearch = searchRaw.trim();
+        // Escape regex metacharacters to eliminate ReDoS and NoSQL regex injection
+        const escaped = cleanSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        filter.$or = [
+          { title: { $regex: escaped, $options: 'i' } },
+          { category: { $regex: escaped, $options: 'i' } }
+        ];
+      }
+    }
+
     const courses = await Course.find(filter).sort({ createdAt: -1 });
     return res.json({ success: true, data: courses });
   } catch (err) {
     console.error('[courseController Error]:', err.message);
-    return res.status(500).json({ success: false, message: err.message, data: [] });
+    return res.status(500).json({ success: false, message: 'Failed to retrieve courses', data: [] });
   }
 };
 
@@ -87,11 +103,26 @@ export const addCourse = async (req, res) => {
 export const updateCourse = async (req, res) => {
   try {
     const payload = { ...req.body };
+    // Never allow client to overwrite identity/internal fields.
+    delete payload._id; delete payload.__v; delete payload.createdAt; delete payload.updatedAt;
     if (Array.isArray(req.body.subCategories) && req.body.subCategories.length > 0) {
       payload.subCat = req.body.subCategories[0];
     }
     const course = await Course.findByIdAndUpdate(req.params.id, payload, { new: true });
     if (course) {
+      // Record immutable audit log: Who (kisne), What (kya), When (kab)
+      await recordAuditLog({
+        action: 'CONTENT_EDIT',
+        admin: req.admin,
+        targetType: 'Course',
+        targetId: course._id,
+        details: {
+          title: course.title,
+          updatedFields: Object.keys(payload)
+        },
+        req
+      });
+
       broadcastRealtimeEvent('courses', course);
       return res.json({ success: true, message: 'Course updated in MongoDB Atlas', data: course });
     }
@@ -108,7 +139,22 @@ export const updateCourse = async (req, res) => {
  */
 export const deleteCourse = async (req, res) => {
   try {
-    await Course.findByIdAndDelete(req.params.id);
+    const course = await Course.findByIdAndDelete(req.params.id);
+    if (course) {
+      // Record immutable audit log: Who (kisne), What (kya), When (kab)
+      await recordAuditLog({
+        action: 'CONTENT_EDIT',
+        admin: req.admin,
+        targetType: 'Course',
+        targetId: req.params.id,
+        details: {
+          action: 'Course Deleted',
+          deletedCourseTitle: course.title
+        },
+        req
+      });
+    }
+
     broadcastRealtimeEvent('courses', { id: req.params.id, deleted: true });
     return res.json({ success: true, message: 'Course deleted successfully' });
   } catch (err) {

@@ -6,7 +6,9 @@
  * and automatic synchronization with Student Lead CRM in MongoDB.
  */
 
+import mongoose from 'mongoose';
 import { Enrollment } from '../../models/Enrollment.js';
+import { Course } from '../../models/Course.js';
 import { Lead } from '../../models/Lead.js';
 import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
 
@@ -63,84 +65,75 @@ export const getEnrollments = async (req, res) => {
  */
 export const createEnrollment = async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required to enroll in a batch'
+      });
+    }
+
     const {
-      id,
-      enrollmentId,
-      studentId,
-      studentName,
-      studentEmail,
-      studentPhone,
       courseName,
       batchCode,
       timing,
       mentor,
       startDate,
-      fee,
       paymentPlan,
-      paidAmount,
-      pendingAmount,
-      feeStatus,
-      paymentMethod,
-      transactionId,
-      status
-    } = req.body;
+      transactionId
+    } = req.body || {};
 
-    const newEnrollmentId = id || enrollmentId || `ENR-${Date.now().toString().slice(-6)}`;
-    const newStudentId = studentId || `CG-STU-${Math.floor(1000 + Math.random() * 9000)}`;
+    const studentId = req.user.sub || req.user.id;
+    const studentName = req.user.name || req.body.studentName || 'Student';
+    const studentEmail = req.user.email || req.body.studentEmail || '';
+    const studentPhone = req.user.phone || req.body.studentPhone || '';
 
+    // Derive fee securely from Course catalog or standard fee
+    let fee = '₹24,999';
+    if (courseName) {
+      const course = await Course.findOne({ title: courseName });
+      if (course && course.price) {
+        fee = course.price;
+      }
+    }
+
+    const newEnrollmentId = `ENR-${Date.now().toString().slice(-6)}`;
+
+    // Zero Trust: feeStatus and status are ALWAYS server-set to Pending Verification
+    // paidAmount is 0 until admin verifies the payment
     const newEnrollment = new Enrollment({
       enrollmentId: newEnrollmentId,
-      studentId: newStudentId,
-      studentName: studentName || 'Student User',
-      studentEmail: studentEmail || 'student@example.com',
-      studentPhone: studentPhone || '9876543210',
+      studentId: studentId.toString(),
+      studentName,
+      studentEmail,
+      studentPhone,
       courseName: courseName || 'Full Stack Web Development (MERN)',
       batchCode: batchCode || 'FS-2026-42',
       timing: timing || '09:00 AM - 11:00 AM (Mon-Fri)',
       mentor: mentor || 'Vikrant Shinde',
       startDate: startDate || '15 Sept 2026',
-      fee: fee || '₹24,999',
+      fee,
       paymentPlan: paymentPlan || 'Full Payment',
-      paidAmount: paidAmount || fee || '₹24,999',
-      pendingAmount: pendingAmount || '₹0',
-      feeStatus: feeStatus || 'Paid',
-      paymentMethod: paymentMethod || 'UPI QR',
-      transactionId: transactionId || `TXN${Date.now().toString().slice(-8)}`,
-      status: status || 'Active'
+      paidAmount: '₹0',
+      pendingAmount: fee,
+      feeStatus: 'Pending',
+      paymentMethod: 'UPI',
+      transactionId: transactionId ? String(transactionId).trim().slice(0, 64) : '',
+      status: 'Pending Verification'
     });
 
     const savedEnrollment = await newEnrollment.save();
 
-    // Auto-create / update student in Lead CRM
-    try {
-      const leadId = `LEAD-${Date.now().toString().slice(-5)}`;
-      await Lead.findOneAndUpdate(
-        { phone: newEnrollment.studentPhone },
-        {
-          leadId,
-          name: newEnrollment.studentName,
-          phone: newEnrollment.studentPhone,
-          course: `${newEnrollment.courseName} (${newEnrollment.batchCode})`,
-          status: 'Enrolled',
-          notes: `Enrolled via Student Portal (${newEnrollment.paymentPlan}, Paid: ${newEnrollment.paidAmount}, Txn: ${newEnrollment.transactionId})`
-        },
-        { upsert: true, new: true }
-      );
-    } catch (leadErr) {
-      console.warn('Sync lead notice:', leadErr.message);
-    }
-
-    broadcastRealtimeEvent('enrollments', savedEnrollment);
-    broadcastRealtimeEvent('leads', savedEnrollment);
+    // Broadcast event type only — NO sensitive student PII!
+    broadcastRealtimeEvent('enrollments_updated');
 
     res.status(201).json({
       success: true,
-      message: 'Student enrolled and payment recorded successfully',
+      message: 'Enrollment submitted successfully and is pending verification',
       data: savedEnrollment
     });
   } catch (error) {
-    console.error('Error creating enrollment:', error);
-    res.status(500).json({ success: false, message: 'Failed to create enrollment', error: error.message });
+    console.error('Error creating enrollment:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to create enrollment' });
   }
 };
 
@@ -158,23 +151,112 @@ export const createEnrollment = async (req, res) => {
 export const updateEnrollmentStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const isObjectId = mongoose.isValidObjectId(id);
+    const enrollment = isObjectId
+      ? await Enrollment.findById(id)
+      : await Enrollment.findOne({ enrollmentId: id });
 
-    const updated = await Enrollment.findByIdAndUpdate(id, updateData, { new: true });
-    if (!updated) {
+    if (!enrollment) {
       return res.status(404).json({ success: false, message: 'Enrollment not found' });
     }
 
-    broadcastRealtimeEvent('enrollments', updated);
+    const { feeStatus, status, paidAmount, pendingAmount, notes } = req.body || {};
 
-    res.status(200).json({
+    // Helper to extract non-negative numeric amount
+    const parseNumericAmount = (val) => {
+      if (typeof val === 'number') {
+        return isNaN(val) ? null : val;
+      }
+      if (typeof val === 'string') {
+        const cleaned = val.replace(/[^0-9.]/g, '').trim();
+        if (!cleaned) return null;
+        const num = Number(cleaned);
+        return isNaN(num) ? null : num;
+      }
+      return null;
+    };
+
+    // Parse course total fee (baseline comparison)
+    const totalFeeNum = parseNumericAmount(enrollment.fee) ?? (enrollment.feeInPaise ? enrollment.feeInPaise / 100 : 0);
+
+    // 1. Validate & apply paidAmount
+    if (paidAmount !== undefined) {
+      const paid = parseNumericAmount(paidAmount);
+      if (paid === null || paid < 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'paidAmount must be a non-negative number'
+        });
+      }
+      if (totalFeeNum > 0 && paid > totalFeeNum) {
+        return res.status(400).json({
+          success: false,
+          message: `paidAmount (${paid}) cannot be more than the course fee (${totalFeeNum})`
+        });
+      }
+      enrollment.paidAmount = typeof paidAmount === 'string' && paidAmount.includes('₹')
+        ? paidAmount.trim()
+        : `₹${paid.toLocaleString('en-IN')}`;
+      enrollment.paidAmountInPaise = Math.round(paid * 100);
+    }
+
+    // 2. Validate & apply pendingAmount
+    if (pendingAmount !== undefined) {
+      const pending = parseNumericAmount(pendingAmount);
+      if (pending === null || pending < 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'pendingAmount must be a non-negative number'
+        });
+      }
+      enrollment.pendingAmount = typeof pendingAmount === 'string' && pendingAmount.includes('₹')
+        ? pendingAmount.trim()
+        : `₹${pending.toLocaleString('en-IN')}`;
+      enrollment.pendingAmountInPaise = Math.round(pending * 100);
+    }
+
+    // 3. Validate & apply feeStatus
+    if (feeStatus !== undefined) {
+      const validFeeStatuses = ['Pending', 'Paid', 'Installment Pending'];
+      if (!validFeeStatuses.includes(feeStatus)) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid feeStatus. Allowed values: ${validFeeStatuses.join(', ')}`
+        });
+      }
+      enrollment.feeStatus = feeStatus;
+    }
+
+    // 4. Validate & apply status
+    if (status !== undefined) {
+      const validStatuses = ['Active', 'Pending Verification', 'Completed', 'Cancelled'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid status. Allowed values: ${validStatuses.join(', ')}`
+        });
+      }
+      enrollment.status = status;
+    }
+
+    // 5. Apply notes
+    if (notes !== undefined) {
+      enrollment.notes = typeof notes === 'string' ? notes.trim() : String(notes);
+    }
+
+    // Fields like courseName, studentId, studentEmail, studentPhone, fee are never mutated
+    await enrollment.save();
+
+    broadcastRealtimeEvent('enrollments', enrollment);
+
+    return res.status(200).json({
       success: true,
       message: 'Enrollment updated successfully',
-      data: updated
+      data: enrollment
     });
   } catch (error) {
     console.error('Error updating enrollment:', error);
-    res.status(500).json({ success: false, message: 'Failed to update enrollment', error: error.message });
+    return res.status(500).json({ success: false, message: 'Failed to update enrollment', error: error.message });
   }
 };
 

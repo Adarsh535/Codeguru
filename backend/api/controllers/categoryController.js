@@ -164,14 +164,16 @@ export const createCategory = async (req, res) => {
 export const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
+    const payload = { ...req.body };
+    delete payload._id; delete payload.__v; delete payload.createdAt; delete payload.updatedAt;
     let updated = null;
     if (id && id.match(/^[0-9a-fA-F]{24}$/)) {
-      updated = await Category.findByIdAndUpdate(id, req.body, { new: true });
+      updated = await Category.findByIdAndUpdate(id, payload, { new: true });
     }
     if (!updated) {
       updated = await Category.findOneAndUpdate(
         { $or: [{ category: id }, { id: id }] },
-        req.body,
+        payload,
         { new: true }
       );
     }

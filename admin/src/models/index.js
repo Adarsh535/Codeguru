@@ -1,12 +1,14 @@
 /**
  * ============================================================================
- * MODEL LAYER BARREL EXPORT (models/index.js)
+ * ADMIN MVC: MODELS BARREL EXPORT (admin/src/models/index.js)
  * ============================================================================
- * Exports all data models for the Admin MVC architecture.
+ * Centralized export for all admin data models, API services, and client helpers.
  */
 
-export { API_BASE, apiFetch } from './apiClient';
-export { leadModel } from './leadModel';
-export { adminCmsModel } from './adminCmsModel';
+export * from './adminCmsModel';
+export { analyticsModel } from './analyticsModel';
+export * from './apiClient';
 export { authModel } from './authModel';
+export { enrollmentModel } from './enrollmentModel';
+export { leadModel } from './leadModel';
 export { systemModel } from './systemModel';

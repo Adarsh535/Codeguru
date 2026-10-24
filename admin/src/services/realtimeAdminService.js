@@ -2,12 +2,13 @@
  * ============================================================================
  * ADMIN REALTIME SYNC SERVICE (realtimeAdminService.js)
  * ============================================================================
- * Establishes persistent Server-Sent Events (SSE) connection and cross-tab
- * channel so that all Admin views (Leads, Courses, Banners, Placements, Team,
- * Categories, Enrollments, Traffic) live-update instantly without manual refresh.
+ * Hardened realtime sync service:
+ * - Uses one-time tickets for SSE connection (no tokens in URL)
+ * - Lifecycle tied strictly to admin authentication
+ * - Efficient fallback (60s instead of 3s flooding)
  */
 
-import { API_BASE } from '../models/apiClient';
+import { API_BASE, getAdminAuth, getRealtimeTicket } from '../models/apiClient';
 
 const STREAM_URL = `${API_BASE}/realtime/stream`;
 
@@ -20,10 +21,16 @@ class RealtimeAdminManager {
     this.pollingInterval = null;
     this.retryCount = 0;
     this.listeners = new Set();
+    this.isStarted = false;
   }
 
   start() {
     if (typeof window === 'undefined') return;
+    const auth = getAdminAuth();
+    if (!auth.token) return; // Do not connect without authenticated session
+
+    if (this.isStarted) return;
+    this.isStarted = true;
 
     // 1. Cross-tab sync via BroadcastChannel
     if ('BroadcastChannel' in window) {
@@ -32,56 +39,47 @@ class RealtimeAdminManager {
         this.broadcastChannel.onmessage = (event) => {
           this.handleEvent(event.data, false);
         };
-      } catch (err) {
-        console.warn('[Admin Realtime] BroadcastChannel init warning:', err);
-      }
+      } catch (err) {}
     }
 
-    // 2. Connect SSE
+    // 2. Connect SSE with ticket
     this.connectSSE();
 
-    // 3. Fallback smart polling (every 3 seconds)
+    // 3. Fallback revalidation (60s gentle interval instead of 3s flooding)
     if (!this.pollingInterval) {
       this.pollingInterval = setInterval(() => {
-        if (typeof document !== 'undefined' && !document.hidden) {
+        if (typeof document !== 'undefined' && !document.hidden && this.isStarted) {
           this.notify('all', { source: 'polling_heartbeat' });
         }
-      }, 3000);
+      }, 60000);
     }
 
     // 4. Focus & visibility change revalidation
-    window.addEventListener('focus', () => {
-      this.notify('all', { source: 'window_focus' });
-    });
-
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        this.notify('all', { source: 'visibility_change' });
-      }
-    });
-
-    // 5. Cross-tab storage fallback
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'codeguru_admin_live_ping') {
-        try {
-          const parsed = JSON.parse(e.newValue || '{}');
-          this.handleEvent(parsed, false);
-        } catch {}
-      }
-    });
+    this.onFocus = () => {
+      if (this.isStarted) this.notify('all', { source: 'window_focus' });
+    };
+    window.addEventListener('focus', this.onFocus);
   }
 
-  connectSSE() {
+  async connectSSE() {
     if (typeof window === 'undefined' || typeof EventSource === 'undefined') return;
+    if (!this.isStarted) return;
 
     if (this.eventSource) {
-      try {
-        this.eventSource.close();
-      } catch {}
+      try { this.eventSource.close(); } catch {}
+      this.eventSource = null;
     }
 
     try {
-      this.eventSource = new EventSource(STREAM_URL);
+      const ticket = await getRealtimeTicket();
+      if (!ticket) {
+        // Retry after delay
+        this.scheduleRetry();
+        return;
+      }
+
+      const urlWithTicket = `${STREAM_URL}?ticket=${encodeURIComponent(ticket)}`;
+      this.eventSource = new EventSource(urlWithTicket);
 
       this.eventSource.onopen = () => {
         this.isConnected = true;
@@ -94,92 +92,87 @@ class RealtimeAdminManager {
         try {
           const data = JSON.parse(event.data);
           this.handleEvent(data, true);
-        } catch (err) {
-          console.warn('[Admin Realtime] Malformed SSE message:', event.data);
-        }
+        } catch (err) {}
       };
 
       this.eventSource.onerror = () => {
         this.isConnected = false;
         this.emitStatusChange(false);
-        try {
-          this.eventSource.close();
-        } catch {}
-
-        const delay = Math.min(1000 * Math.pow(2, this.retryCount), 6000);
-        this.retryCount++;
-
-        clearTimeout(this.retryTimeout);
-        this.retryTimeout = setTimeout(() => {
-          this.connectSSE();
-        }, delay);
+        try { this.eventSource?.close(); } catch {}
+        this.eventSource = null;
+        this.scheduleRetry();
       };
     } catch (err) {
-      console.warn('[Admin Realtime] EventSource connection failed:', err);
+      this.scheduleRetry();
     }
   }
 
-  handleEvent(payload, shouldBroadcast = true) {
-    if (!payload || !payload.type) return;
+  scheduleRetry() {
+    if (!this.isStarted) return;
+    const delay = Math.min(2000 * Math.pow(1.5, this.retryCount), 30000);
+    this.retryCount++;
+    clearTimeout(this.retryTimeout);
+    this.retryTimeout = setTimeout(() => {
+      this.connectSSE();
+    }, delay);
+  }
 
-    const eventType = payload.type;
-    this.notify(eventType, payload.data);
+  handleEvent(eventData, isLocal = true) {
+    if (!eventData) return;
+    const type = eventData.type || 'all';
+    this.notify(type, eventData);
 
-    if (shouldBroadcast) {
-      if (this.broadcastChannel) {
-        try {
-          this.broadcastChannel.postMessage(payload);
-        } catch {}
-      }
+    if (isLocal && this.broadcastChannel) {
       try {
-        localStorage.setItem('codeguru_admin_live_ping', JSON.stringify({ ...payload, _t: Date.now() }));
+        this.broadcastChannel.postMessage(eventData);
       } catch {}
     }
   }
 
-  notify(type, data = null) {
-    if (typeof window === 'undefined') return;
-
-    const detail = { type, data, timestamp: Date.now() };
-
-    // Standard admin refresh event
-    window.dispatchEvent(new CustomEvent('codeguru_refresh_all', { detail }));
-    window.dispatchEvent(new CustomEvent('codeguru_live_data', { detail }));
-    window.dispatchEvent(new CustomEvent(`codeguru_refresh_${type}`, { detail }));
-
-    if (type === 'leads' && data && data.name) {
-      window.dispatchEvent(new CustomEvent('codeguru_lead_added', { detail: data }));
-    }
-
-    this.listeners.forEach((callback) => {
-      try {
-        callback(type, data);
-      } catch (e) {
-        console.error('[Admin Realtime Listener Error]:', e);
-      }
-    });
+  subscribe(eventType, callback) {
+    const listener = { eventType, callback };
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
   }
 
-  subscribe(callback) {
-    this.listeners.add(callback);
-    return () => this.listeners.delete(callback);
+  notify(eventType, data) {
+    window.dispatchEvent(new CustomEvent('codeguru_realtime_event', { detail: { type: eventType, data } }));
+    for (const listener of this.listeners) {
+      if (listener.eventType === 'all' || listener.eventType === eventType) {
+        try { listener.callback(data); } catch {}
+      }
+    }
   }
 
   emitStatusChange(status) {
-    if (typeof window === 'undefined') return;
     window.dispatchEvent(new CustomEvent('codeguru_sync_status', { detail: { connected: status } }));
   }
 
   destroy() {
-    if (this.eventSource) this.eventSource.close();
-    if (this.broadcastChannel) this.broadcastChannel.close();
+    this.isStarted = false;
+    if (this.eventSource) {
+      try { this.eventSource.close(); } catch {}
+      this.eventSource = null;
+    }
+    if (this.broadcastChannel) {
+      try { this.broadcastChannel.close(); } catch {}
+      this.broadcastChannel = null;
+    }
+    if (this.onFocus) {
+      window.removeEventListener('focus', this.onFocus);
+    }
     clearInterval(this.pollingInterval);
     clearTimeout(this.retryTimeout);
+    this.pollingInterval = null;
+    this.isConnected = false;
   }
 }
 
 export const realtimeAdminService = new RealtimeAdminManager();
 
+// Listen to admin logout event to cleanly destroy realtime connection
 if (typeof window !== 'undefined') {
-  realtimeAdminService.start();
+  window.addEventListener('admin_logout_event', () => {
+    realtimeAdminService.destroy();
+  });
 }

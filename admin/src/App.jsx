@@ -9,7 +9,6 @@ import DashboardView from './views/DashboardView';
 import VisitorsView from './views/VisitorsView';
 import LeadsView from './views/LeadsView';
 import NotificationsView from './views/NotificationsView';
-import { leadService } from './services/leadService';
 import ProtectedRoute from './components/ProtectedRoute';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 

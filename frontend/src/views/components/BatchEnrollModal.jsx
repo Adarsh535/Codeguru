@@ -8,26 +8,25 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PersonIcon from '@mui/icons-material/Person';
 import PaymentIcon from '@mui/icons-material/Payment';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import CreditCardIcon from '@mui/icons-material/CreditCard';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import LockIcon from '@mui/icons-material/Lock';
 import ShieldIcon from '@mui/icons-material/Shield';
 import { apiService } from '../../services/apiService';
-import { getQuickLocationSync, detectStudentRealLocation } from '../../utils/geoLocator';
+import { getQuickLocationSync } from '../../utils/geoLocator';
+import { BUSINESS_CONFIG } from '../../config/business';
 
 export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onEnrollSuccess }) {
-  const [step, setStep] = useState(1); // 1: Plan & Details, 2: Payment Gateway, 3: Success
+  const [step, setStep] = useState(1); // 1: Plan & Details, 2: UPI Payment, 3: Success
   const [paymentPlan, setPaymentPlan] = useState('Full Payment');
-  const [paymentMethod, setPaymentMethod] = useState('upi_qr'); // upi_qr, upi_app, card, netbanking
   const [studentName, setStudentName] = useState('');
   const [studentEmail, setStudentEmail] = useState('');
   const [studentPhone, setStudentPhone] = useState('');
-  const [selectedBank, setSelectedBank] = useState('HDFC Bank');
   const [copiedUpi, setCopiedUpi] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [transactionId, setTransactionId] = useState('');
+  const [upiRefInput, setUpiRefInput] = useState('');
+  const [enrollError, setEnrollError] = useState('');
 
   // Prefill student details from logged in user
   useEffect(() => {
@@ -35,32 +34,31 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
       setStudentName(user.name || '');
       setStudentEmail(user.email || '');
       setStudentPhone(user.phone || '');
-    } else {
-      setStudentName('Vikrant Shinde');
-      setStudentEmail('vikrant@example.com');
-      setStudentPhone('9876543210');
     }
     setStep(1);
+    setEnrollError('');
   }, [user, isOpen]);
 
-  if (!isOpen || !batchData) return null;
+  if (!isOpen) return null;
 
   const defaultBatch = {
-    courseName: batchData.courseName || batchData.title || 'Full Stack Web Development (MERN)',
-    batchCode: batchData.batchCode || 'FS-2026-42',
-    timing: batchData.timing || '09:00 AM - 11:00 AM (Mon-Fri)',
-    mentor: batchData.mentor || 'Vikrant Shinde',
-    startDate: batchData.startDate || '15 Sept 2026',
-    fee: batchData.fee || batchData.price || '₹24,999'
+    courseName: batchData?.courseName || batchData?.title || 'Full Stack Web Development (MERN)',
+    batchCode: batchData?.batchCode || 'FS-2026-42',
+    timing: batchData?.timing || '09:00 AM - 11:00 AM (Mon-Fri)',
+    mentor: batchData?.mentor || 'Vikrant Shinde',
+    startDate: batchData?.startDate || '15 Sept 2026',
+    fee: batchData?.fee || batchData?.price || '₹24,999'
   };
 
-  // Extract fee number
   const numericFee = parseInt(defaultBatch.fee.replace(/[^0-9]/g, '')) || 24999;
   const paidAmountVal = paymentPlan === 'Full Payment' ? defaultBatch.fee : `₹${Math.round(numericFee * 0.4).toLocaleString('en-IN')}`;
   const pendingAmountVal = paymentPlan === 'Full Payment' ? '₹0' : `₹${Math.round(numericFee * 0.6).toLocaleString('en-IN')}`;
 
+  // Unified single UPI ID from single source of truth config (F4)
+  const upiId = BUSINESS_CONFIG.upiId || 'codegurru@upi';
+
   const handleCopyUpi = () => {
-    navigator.clipboard.writeText('codeguru@upi');
+    navigator.clipboard.writeText(upiId);
     setCopiedUpi(true);
     setTimeout(() => setCopiedUpi(false), 2000);
   };
@@ -68,24 +66,26 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
   const handleGoToPayment = (e) => {
     e.preventDefault();
     if (!studentName || !studentPhone) {
-      alert('Please fill in your name and phone number to proceed.');
+      setEnrollError('Please fill in your name and phone number to proceed.');
       return;
     }
+    setEnrollError('');
     setStep(2);
   };
 
-  const handleCompletePayment = () => {
+  // TODO: Razorpay integration — verify payment signature and webhook server-side
+  const handleCompletePayment = async () => {
+    if (!upiRefInput.trim()) {
+      setEnrollError('Please enter the 12-digit UPI UTR / Reference number from your payment app.');
+      return;
+    }
+
     setIsSubmitting(true);
-    const txnId = `TXN-${Date.now().toString().slice(-8)}`;
+    setEnrollError('');
+    const txnId = upiRefInput.trim();
     setTransactionId(txnId);
 
     const enrollmentRecord = {
-      id: `ENR-${Date.now().toString().slice(-5)}`,
-      enrollmentId: `ENR-${Date.now().toString().slice(-5)}`,
-      studentId: `CG-STU-${Math.floor(1000 + Math.random() * 9000)}`,
-      studentName: studentName || 'Student User',
-      studentEmail: studentEmail || 'student@example.com',
-      studentPhone: studentPhone || '9876543210',
       courseName: defaultBatch.courseName,
       batchCode: defaultBatch.batchCode,
       timing: defaultBatch.timing,
@@ -95,67 +95,50 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
       paymentPlan: paymentPlan,
       paidAmount: paidAmountVal,
       pendingAmount: pendingAmountVal,
-      feeStatus: paymentPlan === 'Full Payment' ? 'Paid' : 'Installment Pending',
-      paymentMethod: paymentMethod === 'upi_qr' ? 'UPI QR Code' : paymentMethod === 'upi_app' ? 'UPI App (GPay/PhonePe)' : paymentMethod === 'card' ? 'Debit/Credit Card' : `Netbanking (${selectedBank})`,
+      feeStatus: 'Pending Verification',
+      paymentMethod: 'UPI',
       transactionId: txnId,
-      status: 'Active',
-      enrollmentDate: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-      attendance: '100%',
-      overallProgress: '0%',
-      modules: [
-        { name: 'Module 1: HTML5 & CSS3 Fundamentals', status: 'Completed', progress: 100 },
-        { name: 'Module 2: JavaScript ES6+ & DOM', status: 'In Progress', progress: 40 },
-        { name: 'Module 3: React.js Component Architecture', status: 'Upcoming', progress: 0 },
-        { name: 'Module 4: Node.js, Express & MongoDB', status: 'Upcoming', progress: 0 }
-      ]
+      status: 'Pending Verification',
+      enrollmentDate: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
     };
 
     try {
-      // 1. LocalStorage update for instant student portal access
+      // 1. Submit to Backend REST API
+      const res = await apiService.createEnrollment(enrollmentRecord);
+
+      // 2. Local storage record for student reference
       const existingRaw = localStorage.getItem('codeguru_my_batches');
       const existing = existingRaw ? JSON.parse(existingRaw) : [];
       localStorage.setItem('codeguru_my_batches', JSON.stringify([enrollmentRecord, ...existing]));
 
-      // 2. Submit to Backend REST API (/api/enrollments)
-      apiService.createEnrollment(enrollmentRecord);
-
-      // 3. Admin CRM lead sync
+      // 3. Lead sync
       const studentLiveLoc = getQuickLocationSync() || 'Online';
-      const newAdminLead = {
-        id: `LEAD-${Date.now().toString().slice(-4)}`,
-        name: enrollmentRecord.studentName,
-        phone: enrollmentRecord.studentPhone,
-        email: enrollmentRecord.studentEmail || '',
+      apiService.submitLead({
+        name: studentName,
+        phone: studentPhone,
+        email: studentEmail || '',
         location: studentLiveLoc,
-        course: `${enrollmentRecord.courseName} (${enrollmentRecord.batchCode})`,
+        course: `${defaultBatch.courseName} (${defaultBatch.batchCode})`,
         status: 'Enrolled',
-        createdAt: new Date().toISOString(),
-        notes: `Enrolled via Student Portal (Live Location: ${studentLiveLoc}, Plan: ${enrollmentRecord.paymentPlan}, Paid: ${enrollmentRecord.paidAmount}, Txn: ${txnId})`
-      };
-      apiService.submitLead(newAdminLead);
+        notes: `Enrolled via Student Portal (UTR: ${txnId}, Plan: ${paymentPlan})`
+      }).catch(() => {});
 
-      const adminLeadsRaw = localStorage.getItem('codeguru_leads');
-      const adminLeads = adminLeadsRaw ? JSON.parse(adminLeadsRaw) : [];
-      localStorage.setItem('codeguru_leads', JSON.stringify([newAdminLead, ...adminLeads]));
-      
-      window.dispatchEvent(new Event('storage'));
-      window.dispatchEvent(new CustomEvent('codeguru_lead_added', { detail: newAdminLead }));
-    } catch (err) {
-      console.error('Error during enrollment payment submission:', err);
-    }
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setStep(3);
       setTimeout(() => {
-        if (onEnrollSuccess) onEnrollSuccess(enrollmentRecord);
-        onClose();
-      }, 2000);
-    }, 1200);
+        setIsSubmitting(false);
+        setStep(3);
+        setTimeout(() => {
+          if (onEnrollSuccess) onEnrollSuccess(enrollmentRecord);
+          onClose();
+        }, 2200);
+      }, 1000);
+    } catch (err) {
+      setIsSubmitting(false);
+      setEnrollError('Failed to record enrollment. Please try again.');
+    }
   };
 
-  // Generate UPI QR Code image URL dynamically
-  const upiQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=codegurru@upi%26pn=CodeGurru%20Academy%26am=${numericFee}%26cu=INR`;
+  // Dynamic QR Code for single UPI ID
+  const upiQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${upiId}&pn=CodeGurru%20Academy&am=${numericFee}&cu=INR`)}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md animate-fadeIn">
@@ -168,155 +151,166 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-black uppercase tracking-widest text-amber-400 bg-amber-400/15 px-2.5 py-0.5 rounded-full border border-amber-400/30">
-                Course Enrollment & Payment
+                Course Enrollment & UPI Payment
               </span>
               <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
-                <ShieldIcon className="!w-3 !h-3" /> Secure 256-Bit SSL
+                <ShieldIcon className="!w-3 !h-3" /> Secure Enrollment
               </span>
             </div>
             <h2 className="text-lg font-black font-heading tracking-tight mt-1 text-white">
-              {step === 1 ? 'Confirm Batch & Contact Details' : step === 2 ? 'Select Payment Method' : 'Enrollment Confirmed!'}
+              {step === 1 ? 'Confirm Batch & Contact Details' : step === 2 ? 'Complete Payment via UPI' : 'Enrollment Submitted!'}
             </h2>
           </div>
-          <button
+          <button 
+            type="button" 
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 hover:text-white transition-colors cursor-pointer"
           >
-            <CloseIcon className="!w-4 !h-4" />
+            <CloseIcon className="!w-5 !h-5" />
           </button>
         </div>
 
-        {/* MODAL BODY */}
-        <div className="p-6 space-y-5 text-xs font-medium text-slate-700">
+        {/* STEP PROGRESS BAR */}
+        <div className="flex border-b border-slate-100 bg-slate-50/80">
+          <div className={`flex-1 py-2 text-center text-xs font-bold transition-colors ${step >= 1 ? 'text-blue-600 border-b-2 border-blue-600 bg-white' : 'text-slate-400'}`}>
+            1. Student Info
+          </div>
+          <div className={`flex-1 py-2 text-center text-xs font-bold transition-colors ${step >= 2 ? 'text-blue-600 border-b-2 border-blue-600 bg-white' : 'text-slate-400'}`}>
+            2. UPI Payment
+          </div>
+          <div className={`flex-1 py-2 text-center text-xs font-bold transition-colors ${step === 3 ? 'text-emerald-600 border-b-2 border-emerald-600 bg-white' : 'text-slate-400'}`}>
+            3. Verification
+          </div>
+        </div>
 
-          {/* STEP 1: PLAN & STUDENT DETAILS */}
+        <div className="p-6">
+          {enrollError && (
+            <div className="mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-bold">
+              {enrollError}
+            </div>
+          )}
+
+          {/* STEP 1: BATCH DETAILS & CONTACT FORM */}
           {step === 1 && (
-            <form onSubmit={handleGoToPayment} className="space-y-4 animate-fadeIn" suppressHydrationWarning>
-              
-              {/* BATCH SUMMARY CARD */}
-              <div className="p-4 bg-gradient-to-br from-slate-50 to-blue-50/50 rounded-2xl border border-slate-200 space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="font-mono text-[11px] font-black text-blue-600 bg-blue-100/70 px-2.5 py-0.5 rounded-full border border-blue-200">
-                    Batch: #{defaultBatch.batchCode}
+            <form onSubmit={handleGoToPayment} className="space-y-4">
+              <div className="p-4 bg-indigo-50/60 border border-indigo-100 rounded-2xl flex flex-col gap-2">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600">Selected Program</span>
+                    <h3 className="text-sm font-black text-slate-900 font-heading">{defaultBatch.courseName}</h3>
+                  </div>
+                  <span className="px-2.5 py-1 bg-white border border-indigo-200 text-indigo-700 text-xs font-black rounded-lg font-mono">
+                    {defaultBatch.batchCode}
                   </span>
-                  <span className="font-black text-base text-slate-900">{defaultBatch.fee}</span>
                 </div>
-
-                <h3 className="text-sm font-black text-slate-900 font-heading">{defaultBatch.courseName}</h3>
-                
-                <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] text-slate-600">
-                  <div className="flex items-center gap-1.5">
-                    <AccessTimeIcon className="!w-3.5 !h-3.5 text-amber-500" />
-                    <span>{defaultBatch.timing}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <PersonIcon className="!w-3.5 !h-3.5 text-indigo-500" />
-                    <span>Mentor: {defaultBatch.mentor}</span>
-                  </div>
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-indigo-100 text-xs text-slate-600">
+                  <div className="flex items-center gap-1.5"><AccessTimeIcon className="!w-3.5 !h-3.5 text-indigo-500" /> {defaultBatch.timing}</div>
+                  <div className="flex items-center gap-1.5"><PersonIcon className="!w-3.5 !h-3.5 text-indigo-500" /> Mentor: {defaultBatch.mentor}</div>
                 </div>
               </div>
 
               {/* PAYMENT PLAN SELECTION */}
               <div>
-                <label className="font-extrabold text-slate-900 block mb-1.5 text-xs">Choose Fee Payment Plan</label>
+                <label className="text-xs font-extrabold text-slate-700 block mb-2">Select Payment Plan</label>
                 <div className="grid grid-cols-2 gap-3">
-                  <button
-                    suppressHydrationWarning
-                    type="button"
-                    onClick={() => setPaymentPlan('Full Payment')}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                      paymentPlan === 'Full Payment'
-                        ? 'border-blue-600 bg-blue-50/80 ring-2 ring-blue-500/20'
-                        : 'border-slate-200 bg-white hover:bg-slate-50'
+                  <label 
+                    className={`p-3 rounded-2xl border-2 cursor-pointer transition-all flex flex-col gap-1 ${
+                      paymentPlan === 'Full Payment' ? 'border-blue-600 bg-blue-50/50' : 'border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    <div className="font-black text-slate-900">Full Payment</div>
-                    <div className="text-[11px] text-emerald-600 font-bold mt-0.5">{defaultBatch.fee}</div>
-                    <span className="text-[9px] text-slate-400 font-normal block">Instant Access + Full Certificate</span>
-                  </button>
+                    <input 
+                      type="radio" 
+                      name="paymentPlan" 
+                      value="Full Payment" 
+                      checked={paymentPlan === 'Full Payment'} 
+                      onChange={() => setPaymentPlan('Full Payment')} 
+                      className="sr-only" 
+                    />
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-black text-slate-900">One-Time Fee</span>
+                      <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">BEST VALUE</span>
+                    </div>
+                    <span className="text-sm font-black text-blue-600 font-mono">{defaultBatch.fee}</span>
+                    <span className="text-[10px] text-slate-500">100% Course Fee cleared</span>
+                  </label>
 
-                  <button
-                    suppressHydrationWarning
-                    type="button"
-                    onClick={() => setPaymentPlan('2 Installments')}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                      paymentPlan === '2 Installments'
-                        ? 'border-blue-600 bg-blue-50/80 ring-2 ring-blue-500/20'
-                        : 'border-slate-200 bg-white hover:bg-slate-50'
+                  <label 
+                    className={`p-3 rounded-2xl border-2 cursor-pointer transition-all flex flex-col gap-1 ${
+                      paymentPlan === 'Installment Plan' ? 'border-blue-600 bg-blue-50/50' : 'border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    <div className="font-black text-slate-900">2 Installments</div>
-                    <div className="text-[11px] text-blue-600 font-bold mt-0.5">{paidAmountVal} Now</div>
-                    <span className="text-[9px] text-slate-400 font-normal block">Remainder ({pendingAmountVal}) in 30 days</span>
-                  </button>
+                    <input 
+                      type="radio" 
+                      name="paymentPlan" 
+                      value="Installment Plan" 
+                      checked={paymentPlan === 'Installment Plan'} 
+                      onChange={() => setPaymentPlan('Installment Plan')} 
+                      className="sr-only" 
+                    />
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-black text-slate-900">Easy Installment</span>
+                      <span className="text-[10px] font-black bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">40% NOW</span>
+                    </div>
+                    <span className="text-sm font-black text-blue-600 font-mono">₹{Math.round(numericFee * 0.4).toLocaleString('en-IN')}</span>
+                    <span className="text-[10px] text-slate-500">Remaining 60% in Month 2</span>
+                  </label>
                 </div>
               </div>
 
-              {/* STUDENT CONTACT DETAILS */}
-              <div className="space-y-3 pt-1">
-                <label className="font-extrabold text-slate-900 block text-xs">Student Registration Details</label>
-                
+              {/* STUDENT CONTACT FORM */}
+              <div className="space-y-3 pt-2">
                 <div>
-                  <label className="text-[11px] font-bold text-slate-600 block mb-1">Full Name *</label>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Student Full Name</label>
                   <input
-                    suppressHydrationWarning
                     type="text"
                     required
                     value={studentName}
                     onChange={(e) => setStudentName(e.target.value)}
-                    placeholder="Enter full student name"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-semibold"
+                    placeholder="Enter your full name"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold focus:border-blue-500 outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[11px] font-bold text-slate-600 block mb-1">Phone Number *</label>
+                    <label className="text-xs font-bold text-slate-700 block mb-1">WhatsApp Mobile</label>
                     <input
-                      suppressHydrationWarning
                       type="tel"
                       required
                       value={studentPhone}
                       onChange={(e) => setStudentPhone(e.target.value)}
-                      placeholder="9876543210"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-semibold"
+                      placeholder="10-digit number"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold focus:border-blue-500 outline-none"
                     />
                   </div>
-
                   <div>
-                    <label className="text-[11px] font-bold text-slate-600 block mb-1">Email Address</label>
+                    <label className="text-xs font-bold text-slate-700 block mb-1">Email Address</label>
                     <input
-                      suppressHydrationWarning
                       type="email"
                       value={studentEmail}
                       onChange={(e) => setStudentEmail(e.target.value)}
                       placeholder="student@example.com"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-semibold"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold focus:border-blue-500 outline-none"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* PROCEED TO PAYMENT BUTTON */}
               <button
-                suppressHydrationWarning
                 type="submit"
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs shadow-md shadow-blue-500/25 transition-all cursor-pointer flex items-center justify-center gap-2 mt-2"
+                className="w-full py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-black text-xs shadow-lg shadow-blue-500/25 transition-all cursor-pointer flex items-center justify-center gap-2 mt-4"
               >
-                Proceed to Payment Gateway ({paidAmountVal}) <ArrowForwardIcon className="!w-4 !h-4" />
+                Proceed to UPI Payment ({paidAmountVal}) <ArrowForwardIcon className="!w-4 !h-4" />
               </button>
-
             </form>
           )}
 
-          {/* STEP 2: PAYMENT GATEWAY SIMULATOR */}
+          {/* STEP 2: UPI PAYMENT GATEWAY */}
           {step === 2 && (
-            <div className="space-y-4 animate-fadeIn">
-              
-              {/* PAYMENT SUMMARY HEADER */}
-              <div className="flex items-center justify-between p-3.5 bg-slate-900 text-white rounded-2xl">
+            <div className="space-y-4">
+              <div className="p-3.5 bg-slate-900 text-white rounded-2xl flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-mono block">Amount Payable</span>
+                  <span className="text-[10px] text-slate-400 uppercase tracking-widest block font-bold">Payable Amount</span>
                   <span className="text-base font-black text-amber-400 font-mono">{paidAmountVal}</span>
                 </div>
                 <button
@@ -328,149 +322,50 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
                 </button>
               </div>
 
-              {/* PAYMENT METHODS SELECTOR TAB */}
-              <div className="grid grid-cols-4 gap-1.5 p-1 bg-slate-100 rounded-2xl">
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('upi_qr')}
-                  className={`py-2 rounded-xl text-[10px] font-extrabold flex flex-col items-center gap-1 transition-all cursor-pointer ${
-                    paymentMethod === 'upi_qr' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <QrCode2Icon className="!w-4 !h-4" /> UPI QR Code
-                </button>
+              {/* UPI QR CODE & DIRECT TRANSFER */}
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-3">
+                <p className="text-[11px] font-bold text-slate-700">Scan QR Code using GPay, PhonePe, Paytm, or any UPI App</p>
+                
+                <div className="inline-block p-3 bg-white border-2 border-slate-900 rounded-2xl shadow-md relative">
+                  <img src={upiQrUrl} alt="UPI Payment QR Code" className="w-36 h-36 mx-auto rounded-lg" />
+                  <span className="absolute -bottom-2 bg-amber-400 text-slate-950 text-[9px] font-black px-2 py-0.5 rounded-full border border-slate-900">
+                    CodeGurru Official UPI
+                  </span>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('upi_app')}
-                  className={`py-2 rounded-xl text-[10px] font-extrabold flex flex-col items-center gap-1 transition-all cursor-pointer ${
-                    paymentMethod === 'upi_app' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <PaymentIcon className="!w-4 !h-4" /> UPI Apps
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('card')}
-                  className={`py-2 rounded-xl text-[10px] font-extrabold flex flex-col items-center gap-1 transition-all cursor-pointer ${
-                    paymentMethod === 'card' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <CreditCardIcon className="!w-4 !h-4" /> Card
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('netbanking')}
-                  className={`py-2 rounded-xl text-[10px] font-extrabold flex flex-col items-center gap-1 transition-all cursor-pointer ${
-                    paymentMethod === 'netbanking' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <AccountBalanceIcon className="!w-4 !h-4" /> Netbanking
-                </button>
+                <div className="flex items-center justify-center gap-2 pt-1">
+                  <span className="font-mono text-xs text-slate-800 font-bold bg-white px-3 py-1 rounded-lg border border-slate-200">
+                    {upiId}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopyUpi}
+                    className="px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <ContentCopyIcon className="!w-3 !h-3" /> {copiedUpi ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
               </div>
 
-              {/* PAYMENT OPTION 1: UPI QR CODE */}
-              {paymentMethod === 'upi_qr' && (
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-3">
-                  <p className="text-[11px] font-bold text-slate-700">Scan QR Code using GPay, PhonePe, Paytm, or BHIM UPI</p>
-                  
-                  <div className="inline-block p-3 bg-white border-2 border-slate-900 rounded-2xl shadow-md relative">
-                    <img src={upiQrUrl} alt="UPI Payment QR Code" className="w-36 h-36 mx-auto rounded-lg" />
-                    <span className="absolute -bottom-2 bg-amber-400 text-slate-950 text-[9px] font-black px-2 py-0.5 rounded-full border border-slate-900">
-                      CodeGurru Verified UPI
-                    </span>
-                  </div>
+              {/* UTR / TRANSACTION REFERENCE NUMBER INPUT */}
+              <div className="space-y-1.5 p-3.5 bg-blue-50/60 border border-blue-200 rounded-2xl">
+                <label className="text-xs font-black text-slate-900 block">
+                  Enter UPI UTR / Transaction Reference Number
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. 429381029482 (12-digit UPI Ref)"
+                  value={upiRefInput}
+                  onChange={(e) => setUpiRefInput(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-white rounded-xl border border-slate-300 font-mono text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
+                />
+                <p className="text-[10px] text-slate-500">
+                  After paying via UPI, enter the 12-digit transaction UTR number shown in your UPI app receipt to submit for verification.
+                </p>
+              </div>
 
-                  <div className="flex items-center justify-center gap-2 pt-1">
-                    <span className="font-mono text-xs text-slate-800 font-bold bg-white px-3 py-1 rounded-lg border border-slate-200">
-                      codegurru@upi
-                    </span>
-                    <button
-                      type="button"
-                      onClick={handleCopyUpi}
-                      className="px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors"
-                    >
-                      <ContentCopyIcon className="!w-3 !h-3" /> {copiedUpi ? 'Copied!' : 'Copy'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* PAYMENT OPTION 2: UPI APPS */}
-              {paymentMethod === 'upi_app' && (
-                <div className="space-y-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl">
-                  <p className="text-[11px] font-bold text-slate-700 mb-2">Select your UPI Application</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {['Google Pay', 'PhonePe', 'Paytm UPI', 'BHIM UPI'].map((app) => (
-                      <button
-                        key={app}
-                        type="button"
-                        onClick={handleCompletePayment}
-                        className="p-3 bg-white hover:bg-blue-50 border border-slate-200 rounded-xl font-bold text-slate-900 text-xs flex items-center justify-center gap-2 transition-all cursor-pointer hover:border-blue-500"
-                      >
-                        <PaymentIcon className="!w-4 !h-4 text-blue-600" /> Pay via {app}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* PAYMENT OPTION 3: CREDIT / DEBIT CARD */}
-              {paymentMethod === 'card' && (
-                <div className="space-y-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl">
-                  <div>
-                    <label className="text-[10px] font-extrabold text-slate-600 block mb-1">Card Number</label>
-                    <input
-                      type="text"
-                      placeholder="4532 •••• •••• 8892"
-                      defaultValue="4532 8920 1192 8892"
-                      className="w-full px-3 py-2 bg-white rounded-xl border border-slate-300 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[10px] font-extrabold text-slate-600 block mb-1">Expiry (MM/YY)</label>
-                      <input
-                        type="text"
-                        placeholder="08/28"
-                        defaultValue="08/28"
-                        className="w-full px-3 py-2 bg-white rounded-xl border border-slate-300 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-extrabold text-slate-600 block mb-1">CVV Code</label>
-                      <input
-                        type="password"
-                        placeholder="•••"
-                        defaultValue="882"
-                        className="w-full px-3 py-2 bg-white rounded-xl border border-slate-300 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* PAYMENT OPTION 4: NETBANKING */}
-              {paymentMethod === 'netbanking' && (
-                <div className="space-y-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl">
-                  <p className="text-[11px] font-bold text-slate-700">Select Bank for Netbanking</p>
-                  <select
-                    value={selectedBank}
-                    onChange={(e) => setSelectedBank(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-white rounded-xl border border-slate-300 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                  >
-                    <option value="HDFC Bank">HDFC Bank</option>
-                    <option value="State Bank of India">State Bank of India (SBI)</option>
-                    <option value="ICICI Bank">ICICI Bank</option>
-                    <option value="Axis Bank">Axis Bank</option>
-                    <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
-                  </select>
-                </div>
-              )}
-
-              {/* FINAL CONFIRM & PAY BUTTON */}
+              {/* FINAL CONFIRM & SUBMIT BUTTON */}
               <button
                 type="button"
                 onClick={handleCompletePayment}
@@ -479,11 +374,11 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2 animate-pulse">
-                    Processing Payment & Saving Enrollment...
+                    Submitting Enrollment for Verification...
                   </span>
                 ) : (
                   <>
-                    <LockIcon className="!w-4 !h-4" /> Confirm Payment & Complete Enrollment ({paidAmountVal})
+                    <LockIcon className="!w-4 !h-4" /> Submit Payment Verification ({paidAmountVal})
                   </>
                 )}
               </button>
@@ -491,22 +386,22 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
             </div>
           )}
 
-          {/* STEP 3: SUCCESS & REDIRECT */}
+          {/* STEP 3: SUBMITTED FOR VERIFICATION */}
           {step === 3 && (
             <div className="py-8 text-center flex flex-col items-center gap-3 animate-fadeIn">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center animate-bounce">
-                <CheckCircleIcon className="!w-12 !h-12" />
+              <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center animate-bounce">
+                <CheckCircleIcon className="!w-12 !h-12 text-emerald-600" />
               </div>
-              <h3 className="text-xl font-black text-slate-900 font-heading">Payment Successful!</h3>
+              <h3 className="text-xl font-black text-slate-900 font-heading">Enrollment Submitted!</h3>
               
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px] text-slate-600 space-y-1 my-1">
-                <div>Transaction ID: <span className="font-bold text-slate-900">{transactionId}</span></div>
+                <div>UTR Reference: <span className="font-bold text-slate-900">{transactionId}</span></div>
                 <div>Course: <span className="font-bold text-blue-600">{defaultBatch.courseName}</span></div>
-                <div>Amount Paid: <span className="font-bold text-emerald-600">{paidAmountVal}</span></div>
+                <div>Status: <span className="font-bold text-amber-600">Pending Admin Verification</span></div>
               </div>
 
               <p className="text-xs text-slate-500 max-w-xs">
-                Congratulations! You have successfully enrolled. Opening your <strong>My Batch</strong> dashboard now...
+                Your payment details have been submitted. Our admission team will verify your UTR and activate your batch access.
               </p>
             </div>
           )}

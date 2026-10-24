@@ -11,19 +11,42 @@ import SchoolIcon from '@mui/icons-material/School';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
-export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDeleteLead, onAddLead }) {
+export default function LeadsView({ leads = [], searchQuery, onUpdateStatus, onDeleteLead, onAddLead }) {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isTodayOnly, setIsTodayOnly] = useState(false);
   const [newLeadData, setNewLeadData] = useState({ name: '', phone: '', email: '', location: 'Ayodhya, UP', course: 'Full Stack Web Development', notes: '' });
 
-  const filteredLeads = leads.filter(lead => 
-    !searchQuery ||
-    lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    lead.phone.includes(searchQuery) ||
-    (lead.email && lead.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (lead.location && lead.location.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    lead.course.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const isToday = (dateString) => {
+    if (!dateString) return false;
+    const leadDate = new Date(dateString);
+    if (isNaN(leadDate.getTime())) return false;
+    const today = new Date();
+    return (
+      leadDate.getDate() === today.getDate() &&
+      leadDate.getMonth() === today.getMonth() &&
+      leadDate.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const todayLeadsCount = (leads || []).filter(l => isToday(l.createdAt)).length;
+
+  const filteredLeads = (leads || []).filter(lead => {
+    if (isTodayOnly && !isToday(lead.createdAt)) {
+      return false;
+    }
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      (lead.name && lead.name.toLowerCase().includes(q)) ||
+      (lead.phone && lead.phone.includes(q)) ||
+      (lead.email && lead.email.toLowerCase().includes(q)) ||
+      (lead.location && lead.location.toLowerCase().includes(q)) ||
+      (lead.city && lead.city.toLowerCase().includes(q)) ||
+      (lead.course && lead.course.toLowerCase().includes(q))
+    );
+  });
 
   const handleCreateSubmit = (e) => {
     e.preventDefault();
@@ -42,20 +65,49 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
     return { phone, email };
   };
 
+  const escapeHtml = (str) => {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  };
+
   const exportCSV = () => {
-    const headers = ['ID,Name,Phone,Email,Location,Course,Status,Date'];
-    const rows = leads.map(l => {
+    const listToExport = filteredLeads;
+    const headers = ['ID', 'Name', 'Phone', 'Email', 'Location', 'Course', 'Status', 'Date'];
+    const sanitizeCsvCell = (val) => {
+      let str = val === null || val === undefined ? '' : String(val);
+      if (/^[=+\-@\t\r]/.test(str)) {
+        str = "'" + str;
+      }
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+    const rows = listToExport.map((l, i) => {
       const { phone, email } = getCleanLeadContact(l);
-      return `"${l.id}","${l.name}","${phone}","${email}","${l.location || 'Ayodhya, UP'}","${l.course}","${l.status}","${l.createdAt}"`;
+      return [
+        sanitizeCsvCell(l.id || l._id || i + 1),
+        sanitizeCsvCell(l.name),
+        sanitizeCsvCell(phone),
+        sanitizeCsvCell(email),
+        sanitizeCsvCell(l.location || l.city || 'Not Specified'),
+        sanitizeCsvCell(l.course),
+        sanitizeCsvCell(l.status),
+        sanitizeCsvCell(l.createdAt ? new Date(l.createdAt).toLocaleDateString('en-IN') : '')
+      ].join(',');
     });
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers, ...rows].join('\n');
-    const encodedUri = encodeURI(csvContent);
+    const csvContent = [headers.join(','), ...rows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `CodeGuru_Leads_${new Date().toISOString().split('T')[0]}.csv`);
+    link.href = url;
+    link.download = `CodeGuru_${isTodayOnly ? 'Today_Leads' : 'Leads'}_${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const exportPDF = () => {
@@ -66,16 +118,18 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
     }
     const tableRows = filteredLeads.map((l, i) => {
       const { phone, email } = getCleanLeadContact(l);
+      const formattedPhone = phone ? (phone.startsWith('+') ? phone : '+91 ' + phone) : '—';
+      const formattedDate = l.createdAt ? new Date(l.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
       return `
       <tr>
         <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">${i + 1}</td>
-        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">${l.name}</td>
-        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; color: #2563eb; font-weight: 600;">${phone ? (phone.startsWith('+') ? phone : '+91 ' + phone) : '—'}</td>
-        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; color: #475569;">${email || '—'}</td>
-        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0;">${l.location || 'Ayodhya, UP'}</td>
-        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0;">${l.course}</td>
-        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0;"><span style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 800;">${l.status}</span></td>
-        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-size: 11px; color: #64748b;">${new Date(l.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">${escapeHtml(l.name)}</td>
+        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; color: #2563eb; font-weight: 600;">${escapeHtml(formattedPhone)}</td>
+        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; color: #475569;">${escapeHtml(email || '—')}</td>
+        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0;">${escapeHtml(l.location || 'Ayodhya, UP')}</td>
+        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0;">${escapeHtml(l.course)}</td>
+        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0;"><span style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 800;">${escapeHtml(l.status)}</span></td>
+        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; font-size: 11px; color: #64748b;">${escapeHtml(formattedDate)}</td>
       </tr>
     `;
     }).join('');
@@ -114,7 +168,7 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
               </div>
             </div>
             <div class="meta">
-              <div>Date: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+              <div>Date: ${escapeHtml(new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }))}</div>
               <div>Total Inquiries: ${filteredLeads.length}</div>
             </div>
           </div>
@@ -124,6 +178,7 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
                 <th>#</th>
                 <th>Student Name</th>
                 <th>Phone Number</th>
+                <th>Email Address</th>
                 <th>Location</th>
                 <th>Course Inquiry</th>
                 <th>Status</th>
@@ -158,32 +213,107 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
     }
   };
 
+  const renderLeadNotes = (lead) => {
+    const notes = (lead.notes || '').trim();
+    if (!notes) return <span className="text-slate-400 italic text-[11px] font-normal">—</span>;
+
+    const nameMatch = notes.match(/Name:\s*([^,\n]+)/i);
+    const phoneMatch = notes.match(/Phone:\s*([^,\n]+)/i);
+    const emailMatch = notes.match(/Email:\s*([^,\n]+)/i);
+
+    if (nameMatch && phoneMatch) {
+      const name = nameMatch[1].trim();
+      const phone = phoneMatch[1].trim();
+      const email = emailMatch ? emailMatch[1].trim() : (lead.email || '').trim();
+
+      return (
+        <div className="flex flex-col gap-1 text-[11px] leading-tight py-1 select-text">
+          <div className="flex items-center gap-1.5 whitespace-nowrap">
+            <span className="font-bold text-slate-800">Name:</span>
+            <span className="font-semibold text-slate-900">{name}</span>
+          </div>
+          <div className="flex items-center gap-1.5 whitespace-nowrap">
+            <span className="font-bold text-slate-800">Phone:</span>
+            <a
+              href={`tel:${phone.replace(/[^0-9+]/g, '')}`}
+              className="font-semibold text-blue-600 hover:underline inline-flex items-center gap-1"
+            >
+              <PhoneIcon className="!w-3 !h-3 text-blue-500 shrink-0" />
+              <span>{phone.startsWith('+') ? phone : `+91 ${phone}`}</span>
+            </a>
+          </div>
+          {email && (
+            <div className="flex items-center gap-1.5 whitespace-nowrap">
+              <span className="font-bold text-slate-800">Email:</span>
+              <a
+                href={`mailto:${email}`}
+                className="font-medium text-slate-600 hover:text-blue-600 hover:underline inline-flex items-center gap-1"
+              >
+                <EmailIcon className="!w-3 !h-3 text-slate-400 shrink-0" />
+                <span>{email}</span>
+              </a>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (notes.includes('\n')) {
+      return (
+        <div className="flex flex-col gap-1 text-[11px] leading-tight py-1 select-text">
+          {notes.split('\n').filter(Boolean).map((line, idx) => (
+            <div key={idx} className="text-slate-700 font-medium whitespace-nowrap">
+              {line.trim()}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <span className="text-slate-600 font-medium whitespace-normal break-words leading-relaxed select-text">
+        {notes}
+      </span>
+    );
+  };
+
   return (
     <div className="flex flex-col gap-6 animate-fade-in pb-8 select-none">
       
-      {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* HEADER SECTION */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 font-heading tracking-tight">
-            Lead Inquiries Manager
-          </h1>
-          <p className="text-xs font-semibold text-slate-500">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 font-heading tracking-tight">
+              Lead Inquiries Manager
+            </h1>
+            {todayLeadsCount > 0 && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>{todayLeadsCount} New Today</span>
+              </span>
+            )}
+          </div>
+          <p className="text-xs font-semibold text-slate-500 mt-0.5">
             View, search, update status, and manage all student contact inquiries.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* ACTION BUTTONS */}
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={exportCSV}
-            className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-white border border-slate-200/90 hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+            title="Download CSV Spreadsheet"
           >
-            <DownloadIcon className="!w-4 !h-4" />
+            <DownloadIcon className="!w-4 !h-4 text-slate-500" />
             <span>Export CSV</span>
           </button>
 
           <button
             onClick={exportPDF}
-            className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-white border border-slate-200/90 hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+            title="Download Printable PDF Report"
           >
             <PictureAsPdfIcon className="!w-4 !h-4 text-rose-500" />
             <span>Export PDF</span>
@@ -191,12 +321,75 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs shadow-md shadow-blue-500/20 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
           >
             <AddIcon className="!w-4 !h-4" />
             <span>Add Manual Lead</span>
           </button>
         </div>
+      </div>
+
+      {/* QUICK VIEW SEGMENTED CONTROLS & FILTER BAR */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-2 sm:px-3 sm:py-2.5 rounded-2xl border border-slate-200/80 shadow-2xs">
+        
+        {/* SEGMENTED TOGGLE PILLS */}
+        <div className="flex items-center gap-1 bg-slate-100/90 p-1 rounded-xl w-fit">
+          <button
+            onClick={() => setIsTodayOnly(false)}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all duration-200 flex items-center gap-2 cursor-pointer ${
+              !isTodayOnly
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <span>All Leads</span>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+              !isTodayOnly ? 'bg-slate-100 text-slate-800' : 'bg-slate-200/70 text-slate-500'
+            }`}>
+              {leads.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setIsTodayOnly(true)}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all duration-200 flex items-center gap-2 cursor-pointer ${
+              isTodayOnly
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-500/25'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <span className="relative flex h-2 w-2">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isTodayOnly ? 'bg-white opacity-80' : 'bg-emerald-400 opacity-75'}`} />
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${isTodayOnly ? 'bg-white' : 'bg-emerald-500'}`} />
+            </span>
+            <span>Today's Leads</span>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+              isTodayOnly ? 'bg-white/25 text-white' : 'bg-emerald-100 text-emerald-800'
+            }`}>
+              {todayLeadsCount}
+            </span>
+          </button>
+        </div>
+
+        {/* ACTIVE FILTER STATUS / METRICS */}
+        {isTodayOnly ? (
+          <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 via-indigo-50/70 to-sky-50 px-3.5 py-1.5 rounded-xl border border-blue-200/80 text-blue-900 text-xs font-bold animate-fade-in self-start sm:self-auto shadow-2xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+            <span>Showing: <strong>Today's Inquiries</strong> ({filteredLeads.length} of {leads.length})</span>
+            <button
+              onClick={() => setIsTodayOnly(false)}
+              className="ml-1 px-1.5 py-0.5 rounded-md bg-blue-100/70 hover:bg-blue-200 text-blue-800 hover:text-blue-950 font-black text-[11px] transition-colors cursor-pointer flex items-center gap-0.5"
+              title="Show all inquiries"
+            >
+              <span>Show All</span>
+              <CloseIcon className="!w-3 !h-3" />
+            </button>
+          </div>
+        ) : (
+          <div className="text-xs font-semibold text-slate-400 px-3 hidden sm:block">
+            Showing all {filteredLeads.length} student records
+          </div>
+        )}
       </div>
 
       {/* LEADS TABLE */}
@@ -218,7 +411,30 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
             </thead>
 
             <tbody className="divide-y divide-slate-100 font-semibold text-slate-800">
-              {filteredLeads.map((lead) => (
+              {filteredLeads.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="py-12 text-center text-slate-500">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <CalendarTodayIcon className="!w-8 !h-8 text-slate-300" />
+                      <p className="text-sm font-bold text-slate-700">
+                        {isTodayOnly ? "No student inquiries received today yet." : "No leads found."}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        {isTodayOnly ? "New website student inquiry leads will show up here automatically." : "Try a different search keyword."}
+                      </p>
+                      {isTodayOnly && (
+                        <button
+                          onClick={() => setIsTodayOnly(false)}
+                          className="mt-1 px-4 py-1.5 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 transition-colors cursor-pointer"
+                        >
+                          Show All Leads ({leads.length})
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredLeads.map((lead) => (
                 <tr key={lead.id} className="hover:bg-slate-50/80 transition-colors">
                   <td className="py-3.5 px-4 whitespace-nowrap">
                     <div className="flex items-center gap-2.5">
@@ -226,7 +442,14 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
                         {lead.name ? lead.name[0].toUpperCase() : 'L'}
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-bold text-slate-900 whitespace-nowrap">{lead.name}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-slate-900 whitespace-nowrap">{lead.name}</span>
+                          {isToday(lead.createdAt) && (
+                            <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200 tracking-tight uppercase">
+                              Today
+                            </span>
+                          )}
+                        </div>
                         <span className="text-[10px] text-slate-400 font-mono whitespace-nowrap">{lead.id}</span>
                       </div>
                     </div>
@@ -252,7 +475,7 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
                           {email ? (
                             <a href={`mailto:${email}`} className="text-slate-700 font-semibold hover:text-blue-600 hover:underline inline-flex items-center gap-1.5 whitespace-nowrap" title={email}>
                               <EmailIcon className="!w-3.5 !h-3.5 text-slate-400 shrink-0" />
-                              <span className="whitespace-nowrap truncate max-w-[170px]">{email}</span>
+                              <span className="whitespace-nowrap">{email}</span>
                             </a>
                           ) : (
                             <span className="text-slate-400 italic text-[11px] font-normal">—</span>
@@ -265,7 +488,16 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
                   <td className="py-3.5 px-4 whitespace-nowrap">
                     <span className="inline-flex items-center gap-1 text-cyan-800 bg-cyan-50 border border-cyan-200/80 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap">
                       <LocationOnIcon className="!w-3.5 !h-3.5 text-cyan-600 shrink-0" />
-                      <span className="whitespace-nowrap">{lead.location || 'Ayodhya, UP'}</span>
+                      <span className="whitespace-nowrap">{lead.location || lead.city || 'Not Specified'}</span>
+                      {lead.location_source === 'gps' && (
+                        <span className="ml-1 text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-black uppercase tracking-tight">GPS</span>
+                      )}
+                      {lead.location_source === 'manual' && (
+                        <span className="ml-1 text-[9px] bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded font-bold uppercase tracking-tight">Manual</span>
+                      )}
+                      {lead.location_source === 'ip' && (
+                        <span className="ml-1 text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold uppercase tracking-tight">IP</span>
+                      )}
                     </span>
                   </td>
 
@@ -289,8 +521,8 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
                     </select>
                   </td>
 
-                  <td className="py-3.5 px-4 max-w-xs text-slate-500 font-medium truncate whitespace-nowrap">
-                    {lead.notes || '—'}
+                  <td className="py-3.5 px-4 min-w-[260px] max-w-md text-slate-600 font-medium select-text" title={lead.notes}>
+                    {renderLeadNotes(lead)}
                   </td>
 
                   <td className="py-3.5 px-4 text-slate-500 font-medium whitespace-nowrap">
@@ -299,15 +531,17 @@ export default function LeadsView({ leads, searchQuery, onUpdateStatus, onDelete
 
                   <td className="py-3.5 px-4 text-right whitespace-nowrap">
                     <button
+                      type="button"
                       onClick={() => onDeleteLead(lead.id, lead)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-xs shadow-xs hover:shadow-md transition-all duration-150 cursor-pointer active:scale-95 group"
                       title="Delete Lead"
                     >
-                      <DeleteOutlineIcon className="!w-4 !h-4" />
+                      <DeleteOutlineIcon className="!w-4 !h-4 text-white group-hover:scale-110 transition-transform" />
+                      <span>Delete</span>
                     </button>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

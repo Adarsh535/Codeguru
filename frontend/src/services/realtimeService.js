@@ -7,19 +7,10 @@
  * updates live in real time whenever Admin or Backend changes data.
  */
 
+import { getApiBase } from '../models/apiClient';
+
 function getStreamUrl() {
-  if (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_BASE_URL) {
-    return `${process.env.NEXT_PUBLIC_API_BASE_URL}/realtime/stream`;
-  }
-  if (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_URL) {
-    return `${process.env.NEXT_PUBLIC_API_URL}/realtime/stream`;
-  }
-  if (typeof window !== 'undefined' && window.location && window.location.hostname) {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:5000/api/realtime/stream';
-    }
-  }
-  return 'https://369.codegurru.in/api/realtime/stream';
+  return `${getApiBase()}/realtime/stream`;
 }
 
 class RealtimeSyncManager {
@@ -54,16 +45,7 @@ class RealtimeSyncManager {
     // 2. Start SSE Stream
     this.connectSSE();
 
-    // 3. Fallback smart polling: every 4 seconds when page is active
-    if (!this.pollingInterval) {
-      this.pollingInterval = setInterval(() => {
-        if (typeof document !== 'undefined' && !document.hidden) {
-          this.notify('all', { source: 'polling_heartbeat' });
-        }
-      }, 4000);
-    }
-
-    // 4. Instant revalidation when tab gains focus
+    // 2. Window focus and visibility revalidation
     window.addEventListener('focus', () => {
       this.notify('all', { source: 'window_focus' });
     });

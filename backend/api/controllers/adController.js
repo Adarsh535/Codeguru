@@ -6,6 +6,7 @@
  * MongoDB Atlas / local persistence and real-time syncing.
  */
 
+import mongoose from 'mongoose';
 import { Ad } from '../../models/Ad.js';
 import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
 
@@ -23,22 +24,11 @@ const DEFAULT_INITIAL_AD = {
   clicks: 0
 };
 
-/**
- * Auto-seed default ad if none exist in the collection
- */
-const ensureDefaultAdExists = async () => {
-  try {
-    const count = await Ad.countDocuments();
-    if (count === 0) {
-      const seeded = await Ad.create(DEFAULT_INITIAL_AD);
-      console.log('✅ [adController] Seeded default Arena Animation ad banner in database');
-      return [seeded];
-    }
-  } catch (err) {
-    console.warn('[adController] Error auto-seeding ad banner:', err.message);
-  }
-  return null;
-};
+// In-memory cache for daily click throttling per IP+Ad (Section 2.5, B-T)
+const adClickCache = new Map();
+setInterval(() => {
+  adClickCache.clear();
+}, 24 * 60 * 60 * 1000); // Reset daily
 
 /**
  * @route   GET /api/ads
@@ -47,8 +37,7 @@ const ensureDefaultAdExists = async () => {
  */
 export const getAds = async (req, res) => {
   try {
-    const ads = await Ad.find().sort({ displayOrder: 1, createdAt: -1 });
-
+    const ads = await Ad.find().sort({ displayOrder: 1, createdAt: -1 }).lean();
     return res.json({
       success: true,
       count: ads.length,
@@ -58,7 +47,7 @@ export const getAds = async (req, res) => {
     console.error('[adController getAds Error]:', err.message);
     return res.status(500).json({
       success: false,
-      message: err.message,
+      message: 'Failed to retrieve advertisements',
       data: [DEFAULT_INITIAL_AD]
     });
   }
@@ -71,13 +60,14 @@ export const getAds = async (req, res) => {
  */
 export const getActiveAds = async (req, res) => {
   try {
-    const position = req.query.position || 'home_featured';
+    // Cast query.position strictly to string to avoid NoSQL object injection (Section 2.6)
+    const position = typeof req.query.position === 'string' ? req.query.position.trim() : 'home_featured';
     let query = { active: true };
     if (position && position !== 'all') {
       query.position = position;
     }
 
-    let ads = await Ad.find(query).sort({ displayOrder: 1, createdAt: -1 });
+    let ads = await Ad.find(query).sort({ displayOrder: 1, createdAt: -1 }).lean();
 
     return res.json({
       success: true,
@@ -87,7 +77,7 @@ export const getActiveAds = async (req, res) => {
     console.error('[adController getActiveAds Error]:', err.message);
     return res.status(500).json({
       success: false,
-      message: err.message,
+      message: 'Failed to retrieve active advertisements',
       data: [DEFAULT_INITIAL_AD]
     });
   }
@@ -120,19 +110,19 @@ export const createAd = async (req, res) => {
     }
 
     const newAd = await Ad.create({
-      title: title || 'New Promotional Ad',
-      subtitle: subtitle || '',
-      imageUrl,
-      linkUrl: linkUrl || '',
-      badge: badge || 'SPECIAL FEATURE',
-      position: position || 'home_featured',
+      title: typeof title === 'string' ? title.trim() : 'New Promotional Ad',
+      subtitle: typeof subtitle === 'string' ? subtitle.trim() : '',
+      imageUrl: typeof imageUrl === 'string' ? imageUrl.trim() : '',
+      linkUrl: typeof linkUrl === 'string' ? linkUrl.trim() : '',
+      badge: typeof badge === 'string' ? badge.trim() : 'SPECIAL FEATURE',
+      position: typeof position === 'string' ? position.trim() : 'home_featured',
       openInNewTab: openInNewTab !== undefined ? Boolean(openInNewTab) : true,
       active: active !== undefined ? Boolean(active) : true,
       displayOrder: displayOrder !== undefined ? Number(displayOrder) : 0,
       clicks: 0
     });
 
-    broadcastRealtimeEvent('ads', newAd);
+    broadcastRealtimeEvent('ads_updated', { type: 'ads_updated' });
 
     return res.status(201).json({
       success: true,
@@ -143,21 +133,38 @@ export const createAd = async (req, res) => {
     console.error('[adController createAd Error]:', err.message);
     return res.status(500).json({
       success: false,
-      message: err.message
+      message: 'Failed to create ad banner'
     });
   }
 };
 
 /**
  * @route   PUT /api/ads/:id
- * @desc    Updates existing ad banner by ID
+ * @desc    Updates existing ad banner by ID (whitelisted fields only)
  * @access  Admin Private
  */
 export const updateAd = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid Ad ID' });
+    }
+
+    // Whitelist allowed fields only (B22)
+    const allowed = {};
+    const b = req.body || {};
+    if (typeof b.title === 'string') allowed.title = b.title.trim();
+    if (typeof b.subtitle === 'string') allowed.subtitle = b.subtitle.trim();
+    if (typeof b.imageUrl === 'string') allowed.imageUrl = b.imageUrl.trim();
+    if (typeof b.linkUrl === 'string') allowed.linkUrl = b.linkUrl.trim();
+    if (typeof b.badge === 'string') allowed.badge = b.badge.trim();
+    if (typeof b.position === 'string') allowed.position = b.position.trim();
+    if (b.openInNewTab !== undefined) allowed.openInNewTab = Boolean(b.openInNewTab);
+    if (b.active !== undefined) allowed.active = Boolean(b.active);
+    if (b.displayOrder !== undefined) allowed.displayOrder = Number(b.displayOrder);
+
     const updatedAd = await Ad.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: allowed },
       { new: true, runValidators: true }
     );
 
@@ -168,7 +175,7 @@ export const updateAd = async (req, res) => {
       });
     }
 
-    broadcastRealtimeEvent('ads', updatedAd);
+    broadcastRealtimeEvent('ads_updated', { type: 'ads_updated' });
 
     return res.json({
       success: true,
@@ -179,7 +186,7 @@ export const updateAd = async (req, res) => {
     console.error('[adController updateAd Error]:', err.message);
     return res.status(500).json({
       success: false,
-      message: err.message
+      message: 'Failed to update ad banner'
     });
   }
 };
@@ -191,6 +198,10 @@ export const updateAd = async (req, res) => {
  */
 export const deleteAd = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid Ad ID' });
+    }
+
     const deleted = await Ad.findByIdAndDelete(req.params.id);
 
     if (!deleted) {
@@ -200,7 +211,7 @@ export const deleteAd = async (req, res) => {
       });
     }
 
-    broadcastRealtimeEvent('ads', { id: req.params.id, deleted: true });
+    broadcastRealtimeEvent('ads_updated', { type: 'ads_updated' });
 
     return res.json({
       success: true,
@@ -210,21 +221,34 @@ export const deleteAd = async (req, res) => {
     console.error('[adController deleteAd Error]:', err.message);
     return res.status(500).json({
       success: false,
-      message: err.message
+      message: 'Failed to delete ad banner'
     });
   }
 };
 
 /**
  * @route   POST /api/ads/:id/click
- * @desc    Increments click analytics counter for an ad banner
+ * @desc    Increments click analytics counter for an ad banner with daily rate limiting per IP+Ad (B-T)
  * @access  Public
  */
 export const trackAdClick = async (req, res) => {
   try {
-    await Ad.findByIdAndUpdate(req.params.id, { $inc: { clicks: 1 } });
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid Ad ID' });
+    }
+
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    const clickKey = `${ip}_${req.params.id}`;
+
+    // Throttle: max 1 count per IP per ad per day
+    if (!adClickCache.has(clickKey)) {
+      adClickCache.set(clickKey, Date.now());
+      await Ad.findByIdAndUpdate(req.params.id, { $inc: { clicks: 1 } });
+    }
+
     return res.json({ success: true });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    console.error('[adController trackAdClick Error]:', err.message);
+    return res.status(500).json({ success: false, message: 'Failed to record click' });
   }
 };

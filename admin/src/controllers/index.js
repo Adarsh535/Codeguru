@@ -1,14 +1,14 @@
 /**
  * ============================================================================
- * CONTROLLER LAYER BARREL EXPORT (controllers/index.js)
+ * ADMIN MVC: CONTROLLERS BARREL EXPORT (admin/src/controllers/index.js)
  * ============================================================================
- * Exports all custom controller hooks for the Admin MVC architecture.
+ * Centralized export for all admin custom hook controllers.
  */
 
-export { useLeadsController } from './useLeadsController';
+export { useAdsController } from './useAdsController';
 export { useBannersController } from './useBannersController';
 export { useCoursesController } from './useCoursesController';
+export { useLeadsController } from './useLeadsController';
 export { usePlacementsController } from './usePlacementsController';
-export { useTeamController } from './useTeamController';
 export { useSystemController } from './useSystemController';
-export { useAuthController } from './useAuthController';
+export { useTeamController } from './useTeamController';

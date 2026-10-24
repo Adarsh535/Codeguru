@@ -1,13 +1,13 @@
 /**
  * ============================================================================
- * FRONTEND CONTROLLERS BARREL EXPORT (controllers/index.js)
+ * FRONTEND MVC: CONTROLLERS BARREL EXPORT (frontend/src/controllers/index.js)
  * ============================================================================
- * Exports all custom controller hooks for the Frontend MVC architecture.
+ * Centralized export for all custom hook controllers in the MVC architecture.
  */
 
-export { useBannersController } from './useBannersController';
-export { useCoursesController } from './useCoursesController';
-export { useTeamController } from './useTeamController';
-export { usePlacementController } from './usePlacementController';
 export { useContactFormController } from './useContactFormController';
-export { useAutoSlideController } from './useAutoSlideController';
+export { usePlacementController } from './usePlacementController';
+export { useCoursesController } from './useCoursesController';
+export { useBannersController } from './useBannersController';
+export { useTeamController } from './useTeamController';
+export { useBatchController } from './useBatchController';

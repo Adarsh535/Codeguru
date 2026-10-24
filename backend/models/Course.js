@@ -48,7 +48,7 @@ const courseSchema = new mongoose.Schema({
   certificateProvided: { type: String, default: 'Provided' }
 }, {
   timestamps: true,
-  strict: false
+  strict: true
 });
 
 export const Course = mongoose.models.Course || mongoose.model('Course', courseSchema);

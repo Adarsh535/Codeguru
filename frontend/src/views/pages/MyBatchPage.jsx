@@ -35,62 +35,34 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
       if (batchesRaw) {
         setEnrolledBatches(JSON.parse(batchesRaw));
       } else {
-        // Fallback default sample enrollment if empty
-        const defaultEnrollment = [
-          {
-            id: 'ENR-88210',
-            studentId: 'CG-STU-8821',
-            courseName: 'Full Stack Web Development (MERN)',
-            batchCode: 'FS-2026-42',
-            timing: '09:00 AM - 11:00 AM (Mon-Fri)',
-            mentor: 'Vikrant Shinde',
-            startDate: '15 Sept 2026',
-            fee: '₹24,999',
-            paidAmount: '₹24,999',
-            pendingAmount: '₹0',
-            feeStatus: 'Paid',
-            enrollmentDate: '01 Sept 2026',
-            attendance: '94%',
-            overallProgress: '45%',
-            zoomLink: 'https://zoom.us/j/codeguru-batch-42',
-            modules: [
-              { name: 'Module 1: HTML5, CSS3 & Responsive Design', status: 'Completed', progress: 100, lessons: 8 },
-              { name: 'Module 2: JavaScript ES6+ & DOM Programming', status: 'In Progress', progress: 75, lessons: 12 },
-              { name: 'Module 3: React.js Component Architecture & Redux', status: 'Upcoming', progress: 0, lessons: 15 },
-              { name: 'Module 4: Node.js, Express REST API & MongoDB', status: 'Upcoming', progress: 0, lessons: 14 }
-            ]
-          }
-        ];
-        setEnrolledBatches(defaultEnrollment);
+        setEnrolledBatches([]);
       }
     } catch (err) {
       console.error('Error loading my batches:', err);
+      setEnrolledBatches([]);
     }
   }, []);
 
   const currentBatch = enrolledBatches[0];
 
-  const [certs, setCerts] = useState(() => {
-    try {
-      const saved = localStorage.getItem('codeguru_certificates');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return [
-      { id: 'CG-CERT-2026-00047', studentId: 'CG-STU-8821', studentName: 'Priya Singh', course: 'Full Stack Web Development (MERN)', duration: '6 Months', monthsCompleted: 6, totalMonths: 6, status: 'Pending Approval', issueDate: null },
-      { id: 'CG-CERT-2026-00045', studentId: 'CG-STU-0001', studentName: 'Aarav Patel', course: 'Full Stack Web Development (MERN)', duration: '6 Months', monthsCompleted: 6, totalMonths: 6, status: 'Approved', issueDate: '05 Sep 2026' },
-      { id: 'CG-CERT-2026-00046', studentId: 'CG-STU-0002', studentName: 'Diya Sharma', course: 'Data Science & AI Masterclass', duration: '6 Months', monthsCompleted: 2, totalMonths: 6, status: 'Ongoing', issueDate: null }
-    ];
-  });
-
+  // Initialize with empty array to prevent hydration mismatch (F25)
+  const [certs, setCerts] = useState([]);
   const [selectedCert, setSelectedCert] = useState(null);
 
   useEffect(() => {
     const syncCerts = () => {
       try {
         const saved = localStorage.getItem('codeguru_certificates');
-        if (saved) setCerts(JSON.parse(saved));
-      } catch (e) {}
+        if (saved) {
+          setCerts(JSON.parse(saved));
+        } else {
+          setCerts([]);
+        }
+      } catch (e) {
+        setCerts([]);
+      }
     };
+    syncCerts();
     window.addEventListener('storage', syncCerts);
     window.addEventListener('codeguru_certificate_updated', syncCerts);
     return () => {
@@ -100,9 +72,9 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
   }, []);
 
   const studentCert = certs.find(c => 
-    (user?.name && c.studentName.toLowerCase().includes(user.name.toLowerCase())) || 
-    c.studentId === currentBatch?.studentId
-  ) || certs[0];
+    (user?.name && c.studentName?.toLowerCase().includes(user.name.toLowerCase())) || 
+    (currentBatch?.studentId && c.studentId === currentBatch.studentId)
+  ) || null;
 
   const printBlackGoldCertificate = (cert) => {
     const printWin = window.open('', '_blank');
@@ -374,7 +346,12 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
             )}
 
             {/* TAB 2: CERTIFICATE STATUS & DOWNLOAD */}
-            {activeTab === 'certificate' && (
+            {activeTab === 'certificate' && (!studentCert ? (
+              <div className="p-8 text-center text-slate-500 font-bold bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                <div className="text-base font-extrabold text-slate-800">No Certificate Issued Yet</div>
+                <p className="text-xs text-slate-500">Your graduation certificate will become available upon completion of the 6-month batch curriculum and admin verification.</p>
+              </div>
+            ) : (
               <div className="space-y-5">
                 <div className="p-6 rounded-3xl bg-slate-900 text-white space-y-4 relative overflow-hidden">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -453,7 +430,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
                   </div>
                 </div>
               </div>
-            )}
+            ))}
 
             {/* TAB 3: RESOURCES */}
             {activeTab === 'resources' && (

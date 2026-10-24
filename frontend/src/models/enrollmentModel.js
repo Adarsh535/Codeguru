@@ -49,8 +49,8 @@ export const enrollmentModel = {
       const data = await res.json();
       return data;
     } catch (err) {
-      console.warn('Backend enrollment submission fallback:', err.message);
-      return { success: true, data: enrollmentData, fallback: true };
+      console.error('Backend enrollment submission failed:', err.message);
+      return { success: false, message: 'Enrollment submission failed. Please check connection and try again.' };
     }
   }
 };

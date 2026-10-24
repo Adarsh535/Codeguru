@@ -753,12 +753,18 @@ export function CommunicationView() {
             />
           </div>
 
-          <button
-            onClick={() => alert('Broadcast Message Dispatched!')}
-            className="px-6 py-2.5 rounded-xl bg-blue-600 text-white font-extrabold text-xs shadow-md hover:bg-blue-700 flex items-center gap-2"
-          >
-            <Send className="w-4 h-4" /> Send Broadcast via WhatsApp
-          </button>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
+            <button
+              onClick={() => alert('WhatsApp Business API integration is coming soon. Please configure the WhatsApp Cloud API webhook in Settings to enable automated broadcasts.')}
+              className="px-6 py-2.5 rounded-xl bg-blue-600 text-white font-extrabold text-xs shadow-md hover:bg-blue-700 flex items-center gap-2 cursor-pointer transition-all"
+            >
+              <Send className="w-4 h-4" /> Send Broadcast via WhatsApp
+            </button>
+            <span className="px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-bold inline-flex items-center gap-1.5 w-fit">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              Requires WhatsApp Business API Gateway (Coming Soon)
+            </span>
+          </div>
         </div>
       </div>
     </div>

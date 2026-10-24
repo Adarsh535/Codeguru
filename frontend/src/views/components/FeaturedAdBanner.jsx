@@ -31,14 +31,11 @@ export default function FeaturedAdBanner({ onOpenContactModal }) {
 
     fetchAd();
 
-    // Poll every 5s so admin changes reflect in real-time
-    const interval = setInterval(fetchAd, 5000);
     const handleFocus = () => fetchAd();
     window.addEventListener('focus', handleFocus);
 
     return () => {
       isMounted = false;
-      clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
     };
   }, []);
@@ -80,9 +77,15 @@ export default function FeaturedAdBanner({ onOpenContactModal }) {
           {BannerContent}
         </a>
       ) : (
-        <div onClick={handleClick} className="w-full" title={ad.title}>
+        <button
+          suppressHydrationWarning
+          type="button"
+          onClick={handleClick}
+          className="w-full text-left border-0 bg-transparent p-0 cursor-pointer"
+          title={ad.title}
+        >
           {BannerContent}
-        </div>
+        </button>
       )}
     </section>
   );

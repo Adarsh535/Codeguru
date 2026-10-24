@@ -18,51 +18,41 @@ export function usePlacementController() {
   const [isPlacementModalOpen, setIsPlacementModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
-  // Auto-detect visitor location on website load
+  // Load saved location on load without auto-requesting intrusive GPS permissions (F9)
   useEffect(() => {
     let isMounted = true;
-
-    const applyDetectedLocation = (locObj) => {
-      if (!isMounted || !locObj) return;
-      const sanitized = sanitizeLocation(locObj);
-      setSelectedLocation(sanitized);
-      try {
-        localStorage.setItem('codeguru_selected_location', JSON.stringify(sanitized));
-      } catch (e) {}
-      window.dispatchEvent(new Event('codeguru_location_updated'));
-      apiService.pingTraffic('', sanitized.name);
-    };
-
-    const detectLocation = async () => {
-      // 1. Initial cached check
-      try {
-        const saved = localStorage.getItem('codeguru_selected_location') || localStorage.getItem('codeguru_detected_location');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed && parsed.name && isMounted) {
-            const sanitized = sanitizeLocation(parsed);
-            setSelectedLocation(sanitized);
-          }
-        }
-      } catch (e) {}
-
-      // 2. Real-time GPS & IP detection
-      try {
-        const loc = await detectStudentRealLocation();
-        if (isMounted && loc?.name) {
-          applyDetectedLocation(loc);
-        }
-      } catch (err) {
-        if (isMounted && !selectedLocation) {
-          applyDetectedLocation(DEFAULT_AYODHYA_LOCATION);
+    try {
+      const saved = localStorage.getItem('codeguru_selected_location');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.name && isMounted) {
+          setSelectedLocation(sanitizeLocation(parsed));
+          return;
         }
       }
-    };
+    } catch (e) {}
 
-    detectLocation();
-
+    if (isMounted) {
+      setSelectedLocation(DEFAULT_AYODHYA_LOCATION);
+    }
     return () => { isMounted = false; };
   }, []);
+
+  const requestLocation = async () => {
+    try {
+      const loc = await detectStudentRealLocation();
+      if (loc?.name) {
+        const sanitized = sanitizeLocation(loc);
+        setSelectedLocation(sanitized);
+        try {
+          localStorage.setItem('codeguru_selected_location', JSON.stringify(sanitized));
+        } catch (e) {}
+        window.dispatchEvent(new Event('codeguru_location_updated'));
+      }
+    } catch (err) {
+      console.warn('[usePlacementController] Manual location request cancelled or failed:', err.message);
+    }
+  };
 
   // Filter placements by location & category (with fallback to show all drives if town has no specific filter)
   const filteredPlacements = placements.filter(item => {
@@ -104,6 +94,7 @@ export function usePlacementController() {
     setIsPlacementModalOpen,
     isContactModalOpen,
     setIsContactModalOpen,
-    handleResetFilters
+    handleResetFilters,
+    requestLocation
   };
 }

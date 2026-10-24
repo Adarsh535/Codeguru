@@ -11,10 +11,12 @@ import { authModel } from '../models/authModel';
 
 export function useSystemController(user, updateUser) {
   const [email, setEmail] = useState(user?.email || 'admin@codeguru.com');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [dbStatus, setDbStatus] = useState('Connected to MongoDB Atlas Cloud (cluster0.illbds4.mongodb.net)');
-  const [dbUri, setDbUri] = useState('mongodb+srv://Adarshverma:adarshverma@3213@cluster0.illbds4.mongodb.net/codeguru_db');
+  const [dbStatus, setDbStatus] = useState('Checking database connection...');
+  const [dbConnected, setDbConnected] = useState(true);
+  const [dbUri, setDbUri] = useState('Database: connected (Cloud Atlas Managed Cluster)');
   const [dbProvider, setDbProvider] = useState('MongoDB Atlas Cloud Cluster & REST API Endpoint');
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState(null);
@@ -35,47 +37,29 @@ export function useSystemController(user, updateUser) {
   useEffect(() => {
     systemModel.checkHealth()
       .then(data => {
-        if (data.success && data.database) {
-          const mode = data.database.mode || (data.database.isAtlas ? 'cloud' : 'local');
-          setActiveDbMode(mode);
-          setDbStatus(data.database.connectionText || 'Connected to MongoDB Atlas Cloud');
-          setDbUri(data.database.uri || 'mongodb+srv://Adarshverma:adarshverma@3213@cluster0.illbds4.mongodb.net/codeguru_db');
-          setDbProvider(data.database.provider ? `${data.database.provider} & REST API Endpoint` : 'MongoDB Atlas Cloud Cluster');
+        if (data.connected) {
+          setDbConnected(true);
+          setDbStatus('Connected to MongoDB Atlas Cloud');
+          setDbUri('Database: connected (Cloud Atlas Managed Cluster)');
+        } else {
+          setDbConnected(false);
+          setDbStatus('Database: disconnected');
+          setDbUri('Database: disconnected');
         }
       })
       .catch(() => {
-        setDbStatus('Connected to MongoDB Atlas Cloud');
-        setDbUri('mongodb+srv://Adarshverma:adarshverma@3213@cluster0.illbds4.mongodb.net/codeguru_db');
+        setDbConnected(false);
+        setDbStatus('Database: disconnected');
+        setDbUri('Database: disconnected');
       });
   }, []);
 
   const handleSwitchDatabase = async (targetMode) => {
-    setIsSwitchingDb(true);
-    setMessage(null);
-
-    const res = await systemModel.switchDatabase(targetMode);
-    setIsSwitchingDb(false);
-
-    if (res.success) {
-      setActiveDbMode(targetMode);
-      if (res.database) {
-        setDbStatus(res.database.connectionText);
-        setDbUri(res.database.uri);
-        setDbProvider(res.database.provider ? `${res.database.provider} & REST API Endpoint` : 'MongoDB');
-      }
-      setMessage({
-        type: 'success',
-        text: `Switched database connection to ${targetMode === 'cloud' ? 'MongoDB Atlas Cloud' : 'Local MongoDB Compass'}! ⚡`
-      });
-      window.dispatchEvent(new Event('codeguru_refresh_all'));
-    } else {
-      setMessage({
-        type: 'error',
-        text: res.message || `Failed to connect to ${targetMode === 'cloud' ? 'MongoDB Atlas Cloud' : 'Local MongoDB Compass'}`
-      });
-    }
+    setMessage({
+      type: 'info',
+      text: 'Database configuration is managed securely via environment settings.'
+    });
   };
-
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
@@ -85,13 +69,18 @@ export function useSystemController(user, updateUser) {
       return;
     }
 
-    if (newPassword && newPassword !== confirmPassword) {
-      setMessage({ type: 'error', text: 'Passwords do not match! Please re-enter passwords.' });
+    if (!currentPassword) {
+      setMessage({ type: 'error', text: 'Please enter your current password to authorize changes.' });
       return;
     }
 
-    if (newPassword && newPassword.length < 4) {
-      setMessage({ type: 'error', text: 'New password must be at least 4 characters long!' });
+    if (newPassword && newPassword !== confirmPassword) {
+      setMessage({ type: 'error', text: 'New passwords do not match! Please re-enter.' });
+      return;
+    }
+
+    if (newPassword && newPassword.length < 8) {
+      setMessage({ type: 'error', text: 'New password must be at least 8 characters long!' });
       return;
     }
 
@@ -99,7 +88,7 @@ export function useSystemController(user, updateUser) {
     setMessage(null);
 
     const res = await authModel.updateCredentials(
-      user?.email || 'admin@codeguru.com',
+      currentPassword,
       email,
       newPassword || undefined
     );
@@ -109,18 +98,18 @@ export function useSystemController(user, updateUser) {
     if (res.success) {
       const updatedEmail = res.user?.email || email;
       if (updateUser) {
-        updateUser({ email: updatedEmail });
+        updateUser({ email: updatedEmail, ...(res.token ? { token: res.token } : {}) });
       }
       setUpdatedEmailInfo(updatedEmail);
       setIsSuccessModalOpen(true);
-      setMessage({ type: 'success', text: `Admin credentials updated successfully in MongoDB database! Active Email: ${updatedEmail}` });
+      setMessage({ type: 'success', text: `Admin credentials updated successfully! Active Email: ${updatedEmail}` });
+      setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } else {
-      setMessage({ type: 'error', text: res.message || 'Failed to update admin credentials in MongoDB' });
+      setMessage({ type: 'error', text: res.message || 'Failed to update admin credentials' });
     }
   };
-
 
   const [adminPhone, setAdminPhone] = useState('9670912923');
   const [whatsappEnabled, setWhatsappEnabled] = useState(true);
@@ -128,7 +117,7 @@ export function useSystemController(user, updateUser) {
 
   useEffect(() => {
     systemModel.getSettings().then(res => {
-      if (res.success && res.data) {
+      if (res && res.success && res.data) {
         if (res.data.adminPhone) setAdminPhone(res.data.adminPhone);
         if (res.data.whatsappNotificationEnabled !== undefined) setWhatsappEnabled(res.data.whatsappNotificationEnabled);
         if (res.data.autoWhatsappRedirect !== undefined) setAutoWhatsappRedirect(res.data.autoWhatsappRedirect);
@@ -150,21 +139,18 @@ export function useSystemController(user, updateUser) {
 
     setIsSaving(false);
 
-    if (res.success) {
-      try {
-        localStorage.setItem('codeguru_admin_phone', cleanPhone);
-        window.dispatchEvent(new Event('storage'));
-      } catch (err) {}
-
-      setMessage({ type: 'success', text: `Admin Notification Phone Number (${cleanPhone}) saved successfully in MongoDB!` });
+    if (res && res.success) {
+      setMessage({ type: 'success', text: `Admin Notification Settings saved successfully!` });
     } else {
-      setMessage({ type: 'error', text: res.message || 'Failed to update settings' });
+      setMessage({ type: 'error', text: res?.message || 'Failed to update settings' });
     }
   };
 
   return {
     email,
     setEmail,
+    currentPassword,
+    setCurrentPassword,
     adminPhone,
     setAdminPhone,
     whatsappEnabled,
@@ -176,13 +162,18 @@ export function useSystemController(user, updateUser) {
     confirmPassword,
     setConfirmPassword,
     dbStatus,
+    dbConnected,
     dbUri,
     dbProvider,
     activeDbMode,
     isSwitchingDb,
     handleSwitchDatabase,
     handleUpdatePassword,
-    handleSaveSettings
+    handleSaveSettings,
+    isSaving,
+    message,
+    isSuccessModalOpen,
+    closeSuccessModal,
+    updatedEmailInfo
   };
 }
-

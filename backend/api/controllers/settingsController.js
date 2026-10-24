@@ -6,6 +6,7 @@
  */
 
 import { Settings } from '../../models/Settings.js';
+import { recordAuditLog } from '../../services/auditService.js';
 
 export const getSettings = async (req, res) => {
   try {
@@ -20,13 +21,21 @@ export const getSettings = async (req, res) => {
         showMyBatchNav: true
       });
     }
+    // Public callers must not receive admin contact PII; only authenticated
+    // admins (req.admin set by requireAdmin on /admin/settings) get the full doc.
+    if (!req.admin) {
+      const obj = settings.toObject ? settings.toObject() : { ...settings };
+      delete obj.adminPhone;
+      delete obj.adminEmail;
+      return res.status(200).json({ success: true, data: obj });
+    }
     return res.status(200).json({ success: true, data: settings });
   } catch (err) {
     console.error('Error fetching settings:', err);
-    return res.status(500).json({ 
-      success: false, 
+    return res.status(500).json({
+      success: false,
       message: 'Failed to fetch settings',
-      data: { adminPhone: '9670912923', whatsappNotificationEnabled: true, showMyBatchNav: true } 
+      data: { whatsappNotificationEnabled: true, showMyBatchNav: true }
     });
   }
 };
@@ -48,6 +57,18 @@ export const updateSettings = async (req, res) => {
     if (showMyBatchNav !== undefined) settings.showMyBatchNav = Boolean(showMyBatchNav);
 
     await settings.save();
+
+    // Record immutable audit log: Who (kisne), What (kya), When (kab)
+    await recordAuditLog({
+      action: 'SETTINGS_UPDATE',
+      admin: req.admin,
+      targetType: 'Settings',
+      targetId: settings._id,
+      details: {
+        updatedFields: Object.keys(req.body)
+      },
+      req
+    });
 
     return res.status(200).json({
       success: true,

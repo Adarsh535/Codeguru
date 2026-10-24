@@ -625,6 +625,36 @@ export default function CoursesManagerView() {
 
   const totalStudentsEnrolled = courses.reduce((acc, c) => acc + getCourseStudentCount(c.title), 0);
 
+  // Group courses by unique normalized title so chart never renders duplicate bars or overflows
+  const courseChartData = React.useMemo(() => {
+    const map = new Map();
+    courses.forEach((c) => {
+      const cleanTitle = (c.title || 'Untitled Track').trim().replace(/\s+/g, ' ');
+      if (!map.has(cleanTitle)) {
+        map.set(cleanTitle, {
+          title: cleanTitle,
+          count: getCourseStudentCount(c.title),
+          category: c.category,
+          coursesCount: 1
+        });
+      } else {
+        map.get(cleanTitle).coursesCount += 1;
+      }
+    });
+    return Array.from(map.values());
+  }, [courses, enrollments, leads]);
+
+  const totalChartStudents = courseChartData.reduce((acc, c) => acc + c.count, 0) || totalStudentsEnrolled || 1;
+  const maxStudentsInChart = Math.max(...courseChartData.map(d => d.count), 5);
+  const chartYMax = Math.max(Math.ceil(maxStudentsInChart / 5) * 5, 10);
+  const chartYSteps = [
+    chartYMax,
+    Math.round(chartYMax * 0.75),
+    Math.round(chartYMax * 0.5),
+    Math.round(chartYMax * 0.25),
+    0
+  ];
+
   const getCategoryIconBySlugOrLabel = (catId = '', label = '', customIcon = '') => {
     if (customIcon && (customIcon.startsWith('http') || customIcon.startsWith('data:image') || customIcon.includes('/uploads/'))) {
       return customIcon;
@@ -984,100 +1014,133 @@ export default function CoursesManagerView() {
       </div>
 
       {/* FULL-WIDTH COURSE ANALYTICS & VERTICAL BAR GRAPH */}
-      <div className="bg-white p-4.5 sm:p-5 rounded-2xl border border-slate-200/80 shadow-2xs space-y-4">
+      <div className="bg-white p-4.5 sm:p-5 rounded-3xl border border-slate-200/80 shadow-2xs space-y-4 overflow-hidden">
         
         {/* TOP BAR: BADGE & REALTIME SYNC */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black uppercase tracking-wider text-purple-700 bg-purple-50 px-3 py-1 rounded-full border border-purple-100 flex items-center gap-1.5 shadow-2xs">
               <BarChartIcon className="!w-4 !h-4 text-purple-600" />
               <span>COURSE ANALYTICS</span>
             </span>
+            <span className="text-[11px] font-bold text-slate-400 hidden sm:inline">
+              Student Enrollment Distribution
+            </span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-500">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Realtime Sync</span>
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200/70">
+              {courseChartData.length} Unique Programs
+            </span>
+            <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-500">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Realtime Sync</span>
+            </div>
           </div>
         </div>
 
         {/* CONTENT GRID: LEFT STATS BOXES & RIGHT VERTICAL COLUMN CHART */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-end">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
           
           {/* LEFT COLUMN: TOTAL COURSES & TOTAL STUDENTS STATS BOXES */}
-          <div className="lg:col-span-4 xl:col-span-4 flex flex-col gap-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5">
-              <div className="bg-purple-50/50 p-3.5 rounded-xl border border-purple-100/80">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">TOTAL COURSES</span>
-                <span className="text-xl font-black text-slate-900 block mt-0.5">{courses.length} Tracks</span>
+          <div className="lg:col-span-4 xl:col-span-3 flex flex-col justify-between gap-3 min-w-0">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 gap-2.5">
+              <div className="bg-gradient-to-br from-purple-50/70 to-indigo-50/40 p-3.5 rounded-2xl border border-purple-100/80 shadow-2xs">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">TOTAL TRACKS</span>
+                <span className="text-xl sm:text-2xl font-black text-slate-900 block mt-0.5">{courses.length} Courses</span>
+                <span className="text-[10.5px] font-semibold text-purple-700 mt-1 block">
+                  {courseChartData.length} distinct programs
+                </span>
               </div>
 
-              <div className="bg-purple-50/50 p-3.5 rounded-xl border border-purple-100/80">
+              <div className="bg-gradient-to-br from-indigo-50/70 to-blue-50/40 p-3.5 rounded-2xl border border-indigo-100/80 shadow-2xs">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">TOTAL STUDENTS</span>
-                <span className="text-xl font-black text-slate-900 block mt-0.5">{totalStudentsEnrolled} Enrolled</span>
+                <span className="text-xl sm:text-2xl font-black text-slate-900 block mt-0.5">{totalStudentsEnrolled} Enrolled</span>
+                <span className="text-[10.5px] font-semibold text-indigo-700 mt-1 block">
+                  Leads & batch admissions
+                </span>
               </div>
             </div>
 
-            <div className="pt-0.5">
-              <h3 className="text-sm font-black text-slate-900 font-heading leading-tight">
-                Students Per Course Graph
+            <div className="p-3 bg-slate-50/70 rounded-2xl border border-slate-100 hidden lg:block">
+              <h3 className="text-xs font-black text-slate-800 font-heading leading-tight">
+                Enrollment Distribution
               </h3>
-              <p className="text-[11px] font-semibold text-slate-400 mt-0.5">
-                Enrollment count & percentage share
+              <p className="text-[10.5px] font-semibold text-slate-400 mt-0.5">
+                Displays active students and percentage share per unique course curriculum.
               </p>
             </div>
           </div>
 
-          {/* RIGHT COLUMN: VERTICAL COLUMN BAR CHART WITH Y-AXIS GRID LINES */}
-          <div className="lg:col-span-8 xl:col-span-8 flex flex-col justify-end">
-            <div className="relative w-full h-44 flex items-end">
+          {/* RIGHT COLUMN: VERTICAL COLUMN BAR CHART WITH SCROLLABLE CONTAINER */}
+          <div className="lg:col-span-8 xl:col-span-9 min-w-0 flex flex-col justify-end bg-slate-50/50 p-3 sm:p-4 rounded-2xl border border-slate-100/90">
+            <div className="relative w-full h-52 flex items-end">
               
-              {/* Y-AXIS BACKGROUND GRID LINES & LABELS */}
-              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none text-[11px] font-bold text-slate-400">
-                {[25, 20, 15, 10, 5, 0].map((val) => (
-                  <div key={val} className="flex items-center gap-2.5 w-full">
-                    <span className="w-5 text-right font-mono text-slate-400 shrink-0">{val}</span>
-                    <div className="flex-1 border-b border-slate-100" />
-                  </div>
+              {/* Y-AXIS SCALE FIXED ON LEFT */}
+              <div className="shrink-0 flex flex-col justify-between h-[135px] mb-8 pr-2.5 z-20 border-r border-slate-200/70 text-[11px] font-bold text-slate-400 pointer-events-none select-none">
+                {chartYSteps.map((val) => (
+                  <span key={val} className="w-5 text-right font-mono text-slate-400 leading-none">
+                    {val}
+                  </span>
                 ))}
               </div>
 
-              {/* BARS CONTAINER */}
-              <div className="relative z-10 w-full pl-9 pr-2 h-full flex items-end justify-around gap-2">
-                {courses.map((c, cIdx) => {
-                  const count = getCourseStudentCount(c.title);
-                  const maxVal = 25;
-                  const heightPct = Math.min(Math.round((count / maxVal) * 100), 100);
-                  const pctShare = totalStudentsEnrolled > 0
-                    ? ((count / totalStudentsEnrolled) * 100).toFixed(1)
-                    : '0.0';
+              {/* SCROLLABLE BARS CONTAINER */}
+              <div className="relative flex-1 h-full overflow-x-auto overflow-y-hidden pb-1 scrollbar-thin">
+                
+                {/* HORIZONTAL DASHED GRID LINES */}
+                <div className="absolute inset-x-0 bottom-8 h-[135px] flex flex-col justify-between pointer-events-none select-none">
+                  {chartYSteps.map((val) => (
+                    <div key={val} className="w-full border-b border-dashed border-slate-200/60 h-0" />
+                  ))}
+                </div>
 
-                  return (
-                    <div key={cIdx} className="flex flex-col items-center justify-end h-full flex-1 max-w-[110px] group">
-                      {/* VALUE LABEL ON TOP OF BAR */}
-                      <span className="text-[11px] font-black text-slate-900 mb-1 group-hover:scale-110 transition-transform">
-                        {count}
-                      </span>
+                {/* BARS LIST */}
+                <div className="relative z-10 min-w-full flex items-end justify-around gap-2 sm:gap-4 px-2 h-full">
+                  {courseChartData.map((item, idx) => {
+                    const count = item.count;
+                    const heightPct = Math.min(Math.round((count / chartYMax) * 100), 100);
+                    const pctShare = totalChartStudents > 0
+                      ? ((count / totalChartStudents) * 100).toFixed(1)
+                      : '0.0';
 
-                      {/* VERTICAL BAR */}
-                      <div className="w-full flex justify-center h-[110px] items-end">
-                        <div
-                          className="w-6 sm:w-8 bg-purple-700 group-hover:bg-purple-600 rounded-t-md transition-all duration-700 shadow-xs"
-                          style={{ height: `${Math.max(heightPct, 8)}%` }}
-                        />
+                    return (
+                      <div
+                        key={idx}
+                        className="flex flex-col items-center justify-end h-full flex-1 min-w-[72px] sm:min-w-[84px] max-w-[110px] group cursor-pointer"
+                        title={`${item.title}: ${count} Enrolled (${pctShare}%)`}
+                      >
+                        {/* VALUE LABEL ON TOP OF BAR */}
+                        <div className="mb-1 text-center">
+                          <span className="text-[11px] font-black text-slate-800 group-hover:text-purple-700 group-hover:scale-110 transition-all inline-block">
+                            {count}
+                          </span>
+                        </div>
+
+                        {/* VERTICAL BAR */}
+                        <div className="w-full flex justify-center h-[135px] items-end px-1">
+                          <div
+                            className="w-7 sm:w-9 bg-gradient-to-t from-purple-700 via-purple-600 to-indigo-500 group-hover:from-purple-600 group-hover:to-indigo-400 rounded-t-lg transition-all duration-500 shadow-xs group-hover:shadow-md group-hover:brightness-110"
+                            style={{ height: `${Math.max(heightPct, 6)}%` }}
+                          />
+                        </div>
+
+                        {/* X-AXIS LABELS BELOW BAR */}
+                        <div className="text-center mt-1.5 w-full space-y-0.5">
+                          <span
+                            className="text-[10px] sm:text-[10.5px] font-extrabold text-slate-700 group-hover:text-purple-700 truncate block leading-tight px-0.5"
+                            title={item.title}
+                          >
+                            {item.title}
+                          </span>
+                          <span className="inline-block text-[9.5px] font-black text-purple-700 bg-purple-100/70 px-1.5 py-0.2 rounded-md">
+                            {pctShare}%
+                          </span>
+                        </div>
                       </div>
+                    );
+                  })}
+                </div>
 
-                      {/* X-AXIS LABELS BELOW BAR */}
-                      <div className="text-center mt-1.5 space-y-0.5 w-full">
-                        <span className="text-[10.5px] font-extrabold text-slate-800 line-clamp-1 leading-tight block" title={c.title}>
-                          {c.title}
-                        </span>
-                        <span className="text-[10px] font-bold text-slate-400 block">
-                          {pctShare}%
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
 
             </div>

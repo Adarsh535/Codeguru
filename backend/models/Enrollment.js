@@ -19,16 +19,23 @@ const enrollmentSchema = new mongoose.Schema({
   mentor: { type: String, default: 'Vikrant Shinde' },
   startDate: { type: String, default: '15 Sept 2026' },
   fee: { type: String, required: true },
+  feeInPaise: { type: Number, default: 0 },
   paymentPlan: { type: String, default: 'Full Payment' },
   paidAmount: { type: String, required: true },
+  paidAmountInPaise: { type: Number, default: 0 },
   pendingAmount: { type: String, default: '₹0' },
-  feeStatus: { type: String, enum: ['Paid', 'Installment Pending'], default: 'Paid' },
+  pendingAmountInPaise: { type: Number, default: 0 },
+  feeStatus: { type: String, enum: ['Pending', 'Paid', 'Installment Pending'], default: 'Pending' },
   paymentMethod: { type: String, default: 'UPI QR' },
   transactionId: { type: String, default: '' },
-  status: { type: String, enum: ['Active', 'Pending Verification', 'Completed'], default: 'Active' },
+  status: { type: String, enum: ['Active', 'Pending Verification', 'Completed', 'Cancelled'], default: 'Pending Verification' },
+  notes: { type: String, default: '' },
   enrollmentDate: { type: String, default: () => new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) }
 }, {
   timestamps: true
 });
+
+enrollmentSchema.index({ studentId: 1 });
+enrollmentSchema.index({ status: 1, createdAt: -1 });
 
 export const Enrollment = mongoose.models.Enrollment || mongoose.model('Enrollment', enrollmentSchema);

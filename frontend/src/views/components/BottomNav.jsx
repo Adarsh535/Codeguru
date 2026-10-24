@@ -86,7 +86,7 @@ export default function BottomNav({
                     suppressHydrationWarning
                     onClick={handleCallClick}
                     className="relative bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 w-[52px] h-[52px] rounded-full flex items-center justify-center shadow-lg shadow-orange-500/30 z-20 transition-transform active:scale-90 hover:scale-105 duration-300 cursor-pointer"
-                    title={user ? 'My Account' : 'Instant Login via Mobile OTP'}
+                    title={user ? 'My Account' : 'Instant Login / Inquiry'}
                   >
                     <Phone className="w-6 h-6 fill-slate-900 stroke-none rotate-[10deg]" />
                   </button>

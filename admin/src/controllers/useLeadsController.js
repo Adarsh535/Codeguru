@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { leadModel } from '../models/leadModel';
+import { realtimeAdminService } from '../services/realtimeAdminService';
 
 export function useLeadsController(isAuthenticated = true) {
   const [leads, setLeads] = useState([]);
@@ -43,6 +44,9 @@ export function useLeadsController(isAuthenticated = true) {
         loadData();
       }, 1500);
 
+      const unsubscribeRealtime = realtimeAdminService.subscribe('leads_updated', handleSync);
+      const unsubscribeRealtimeAll = realtimeAdminService.subscribe('all', handleSync);
+
       window.addEventListener('storage', handleSync);
       window.addEventListener('codeguru_lead_added', handleSync);
       window.addEventListener('codeguru_refresh_leads', handleSync);
@@ -52,6 +56,8 @@ export function useLeadsController(isAuthenticated = true) {
 
       return () => {
         clearInterval(interval);
+        unsubscribeRealtime();
+        unsubscribeRealtimeAll();
         window.removeEventListener('storage', handleSync);
         window.removeEventListener('codeguru_lead_added', handleSync);
         window.removeEventListener('codeguru_refresh_leads', handleSync);

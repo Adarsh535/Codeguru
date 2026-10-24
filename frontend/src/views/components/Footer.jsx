@@ -18,37 +18,29 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
 
   const quickLinks = [
     { name: 'Home', href: '/' },
-    { name: 'About Us', href: '/courses' },
-    { name: 'Our Team', href: '/#team-section' },
-    { name: 'Register', href: '/#contact-section' },
+    { name: 'About Us', href: '/about' },
+    { name: 'Courses', href: '/courses' },
+    { name: 'IT Services', href: '/services' },
     { name: 'Our Placements', href: '/placements' },
-    { name: 'Contact Us', href: '/#contact-section' }
+    { name: 'Contact Us', href: '/contact' }
   ];
 
   const policyLinks = [
-    { name: 'Terms & Conditions', href: '#' },
-    { name: 'Privacy Policy', href: '#' },
-    { name: 'Refund & Cancellation Policy', href: '#' },
-    { name: 'Payment Policy', href: '#' },
-    { name: 'FAQs', href: '#' },
-    { name: 'Legal Documents', href: '#' }
+    { name: 'FAQs', href: '/faq' },
+    { name: 'Terms & Conditions', href: '/terms' },
+    { name: 'Privacy Policy', href: '/privacy' },
+    { name: 'Refund & Cancellation Policy', href: '/refund-policy' }
   ];
 
   const popularPrograms = [
-    'Best Summer Training for CS Students in Ayodhya',
-    'Best Summer Training for EC Students in Ayodhya',
-    'Best Summer Training for Electrical Students in Ayodhya',
-    'Best Summer Training for Mechanical Engineering Students in Ayodhya',
-    'Corporate Training Programs in Ayodhya',
-    'Best Apprenticeship Program in Ayodhya',
-    'Syllabus-Based Training in Ayodhya',
-    'On-Campus Training & Placement Drives in Ayodhya',
-    'Top Company for Data Analytics Course in Ayodhya',
-    'Software Testing & QA Automation Training in Ayodhya',
-    'Best Company for MEAN Stack Training in Ayodhya',
-    'Best Company For MERN Stack Training in Ayodhya',
-    'Top Company for Summer Training on MERN Full Stack',
-    'Best Fullstack NodeJS Training in Ayodhya'
+    { name: 'MERN Stack Web Development', href: '/courses?category=coding' },
+    { name: 'Python AI & Machine Learning', href: '/courses?category=coding' },
+    { name: 'Java Spring Boot Full Stack', href: '/courses?category=coding' },
+    { name: 'C++ Data Structures & Algorithms', href: '/courses?category=coding' },
+    { name: 'Hardware & Laptop Chip-Level Repair', href: '/courses?category=electrical' },
+    { name: 'CCTV & Network Security Administration', href: '/courses?category=networking' },
+    { name: 'Digital Marketing & SEO Growth', href: '/courses?category=marketing' },
+    { name: 'Data Science & Analytics Masterclass', href: '/courses?category=coding' }
   ];
 
   const moreTrainingLinks = [
@@ -114,7 +106,13 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
           
           {/* COLUMN 1: BRAND & CONTACT INFO (5 cols) */}
           <div className="lg:col-span-5 flex flex-col gap-5">
-            <div className="flex items-center gap-3 cursor-pointer group" onClick={onOpenContactModal}>
+            <button
+              suppressHydrationWarning
+              type="button"
+              className="flex items-center gap-3 cursor-pointer group text-left border-0 bg-transparent p-0"
+              onClick={onOpenContactModal}
+              aria-label="Open contact information"
+            >
               <div className="w-12 h-12 flex items-center justify-center group-hover:scale-105 transition-all">
                 <img
                   src="/logo.png"
@@ -131,7 +129,7 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
                   CODEGURRU ACADEMY • UK VK PVT. LTD.
                 </span>
               </div>
-            </div>
+            </button>
 
             <p className="text-slate-300 text-xs leading-relaxed font-normal">
               CodeGurru (UK VK Pvt. Ltd.) is Uttar Pradesh's premier IT academy &amp; tech center, founded by Kishan Pandey. Providing 100% placement IT bootcamps, custom software development, and rapid computer &amp; laptop repair.
@@ -200,14 +198,24 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
               <ul className="flex flex-col gap-2 text-xs font-semibold">
                 {policyLinks.map((policy, i) => (
                   <li key={i}>
-                    <a
-                      href={policy.href}
-                      onClick={(e) => { e.preventDefault(); if (onOpenContactModal) onOpenContactModal(); }}
-                      className="group flex items-center gap-2 text-slate-300 hover:text-cyan-400 transition-colors"
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 group-hover:scale-125 transition-transform" />
-                      <span>{policy.name}</span>
-                    </a>
+                    {policy.href.startsWith('/') ? (
+                      <Link
+                        href={policy.href}
+                        className="group flex items-center gap-2 text-slate-300 hover:text-cyan-400 transition-colors"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 group-hover:scale-125 transition-transform" />
+                        <span>{policy.name}</span>
+                      </Link>
+                    ) : (
+                      <a
+                        href={policy.href}
+                        onClick={(e) => { e.preventDefault(); if (onOpenContactModal) onOpenContactModal(); }}
+                        className="group flex items-center gap-2 text-slate-300 hover:text-cyan-400 transition-colors"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 group-hover:scale-125 transition-transform" />
+                        <span>{policy.name}</span>
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -264,56 +272,21 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
 
         </div>
 
-        {/* ACCORDION CATEGORY LINKS ACCELERATOR (SEO KEYWORDS SECTION FOR AYODHYA) */}
-        <div className="py-8 border-b border-slate-800/80 flex flex-col gap-6 text-xs">
-          
-          {/* SECTION 1: OUR POPULAR TRAINING PROGRAMS IN AYODHYA */}
+        {/* POPULAR TRAINING PROGRAMS (F18) */}
+        <div className="py-6 border-b border-slate-800/80 flex flex-col gap-3 text-xs">
           <div>
             <h5 className="font-extrabold text-slate-300 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-              <span>Our Popular Training Programs in Ayodhya</span>
+              <span>Popular Training Programs & Tracks</span>
             </h5>
-            <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-slate-400 text-[11px] leading-relaxed">
+            <div className="flex flex-wrap gap-x-3 gap-y-2 text-slate-400 text-xs leading-relaxed">
               {popularPrograms.map((prog, idx) => (
-                <span key={idx} className="hover:text-white transition-colors cursor-pointer" onClick={onOpenContactModal}>
-                  {prog} {idx < popularPrograms.length - 1 ? <span className="text-slate-700 ml-2">•</span> : ''}
-                </span>
+                <Link key={idx} href={prog.href} className="hover:text-amber-400 transition-colors">
+                  {prog.name} {idx < popularPrograms.length - 1 ? <span className="text-slate-700 ml-2">•</span> : ''}
+                </Link>
               ))}
             </div>
           </div>
-
-
-
-          {/* SECTION 3: ADVANCED TRAINING PROGRAMS IN AYODHYA */}
-          <div>
-            <h5 className="font-extrabold text-slate-300 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Advanced Training Programs in Ayodhya</span>
-            </h5>
-            <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-slate-400 text-[11px] leading-relaxed">
-              {advancedCourses.map((adv, idx) => (
-                <span key={idx} className="hover:text-white transition-colors cursor-pointer" onClick={onOpenContactModal}>
-                  {adv} {idx < advancedCourses.length - 1 ? <span className="text-slate-700 ml-2">•</span> : ''}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* SECTION 4: TOP COURSES IN AYODHYA */}
-          <div>
-            <h5 className="font-extrabold text-slate-300 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Globe className="w-3.5 h-3.5 text-purple-400" />
-              <span>Top Courses in Ayodhya</span>
-            </h5>
-            <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-slate-400 text-[11px] leading-relaxed">
-              {topCoursesInAyodhya.map((top, idx) => (
-                <span key={idx} className="hover:text-white transition-colors cursor-pointer" onClick={onOpenContactModal}>
-                  {top} {idx < topCoursesInAyodhya.length - 1 ? <span className="text-slate-700 ml-2">•</span> : ''}
-                </span>
-              ))}
-            </div>
-          </div>
-
         </div>
 
 

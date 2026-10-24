@@ -62,30 +62,8 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     window.addEventListener('codeguru_refresh_all', fetchCoursesAndCategories);
     window.addEventListener('focus', fetchCoursesAndCategories);
 
-    // 2. Background polling fallback (every 4 seconds)
-    const interval = setInterval(() => {
-      if (typeof document !== 'undefined' && !document.hidden) {
-        fetchCoursesAndCategories();
-      }
-    }, 4000);
-
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const catParam = params.get('category');
-      if (catParam) {
-        setActiveCategory(catParam);
-        const subList = SUB_CATEGORIES[catParam];
-        if (subList && subList.length > 0) {
-          setActiveSubCategory(subList[0].id);
-        }
-        scrollToCatalogSection(100);
-        scrollToCatalogSection(300);
-      }
-    }
-
     return () => {
       isMounted = false;
-      clearInterval(interval);
       window.removeEventListener('codeguru_refresh_courses', fetchCoursesAndCategories);
       window.removeEventListener('codeguru_refresh_categories', fetchCoursesAndCategories);
       window.removeEventListener('codeguru_refresh_all', fetchCoursesAndCategories);

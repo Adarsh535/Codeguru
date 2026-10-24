@@ -2,20 +2,16 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
-import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import EditIcon from '@mui/icons-material/Edit';
 import CallIcon from '@mui/icons-material/Call';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import SchoolIcon from '@mui/icons-material/School';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
-import BadgeIcon from '@mui/icons-material/Badge';
-import SmsIcon from '@mui/icons-material/Sms';
+import EditIcon from '@mui/icons-material/Edit';
 import { apiService } from '../../services/apiService';
+import { getApiBase } from '../../models/apiClient';
 import { getQuickLocationSync } from '../../utils/geoLocator';
 
 export default function BottomBarOtpSheet({
@@ -28,39 +24,27 @@ export default function BottomBarOtpSheet({
   const [renderSheet, setRenderSheet] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
-  // Form states: 'phone' | 'otp' | 'details' | 'success'
+  // Flow steps: 'phone' -> 'details' -> 'success' (Zero OTP)
   const [step, setStep] = useState('phone');
-  const [studentName, setStudentName] = useState('');
-  const [studentEmail, setStudentEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [createdLeadId, setCreatedLeadId] = useState(null);
+  const createdLeadIdRef = useRef(null);
+  const [phoneLoading, setPhoneLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [resendTimer, setResendTimer] = useState(30);
-  const [smsNotification, setSmsNotification] = useState(null);
-  const [activeOtp, setActiveOtp] = useState('');
-  const [verifiedToken, setVerifiedToken] = useState('');
-  const [verifiedStudentId, setVerifiedStudentId] = useState('');
 
   const phoneInputRef = useRef(null);
   const nameInputRef = useRef(null);
   const emailInputRef = useRef(null);
-  const otpRefs = [
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null)
-  ];
 
   const [showMyBatch, setShowMyBatch] = useState(true);
 
-  // Fetch showMyBatchNav setting
+  // Fetch showMyBatchNav setting from backend
   useEffect(() => {
     try {
-      const base = typeof window !== 'undefined' ? (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://369.codegurru.in/api') : 'https://369.codegurru.in/api';
-      fetch(`${base}/settings`)
+      fetch(`${getApiBase()}/settings`)
         .then(res => res.json())
         .then(data => {
           if (data && data.success && data.data && data.data.showMyBatchNav !== undefined) {
@@ -71,35 +55,28 @@ export default function BottomBarOtpSheet({
     } catch (e) {}
   }, [isOpen]);
 
-  // Animate open/close
+  // Handle open/close animation & state resets
   useEffect(() => {
     if (isOpen) {
       setRenderSheet(true);
       setIsClosing(false);
       setStep('phone');
       setErrorMsg('');
-      setOtpDigits(['', '', '', '', '', '']);
-      // Keyboard will only open when user manually clicks/taps the input field
+      setLoading(false);
+      setPhoneLoading(false);
+      setCreatedLeadId(null);
+      createdLeadIdRef.current = null;
     } else if (renderSheet) {
       setIsClosing(true);
       const timer = setTimeout(() => {
         setRenderSheet(false);
         setIsClosing(false);
+        setCreatedLeadId(null);
+        createdLeadIdRef.current = null;
       }, 300);
       return () => clearTimeout(timer);
     }
   }, [isOpen, user]);
-
-  // Resend OTP countdown timer
-  useEffect(() => {
-    let interval = null;
-    if (step === 'otp' && resendTimer > 0) {
-      interval = setInterval(() => {
-        setResendTimer((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [step, resendTimer]);
 
   if (!renderSheet) return null;
 
@@ -110,8 +87,8 @@ export default function BottomBarOtpSheet({
     }, 280);
   };
 
-  // Step 1: Submit Phone Number and Open Step 2 (Name & Email Form)
-  const handleSendOtp = async (e) => {
+  // STEP 1: Phone submission -> Immediately creates Lead in Admin, then moves to Name & Email step
+  const handlePhoneNext = async (e) => {
     if (e) e.preventDefault();
     setErrorMsg('');
 
@@ -121,190 +98,97 @@ export default function BottomBarOtpSheet({
       return;
     }
 
-    setLoading(true);
+    setPhoneLoading(true);
+    const userLoc = getQuickLocationSync() || 'Online Visitor';
+
     try {
-      const userLoc = getQuickLocationSync() || 'Online Visitor';
-      // Record initial lead with phone number to Admin Leads
-      await apiService.submitLead({
-        name: 'Student Applicant',
+      // 1. Immediately send Step 1 Lead to Admin so phone number is saved even if user drops off
+      const leadRes = await apiService.submitLead({
         phone: cleanPhone,
-        email: '',
+        name: 'Student Applicant',
         location: userLoc,
         course: 'Admission & Training Inquiry',
-        notes: 'Inquiry Started (Phone submitted, filling profile)',
+        notes: `Step 1: Mobile entered (${cleanPhone}), profile pending`,
         status: 'New'
-      }).catch(() => {});
+      });
 
-      // Instantly open the second form (Name & Email)
+      if (leadRes && leadRes.data) {
+        const savedId = leadRes.data.id || leadRes.data._id || leadRes.data.leadId;
+        if (savedId) {
+          createdLeadIdRef.current = savedId;
+          setCreatedLeadId(savedId);
+        }
+      }
+
       setStep('details');
       setErrorMsg('');
-
       setTimeout(() => {
         if (nameInputRef.current) {
           nameInputRef.current.focus();
         }
-      }, 200);
+      }, 150);
     } catch (err) {
+      console.warn('Step 1 lead submit error:', err);
+      // Still proceed so user isn't stuck
       setStep('details');
     } finally {
-      setLoading(false);
+      setPhoneLoading(false);
     }
   };
 
-  // Handle OTP digit inputs (6-digit support)
-  const handleOtpChange = (index, value) => {
-    const cleanVal = value.replace(/[^0-9]/g, '').slice(-1);
-    const newDigits = [...otpDigits];
-    newDigits[index] = cleanVal;
-    setOtpDigits(newDigits);
-    setErrorMsg('');
-
-    // Jump to next box
-    if (cleanVal && index < 5 && otpRefs[index + 1]?.current) {
-      otpRefs[index + 1].current.focus();
-    }
-
-    // Auto verify if all 6 digits entered
-    if (cleanVal && index === 5 && newDigits.every((d) => d !== '')) {
-      handleVerifyOtp(newDigits.join(''));
-    }
-  };
-
-  const handleOtpKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
-      otpRefs[index - 1]?.current?.focus();
-    }
-  };
-
-  const handleOtpPaste = (e) => {
-    e.preventDefault();
-    const pasteData = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6);
-    if (pasteData) {
-      const newDigits = ['', '', '', '', '', ''];
-      for (let i = 0; i < pasteData.length; i++) {
-        newDigits[i] = pasteData[i];
-      }
-      setOtpDigits(newDigits);
-      if (pasteData.length === 6 || pasteData === '1234') {
-        handleVerifyOtp(pasteData);
-      } else if (otpRefs[pasteData.length]?.current) {
-        otpRefs[pasteData.length].current.focus();
-      }
-    }
-  };
-
-  // Step 2: Verify OTP
-  const handleVerifyOtp = async (customOtpString = null) => {
-    const cleanPhone = phone.replace(/[^0-9]/g, '').slice(-10);
-    const entered = (customOtpString || otpDigits.join('')).replace(/[^0-9]/g, '');
-
-    if (!entered || (entered.length < 4)) {
-      setErrorMsg('Please enter the 6-digit OTP code received on your mobile');
-      return;
-    }
-
-    setLoading(true);
-    setErrorMsg('');
-
-    try {
-      const res = await apiService.verifyOtp({
-        phone: cleanPhone,
-        otp: entered,
-        name: '',
-        location: getQuickLocationSync() || ''
-      });
-
-      if (res.success && res.student) {
-        setVerifiedToken(res.token || '');
-        setVerifiedStudentId(res.student.id || res.student._id || '');
-
-        const existingName = res.student.name && !res.student.name.startsWith('Student ') ? res.student.name : '';
-        const existingEmail = res.student.email && !res.student.email.endsWith('@student.codeguru.in') ? res.student.email : '';
-        setStudentName(existingName);
-        setStudentEmail(existingEmail);
-
-        // Smoothly transition to Step 3: Enter Name & Email!
-        setStep('details');
-        setErrorMsg('');
-        setTimeout(() => {
-          if (nameInputRef.current) {
-            nameInputRef.current.focus();
-          }
-        }, 200);
-      } else {
-        setErrorMsg(res.message || 'Incorrect OTP code. Please try again.');
-      }
-    } catch (err) {
-      setErrorMsg('Verification failed. Please check connection.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Step 3: Save Name & Email Profile Details
-  const handleSaveDetails = async (e) => {
+  // STEP 2: Name & Email submission -> Updates the Step 1 lead in Admin & logs in Student
+  const handleFinalSubmit = async (e) => {
     if (e) e.preventDefault();
     setErrorMsg('');
 
-    if (!studentName.trim()) {
+    const cleanName = name.trim();
+    if (!cleanName || cleanName.length < 2) {
       setErrorMsg('Please enter your full name');
       if (nameInputRef.current) nameInputRef.current.focus();
       return;
     }
 
-    if (!studentEmail.trim()) {
-      setErrorMsg('Please enter your email address');
-      if (emailInputRef.current) emailInputRef.current.focus();
-      return;
-    }
-
+    const cleanEmail = email.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(studentEmail.trim())) {
+    if (!cleanEmail || !emailRegex.test(cleanEmail)) {
       setErrorMsg('Please enter a valid email address');
       if (emailInputRef.current) emailInputRef.current.focus();
       return;
     }
 
-    setLoading(true);
     const cleanPhone = phone.replace(/[^0-9]/g, '').slice(-10);
+    setLoading(true);
     const userLoc = getQuickLocationSync() || 'Online Visitor';
 
     try {
-      // 1. Send complete student inquiry to Admin Leads (Name + Phone + Email)
-      await apiService.submitLead({
-        name: studentName.trim(),
+      // 1. Single reliable update: update the Step 1 lead in Admin database with student Name & Email
+      const targetLeadId = createdLeadIdRef.current || createdLeadId;
+      await apiService.updateLead(targetLeadId, {
+        name: cleanName,
+        email: cleanEmail,
         phone: cleanPhone,
-        email: studentEmail.trim().toLowerCase(),
         location: userLoc,
-        course: 'Admission & Training Inquiry',
-        notes: `Full Lead - Name: ${studentName.trim()}, Phone: ${cleanPhone}, Email: ${studentEmail.trim().toLowerCase()}`,
-        status: 'New'
-      }).catch(() => {});
+        notes: `Inquiry completed by student\nName: ${cleanName}\nEmail: ${cleanEmail}\nPhone: ${cleanPhone}`
+      }).catch(err => console.warn('updateLead non-fatal:', err));
 
-      // 2. Update/create student profile in backend
-      const res = await apiService.updateStudentProfile({
-        phone: cleanPhone,
-        name: studentName.trim(),
-        email: studentEmail.trim().toLowerCase(),
-        location: userLoc
-      }).catch(() => null);
-
-      // 3. Persist login session so student is logged in immediately
+      // 2. Establish active student session
       const userPayload = {
-        name: (res && res.student && res.student.name) ? res.student.name : studentName.trim(),
-        email: (res && res.student && res.student.email) ? res.student.email : studentEmail.trim().toLowerCase(),
+        name: cleanName,
+        email: cleanEmail,
         phone: cleanPhone,
         isLoggedIn: true,
-        token: (res && res.token) ? res.token : (verifiedToken || `cg-student-jwt-${Date.now()}`),
         loginTime: new Date().toISOString()
       };
 
-      localStorage.setItem('codeguru_user', JSON.stringify(userPayload));
-      localStorage.setItem('codeguru_token', userPayload.token);
-      localStorage.setItem('token', userPayload.token);
-      localStorage.setItem('codeguru_lead_submitted', cleanPhone);
-      window.dispatchEvent(new Event('storage'));
-      window.dispatchEvent(new CustomEvent('codeguru_user_updated'));
+      try {
+        localStorage.setItem('codeguru_user', JSON.stringify(userPayload));
+        // Auth tokens reside in HttpOnly cookies; purge any legacy localStorage tokens
+        localStorage.removeItem('codeguru_token');
+        localStorage.removeItem('token');
+        localStorage.setItem('codeguru_lead_submitted', cleanPhone);
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('codeguru_user_updated'));
+      } catch (storageErr) {}
 
       setStep('success');
 
@@ -312,11 +196,14 @@ export default function BottomBarOtpSheet({
         onLoginSuccess(userPayload);
       }
 
+      // Smooth auto-dismiss after success confirmation
       setTimeout(() => {
         handleClose();
-      }, 1600);
+      }, 2200);
+
     } catch (err) {
-      setErrorMsg('Failed to save profile. Please try again.');
+      console.error('Final registration error:', err);
+      setErrorMsg('Unable to submit inquiry. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -345,7 +232,7 @@ export default function BottomBarOtpSheet({
       />
 
       {/* ============================================================== */}
-      {/* SECTION 1: BADHA CARD (BACKGROUND ELEVATED CARD / FRAME)        */}
+      {/* BADHA CARD (BACKGROUND ELEVATED CARD / FRAME)                   */}
       {/* ============================================================== */}
       <div 
         className={`relative z-10 w-full max-w-[440px] mx-auto rounded-t-[36px] sm:rounded-[40px] p-2.5 sm:p-3.5 bg-gradient-to-b from-slate-200/95 via-slate-100/95 to-slate-200/95 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.45)] border-t sm:border border-white/70 backdrop-blur-xl transform transition-all duration-300 ease-out ${
@@ -359,7 +246,7 @@ export default function BottomBarOtpSheet({
         </div>
 
         {/* ============================================================== */}
-        {/* SECTION 2: CHHOTA CARD (INNER WHITE CARD WITH FULL OTP SYSTEM)  */}
+        {/* CHHOTA CARD (INNER WHITE CARD WITH MULTI-STEP FORM)            */}
         {/* ============================================================== */}
         <div 
           className="relative w-full bg-white rounded-[28px] sm:rounded-[30px] shadow-[0_12px_36px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100/80 px-6 sm:px-7 pt-5 pb-6 overflow-hidden flex flex-col"
@@ -377,414 +264,293 @@ export default function BottomBarOtpSheet({
             <CloseIcon className="!w-4 !h-4 text-slate-700" />
           </button>
 
-        {/* ---------------- ALREADY LOGGED IN VIEW ---------------- */}
-        {user ? (
-          <div className="flex flex-col gap-4 pt-2">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#fb923c] to-[#ea580c] text-white flex items-center justify-center shadow-lg shadow-orange-500/25 mx-auto font-black text-2xl uppercase">
-              {user.name ? user.name[0] : 'S'}
-            </div>
-            <div className="text-center">
-              <h3 className="text-xl font-black text-slate-900 tracking-tight">{user.name}</h3>
-              <p className="text-xs font-semibold text-slate-500 mt-0.5">{user.email || user.phone}</p>
-              <span className="inline-block mt-2 px-3 py-1 bg-emerald-100 text-emerald-800 text-[11px] font-extrabold rounded-full">
-                ● Active Student
-              </span>
-            </div>
-
-            <div className={`grid ${showMyBatch ? 'grid-cols-2' : 'grid-cols-1'} gap-2.5 mt-2`}>
-              {showMyBatch && (
-                <a
-                  href="/my-batch"
-                  className="flex items-center justify-center gap-2 py-3 px-3 bg-slate-900 text-white rounded-2xl text-xs font-bold hover:bg-slate-800 transition-colors shadow-sm"
-                >
-                  <SchoolIcon className="!w-4 !h-4 text-orange-400" />
-                  <span>My Batches</span>
-                </a>
-              )}
-
-              <button
-                type="button"
-                onClick={() => {
-                  handleClose();
-                  if (onOpenContactModal) onOpenContactModal();
-                }}
-                className="flex items-center justify-center gap-2 py-3 px-3 bg-orange-50 text-orange-950 border border-orange-200 rounded-2xl text-xs font-bold hover:bg-orange-100 transition-colors"
-              >
-                <CallIcon className="!w-4 !h-4 text-orange-600" />
-                <span>Call Support</span>
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="w-full mt-1 py-3 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-2xl border border-rose-200 flex items-center justify-center gap-2 transition-colors cursor-pointer"
-            >
-              <LogoutIcon className="!w-4 !h-4" />
-              <span>Logout Account</span>
-            </button>
-          </div>
-
-        ) : step === 'phone' ? (
-          /* ---------------- STEP 1: WELCOME BACK (EXACT 1-TO-1 MATCH TO REFERENCE IMAGE) ---------------- */
-          <form onSubmit={handleSendOtp} className="flex flex-col">
-            
-            {/* SOCIAL PROOF AVATAR CLUSTER */}
-            <div className="flex items-center justify-center -space-x-2 pt-1 mb-2 select-none">
-              <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f97316] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
-                R
-              </span>
-              <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#8b5cf6] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
-                A
-              </span>
-              <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0ea5e9] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
-                S
-              </span>
-              <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#10b981] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
-                P
-              </span>
-              <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0f172a] text-white font-black text-[11px] sm:text-xs flex items-center justify-center ring-2 ring-white shadow-xs">
-                5k+
-              </span>
-            </div>
-
-            {/* SOCIAL PROOF SUB-BANNER */}
-            <p className="text-center text-xs sm:text-[13px] text-slate-600 font-medium mb-4 select-none">
-              Join <strong className="text-orange-500 font-black">5000+</strong> students learning with us
-            </p>
-
-            {/* HEADLINE & SUBTITLE */}
-            <div className="text-center mb-5">
-              <h2 className="text-[25px] sm:text-[27px] font-black text-slate-900 tracking-tight font-heading">
-                Welcome Back
-              </h2>
-              <p className="text-xs sm:text-[13.5px] font-medium text-slate-500 mt-1">
-                Enter your WhatsApp number to continue
-              </p>
-            </div>
-
-            {errorMsg && (
-              <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 animate-fadeIn">
-                <span className="w-2 h-2 rounded-full bg-rose-600 shrink-0" />
-                <span>{errorMsg}</span>
+          {/* ---------------- 1. ALREADY LOGGED IN VIEW ---------------- */}
+          {user ? (
+            <div className="flex flex-col gap-4 pt-2">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#fb923c] to-[#ea580c] text-white flex items-center justify-center shadow-lg shadow-orange-500/25 mx-auto font-black text-2xl uppercase">
+                {user.name ? user.name[0] : 'S'}
               </div>
-            )}
-
-            {/* PHONE NUMBER INPUT CARD */}
-            <div className="bg-white border border-slate-200/90 hover:border-slate-300 focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/10 rounded-2xl px-4 py-3 sm:py-3.5 flex items-center gap-3 transition-all mb-4 shadow-xs">
-              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-black text-slate-900 select-none shrink-0">
-                <span className="font-extrabold text-slate-900">IN</span>
-                <span className="font-extrabold text-slate-900">+91</span>
+              <div className="text-center">
+                <h3 className="text-xl font-black text-slate-900 tracking-tight">{user.name}</h3>
+                <p className="text-xs font-semibold text-slate-500 mt-0.5">{user.email || user.phone}</p>
+                <span className="inline-block mt-2 px-3 py-1 bg-emerald-100 text-emerald-800 text-[11px] font-extrabold rounded-full">
+                  ● Active Student
+                </span>
               </div>
-              <div className="h-5 w-[1px] bg-slate-200 shrink-0" />
-              <input
-                ref={phoneInputRef}
-                type="tel"
-                inputMode="numeric"
-                maxLength={10}
-                value={phone}
-                onChange={(e) => {
-                  const clean = e.target.value.replace(/[^0-9]/g, '');
-                  setPhone(clean);
-                  if (errorMsg) setErrorMsg('');
-                }}
-                placeholder="98765 43210"
-                className="w-full bg-transparent text-base sm:text-lg font-bold text-slate-900 placeholder:text-slate-400 outline-none tracking-wide"
-              />
-              {phone && (
-                <button
-                  type="button"
-                  onClick={() => { setPhone(''); if (errorMsg) setErrorMsg(''); }}
-                  className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
-                  title="Clear number"
-                >
-                  <CloseIcon className="!w-4 !h-4" />
-                </button>
-              )}
-            </div>
 
-            {/* SUBMIT BUTTON */}
-            <button
-              type="submit"
-              disabled={loading || phone.length < 10}
-              className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-base sm:text-[17px] tracking-wide shadow-[0_8px_20px_rgba(249,115,22,0.28)] hover:shadow-[0_10px_24px_rgba(249,115,22,0.38)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Submitting...</span>
-                </>
-              ) : (
-                <>
-                  <span>Submit</span>
-                  <ArrowForwardIcon className="!w-4 !h-4 text-white" />
-                </>
-              )}
-            </button>
+              <div className={`grid ${showMyBatch ? 'grid-cols-2' : 'grid-cols-1'} gap-2.5 mt-2`}>
+                {showMyBatch && (
+                  <a
+                    href="/my-batch"
+                    className="flex items-center justify-center gap-2 py-3 px-3 bg-slate-900 text-white rounded-2xl text-xs font-bold hover:bg-slate-800 transition-colors shadow-sm"
+                  >
+                    <SchoolIcon className="!w-4 !h-4 text-orange-400" />
+                    <span>My Batches</span>
+                  </a>
+                )}
 
-            {/* TERMS & PRIVACY */}
-            <p className="text-[11px] sm:text-xs text-slate-400 text-center font-medium mt-4 sm:mt-5 leading-relaxed select-none">
-              By continuing, you agree to our Terms &amp; Privacy Policy
-            </p>
-          </form>
-
-        ) : step === 'otp' ? (
-          /* ---------------- STEP 2: VERIFY OTP ---------------- */
-          <div className="flex flex-col">
-            
-            {/* HERO OTP ICON */}
-            <div className="w-16 h-16 rounded-[22px] bg-gradient-to-br from-[#fb923c] via-[#f97316] to-[#ea580c] text-white flex items-center justify-center shadow-lg shadow-orange-500/35 mx-auto mt-1 mb-4">
-              <svg 
-                className="w-7 h-7 text-white" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white" 
-                strokeWidth="2.4" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              >
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-            </div>
-
-            {/* HEADLINE & SUBTITLE */}
-            <div className="text-center mb-5">
-              <h2 className="text-[25px] sm:text-[27px] font-black text-slate-900 tracking-tight">
-                Verify OTP
-              </h2>
-              <div className="flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-500 mt-1">
-                <span>Code sent to</span>
-                <span className="font-bold text-slate-800">+91 {phone}</span>
-                <button
-                  type="button"
-                  onClick={() => { setStep('phone'); setErrorMsg(''); }}
-                  className="text-orange-600 hover:text-orange-700 font-extrabold underline cursor-pointer ml-1"
-                >
-                  Edit
-                </button>
-              </div>
-            </div>
-
-            {smsNotification?.otp && (
-              <div className="mb-4 p-3 sm:p-3.5 bg-gradient-to-r from-orange-500/10 via-orange-400/15 to-orange-500/10 border border-orange-300 rounded-2xl flex items-center justify-between gap-3 animate-fadeIn shadow-xs">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-xs font-black text-slate-900 tracking-tight flex items-center gap-1.5">
-                      <span>Trial OTP:</span>
-                      <span className="font-mono text-orange-700 bg-orange-100/80 px-1.5 py-0.5 rounded-md font-extrabold tracking-widest">{smsNotification.otp}</span>
-                    </p>
-                    <p className="text-[10px] font-semibold text-slate-500 truncate">
-                      SMS Trial mode active • Tap to auto-fill
-                    </p>
-                  </div>
-                </div>
                 <button
                   type="button"
                   onClick={() => {
-                    const otpStr = smsNotification.otp.toString();
-                    const digits = otpStr.split('');
-                    const padded = [...digits, ...Array(Math.max(0, 6 - digits.length)).fill('')];
-                    setOtpDigits(padded);
-                    handleVerifyOtp(otpStr);
+                    handleClose();
+                    if (onOpenContactModal) onOpenContactModal();
                   }}
-                  className="px-3 py-1.5 bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white font-black text-xs rounded-xl shadow-xs transition-all cursor-pointer shrink-0 active:scale-95"
+                  className="flex items-center justify-center gap-2 py-3 px-3 bg-orange-50 text-orange-950 border border-orange-200 rounded-2xl text-xs font-bold hover:bg-orange-100 transition-colors"
                 >
-                  Auto Fill
+                  <CallIcon className="!w-4 !h-4 text-orange-600" />
+                  <span>Call Support</span>
                 </button>
               </div>
-            )}
 
-            {errorMsg && (
-              <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 animate-fadeIn">
-                <span className="w-2 h-2 rounded-full bg-rose-600 shrink-0" />
-                <span>{errorMsg}</span>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full mt-1 py-3 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-2xl border border-rose-200 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              >
+                <LogoutIcon className="!w-4 !h-4" />
+                <span>Logout Account</span>
+              </button>
+            </div>
+
+          ) : step === 'phone' ? (
+            /* ---------------- 2. STEP 1: MOBILE NUMBER ENTRY ---------------- */
+            <form onSubmit={handlePhoneNext} className="flex flex-col">
+              
+              {/* SOCIAL PROOF AVATAR CLUSTER */}
+              <div className="flex items-center justify-center -space-x-2 pt-1 mb-2 select-none">
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f97316] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                  R
+                </span>
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#8b5cf6] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                  A
+                </span>
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0ea5e9] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                  S
+                </span>
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#10b981] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                  P
+                </span>
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0f172a] text-white font-black text-[11px] sm:text-xs flex items-center justify-center ring-2 ring-white shadow-xs">
+                  5k+
+                </span>
               </div>
-            )}
 
-            {/* 6 DIGIT OTP BOXES */}
-            <div className="flex items-center justify-center gap-2 sm:gap-2.5 my-2 mb-5" onPaste={handleOtpPaste}>
-              {otpDigits.map((digit, idx) => (
+              {/* SOCIAL PROOF SUB-BANNER */}
+              <p className="text-center text-xs sm:text-[13px] text-slate-600 font-medium mb-4 select-none">
+                Join <strong className="text-orange-500 font-black">5000+</strong> students learning with us
+              </p>
+
+              {/* HEADLINE & SUBTITLE */}
+              <div className="text-center mb-5">
+                <h2 className="text-[25px] sm:text-[27px] font-black text-slate-900 tracking-tight font-heading">
+                  Login / Sign up
+                </h2>
+                <p className="text-xs sm:text-[13.5px] font-medium text-slate-500 mt-1">
+                  Enter your mobile number to continue
+                </p>
+              </div>
+
+              {errorMsg && (
+                <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 animate-fadeIn">
+                  <span className="w-2 h-2 rounded-full bg-rose-600 shrink-0" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
+              {/* PHONE NUMBER INPUT CARD */}
+              <div className="bg-white border border-slate-200/90 hover:border-slate-300 focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/10 rounded-2xl px-4 py-3 sm:py-3.5 flex items-center gap-3 transition-all mb-4 shadow-xs">
+                <div className="flex items-center gap-1.5 text-xs sm:text-sm font-black text-slate-900 select-none shrink-0">
+                  <span className="font-extrabold text-slate-900">IN</span>
+                  <span className="font-extrabold text-slate-900">+91</span>
+                </div>
+                <div className="h-5 w-[1px] bg-slate-200 shrink-0" />
                 <input
-                  key={idx}
-                  ref={otpRefs[idx]}
+                  ref={phoneInputRef}
                   type="tel"
                   inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleOtpChange(idx, e.target.value)}
-                  onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                  className={`w-11 h-12 sm:w-12 sm:h-14 aspect-square shrink-0 text-center text-xl sm:text-2xl font-black rounded-2xl border-2 transition-all outline-none shadow-sm flex items-center justify-center ${
-                    digit
-                      ? 'border-[#f97316] bg-orange-50/40 text-slate-900 ring-2 ring-orange-500/20'
-                      : 'border-slate-200 bg-[#f8fafc] text-slate-900 focus:border-[#f97316] focus:bg-white focus:ring-4 focus:ring-orange-500/20'
-                  }`}
+                  maxLength={10}
+                  value={phone}
+                  onChange={(e) => {
+                    const clean = e.target.value.replace(/[^0-9]/g, '');
+                    setPhone(clean);
+                    if (errorMsg) setErrorMsg('');
+                  }}
+                  placeholder="98765 43210"
+                  className="w-full bg-transparent text-base sm:text-lg font-bold text-slate-900 placeholder:text-slate-400 outline-none tracking-wide"
                 />
-              ))}
-            </div>
+                {phone && (
+                  <button
+                    type="button"
+                    onClick={() => { setPhone(''); if (errorMsg) setErrorMsg(''); }}
+                    className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+                    title="Clear number"
+                  >
+                    <CloseIcon className="!w-4 !h-4" />
+                  </button>
+                )}
+              </div>
 
-            {/* VERIFY BUTTON */}
-            <button
-              type="button"
-              onClick={() => handleVerifyOtp()}
-              disabled={loading || otpDigits.filter(Boolean).length < 4}
-              className={`w-full py-4 px-4 rounded-2xl text-base font-black text-white flex items-center justify-center gap-2 shadow-md shadow-orange-500/25 transition-all cursor-pointer ${
-                loading || otpDigits.filter(Boolean).length < 4
-                  ? 'bg-orange-300 text-white/80 cursor-not-allowed shadow-none'
-                  : 'bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] active:scale-[0.98]'
-              }`}
-            >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Verifying...</span>
-                </>
-              ) : (
-                <>
-                  <span>Verify Code</span>
-                  <ArrowForwardIcon className="!w-4 !h-4 text-white" />
-                </>
-              )}
-            </button>
+              {/* SUBMIT BUTTON */}
+              <button
+                type="submit"
+                disabled={phone.length < 10 || phoneLoading}
+                className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-base sm:text-[17px] tracking-wide shadow-[0_8px_20px_rgba(249,115,22,0.28)] hover:shadow-[0_10px_24px_rgba(249,115,22,0.38)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {phoneLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Sending Inquiry...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Submit</span>
+                    <ArrowForwardIcon className="!w-4 !h-4 text-white" />
+                  </>
+                )}
+              </button>
 
-            {/* RESEND OTP */}
-            <div className="flex items-center justify-between text-xs font-bold text-slate-500 mt-4 px-1">
-              <span>Didn't receive code?</span>
-              {resendTimer > 0 ? (
-                <span className="text-slate-400 font-semibold">Resend in {resendTimer}s</span>
-              ) : (
+              {/* TERMS & PRIVACY */}
+              <p className="text-[11px] sm:text-xs text-slate-400 text-center font-medium mt-4 sm:mt-5 leading-relaxed select-none">
+                By continuing, you agree to our Terms &amp; Privacy Policy
+              </p>
+            </form>
+
+          ) : step === 'details' ? (
+            /* ---------------- 3. STEP 2: NAME & EMAIL POPUP ---------------- */
+            <form onSubmit={handleFinalSubmit} className="flex flex-col animate-fadeIn">
+              
+              {/* EDITABLE PHONE HEADER PILL */}
+              <div className="flex items-center justify-between bg-orange-50/80 border border-orange-200/70 rounded-2xl px-3.5 py-2 mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-orange-500 shrink-0" />
+                  <span className="text-xs font-bold text-slate-600">Mobile:</span>
+                  <span className="text-xs font-extrabold text-slate-900">+91 {phone}</span>
+                </div>
                 <button
                   type="button"
-                  onClick={handleSendOtp}
-                  disabled={loading}
-                  className="text-orange-600 hover:underline inline-flex items-center gap-1 font-extrabold cursor-pointer"
+                  onClick={() => { setStep('phone'); setErrorMsg(''); }}
+                  className="text-[11px] font-black text-orange-600 hover:text-orange-700 flex items-center gap-1 cursor-pointer hover:underline"
                 >
-                  <RefreshIcon className="!w-3.5 !h-3.5" />
-                  <span>Resend OTP</span>
+                  <EditIcon className="!w-3 !h-3" />
+                  <span>Change</span>
                 </button>
-              )}
-            </div>
-          </div>
+              </div>
 
-        ) : step === 'details' ? (
-          /* ---------------- STEP 3: COMPLETE YOUR PROFILE (NAME & EMAIL) ---------------- */
-          <form onSubmit={handleSaveDetails} className="flex flex-col animate-fadeIn">
-            
-            {/* HERO PROFILE ICON */}
-            <div className="w-16 h-16 rounded-[22px] bg-gradient-to-br from-[#fb923c] via-[#f97316] to-[#ea580c] text-white flex items-center justify-center shadow-lg shadow-orange-500/35 mx-auto mt-1 mb-4">
-              <svg 
-                className="w-7 h-7 text-white" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white" 
-                strokeWidth="2.4" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
+              {/* HEADLINE & SUBTITLE */}
+              <div className="text-center mb-4">
+                <h2 className="text-[23px] sm:text-[25px] font-black text-slate-900 tracking-tight font-heading">
+                  Complete Your Profile
+                </h2>
+                <p className="text-xs sm:text-[13px] font-medium text-slate-500 mt-0.5">
+                  Enter your name &amp; email to proceed
+                </p>
+              </div>
+
+              {errorMsg && (
+                <div className="mb-3.5 bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 animate-fadeIn">
+                  <span className="w-2 h-2 rounded-full bg-rose-600 shrink-0" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
+              {/* FULL NAME INPUT */}
+              <div className="flex flex-col gap-1 mb-3">
+                <label className="text-[10.5px] font-black text-slate-500 uppercase tracking-wider pl-1">
+                  Full Name
+                </label>
+                <div className="bg-white border border-slate-200/90 hover:border-slate-300 focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/10 rounded-2xl px-3.5 py-3 flex items-center gap-2.5 transition-all shadow-xs">
+                  <PersonIcon className="!w-4 !h-4 text-slate-400 shrink-0" />
+                  <input
+                    ref={nameInputRef}
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (errorMsg) setErrorMsg('');
+                    }}
+                    placeholder="e.g. Rahul Sharma"
+                    className="w-full bg-transparent text-sm font-bold text-slate-900 placeholder:text-slate-400 outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* EMAIL ADDRESS INPUT */}
+              <div className="flex flex-col gap-1 mb-4">
+                <label className="text-[10.5px] font-black text-slate-500 uppercase tracking-wider pl-1">
+                  Email Address
+                </label>
+                <div className="bg-white border border-slate-200/90 hover:border-slate-300 focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/10 rounded-2xl px-3.5 py-3 flex items-center gap-2.5 transition-all shadow-xs">
+                  <EmailIcon className="!w-4 !h-4 text-slate-400 shrink-0" />
+                  <input
+                    ref={emailInputRef}
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (errorMsg) setErrorMsg('');
+                    }}
+                    placeholder="e.g. rahul@gmail.com"
+                    className="w-full bg-transparent text-sm font-bold text-slate-900 placeholder:text-slate-400 outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* SUBMIT BUTTON */}
+              <button
+                type="submit"
+                disabled={loading || !name.trim() || !email.trim()}
+                className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-base sm:text-[17px] tracking-wide shadow-[0_8px_20px_rgba(249,115,22,0.28)] hover:shadow-[0_10px_24px_rgba(249,115,22,0.38)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </div>
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Submitting Lead &amp; Logging In...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Submit &amp; Login</span>
+                    <ArrowForwardIcon className="!w-4 !h-4 text-white" />
+                  </>
+                )}
+              </button>
 
-            {/* HEADLINE & SUBTITLE */}
-            <div className="text-center mb-5">
-              <h2 className="text-[25px] sm:text-[27px] font-black text-slate-900 tracking-tight">
-                Complete Your Profile
-              </h2>
-              <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
-                Enter your name & email to finish setup
-              </p>
-            </div>
+              <button
+                type="button"
+                onClick={() => { setStep('phone'); setErrorMsg(''); }}
+                className="mt-3 text-xs font-extrabold text-slate-500 hover:text-slate-700 text-center cursor-pointer transition-colors"
+              >
+                ← Back to Mobile Number
+              </button>
+            </form>
 
-            {errorMsg && (
-              <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 animate-fadeIn">
-                <span className="w-2 h-2 rounded-full bg-rose-600 shrink-0" />
-                <span>{errorMsg}</span>
+          ) : (
+            /* ---------------- 4. STEP 3: INSTANT SUCCESS CONFIRMATION ---------------- */
+            <div className="py-6 text-center flex flex-col items-center gap-3.5 animate-fadeIn">
+              <div className="w-18 h-18 rounded-full bg-emerald-50 border-4 border-emerald-100 text-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 relative">
+                <CheckCircleIcon className="!w-12 !h-12 text-emerald-500" />
+                <div className="absolute inset-0 rounded-full border-2 border-emerald-400 animate-ping opacity-25" />
               </div>
-            )}
-
-            {/* FULL NAME INPUT */}
-            <div className="flex flex-col gap-1.5 mb-3.5">
-              <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
-                FULL NAME
-              </label>
-              <div className="bg-[#f8fafc] border border-slate-200/90 rounded-2xl px-4 py-3.5 flex items-center gap-3 focus-within:bg-white focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/15 transition-all">
-                <PersonIcon className="!w-5 !h-5 text-slate-400" />
-                <input
-                  ref={nameInputRef}
-                  type="text"
-                  required
-                  value={studentName}
-                  onChange={(e) => {
-                    setStudentName(e.target.value);
-                    if (errorMsg) setErrorMsg('');
-                  }}
-                  placeholder="e.g. Rahul Sharma"
-                  className="w-full bg-transparent text-sm font-bold text-slate-900 placeholder-slate-400 outline-none"
-                />
+              
+              <div className="flex flex-col gap-1">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight font-heading">
+                  Inquiry Submitted!
+                </h3>
+                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 self-center mt-0.5">
+                  ● Lead Sent to Admin
+                </span>
+                <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-1 max-w-xs leading-relaxed">
+                  Welcome, <strong className="text-slate-900 font-extrabold">{name || 'Student'}</strong>! Our counselor will call you at <strong className="text-slate-900 font-extrabold">+91 {phone}</strong> shortly.
+                </p>
               </div>
-            </div>
 
-            {/* EMAIL ADDRESS INPUT */}
-            <div className="flex flex-col gap-1.5 mb-5">
-              <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
-                EMAIL ADDRESS
-              </label>
-              <div className="bg-[#f8fafc] border border-slate-200/90 rounded-2xl px-4 py-3.5 flex items-center gap-3 focus-within:bg-white focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/15 transition-all">
-                <EmailIcon className="!w-5 !h-5 text-slate-400" />
-                <input
-                  ref={emailInputRef}
-                  type="email"
-                  required
-                  value={studentEmail}
-                  onChange={(e) => {
-                    setStudentEmail(e.target.value);
-                    if (errorMsg) setErrorMsg('');
-                  }}
-                  placeholder="e.g. rahul@gmail.com"
-                  className="w-full bg-transparent text-sm font-bold text-slate-900 placeholder-slate-400 outline-none"
-                />
+              {/* LOADER PROGRESS BAR */}
+              <div className="w-full max-w-[200px] bg-slate-100 h-1.5 rounded-full overflow-hidden mt-2">
+                <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full w-full animate-progress-fill" />
               </div>
             </div>
-
-            {/* SUBMIT & LOGIN BUTTON */}
-            <button
-              type="submit"
-              disabled={loading || !studentName.trim() || !studentEmail.trim()}
-              className={`w-full py-4 px-4 rounded-2xl text-base font-black text-white flex items-center justify-center gap-2 shadow-md shadow-orange-500/25 transition-all cursor-pointer ${
-                loading || !studentName.trim() || !studentEmail.trim()
-                  ? 'bg-orange-300 text-white/80 cursor-not-allowed shadow-none'
-                  : 'bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] active:scale-[0.98]'
-              }`}
-            >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Submitting &amp; Logging In...</span>
-                </>
-              ) : (
-                <>
-                  <span>Submit &amp; Login</span>
-                  <ArrowForwardIcon className="!w-4 !h-4 text-white" />
-                </>
-              )}
-            </button>
-          </form>
-
-        ) : (
-          /* ---------------- STEP 4: SUCCESS ---------------- */
-          <div className="py-6 text-center flex flex-col items-center gap-3 animate-fadeIn">
-            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center animate-bounce shadow-md">
-              <CheckCircleIcon className="!w-10 !h-10" />
-            </div>
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">
-              Inquiry Submitted Successfully!
-            </h3>
-            <p className="text-xs text-slate-500 font-semibold max-w-xs">
-              Thank you! Our counselor will connect with you on WhatsApp shortly.
-            </p>
-          </div>
-        )}
+          )}
 
         </div>
       </div>

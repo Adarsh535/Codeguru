@@ -65,30 +65,42 @@ export const getTrafficStats = async (req, res) => {
 
 /**
  * @route   POST /api/traffic/visit
- * @desc    Logs a webpage visit from a user IP/session.
+ * @desc    Logs a webpage visit from a user IP/session atomically.
  * @access  Public
  */
 export const recordVisit = async (req, res) => {
-  const visitorIp = req.body.ip || req.ip || '127.0.0.1';
+  const visitorIp = req.ip || req.headers['x-forwarded-for'] || '127.0.0.1';
   activeSessions.set(visitorIp, Date.now());
 
   const todayStr = new Date().toISOString().split('T')[0];
-  const userCity = req.body.city || 'Ayodhya, UP';
+  const userCity = String(req.body?.city || 'Ayodhya, UP').slice(0, 50);
 
   try {
-    let todayRecord = await Traffic.findOne({ date: todayStr });
-    if (!todayRecord) {
-      todayRecord = new Traffic({ date: todayStr, pageViews: 1, uniqueVisitors: 1, cities: [{ name: userCity, count: 1 }] });
-    } else {
-      todayRecord.pageViews += 1;
-      const cityItem = todayRecord.cities.find(c => c.name === userCity);
-      if (cityItem) {
-        cityItem.count += 1;
-      } else {
-        todayRecord.cities.push({ name: userCity, count: 1 });
-      }
+    // Atomic update if city already exists in today's record
+    const updated = await Traffic.findOneAndUpdate(
+      { date: todayStr, 'cities.name': userCity },
+      { 
+        $inc: { pageViews: 1, 'cities.$.count': 1 }
+      },
+      { new: true }
+    );
+
+    // If city wasn't in array or record didn't exist yet
+    if (!updated) {
+      await Traffic.findOneAndUpdate(
+        { date: todayStr },
+        {
+          $inc: { pageViews: 1, uniqueVisitors: 1 },
+          $push: { 
+            cities: { 
+              $each: [{ name: userCity, count: 1 }],
+              $slice: -50 // Keep max 50 top cities
+            } 
+          }
+        },
+        { upsert: true, new: true }
+      );
     }
-    await todayRecord.save();
   } catch (e) {
     console.warn('[trafficController Warning] Error logging visit:', e.message);
   }
@@ -98,27 +110,39 @@ export const recordVisit = async (req, res) => {
 
 /**
  * @route   POST /api/traffic/search-course
- * @desc    Tracks searched course query keywords for demand analytics.
+ * @desc    Tracks searched course query keywords atomically.
  * @access  Public
  */
 export const trackCourseSearch = async (req, res) => {
-  const query = (req.body.query || '').trim();
+  const query = String(req.body?.query || '').trim().slice(0, 80);
   if (!query) return res.json({ success: false });
 
   const todayStr = new Date().toISOString().split('T')[0];
 
   try {
-    let todayRecord = await Traffic.findOne({ date: todayStr });
-    if (todayRecord) {
-      const searchItem = todayRecord.searchedCourses.find(s => s.query.toLowerCase() === query.toLowerCase());
-      if (searchItem) {
-        searchItem.count += 1;
-      } else {
-        todayRecord.searchedCourses.push({ query, count: 1 });
-      }
-      await todayRecord.save();
+    const updated = await Traffic.findOneAndUpdate(
+      { date: todayStr, 'searchedCourses.query': query },
+      { $inc: { 'searchedCourses.$.count': 1 } },
+      { new: true }
+    );
+
+    if (!updated) {
+      await Traffic.findOneAndUpdate(
+        { date: todayStr },
+        { 
+          $push: { 
+            searchedCourses: { 
+              $each: [{ query, count: 1 }],
+              $slice: -50 // Bounded array size
+            } 
+          } 
+        },
+        { upsert: true, new: true }
+      );
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('[trafficController Warning] Error tracking search:', e.message);
+  }
 
   res.json({ success: true });
 };

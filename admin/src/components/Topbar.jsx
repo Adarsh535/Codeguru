@@ -12,118 +12,42 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-
-const DEFAULT_NOTIFICATIONS = [
-  {
-    id: 'n1',
-    type: 'visitor',
-    title: 'New Student Visitor',
-    message: 'A student from Ayodhya, UP is currently active on the Homepage & Full-Stack Course.',
-    city: 'Ayodhya, UP',
-    time: 'Just now',
-    isUnread: true
-  },
-  {
-    id: 'n2',
-    type: 'lead',
-    title: 'New Contact Lead Submitted',
-    message: 'Saurabh Kumar (+91 9876543210) submitted a course inquiry for Full Stack Web Development.',
-    city: 'Ayodhya, UP',
-    time: '2 mins ago',
-    isUnread: true
-  },
-  {
-    id: 'n3',
-    type: 'visitor',
-    title: 'Searching Visitor Active',
-    message: 'A student from Ayodhya, UP is searching for Python AI & Data Science batch details.',
-    city: 'Ayodhya, UP',
-    time: '5 mins ago',
-    isUnread: true
-  },
-  {
-    id: 'n4',
-    type: 'visitor',
-    title: 'Curriculum PDF Download',
-    message: 'A student from Kanpur, UP viewed and downloaded the Java Full Stack & DSA Syllabus.',
-    city: 'Kanpur, UP',
-    time: '12 mins ago',
-    isUnread: true
-  },
-  {
-    id: 'n5',
-    type: 'lead',
-    title: 'Callback Inquiry Received',
-    message: 'Ananya Mishra (+91 9123456789) requested a callback for Ayodhya branch campus.',
-    city: 'Ayodhya, UP',
-    time: '18 mins ago',
-    isUnread: true
-  },
-  {
-    id: 'n6',
-    type: 'visitor',
-    title: 'Website Searching Student',
-    message: 'A student from Noida (Delhi NCR) is viewing Placement Records & Package stats.',
-    city: 'Noida, UP',
-    time: '25 mins ago',
-    isUnread: true
-  },
-  {
-    id: 'n7',
-    type: 'visitor',
-    title: 'Active Website Visitor',
-    message: 'A student from Varanasi, UP searched for C++ System Design & DSA offline batch.',
-    city: 'Varanasi, UP',
-    time: '32 mins ago',
-    isUnread: true
-  },
-  {
-    id: 'n8',
-    type: 'visitor',
-    title: 'Contact Page Opened',
-    message: 'A student from Prayagraj, UP opened Contact Us section and clicked Location Map.',
-    city: 'Prayagraj, UP',
-    time: '45 mins ago',
-    isUnread: true
-  },
-  {
-    id: 'n9',
-    type: 'visitor',
-    title: 'Mobile Visitor Ping',
-    message: 'A student from Gorakhpur, UP visited CodeGuru Web from Android Mobile Browser.',
-    city: 'Gorakhpur, UP',
-    time: '1 hour ago',
-    isUnread: true
-  },
-  {
-    id: 'n10',
-    type: 'lead',
-    title: 'Demo Session Inquiry',
-    message: 'Vikas Sharma (+91 9988776655) enrolled for Python Data Science weekend demo.',
-    city: 'Delhi-NCR',
-    time: '2 hours ago',
-    isUnread: true
-  },
-  {
-    id: 'n11',
-    type: 'visitor',
-    title: 'Active Website Visitor',
-    message: 'A student from Agra, UP visited CodeGuru Web about Machine Learning bootcamp.',
-    city: 'Agra, UP',
-    time: '3 hours ago',
-    isUnread: true
-  }
-];
+import { leadModel } from '../models/leadModel';
 
 export default function Topbar({ onToggleSidebar, searchQuery, setSearchQuery, todayLeadsCount, onRefresh }) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifFilter, setNotifFilter] = useState('all'); // all, visitor, lead
-  const [notifications, setNotifications] = useState(DEFAULT_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showRefreshToast, setShowRefreshToast] = useState(false);
   const notifRef = useRef(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchRealData = async () => {
+      try {
+        const leadsData = await leadModel.getLeads();
+        if (!isMounted) return;
+        const leadsList = Array.isArray(leadsData) ? leadsData : (leadsData?.leads || []);
+        const mapped = leadsList.slice(0, 15).map((l, idx) => ({
+          id: l._id || l.id || `lead-${idx}`,
+          type: 'lead',
+          title: 'Student Lead Inquiry',
+          message: `${l.name || 'Anonymous'} (${l.phone || l.email || 'No contact'}) inquired for ${l.courseInterest || l.course || 'Course'}.`,
+          city: l.location || l.city || 'Campus',
+          time: l.createdAt ? new Date(l.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) : 'Recent',
+          isUnread: l.status === 'New'
+        }));
+        setNotifications(mapped);
+      } catch (err) {
+        console.error("Failed to fetch topbar notifications:", err);
+      }
+    };
+    fetchRealData();
+    return () => { isMounted = false; };
+  }, []);
 
   const handleRefreshClick = async () => {
     if (isRefreshing) return;
@@ -288,10 +212,10 @@ export default function Topbar({ onToggleSidebar, searchQuery, setSearchQuery, t
 
           <button
             onClick={logout}
-            className="ml-1 px-2.5 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
+            className="ml-1 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-xs font-bold transition-all shadow-xs hover:shadow flex items-center gap-1.5 cursor-pointer active:scale-95"
             title="Logout"
           >
-            <LogoutIcon className="!w-3.5 !h-3.5" />
+            <LogoutIcon className="!w-3.5 !h-3.5 text-white" />
             <span className="hidden md:inline">Logout</span>
           </button>
         </div>

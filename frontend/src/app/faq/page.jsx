@@ -4,16 +4,17 @@ import { HelpCircle, ChevronRight, PhoneCall, Sparkles } from 'lucide-react';
 import { BUSINESS_CONFIG } from '../../config/business';
 
 export const metadata = {
-  title: 'Frequently Asked Questions (FAQs) | CodeGurru',
+  title: 'Frequently Asked Questions (FAQs)',
   description:
-    'Find answers to key questions about CodeGurru (UK VK Pvt. Ltd.): courses, campus locations, placement guarantee, laptop repair service, and batch timings.',
+    'Find answers to key questions about CodeGurru (UK VK Pvt. Ltd.): courses, admissions, campus location in Ayodhya, placement guarantee, laptop repair service, and batch timings.',
   keywords: [
     'CodeGurru FAQ',
     'What is CodeGurru',
     'Where is CodeGurru located',
+    'Who is founder of CodeGurru',
     'CodeGurru Placement Support',
     'Does CodeGurru repair laptops',
-    'CodeGurru Courses',
+    'CodeGurru Courses Fees',
   ],
   alternates: {
     canonical: 'https://codegurru.in/faq',
@@ -22,6 +23,16 @@ export const metadata = {
     title: 'CodeGurru FAQs | Everything You Need to Know',
     description: 'All answers about CodeGurru IT Training, Software Development, and Computer Repair.',
     url: 'https://codegurru.in/faq',
+    siteName: 'CodeGurru (UK VK Pvt. Ltd.)',
+    images: [{ url: '/logo.png', width: 800, height: 600, alt: 'CodeGurru FAQs' }],
+    locale: 'en_IN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'CodeGurru FAQs | Admissions, Courses & Laptop Repair',
+    description: 'Get instant answers to all questions regarding CodeGurru programs and campus desks.',
+    images: ['/logo.png'],
   },
 };
 
@@ -35,7 +46,12 @@ export default function FAQPage() {
     {
       question: 'Where is CodeGurru located?',
       answer:
-        'CodeGurru is located Near Saket College Petrol Pump, Ayodhya, Uttar Pradesh. The campus features high-tech air-conditioned coding labs, gigabit fiber network, and a dedicated computer hardware repair center.'
+        'CodeGurru is located Near Saket College Petrol Pump, Ayodhya, Uttar Pradesh (PIN: 224123). The campus features high-tech air-conditioned coding labs, gigabit fiber network, and a dedicated computer hardware repair center.'
+    },
+    {
+      question: 'Who is the founder of CodeGurru?',
+      answer:
+        'CodeGurru was founded by Kishan Pandey, who serves as Founder & CEO under UK VK Pvt. Ltd. The institute was established to empower youth, college graduates, and engineering students across Uttar Pradesh with industry-grade software engineering skills and high-paying careers.'
     },
     {
       question: 'Which courses does CodeGurru offer?',
@@ -43,16 +59,45 @@ export default function FAQPage() {
         'CodeGurru offers comprehensive practical certification bootcamps including: Full Stack Web Development (MERN Stack: MongoDB, Express, React, Node.js), Python with Artificial Intelligence & Machine Learning, Java Spring Boot Enterprise Engineering, C++ with Data Structures & Algorithms (DSA), React.js & Next.js Modern Frontend, Robotics & IoT Automation, Digital Marketing, and Basic Computer Skills with Advanced Excel and Tally Prime GST.'
     },
     {
-      question: 'Does CodeGurru provide placement?',
+      question: 'Does CodeGurru provide placement assistance?',
       answer:
-        'Yes, CodeGurru guarantees 100% placement drive assistance to students who maintain at least 80% attendance and complete the 4 mandatory production capstone projects. Our placement cell conducts mock technical interviews, DSA coding rounds, and connects students directly to partner MNCs and high-growth startups with packages ranging up to 18+ LPA.'
+        'Yes, CodeGurru guarantees 100% placement drive assistance to students who maintain at least 80% attendance and complete the mandatory production capstone projects. Our placement cell conducts mock technical interviews, DSA coding rounds, and connects students directly to partner MNCs and high-growth startups with packages ranging up to 18.5 LPA.'
     },
     {
-      question: 'Does CodeGurru repair laptops?',
+      question: 'Are classes available online or offline?',
+      answer:
+        'Both options are available. CodeGurru offers classroom offline bootcamps at the Ayodhya campus with 1-on-1 mentor guidance, as well as live interactive online blended batches with cloud coding environments and daily live doubt-clearing sessions.'
+    },
+    {
+      question: 'Does CodeGurru repair laptops and computers?',
       answer:
         'Yes, CodeGurru operates a dedicated hardware and diagnostics lab providing same-day computer and laptop repair across Lucknow and Ayodhya. Our certified technicians fix chip-level motherboard faults, replace broken screens/displays, upgrade slow laptops with high-speed SSDs and RAM, and offer doorstep pickup and delivery with a 90-day service warranty.'
+    },
+    {
+      question: 'How do I apply or book a free counseling session?',
+      answer:
+        'You can register online on our website codegurru.in, call our admissions desk at +91 72388 29360, or visit our Ayodhya campus Near Saket College Petrol Pump. Our mentors provide free 1-on-1 career guidance and skill assessments.'
     }
   ];
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://codegurru.in',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'FAQs',
+        item: 'https://codegurru.in/faq',
+      },
+    ],
+  };
 
   const faqJsonLd = {
     '@context': 'https://schema.org',
@@ -69,6 +114,10 @@ export default function FAQPage() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}

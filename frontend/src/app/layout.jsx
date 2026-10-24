@@ -6,24 +6,43 @@ import { BUSINESS_CONFIG } from '../config/business';
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://codegurru.in'),
   title: {
-    default: 'CodeGurru | Best IT Training, Software Development & Laptop Repair',
-    template: '%s | CodeGurru (UK VK Pvt. Ltd.)',
+    default: 'CodeGurru | IT Training, Software Development & Laptop Repair',
+    template: '%s | CodeGurru',
   },
   description:
-    'CodeGurru (UK VK Pvt. Ltd.) is Uttar Pradesh’s premier tech hub founded by Kishan Pandey. Offering 100% placement IT bootcamps, custom software development & same-day laptop repair.',
+    'CodeGurru (UK VK Pvt. Ltd.) is Uttar Pradesh’s premier IT ecosystem founded by Kishan Pandey. Offering 100% placement IT bootcamps (MERN, Python AI, Java, C++ DSA), custom software engineering & same-day laptop repair in Ayodhya & Lucknow.',
+  applicationName: 'CodeGurru',
+  category: 'Education & Technology',
+  classification: 'IT Training Institute, Software Development, Laptop Repair',
   keywords: [
     'CodeGurru',
     'Code Gurru',
+    'CodeGuru',
+    'CodeGuru Web',
+    'CodeGurru Ayodhya',
+    'CodeGurru Lucknow',
+    'CodeGuru Ayodhya',
+    'CodeGuru Lucknow',
     'UK VK Pvt. Ltd.',
     'Kishan Pandey CodeGurru',
+    'Kishan Pandey',
     'Best IT Training Institute Lucknow',
+    'Best IT Training Institute Ayodhya',
+    'Coding Classes in Ayodhya',
+    'Computer Institute Ayodhya',
     'Full Stack Web Development Course Ayodhya',
     'MERN Stack Coaching Lucknow',
     'Python AI Machine Learning Course Uttar Pradesh',
+    'Java Spring Boot Training UP',
+    'C++ DSA Coding Ayodhya',
     'Laptop Repair in Lucknow',
     'Laptop Repair in Ayodhya',
+    'Computer Repair Near Me Ayodhya',
+    'Motherboard Repair Ayodhya',
     'Software Development Company in Lucknow',
+    'Software Development Company in Ayodhya',
     'IT Job Placement Guarantee UP',
+    'CodeGurru Placement Academy',
   ],
   authors: [{ name: 'CodeGurru (UK VK Pvt. Ltd.)', url: 'https://codegurru.in' }],
   creator: 'Kishan Pandey, Founder & CEO CodeGurru',
@@ -34,8 +53,14 @@ export const metadata = {
     telephone: true,
   },
   icons: {
-    icon: '/logo.png?v=4',
-    apple: '/logo.png?v=4',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/logo-icon.png', sizes: '192x192', type: 'image/png' },
+      { url: '/logo.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/logo-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
   robots: {
     index: true,
@@ -53,7 +78,7 @@ export const metadata = {
   openGraph: {
     title: 'CodeGurru | Best IT Training, Software Development & Laptop Repair',
     description:
-      'CodeGurru (UK VK Pvt. Ltd.) delivers job-oriented IT training (MERN, Python AI, Java), custom software development, and rapid computer/laptop repair across Uttar Pradesh.',
+      'CodeGurru (UK VK Pvt. Ltd.) delivers job-oriented IT bootcamps (MERN, Python AI, Java), bespoke software development, and rapid computer/laptop repair across Uttar Pradesh.',
     url: 'https://codegurru.in',
     siteName: 'CodeGurru (UK VK Pvt. Ltd.)',
     images: [
@@ -78,6 +103,11 @@ export const metadata = {
   alternates: {
     canonical: 'https://codegurru.in',
   },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION || undefined,
+    bing: process.env.NEXT_PUBLIC_BING_VERIFICATION || undefined,
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -89,7 +119,7 @@ export default function RootLayout({ children }) {
         '@id': 'https://codegurru.in/#organization',
         name: BUSINESS_CONFIG.brandName,
         legalName: BUSINESS_CONFIG.legalName,
-        alternateName: BUSINESS_CONFIG.alternateNames,
+        alternateName: [...BUSINESS_CONFIG.alternateNames, 'CodeGuru', 'CodeGuru Web', 'CodeGuru Academy'],
         url: BUSINESS_CONFIG.urls.siteUrl,
         logo: BUSINESS_CONFIG.urls.logo,
         founder: {
@@ -120,12 +150,13 @@ export default function RootLayout({ children }) {
         parentOrganization: { '@id': 'https://codegurru.in/#organization' },
         url: BUSINESS_CONFIG.urls.siteUrl,
         telephone: BUSINESS_CONFIG.contact.primaryPhone,
+        priceRange: '₹₹',
         address: {
           '@type': 'PostalAddress',
           streetAddress: BUSINESS_CONFIG.branches[0].streetAddress,
           addressLocality: BUSINESS_CONFIG.branches[0].city,
           addressRegion: BUSINESS_CONFIG.branches[0].state,
-          postalCode: BUSINESS_CONFIG.branches[0].postalCode,
+          postalCode: BUSINESS_CONFIG.branches[0].postalCode || '224123',
           addressCountry: BUSINESS_CONFIG.branches[0].country,
         },
         geo: {
@@ -155,7 +186,7 @@ export default function RootLayout({ children }) {
           streetAddress: BUSINESS_CONFIG.branches[0].streetAddress,
           addressLocality: BUSINESS_CONFIG.branches[0].city,
           addressRegion: BUSINESS_CONFIG.branches[0].state,
-          postalCode: BUSINESS_CONFIG.branches[0].postalCode,
+          postalCode: BUSINESS_CONFIG.branches[0].postalCode || '224123',
           addressCountry: BUSINESS_CONFIG.branches[0].country,
         },
         geo: {
@@ -177,11 +208,68 @@ export default function RootLayout({ children }) {
         '@id': 'https://codegurru.in/#website',
         url: BUSINESS_CONFIG.urls.siteUrl,
         name: BUSINESS_CONFIG.brandName,
+        alternateName: ['CodeGuru', 'Code Gurru', 'CodeGuru Web'],
         potentialAction: {
           '@type': 'SearchAction',
           target: `${BUSINESS_CONFIG.urls.siteUrl}/courses?search={search_term_string}`,
           'query-input': 'required name=search_term_string',
         },
+      },
+      {
+        '@type': 'ItemList',
+        '@id': 'https://codegurru.in/#sitelinks',
+        name: 'CodeGurru Key Services & Navigation',
+        itemListElement: [
+          {
+            '@type': 'SiteNavigationElement',
+            position: 1,
+            name: 'Home',
+            description: 'CodeGurru Home - Best IT Training, Software Development & Laptop Repair',
+            url: 'https://codegurru.in',
+          },
+          {
+            '@type': 'SiteNavigationElement',
+            position: 2,
+            name: 'Courses',
+            description: 'Job-oriented IT bootcamps: MERN Stack, Python AI, Java, C++ & DSA',
+            url: 'https://codegurru.in/courses',
+          },
+          {
+            '@type': 'SiteNavigationElement',
+            position: 3,
+            name: 'Services',
+            description: 'Custom Web & App Development, Billing ERP & Doorstep Laptop Repair',
+            url: 'https://codegurru.in/services',
+          },
+          {
+            '@type': 'SiteNavigationElement',
+            position: 4,
+            name: 'Placements',
+            description: '100% Placement Support, Hiring Partners & Student Salary Packages',
+            url: 'https://codegurru.in/placements',
+          },
+          {
+            '@type': 'SiteNavigationElement',
+            position: 5,
+            name: 'About CodeGurru',
+            description: 'Founded by Kishan Pandey under UK VK Pvt. Ltd. in Uttar Pradesh',
+            url: 'https://codegurru.in/about',
+          },
+          {
+            '@type': 'SiteNavigationElement',
+            position: 6,
+            name: 'Contact & Helplines',
+            description: 'Campus address Near Saket College Petrol Pump, Ayodhya & Call Desks',
+            url: 'https://codegurru.in/contact',
+          },
+          {
+            '@type': 'SiteNavigationElement',
+            position: 7,
+            name: 'FAQs',
+            description: 'Frequently asked questions regarding courses, fees, admissions and repair',
+            url: 'https://codegurru.in/faq',
+          },
+        ],
       },
     ],
   };
@@ -193,6 +281,12 @@ export default function RootLayout({ children }) {
           httpEquiv="Content-Security-Policy"
           content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval' data: blob:; style-src * 'unsafe-inline';"
         />
+        {/* Geo Meta Tags for Google Local Search & Maps */}
+        <meta name="geo.region" content="IN-UP" />
+        <meta name="geo.placename" content="Ayodhya, Uttar Pradesh" />
+        <meta name="geo.position" content="26.7922;82.1998" />
+        <meta name="ICBM" content="26.7922, 82.1998" />
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

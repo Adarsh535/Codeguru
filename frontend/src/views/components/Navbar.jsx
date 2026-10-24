@@ -5,6 +5,8 @@ import { MapPin, LogIn, UserPlus, LogOut, User, BookOpen, Layers, GraduationCap,
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 
+import { getApiBase } from '../../models/apiClient';
+
 export default function Navbar({
   selectedLocation,
   onOpenLocationModal,
@@ -34,8 +36,7 @@ export default function Navbar({
 
   const fetchSettings = () => {
     try {
-      const base = typeof window !== 'undefined' ? (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://369.codegurru.in/api') : 'https://369.codegurru.in/api';
-      fetch(`${base}/settings`)
+      fetch(`${getApiBase()}/settings`)
         .then(res => res.json())
         .then(data => {
           if (data && data.success && data.data && data.data.showMyBatchNav !== undefined) {
@@ -55,14 +56,11 @@ export default function Navbar({
     window.addEventListener('codeguru_refresh_all', fetchSettings);
     window.addEventListener('focus', fetchSettings);
 
-    const interval = setInterval(fetchSettings, 5000);
-
     return () => {
       window.removeEventListener('storage', checkUser);
       window.removeEventListener('codeguru_user_updated', checkUser);
       window.removeEventListener('codeguru_refresh_all', fetchSettings);
       window.removeEventListener('focus', fetchSettings);
-      clearInterval(interval);
     };
   }, []);
 

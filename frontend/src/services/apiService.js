@@ -59,6 +59,7 @@ export const apiService = {
    * @param {Object} leadData - { name, phone, course, location, notes }
    */
   submitLead: (leadData) => leadModel.submitLead(leadData),
+  updateLead: (leadId, updateData) => leadModel.updateLead(leadId, updateData),
 
   /**
    * API: Create New Student Course Enrollment & Payment
@@ -93,16 +94,22 @@ export const apiService = {
   loginStudent: (credentials) => userModel.loginStudent(credentials),
 
   /**
-   * API: Send Mobile OTP for Fast Student Login
-   * @route POST http://localhost:5000/api/auth/student/send-otp
+   * API: Direct Mobile Login without OTP (Sends lead to Admin immediately)
+   * @route POST /api/auth/student/phone-login
    */
-  sendOtp: (phone) => userModel.sendOtp(phone),
+  phoneLogin: (payload) => userModel.phoneLogin(payload),
 
   /**
-   * API: Verify Mobile OTP & Auto Login
+   * API: Send Mobile OTP for Fast Student Login (no-op backwards compatible)
+   * @route POST http://localhost:5000/api/auth/student/send-otp
+   */
+  sendOtp: (phone) => userModel.phoneLogin({ phone }),
+
+  /**
+   * API: Verify Mobile OTP & Auto Login (no-op backwards compatible)
    * @route POST http://localhost:5000/api/auth/student/verify-otp
    */
-  verifyOtp: (payload) => userModel.verifyOtp(payload),
+  verifyOtp: (payload) => userModel.phoneLogin(payload),
 
   /**
    * API: Update Student Name & Email

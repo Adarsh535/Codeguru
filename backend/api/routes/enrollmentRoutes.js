@@ -27,7 +27,7 @@ router.get('/', requireAuth, getEnrollments);
  * POST /api/enrollments
  * Create new enrollment & record payment
  */
-router.post('/', createEnrollment);
+router.post('/', requireAuth, createEnrollment);
 
 /**
  * PUT /api/enrollments/:id

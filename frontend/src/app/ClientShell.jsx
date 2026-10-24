@@ -12,9 +12,9 @@ import PlacementSelectorModal from '../views/components/PlacementSelectorModal';
 import ContactModal from '../views/components/ContactModal';
 import ProfilePage from '../views/components/ProfilePage';
 import InquiryModal from '../views/components/InquiryModal';
-import AuthModal from '../views/components/AuthModal';
 import BatchEnrollModal from '../views/components/BatchEnrollModal';
 import BottomBarOtpSheet from '../views/components/BottomBarOtpSheet';
+import { ModalsProvider } from '../context/ModalsContext';
 import { apiService } from '../services/apiService';
 import { realtimeSync } from '../services/realtimeService';
 import { trackPageView, sendHeartbeat, sendLeaveEvent } from '../utils/visitorTracker';
@@ -23,8 +23,6 @@ export default function ClientShell({ children }) {
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState('home');
   const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState('login');
   const [isOtpSheetOpen, setIsOtpSheetOpen] = useState(false);
   
   // Batch Enrollment Modal State
@@ -60,25 +58,16 @@ export default function ClientShell({ children }) {
   const isOtpSheetOpenRef = useRef(isOtpSheetOpen);
   isOtpSheetOpenRef.current = isOtpSheetOpen;
 
-  // Auto-open BottomBarOtpSheet with 15 seconds delay until student logs in:
-  useEffect(() => {
-    const interval = setInterval(() => {
-      try {
-        const stored = typeof window !== 'undefined' ? localStorage.getItem('codeguru_user') : null;
-        if (stored || userRef.current) {
-          clearInterval(interval);
-          return;
-        }
-      } catch (e) {}
-
-      // If student is not logged in and sheet is currently closed, pop it open!
-      if (!isOtpSheetOpenRef.current && !userRef.current) {
-        setIsOtpSheetOpen(true);
+  // Sheet is opened strictly on user action (e.g. clicking Enroll or Login)
+  // Remember dismissal in sessionStorage so it is never forced on users (F8)
+  const handleCloseOtpSheet = () => {
+    try {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('codeguru_otp_sheet_dismissed', '1');
       }
-    }, 15000); // 15 seconds delay
-
-    return () => clearInterval(interval);
-  }, []);
+    } catch (e) {}
+    setIsOtpSheetOpen(false);
+  };
 
   const handleOpenEnrollModal = (batch = null) => {
     if (!user) {
@@ -134,7 +123,7 @@ export default function ClientShell({ children }) {
         if (document.visibilityState === 'visible') {
           sendHeartbeat(pathname);
         }
-      }, 5000); // 5s interval for snappy presence detection
+      }, 30000); // 30s interval for presence detection (F10)
     };
 
     const stopHeartbeat = () => {
@@ -191,104 +180,112 @@ export default function ClientShell({ children }) {
     return child;
   });
 
+  const modalsValue = {
+    openEnrollModal: handleOpenEnrollModal,
+    openContactModal: () => setIsContactModalOpen(true),
+    openInquiryModal: () => setIsInquiryModalOpen(true),
+    openOtpSheet: () => setIsOtpSheetOpen(true),
+    openLocationModal: () => setIsLocationModalOpen(true),
+    openPlacementModal: () => setIsPlacementModalOpen(true),
+    user,
+    selectedLocation,
+    selectedCategory
+  };
+
   return (
     <DeviceGuard>
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 justify-between overflow-x-hidden pt-14 sm:pt-20 pb-20 sm:pb-8" suppressHydrationWarning>
-        
-        {/* RESPONSIVE TOPBAR HEADER */}
-        <Navbar
-          selectedLocation={selectedLocation}
-          onOpenLocationModal={() => setIsLocationModalOpen(true)}
-          selectedCategory={selectedCategory}
-          onOpenPlacementModal={() => setIsPlacementModalOpen(true)}
-          onOpenContactModal={() => setIsContactModalOpen(true)}
-          onOpenInquiryModal={() => setIsInquiryModalOpen(true)}
-          onOpenLogin={() => setIsOtpSheetOpen(true)}
-          onOpenRegister={() => setIsOtpSheetOpen(true)}
-          setActiveTab={setActiveTab}
-        />
-
-        <main className="flex-1 overflow-x-hidden">
-          {childrenWithProps}
-        </main>
-
-        {/* INTERACTIVE FOOTER WITH LIVE LOCATION MAP */}
-        {pathname !== '/courses' && (
-          <Footer
+      <ModalsProvider value={modalsValue}>
+        <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 justify-between overflow-x-hidden pt-14 sm:pt-20 pb-20 sm:pb-8" suppressHydrationWarning>
+          
+          {/* RESPONSIVE TOPBAR HEADER */}
+          <Navbar
             selectedLocation={selectedLocation}
             onOpenLocationModal={() => setIsLocationModalOpen(true)}
+            selectedCategory={selectedCategory}
+            onOpenPlacementModal={() => setIsPlacementModalOpen(true)}
+            onOpenContactModal={() => setIsContactModalOpen(true)}
+            onOpenInquiryModal={() => setIsInquiryModalOpen(true)}
+            onOpenLogin={() => setIsOtpSheetOpen(true)}
+            onOpenRegister={() => setIsOtpSheetOpen(true)}
+            setActiveTab={setActiveTab}
+          />
+
+          <main className="flex-1 overflow-x-hidden">
+            {childrenWithProps}
+          </main>
+
+          {/* INTERACTIVE FOOTER WITH LIVE LOCATION MAP */}
+          {pathname !== '/courses' && (
+            <Footer
+              selectedLocation={selectedLocation}
+              onOpenLocationModal={() => setIsLocationModalOpen(true)}
+              onOpenContactModal={() => setIsContactModalOpen(true)}
+            />
+          )}
+
+          {/* RESPONSIVE BOTTOM FOOTER NAVBAR */}
+          <BottomNav
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            user={user}
+            onOpenOtpSheet={() => setIsOtpSheetOpen(true)}
+            onOpenContactModal={() => setIsContactModalOpen(true)}
+            onOpenPlacementModal={() => setIsPlacementModalOpen(true)}
+          />
+
+          {/* LOCATION SELECTOR MODAL */}
+          <LocationModal
+            isOpen={isLocationModalOpen}
+            onClose={() => setIsLocationModalOpen(false)}
+            locations={locations}
+            selectedLocation={selectedLocation}
+            onSelectLocation={setSelectedLocation}
+          />
+
+          {/* PLACEMENT SELECTOR MODAL */}
+          <PlacementSelectorModal
+            isOpen={isPlacementModalOpen}
+            onClose={() => setIsPlacementModalOpen(false)}
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+          />
+
+          {/* SOCIAL & CONTACT CHANNELS POPUP MODAL */}
+          <ContactModal
+            isOpen={isContactModalOpen}
+            onClose={() => setIsContactModalOpen(false)}
+          />
+
+          {/* INQUIRIES MODAL */}
+          <InquiryModal
+            isOpen={isInquiryModalOpen}
+            onClose={() => setIsInquiryModalOpen(false)}
+            onSubmitSuccess={() => checkUser()}
+          />
+
+
+
+          {/* BATCH ENROLLMENT MODAL */}
+          <BatchEnrollModal
+            isOpen={isEnrollModalOpen}
+            onClose={() => setIsEnrollModalOpen(false)}
+            batchData={enrollBatchData}
+            user={user}
+            onEnrollSuccess={handleEnrollSuccess}
+          />
+
+          {/* SMOOTH BOTTOM BAR OTP LOGIN SHEET */}
+          <BottomBarOtpSheet
+            isOpen={isOtpSheetOpen}
+            onClose={handleCloseOtpSheet}
+            user={user}
+            onLoginSuccess={() => checkUser()}
             onOpenContactModal={() => setIsContactModalOpen(true)}
           />
-        )}
 
-        {/* RESPONSIVE BOTTOM FOOTER NAVBAR */}
-        <BottomNav
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          user={user}
-          onOpenOtpSheet={() => setIsOtpSheetOpen(true)}
-          onOpenContactModal={() => setIsContactModalOpen(true)}
-          onOpenPlacementModal={() => setIsPlacementModalOpen(true)}
-        />
-
-        {/* LOCATION SELECTOR MODAL */}
-        <LocationModal
-          isOpen={isLocationModalOpen}
-          onClose={() => setIsLocationModalOpen(false)}
-          locations={locations}
-          selectedLocation={selectedLocation}
-          onSelectLocation={setSelectedLocation}
-        />
-
-        {/* PLACEMENT SELECTOR MODAL */}
-        <PlacementSelectorModal
-          isOpen={isPlacementModalOpen}
-          onClose={() => setIsPlacementModalOpen(false)}
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-        />
-
-        {/* SOCIAL & CONTACT CHANNELS POPUP MODAL */}
-        <ContactModal
-          isOpen={isContactModalOpen}
-          onClose={() => setIsContactModalOpen(false)}
-        />
-
-        {/* INQUIRIES MODAL */}
-        <InquiryModal
-          isOpen={isInquiryModalOpen}
-          onClose={() => setIsInquiryModalOpen(false)}
-          onSubmitSuccess={() => checkUser()}
-        />
-
-        {/* AUTHENTICATION LOGIN & REGISTER MODAL */}
-        <AuthModal
-          isOpen={isAuthModalOpen}
-          onClose={() => setIsAuthModalOpen(false)}
-          initialMode={authModalMode}
-          onAuthSuccess={() => checkUser()}
-        />
-
-        {/* BATCH ENROLLMENT MODAL */}
-        <BatchEnrollModal
-          isOpen={isEnrollModalOpen}
-          onClose={() => setIsEnrollModalOpen(false)}
-          batchData={enrollBatchData}
-          user={user}
-          onEnrollSuccess={handleEnrollSuccess}
-        />
-
-        {/* SMOOTH BOTTOM BAR OTP LOGIN SHEET */}
-        <BottomBarOtpSheet
-          isOpen={isOtpSheetOpen}
-          onClose={() => setIsOtpSheetOpen(false)}
-          user={user}
-          onLoginSuccess={() => checkUser()}
-          onOpenContactModal={() => setIsContactModalOpen(true)}
-        />
-
-      </div>
+        </div>
+      </ModalsProvider>
     </DeviceGuard>
   );
 }

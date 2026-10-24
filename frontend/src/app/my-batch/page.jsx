@@ -1,7 +1,7 @@
 import MyBatchPage from '../../views/pages/MyBatchPage';
 
 export const metadata = {
-  title: 'My Batch Portal | CodeGurru Student Portal & Schedule',
+  title: 'Student Batch Portal & Schedule',
   description:
     'Access your enrolled CodeGurru student batch, live classes schedule, assignment submissions, mentor support, and course progress.',
   keywords: [
@@ -15,7 +15,7 @@ export const metadata = {
     follow: true,
   },
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/my-batch`,
+    canonical: 'https://codegurru.in/my-batch',
   },
 };
 

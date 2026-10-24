@@ -11,51 +11,39 @@
  * - Live Visitor & Course Search Traffic Analytics API
  */
 
-import { API_BASE } from './apiClient';
+import { apiFetch, API_BASE } from './apiClient';
 
 export const adminCmsModel = {
   /**
-   * --------------------------------------------------------------------------
-   * API: Upload Media File (Image/Video)
-   * --------------------------------------------------------------------------
-   * @route   POST http://localhost:5000/api/upload
-   * @desc    Backend file upload endpoint par file multipart formdata ke throw post karta hai.
-   *          Failure par DataURL conversion reader ka fallback use karta hai.
-   * @param   {File} file - Browser File object (JPG, PNG, WEBP, MP4, etc.)
-   * @returns {Promise<string|null>} Uploaded image/video URL string or base64 data URL
+   * Upload Media File (Image/Video). Throws on failure (A7).
+   * @param {File} file
+   * @returns {Promise<string>}
    */
   uploadFile: async (file) => {
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch(`${API_BASE}/upload`, {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
-      if (data.success && data.url) {
-        return data.url;
-      }
-      console.warn('[adminCmsModel API Warning] File upload returned error response:', data);
-      return null;
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Backend file upload failed:', err);
-      return null;
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await apiFetch(`${API_BASE}/upload`, {
+      method: 'POST',
+      body: formData
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `File upload failed (${res.status})`);
     }
+    const data = await res.json();
+    if (data.success && data.url) {
+      return data.url;
+    }
+    throw new Error(data.message || 'File upload failed');
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Get Banners List
-   * --------------------------------------------------------------------------
-   * @route   GET http://localhost:5000/api/banners
-   * @desc    Website hero banner slides MongoDB se fetch karta hai (with localStorage fallback).
-   * @access  Public / Admin
-   * @returns {Promise<Array>} List of hero banner objects
+   * Get Banners List
    */
   getBanners: async () => {
     try {
-      const res = await fetch(`${API_BASE}/banners`);
+      const res = await apiFetch(`${API_BASE}/banners`);
+      if (!res.ok) return [];
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         return data.data.map(item => ({
@@ -63,91 +51,67 @@ export const adminCmsModel = {
           id: item._id || item.id
         }));
       }
-      return [];
     } catch (err) {
       console.warn('[adminCmsModel API Warning] Banners API call failed:', err);
-      return [];
     }
+    return [];
   },
 
-
   /**
-   * --------------------------------------------------------------------------
-   * API: Create New Hero Banner
-   * --------------------------------------------------------------------------
-   * @route   POST http://localhost:5000/api/banners
-   * @desc    Naya hero section banner banner database me save karta hai.
-   * @param   {Object} payload - { title, subtitle, type, badge, ctaText, mediaUrl }
-   * @returns {Promise<Object|null>} Created banner object with ID
+   * Add New Banner. Throws on failure (A7).
    */
   addBanner: async (payload) => {
-    try {
-      const res = await fetch(`${API_BASE}/banners`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      const item = data.data;
-      return item ? { ...item, id: item._id || item.id } : null;
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error creating banner:', err);
-      return null;
+    const res = await apiFetch(`${API_BASE}/banners`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to add banner (${res.status})`);
     }
+    const data = await res.json();
+    const item = data.data;
+    return item ? { ...item, id: item._id || item.id } : null;
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Delete Hero Banner
-   * --------------------------------------------------------------------------
-   * @route   DELETE http://localhost:5000/api/banners/:id
-   * @desc    Banner ID ke dwara hero slide delete karta hai.
-   * @param   {string} id - Banner MongoDB _id
-   * @returns {Promise<void>}
+   * Delete Banner. Throws on failure (A7).
    */
   deleteBanner: async (id) => {
-    try {
-      await fetch(`${API_BASE}/banners/${id}`, { method: 'DELETE' });
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error deleting banner:', err);
+    const res = await apiFetch(`${API_BASE}/banners/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to delete banner (${res.status})`);
     }
+    return res.json();
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Update Hero Banner
-   * --------------------------------------------------------------------------
-   * @route   PUT http://localhost:5000/api/banners/:id
-   * @desc    Existing hero banner details update karta hai.
-   * @param   {string} id - Banner ID
-   * @param   {Object} payload - { title, subtitle, type, badge, ctaText, mediaUrl }
-   * @returns {Promise<Object|null>} Updated banner object
+   * Update Banner. Throws on failure (A7).
    */
   updateBanner: async (id, payload) => {
-    try {
-      const res = await fetch(`${API_BASE}/banners/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      const item = data.data;
-      return item ? { ...item, id: item._id || item.id } : null;
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error updating banner:', err);
-      return null;
+    const res = await apiFetch(`${API_BASE}/banners/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to update banner (${res.status})`);
     }
+    const data = await res.json();
+    const item = data.data;
+    return item ? { ...item, id: item._id || item.id } : null;
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Get Promotional / Advertisement Banners List
-   * --------------------------------------------------------------------------
-   * @route   GET http://localhost:5000/api/ads
+   * Get Promotional / Advertisement Banners List
    */
   getAds: async () => {
     try {
-      const res = await fetch(`${API_BASE}/ads`);
+      const res = await apiFetch(`${API_BASE}/ads`);
+      if (!res.ok) return [];
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         return data.data.map(item => ({
@@ -163,77 +127,60 @@ export const adminCmsModel = {
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Create New Ad Banner
-   * --------------------------------------------------------------------------
-   * @route   POST http://localhost:5000/api/ads
+   * Create New Ad Banner. Throws on failure (A7).
    */
   createAd: async (payload) => {
-    try {
-      const res = await fetch(`${API_BASE}/ads`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      const item = data.data;
-      return item ? { ...item, id: item._id || item.id } : null;
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error creating ad:', err);
-      return null;
+    const res = await apiFetch(`${API_BASE}/ads`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to create ad (${res.status})`);
     }
+    const data = await res.json();
+    const item = data.data;
+    return item ? { ...item, id: item._id || item.id } : null;
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Update Existing Ad Banner
-   * --------------------------------------------------------------------------
-   * @route   PUT http://localhost:5000/api/ads/:id
+   * Update Existing Ad Banner. Throws on failure (A7).
    */
   updateAd: async (id, payload) => {
-    try {
-      const res = await fetch(`${API_BASE}/ads/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      const item = data.data;
-      return item ? { ...item, id: item._id || item.id } : null;
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error updating ad:', err);
-      return null;
+    const res = await apiFetch(`${API_BASE}/ads/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to update ad (${res.status})`);
     }
+    const data = await res.json();
+    const item = data.data;
+    return item ? { ...item, id: item._id || item.id } : null;
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Delete Ad Banner
-   * --------------------------------------------------------------------------
-   * @route   DELETE http://localhost:5000/api/ads/:id
+   * Delete Ad Banner. Throws on failure (A7).
    */
   deleteAd: async (id) => {
-    try {
-      const res = await fetch(`${API_BASE}/ads/${id}`, { method: 'DELETE' });
-      return await res.json();
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error deleting ad:', err);
-      return { success: false, message: err.message };
+    const res = await apiFetch(`${API_BASE}/ads/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to delete ad (${res.status})`);
     }
+    return res.json();
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Get All Courses
-   * --------------------------------------------------------------------------
-   * @route   GET http://localhost:5000/api/courses
-   * @desc    Frontend aur Admin catalog ke liye saare offered courses fetch karta hai.
-   * @access  Public / Admin
-   * @returns {Promise<Array>} List of course objects
+   * Get All Courses
    */
   getCourses: async () => {
     try {
-      const res = await fetch(`${API_BASE}/courses?all=true`);
+      const res = await apiFetch(`${API_BASE}/courses?all=true`);
+      if (!res.ok) return [];
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         return data.data.map(item => ({
@@ -249,85 +196,60 @@ export const adminCmsModel = {
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Add New Course
-   * --------------------------------------------------------------------------
-   * @route   POST http://localhost:5000/api/courses
-   * @desc    Naya training course database me insert karta hai.
-   * @param   {Object} payload - { title, category, subCat, duration, price, level, badge, description, technologies }
-   * @returns {Promise<Object|null>} Created course record
+   * Add New Course. Throws on failure (A7).
    */
   addCourse: async (payload) => {
-    try {
-      const res = await fetch(`${API_BASE}/courses`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      const item = data.data;
-      return item ? { ...item, id: item._id || item.id } : null;
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error adding course:', err);
-      return null;
+    const res = await apiFetch(`${API_BASE}/courses`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to add course (${res.status})`);
     }
+    const data = await res.json();
+    const item = data.data;
+    return item ? { ...item, id: item._id || item.id } : null;
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Delete Course
-   * --------------------------------------------------------------------------
-   * @route   DELETE http://localhost:5000/api/courses/:id
-   * @desc    Course ID ke dwara training course delete karta hai.
-   * @param   {string} id - Course MongoDB _id
-   * @returns {Promise<void>}
+   * Delete Course. Throws on failure (A7).
    */
   deleteCourse: async (id) => {
-    try {
-      await fetch(`${API_BASE}/courses/${id}`, { method: 'DELETE' });
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error deleting course:', err);
+    const res = await apiFetch(`${API_BASE}/courses/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to delete course (${res.status})`);
     }
+    return res.json();
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Update Course
-   * --------------------------------------------------------------------------
-   * @route   PUT http://localhost:5000/api/courses/:id
-   * @desc    Course details update karta hai.
-   * @param   {string} id - Course ID
-   * @param   {Object} payload
-   * @returns {Promise<Object|null>} Updated course record
+   * Update Course. Throws on failure (A7).
    */
   updateCourse: async (id, payload) => {
-    try {
-      const res = await fetch(`${API_BASE}/courses/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      const item = data.data;
-      return item ? { ...item, id: item._id || item.id } : null;
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error updating course:', err);
-      return null;
+    const res = await apiFetch(`${API_BASE}/courses/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to update course (${res.status})`);
     }
+    const data = await res.json();
+    const item = data.data;
+    return item ? { ...item, id: item._id || item.id } : null;
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Get Student Placements Records
-   * --------------------------------------------------------------------------
-   * @route   GET http://localhost:5000/api/placements
-   * @desc    Student job placements and package data fetch karta hai.
-   * @access  Public / Admin
-   * @returns {Promise<Array>} List of placement records
+   * Get Student Placements Records
    */
   getPlacements: async () => {
     try {
-      const res = await fetch(`${API_BASE}/placements`);
+      const res = await apiFetch(`${API_BASE}/placements`);
+      if (!res.ok) return [];
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         return data.data.map(item => ({
@@ -343,85 +265,60 @@ export const adminCmsModel = {
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Add New Student Placement Record
-   * --------------------------------------------------------------------------
-   * @route   POST http://localhost:5000/api/placements
-   * @desc    Placed student details (Student name, company, package CTC, role, image) record karta hai.
-   * @param   {Object} payload - { studentName, company, package: ctc, role, avatarUrl, course }
-   * @returns {Promise<Object|null>} Created placement record
+   * Add New Student Placement Record. Throws on failure (A7).
    */
   addPlacement: async (payload) => {
-    try {
-      const res = await fetch(`${API_BASE}/placements`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      const item = data.data;
-      return item ? { ...item, id: item._id || item.id } : null;
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error adding placement:', err);
-      return null;
+    const res = await apiFetch(`${API_BASE}/placements`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to add placement (${res.status})`);
     }
+    const data = await res.json();
+    const item = data.data;
+    return item ? { ...item, id: item._id || item.id } : null;
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Delete Placement Record
-   * --------------------------------------------------------------------------
-   * @route   DELETE http://localhost:5000/api/placements/:id
-   * @desc    Placement record database se remove karta hai.
-   * @param   {string} id - Placement MongoDB _id
-   * @returns {Promise<void>}
+   * Delete Placement Record. Throws on failure (A7).
    */
   deletePlacement: async (id) => {
-    try {
-      await fetch(`${API_BASE}/placements/${id}`, { method: 'DELETE' });
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error deleting placement:', err);
+    const res = await apiFetch(`${API_BASE}/placements/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to delete placement (${res.status})`);
     }
+    return res.json();
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Update Student Placement Record
-   * --------------------------------------------------------------------------
-   * @route   PUT http://localhost:5000/api/placements/:id
-   * @desc    Placement record details update karta hai.
-   * @param   {string} id - Placement ID
-   * @param   {Object} payload
-   * @returns {Promise<Object|null>} Updated placement record
+   * Update Student Placement Record. Throws on failure (A7).
    */
   updatePlacement: async (id, payload) => {
-    try {
-      const res = await fetch(`${API_BASE}/placements/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      const item = data.data;
-      return item ? { ...item, id: item._id || item.id } : null;
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error updating placement:', err);
-      return null;
+    const res = await apiFetch(`${API_BASE}/placements/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to update placement (${res.status})`);
     }
+    const data = await res.json();
+    const item = data.data;
+    return item ? { ...item, id: item._id || item.id } : null;
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Get CodeGuru Team Members & Instructors
-   * --------------------------------------------------------------------------
-   * @route   GET http://localhost:5000/api/team
-   * @desc    CodeGuru instructors aur executive staff list fetch karta hai.
-   * @access  Public / Admin
-   * @returns {Promise<Array>} List of team members
+   * Get CodeGuru Team Members & Instructors
    */
   getTeam: async () => {
     try {
-      const res = await fetch(`${API_BASE}/team`);
+      const res = await apiFetch(`${API_BASE}/team`);
+      if (!res.ok) return [];
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         return data.data.map(item => ({
@@ -437,88 +334,64 @@ export const adminCmsModel = {
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Add New Team Member
-   * --------------------------------------------------------------------------
-   * @route   POST http://localhost:5000/api/team
-   * @desc    Naya staff instructor member save karta hai.
-   * @param   {Object} payload - { name, role, bio, photoUrl, experience }
-   * @returns {Promise<Object|null>} Created team member object
+   * Add New Team Member. Throws on failure (A7).
    */
   addTeamMember: async (payload) => {
-    try {
-      const res = await fetch(`${API_BASE}/team`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      const item = data.data;
-      return item ? { ...item, id: item._id || item.id } : null;
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error adding team member:', err);
-      return null;
+    const res = await apiFetch(`${API_BASE}/team`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to add team member (${res.status})`);
     }
+    const data = await res.json();
+    const item = data.data;
+    return item ? { ...item, id: item._id || item.id } : null;
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Delete Team Member
-   * --------------------------------------------------------------------------
-   * @route   DELETE http://localhost:5000/api/team/:id
-   * @desc    Team member profile delete karta hai.
-   * @param   {string} id - Team MongoDB _id
-   * @returns {Promise<void>}
+   * Delete Team Member. Throws on failure (A7).
    */
   deleteTeamMember: async (id) => {
-    try {
-      await fetch(`${API_BASE}/team/${id}`, { method: 'DELETE' });
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error deleting team member:', err);
+    const res = await apiFetch(`${API_BASE}/team/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to delete team member (${res.status})`);
     }
+    return res.json();
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Update Team Member
-   * --------------------------------------------------------------------------
-   * @route   PUT http://localhost:5000/api/team/:id
-   * @desc    Team member profile update karta hai.
-   * @param   {string} id - Team Member ID
-   * @param   {Object} payload
-   * @returns {Promise<Object|null>} Updated team member object
+   * Update Team Member. Throws on failure (A7).
    */
   updateTeamMember: async (id, payload) => {
-    try {
-      const res = await fetch(`${API_BASE}/team/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      const item = data.data;
-      return item ? { ...item, id: item._id || item.id } : null;
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error updating team member:', err);
-      return null;
+    const res = await apiFetch(`${API_BASE}/team/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to update team member (${res.status})`);
     }
+    const data = await res.json();
+    const item = data.data;
+    return item ? { ...item, id: item._id || item.id } : null;
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Get Traffic & Live Visitor Analytics
-   * --------------------------------------------------------------------------
-   * @route   GET http://localhost:5000/api/traffic/stats
-   * @desc    Realtime website traffic analytics (today visitors, live active users, top searched courses, city breakdown) return karta hai.
-   * @access  Admin Private
-   * @returns {Promise<Object>} Traffic analytics object { todayVisitors, liveActive, totalVisitors, dailyTrend, topSearchedCourses, cityBreakdown }
+   * Get Traffic & Live Visitor Analytics
    */
   getTrafficStats: async () => {
     try {
-      const res = await fetch(`${API_BASE}/traffic/stats`);
-      const data = await res.json();
-      if (data.success) {
-        return data.data;
+      const res = await apiFetch(`${API_BASE}/traffic/stats`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          return data.data;
+        }
       }
     } catch (err) {
       console.warn('[adminCmsModel API Warning] Traffic API call error:', err);
@@ -534,21 +407,15 @@ export const adminCmsModel = {
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Get Course Categories
-   * --------------------------------------------------------------------------
-   * @route   GET http://localhost:5000/api/categories
-   * @desc    Saare course categories fetch karta hai.
-   * @access  Public / Admin
-   * @returns {Promise<Array>} List of category objects
+   * Get Course Categories (Backend API only, no fake localStorage merge - A9)
    */
   getCategories: async () => {
-    let apiList = [];
     try {
-      const res = await fetch(`${API_BASE}/categories`);
+      const res = await apiFetch(`${API_BASE}/categories`);
+      if (!res.ok) return [];
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
-        apiList = data.data.map(item => ({
+        return data.data.map(item => ({
           ...item,
           id: item._id || item.id
         }));
@@ -556,117 +423,57 @@ export const adminCmsModel = {
     } catch (err) {
       console.warn('[adminCmsModel API Warning] Categories API call error:', err);
     }
-    
-    // Merge localStorage categories fallback
-    try {
-      const local = JSON.parse(localStorage.getItem('codeguru_custom_categories') || '[]');
-      const combined = [...apiList];
-      local.forEach(loc => {
-        if (!combined.some(c => c.category === loc.category || c.id === loc.id)) {
-          combined.push(loc);
-        }
-      });
-      return combined;
-    } catch {
-      return apiList;
-    }
+    return [];
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Add New Course Category
-   * --------------------------------------------------------------------------
-   * @route   POST http://localhost:5000/api/categories
-   * @desc    Nayi course category save karta hai with localStorage fallback.
-   * @param   {Object} payload - { label, category, subCat, subCategories, badge, icon, bgColor }
-   * @returns {Promise<Object>} { success: boolean, data?: Object, message?: string }
+   * Add New Course Category. Real API only, throws on error (A7, A9).
    */
   addCategory: async (payload) => {
-    try {
-      const res = await fetch(`${API_BASE}/categories`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.success && data.data) {
-        const item = data.data;
-        return { success: true, data: { ...item, id: item._id || item.id } };
-      }
-    } catch (err) {
-      console.warn('[adminCmsModel API Warning] Backend addCategory failed, saving to localStorage:', err);
+    const res = await apiFetch(`${API_BASE}/categories`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to create category (${res.status})`);
     }
-
-    // Fallback: save locally so user operation never fails!
-    const newLocalCat = {
-      ...payload,
-      id: 'cat-' + Date.now(),
-      _id: 'cat-' + Date.now(),
-      createdAt: new Date().toISOString()
-    };
-    try {
-      const local = JSON.parse(localStorage.getItem('codeguru_custom_categories') || '[]');
-      local.push(newLocalCat);
-      localStorage.setItem('codeguru_custom_categories', JSON.stringify(local));
-      return { success: true, data: newLocalCat };
-    } catch (e) {
-      return { success: false, message: e.message || 'Storage error' };
+    const data = await res.json();
+    if (data.success && data.data) {
+      const item = data.data;
+      return { success: true, data: { ...item, id: item._id || item.id } };
     }
+    throw new Error(data.message || 'Failed to create category');
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Update Course Category
-   * --------------------------------------------------------------------------
-   * @route   PUT http://localhost:5000/api/categories/:id
-   * @desc    Course category update karta hai.
-   * @param   {string} id - Category ID
-   * @param   {Object} payload
-   * @returns {Promise<Object|null>} Updated category object
+   * Update Course Category. Throws on error (A7).
    */
   updateCategory: async (id, payload) => {
-    try {
-      const res = await fetch(`${API_BASE}/categories/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.success && data.data) {
-        const item = data.data;
-        return { ...item, id: item._id || item.id };
-      }
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error updating category:', err);
+    const res = await apiFetch(`${API_BASE}/categories/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to update category (${res.status})`);
     }
-    try {
-      const local = JSON.parse(localStorage.getItem('codeguru_custom_categories') || '[]');
-      const updated = local.map(c => (c.id === id || c._id === id || c.category === id) ? { ...c, ...payload } : c);
-      localStorage.setItem('codeguru_custom_categories', JSON.stringify(updated));
-    } catch {}
-    return { id, ...payload };
+    const data = await res.json();
+    const item = data.data;
+    return item ? { ...item, id: item._id || item.id } : null;
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Delete Course Category
-   * --------------------------------------------------------------------------
-   * @route   DELETE http://localhost:5000/api/categories/:id
-   * @desc    Course category delete karta hai.
-   * @param   {string} id - Category MongoDB _id or local id
-   * @returns {Promise<void>}
+   * Delete Course Category. Throws on error (A7).
    */
   deleteCategory: async (id) => {
-    try {
-      await fetch(`${API_BASE}/categories/${id}`, { method: 'DELETE' });
-    } catch (err) {
-      console.error('[adminCmsModel API Error] Error deleting category:', err);
+    const res = await apiFetch(`${API_BASE}/categories/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to delete category (${res.status})`);
     }
-    // Also remove from localStorage if present
-    try {
-      const local = JSON.parse(localStorage.getItem('codeguru_custom_categories') || '[]');
-      const filtered = local.filter(c => c.id !== id && c._id !== id);
-      localStorage.setItem('codeguru_custom_categories', JSON.stringify(filtered));
-    } catch {}
+    return res.json();
   }
 };

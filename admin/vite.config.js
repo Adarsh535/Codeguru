@@ -5,6 +5,11 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5174,
-    open: false
+    open: false,
+    headers: {
+      'X-Frame-Options': 'DENY',
+      'Content-Security-Policy': "frame-ancestors 'none';",
+      'X-Content-Type-Options': 'nosniff'
+    }
   }
 });

@@ -3,7 +3,7 @@ import { MapPin, Phone, Mail, Clock, MessageSquare, Send } from 'lucide-react';
 import { BUSINESS_CONFIG } from '../../config/business';
 
 export const metadata = {
-  title: 'Contact CodeGurru | Lucknow & Ayodhya Campus Helplines',
+  title: 'Contact Us | Lucknow & Ayodhya Helplines',
   description:
     'Contact CodeGurru (UK VK Pvt. Ltd.) at Lucknow Head Office or Ayodhya Campus. Call +91 72388 29360 for course admissions, software quotes, or laptop repair pickup.',
   keywords: [
@@ -21,10 +21,39 @@ export const metadata = {
     title: 'Contact CodeGurru | Campus Coordinates & Support Desks',
     description: 'Reach our admissions, IT software consulting, and laptop repair desks in Lucknow and Ayodhya.',
     url: 'https://codegurru.in/contact',
+    siteName: 'CodeGurru (UK VK Pvt. Ltd.)',
+    images: [{ url: '/logo.png', width: 800, height: 600, alt: 'Contact CodeGurru' }],
+    locale: 'en_IN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Contact CodeGurru | Lucknow & Ayodhya Campus Helplines',
+    description: 'Call +91 72388 29360 for course admissions, software quotes, or laptop repair.',
+    images: ['/logo.png'],
   },
 };
 
 export default function ContactPage() {
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://codegurru.in',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Contact',
+        item: 'https://codegurru.in/contact',
+      },
+    ],
+  };
+
   const contactJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
@@ -38,6 +67,7 @@ export default function ContactPage() {
       streetAddress: BUSINESS_CONFIG.branches[0].streetAddress,
       addressLocality: 'Ayodhya',
       addressRegion: 'Uttar Pradesh',
+      postalCode: '224123',
       addressCountry: 'IN',
     },
     geo: {
@@ -57,6 +87,10 @@ export default function ContactPage() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(contactJsonLd) }}
@@ -167,8 +201,8 @@ export default function ContactPage() {
             
             <div className="w-full h-72 sm:h-80 bg-slate-100">
               <iframe
-                title="CodeGurru Location Map"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d113997.77709325985!2d82.13824128520286!3d26.788481546871184!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399a07937e6d2823%3A0x5fc85775f0a3952f!2sAyodhya%2C%20Uttar%20Pradesh!5e0!3m2!1sen!2sin!4v1699999999999!5m2!1sen!2sin"
+                title="CodeGurru Ayodhya Campus Location Map"
+                src="https://maps.google.com/maps?q=26.7922,82.1998&hl=en&z=16&output=embed"
                 className="w-full h-full border-0"
                 allowFullScreen=""
                 loading="lazy"

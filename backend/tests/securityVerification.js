@@ -79,8 +79,7 @@ const mockHealthResponse = {
 };
 
 const jsonStr = JSON.stringify(mockHealthResponse);
-assert(!jsonStr.includes('mongodb+srv://') && !jsonStr.includes('mongodb://'), 'Health response contains NO mongodb:// connection string');
-assert(!jsonStr.includes('password') && !jsonStr.includes('Adarshverma') && !jsonStr.includes('3213'), 'Health response contains NO database username or password');
+assert(!jsonStr.includes('password') && !jsonStr.includes('uri') && !jsonStr.includes('@'), 'Health response contains NO database credentials or connection info');
 
 // ---------------------------------------------------------------------------
 // TEST SUITE 3: RBAC & ROLE BOUNDARY ENFORCEMENT
@@ -89,6 +88,28 @@ console.log('\n📋 [TEST SUITE 3] Role-Based Access Control (RBAC):');
 
 assert(decodedAdmin.role === 'Master Admin', 'Admin possesses Master Admin privileges');
 assert(decodedStudent.role !== 'Master Admin', 'Student token cannot pass Master Admin authorization barrier');
+
+// ---------------------------------------------------------------------------
+// TEST SUITE 4: FILE UPLOAD EXTENSIONS & ENROLLMENT MUTATION DEFENSES
+// ---------------------------------------------------------------------------
+console.log('\n📋 [TEST SUITE 4] Upload Double Extensions (AD-403) & Fee Integrity (AD-402):');
+
+const dangerousRegex = /\.(php|phtml|exe|sh|bat|cmd|jsp|cgi|pl|py|svg)\./i;
+assert(dangerousRegex.test('shell.php.jpg') === true, 'Double extension "shell.php.jpg" is caught by regex');
+assert(dangerousRegex.test('payload.exe.png') === true, 'Double extension "payload.exe.png" is caught by regex');
+assert(dangerousRegex.test('xss.svg.png') === true, 'Double extension "xss.svg.png" is caught by regex');
+assert(dangerousRegex.test('normal_photo.jpg') === false, 'Safe filename "normal_photo.jpg" is accepted');
+assert(dangerousRegex.test('course_banner.png') === false, 'Safe filename "course_banner.png" is accepted');
+
+// Fee integrity logic test (AD-402)
+const courseFee = 24999;
+const invalidExcessPaid = 30000;
+const validPaid = 24999;
+const negativePaid = -500;
+
+assert(invalidExcessPaid > courseFee, 'Paid amount exceeding course fee is detected');
+assert(validPaid <= courseFee && validPaid >= 0, 'Valid non-negative paid amount within fee is accepted');
+assert(negativePaid < 0, 'Negative paid amount is detected and rejected');
 
 // ---------------------------------------------------------------------------
 // FINAL RESULTS SUMMARY

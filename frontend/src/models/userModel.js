@@ -58,23 +58,35 @@ export const userModel = {
   },
 
   /**
+   * API: Direct Mobile Login without OTP (Sends lead to Admin immediately)
+   * @route   POST /api/auth/student/phone-login
+   */
+  phoneLogin: async ({ phone, name, email, location, course, notes, leadId } = {}) => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/student/phone-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, name, email, location, course, notes, leadId })
+      });
+      const data = await res.json();
+      if (data && data.success && data.token) {
+        setAuthToken(data.token);
+      }
+      return data;
+    } catch (err) {
+      console.warn('[userModel API Warning] phoneLogin network error:', err);
+      return { success: false, message: 'Unable to reach server. Please try again.' };
+    }
+  },
+
+  /**
    * API: Send Mobile OTP for Fast Student Login
    * @route   POST https://369.codegurru.in/api/auth/student/send-otp
    * @param   {string} phone - 10-digit mobile number
    * @returns {Promise<Object>} API JSON response
    */
   sendOtp: async (phone) => {
-    try {
-      const res = await fetch(`${API_BASE}/auth/student/send-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone })
-      });
-      return await res.json();
-    } catch (err) {
-      console.warn('[userModel API Warning] sendOtp network error:', err);
-      return { success: false, message: 'Unable to reach server. Please try again.' };
-    }
+    return userModel.phoneLogin({ phone });
   },
 
   /**

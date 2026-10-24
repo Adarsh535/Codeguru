@@ -2,63 +2,49 @@
  * ============================================================================
  * MIDDLEWARE: AUTHENTICATION & ROLE-BASED ACCESS CONTROL (authMiddleware.js)
  * ============================================================================
- * 1. validateApiKey: Verifies that requests contain the valid x-api-key secret header.
- * 2. requireAuth: Verifies that a valid JWT token is present (via cookie or Bearer header).
- * 3. requireAdmin: Verifies that the authenticated user possesses the 'Master Admin' role.
+ * Zero-trust authentication enforcement:
+ * - Real cryptographically signed JWTs
+ * - Live MongoDB admin validation, tokenVersion check, active status check
+ * - Complete removal of all query token / header bypasses
  */
 
+import mongoose from 'mongoose';
 import { verifyToken } from '../utils/jwtHelper.js';
 import { Admin } from '../models/Admin.js';
+import { Student } from '../models/Student.js';
+import { inMemoryUsers } from '../api/controllers/userController.js';
+import { consumeRealtimeTicket } from '../services/ticketService.js';
 
 /**
- * Global API Security Middleware:
- * Verifies that incoming requests have the valid x-api-key header matching API_SECRET_KEY.
- * Blocks unauthorized direct scrapers and unauthorized callers.
+ * Legacy stub: No-op to preserve interface without fake API key bypass
  */
 export const validateApiKey = (req, res, next) => {
-  // Allow health checks, preflight OPTIONS, and realtime SSE streams / public beacons
-  const p = req.originalUrl || req.path || '';
-  if (
-    p.includes('/health') ||
-    p.includes('/realtime/stream') ||
-    p.includes('/analytics/stream') ||
-    p.includes('/analytics/heartbeat') ||
-    p.includes('/analytics/leave') ||
-    p.includes('/analytics/track') ||
-    p.includes('/events') ||
-    req.method === 'OPTIONS'
-  ) {
-    return next();
-  }
-
-  const expectedKey = process.env.API_SECRET_KEY || 'cg_app_secret_369_2026';
-  const providedKey = req.headers['x-api-key'] || req.headers['x-secret-key'] || req.query.apiKey;
-
-  if (providedKey && providedKey === expectedKey) {
-    return next();
-  }
-
-  // Also permit requests originating from trusted frontend/admin domains (Vercel & Codeguru)
-  const origin = req.headers.origin || req.headers.referer || '';
-  if (
-    origin.includes('.vercel.app') ||
-    origin.includes('codegurru.in') ||
-    origin.includes('localhost') ||
-    origin.includes('127.0.0.1')
-  ) {
-    return next();
-  }
-
-  return res.status(403).json({
-    success: false,
-    message: 'Access Denied: Invalid or missing API security key.'
-  });
+  next();
 };
 
 /**
- * Extract token from cookies, authorization headers, or URL query param (for SSE EventSource)
- * @param {Object} req - Express request
- * @returns {string|null} Token or null
+ * CSRF hardening: for state-changing methods, require a JSON Content-Type.
+ * A cross-site auto-submitting HTML form (the CSRF vector) can only send
+ * text/plain, urlencoded or multipart — never application/json — so this
+ * blocks forged state changes while leaving the admin UI (which always
+ * sends JSON) and GET requests untouched.
+ */
+export const requireJson = (req, res, next) => {
+  const method = (req.method || '').toUpperCase();
+  if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') return next();
+  const ct = (req.headers['content-type'] || '').toLowerCase();
+  if (!ct.includes('application/json')) {
+    return res.status(415).json({
+      success: false,
+      message: 'Unsupported request. Admin actions must be sent as application/json.'
+    });
+  }
+  next();
+};
+
+/**
+ * Extract token ONLY from Authorization header or HttpOnly cookies.
+ * Strictly ignores query string tokens to eliminate token leakage in access logs.
  */
 export const extractToken = (req) => {
   // 1. Check HttpOnly cookies
@@ -69,7 +55,7 @@ export const extractToken = (req) => {
   }
 
   // 2. Check Authorization Bearer header
-  const authHeader = req.headers.authorization || req.headers['x-admin-token'] || '';
+  const authHeader = req.headers.authorization || '';
   if (authHeader.startsWith('Bearer ')) {
     return authHeader.substring(7).trim();
   }
@@ -77,25 +63,148 @@ export const extractToken = (req) => {
     return authHeader.trim();
   }
 
-  // 3. Check query parameter (crucial for browser EventSource SSE connections)
-  if (req.query && req.query.token) {
-    return req.query.token;
-  }
-
   return null;
 };
 
 /**
- * User / Student Authentication Middleware
- * Requires a valid cryptographically signed JWT.
+ * Enforce Admin Authentication
+ * Validates JWT, verifies admin exists in DB, is active, and tokenVersion matches.
  */
-export const requireAuth = async (req, res, next) => {
+export const requireAdmin = async (req, res, next) => {
   try {
     const token = extractToken(req);
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Authentication required. Please log in to continue.'
+        message: 'Access denied. Admin authentication token is required.'
+      });
+    }
+
+    const decoded = verifyToken(token);
+    if (!decoded) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired authentication token.'
+      });
+    }
+
+    // Must be admin type or possess recognized admin role
+    const adminRoles = ['Master Admin', 'Admin', 'Counselor'];
+    if (decoded.type !== 'admin' && !adminRoles.includes(decoded.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: Admin privileges required.'
+      });
+    }
+
+    const adminId = decoded.sub || decoded.id;
+    if (!adminId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token subject.'
+      });
+    }
+
+    // Live DB validation (prevents access from deleted or modified admins)
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      return res.status(401).json({
+        success: false,
+        message: 'Admin account not found or has been removed.'
+      });
+    }
+
+    if (admin.isActive === false) {
+      return res.status(401).json({
+        success: false,
+        message: 'Admin account is deactivated.'
+      });
+    }
+
+    // Verify token version (revokes tokens issued prior to password/credential reset)
+    const expectedTv = admin.tokenVersion ?? 0;
+    const tokenTv = decoded.tv ?? 0;
+    if (tokenTv !== expectedTv) {
+      return res.status(401).json({
+        success: false,
+        message: 'Session has been invalidated. Please log in again.'
+      });
+    }
+
+    req.admin = admin;
+    req.user = {
+      sub: admin._id.toString(),
+      id: admin._id.toString(),
+      email: admin.email,
+      role: admin.role,
+      type: 'admin'
+    };
+
+    next();
+  } catch (error) {
+    console.error('[requireAdmin Error]:', error.message);
+    return res.status(401).json({
+      success: false,
+      message: 'Authentication verification failed.'
+    });
+  }
+};
+
+/**
+ * Admin or Short-Lived SSE Ticket Authentication Middleware
+ * Specifically for browser EventSource endpoints where headers cannot be attached.
+ */
+export const requireAdminOrTicket = async (req, res, next) => {
+  if (req.query?.ticket) {
+    const ticketData = consumeRealtimeTicket(req.query.ticket);
+    if (ticketData) {
+      req.admin = ticketData;
+      req.user = ticketData;
+      return next();
+    }
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid or expired realtime ticket.'
+    });
+  }
+  return requireAdmin(req, res, next);
+};
+
+/**
+ * Role-Based Access Control Middleware
+ * Usage: requireRole('Master Admin') or requireRole('Master Admin', 'Admin')
+ */
+export const requireRole = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user || !req.admin) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required.'
+      });
+    }
+
+    const userRole = req.admin.role || req.user.role;
+    if (!allowedRoles.includes(userRole)) {
+      return res.status(403).json({
+        success: false,
+        message: `Forbidden: This action requires one of the following roles: ${allowedRoles.join(', ')}`
+      });
+    }
+
+    next();
+  };
+};
+
+/**
+ * Student Authentication Middleware
+ */
+export const requireStudent = async (req, res, next) => {
+  try {
+    const token = extractToken(req);
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required. Please log in as a student.'
       });
     }
 
@@ -107,68 +216,108 @@ export const requireAuth = async (req, res, next) => {
       });
     }
 
-    req.user = decoded;
+    const studentId = (decoded.sub || decoded.id || '').toString();
+    let student = inMemoryUsers.get(studentId);
+    if (!student && mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(studentId)) {
+      student = await Student.findById(studentId);
+    }
+    if (!student) {
+      return res.status(401).json({
+        success: false,
+        message: 'Student account not found.'
+      });
+    }
+
+    req.student = student;
+    req.user = {
+      sub: (student._id || studentId).toString(),
+      id: (student._id || studentId).toString(),
+      email: student.email,
+      phone: student.phone || '',
+      role: 'Student',
+      type: 'student'
+    };
+
     next();
   } catch (error) {
-    console.error('[requireAuth Error]:', error.message);
+    console.error('[requireStudent Error]:', error.message);
     return res.status(401).json({
       success: false,
-      message: 'Authentication verification failed.'
+      message: 'Student authentication verification failed.'
     });
   }
 };
 
 /**
- * Master Admin Access Control Middleware
- * Enforces role-based access control (RBAC). Only 'Master Admin' is permitted.
+ * General Authentication Middleware (accepts either valid Admin or valid Student)
  */
-export const requireAdmin = async (req, res, next) => {
+export const requireAuth = async (req, res, next) => {
   try {
     const token = extractToken(req);
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Access denied. Master Admin authentication token is required.'
+        message: 'Authentication required. Please log in.'
       });
     }
 
-    // 1. Verify cryptographic JWT signature & claims
     const decoded = verifyToken(token);
-    if (decoded) {
-      if (decoded.role === 'Master Admin' || decoded.role === 'Admin') {
-        req.admin = decoded;
-        req.user = decoded;
-        return next();
-      }
-      return res.status(403).json({
+    if (!decoded) {
+      return res.status(401).json({
         success: false,
-        message: 'Access forbidden. Administrator privileges are required.'
+        message: 'Session has expired or is invalid. Please log in again.'
       });
     }
 
-    // 2. Fallback check against database for backwards-compatible active session transition
-    // Note: strictly requires matching admin record in MongoDB Atlas
-    const adminEmail = req.headers['x-admin-email'] || req.query?.adminEmail;
-    if (adminEmail && (token.startsWith('cg-admin-jwt-') || token.startsWith('fallback-token-'))) {
-      const cleanEmail = adminEmail.toLowerCase().trim();
-      const admin = await Admin.findOne({ email: cleanEmail });
-      if (admin) {
-        req.admin = {
-          id: admin._id,
-          email: admin.email,
-          role: admin.role
-        };
-        req.user = req.admin;
-        return next();
+    if (decoded.type === 'admin' || ['Master Admin', 'Admin', 'Counselor'].includes(decoded.role)) {
+      const adminId = (decoded.sub || decoded.id || '').toString();
+      let admin = null;
+      if (mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(adminId)) {
+        admin = await Admin.findById(adminId);
       }
+      // SECURITY: fail closed. Never fabricate an admin when the DB cannot
+      // confirm the account (previously this let revoked/deactivated admins
+      // back in during any DB outage).
+      if (!admin || admin.isActive === false) {
+        return res.status(401).json({ success: false, message: 'Invalid admin session.' });
+      }
+      if ((decoded.tv ?? 0) !== (admin.tokenVersion ?? 0)) {
+        return res.status(401).json({ success: false, message: 'Session invalidated.' });
+      }
+      req.admin = admin;
+      req.user = {
+        sub: admin._id.toString(),
+        id: admin._id.toString(),
+        email: admin.email,
+        role: admin.role,
+        type: 'admin'
+      };
+      return next();
     }
 
-    return res.status(401).json({
-      success: false,
-      message: 'Invalid or expired Master Admin authentication token.'
-    });
+    // Otherwise student
+    const studentId = (decoded.sub || decoded.id || '').toString();
+    let student = inMemoryUsers.get(studentId);
+    if (!student && mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(studentId)) {
+      student = await Student.findById(studentId);
+    }
+    if (!student) {
+      return res.status(401).json({ success: false, message: 'Student account not found.' });
+    }
+
+    req.student = student;
+    req.user = {
+      sub: (student._id || studentId).toString(),
+      id: (student._id || studentId).toString(),
+      email: student.email,
+      phone: student.phone || '',
+      role: 'Student',
+      type: 'student'
+    };
+
+    next();
   } catch (error) {
-    console.error('[requireAdmin Error]:', error.message);
+    console.error('[requireAuth Error]:', error.message);
     return res.status(401).json({
       success: false,
       message: 'Authentication verification failed.'

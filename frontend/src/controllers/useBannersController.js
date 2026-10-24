@@ -1,52 +1,79 @@
+'use client';
+
 /**
  * ============================================================================
- * CONTROLLER LAYER: BANNERS CONTROLLER (useBannersController.js)
+ * FRONTEND MVC: BANNERS CONTROLLER (useBannersController.js)
  * ============================================================================
- * Custom hook handling hero section banner slides state, API fetching, and slider controls.
+ * Manages promotional banners fetching, slide transitions, and auto-rotation.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { bannerModel } from '../models/bannerModel';
 
-export function useBannersController() {
+export function useBannersController(autoplayIntervalMs = 5000) {
   const [banners, setBanners] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const loadBanners = useCallback(async () => {
-    setLoading(true);
-    const data = await bannerModel.getBanners();
-    setBanners(data);
-    setLoading(false);
+  const fetchBanners = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await bannerModel.getBanners();
+      if (Array.isArray(data) && data.length > 0) {
+        setBanners(data);
+      }
+    } catch (err) {
+      console.warn('[useBannersController] Error loading banners:', err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    loadBanners();
-  }, [loadBanners]);
+    fetchBanners();
 
-  const handleNext = () => {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('codeguru_refresh_banners', fetchBanners);
+      return () => {
+        window.removeEventListener('codeguru_refresh_banners', fetchBanners);
+      };
+    }
+  }, [fetchBanners]);
+
+  // Autoplay rotation
+  useEffect(() => {
+    if (banners.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % banners.length);
+    }, autoplayIntervalMs);
+
+    return () => clearInterval(timer);
+  }, [banners.length, autoplayIntervalMs]);
+
+  const nextSlide = useCallback(() => {
     if (banners.length === 0) return;
     setCurrentIndex(prev => (prev + 1) % banners.length);
-  };
+  }, [banners.length]);
 
-  const handlePrev = () => {
+  const prevSlide = useCallback(() => {
     if (banners.length === 0) return;
     setCurrentIndex(prev => (prev - 1 + banners.length) % banners.length);
-  };
+  }, [banners.length]);
 
-  const setSlide = (index) => {
+  const goToSlide = useCallback((index) => {
     if (index >= 0 && index < banners.length) {
       setCurrentIndex(index);
     }
-  };
+  }, [banners.length]);
 
   return {
     banners,
     currentIndex,
-    currentBanner: banners[currentIndex] || null,
     loading,
-    handleNext,
-    handlePrev,
-    setSlide
+    nextSlide,
+    prevSlide,
+    goToSlide,
+    refreshBanners: fetchBanners
   };
 }

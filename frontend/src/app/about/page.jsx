@@ -4,7 +4,7 @@ import { ShieldCheck, Award, Users, CheckCircle2, Building, PhoneCall, Sparkles 
 import { BUSINESS_CONFIG } from '../../config/business';
 
 export const metadata = {
-  title: 'About CodeGurru | Premier IT Academy & Tech Center in Uttar Pradesh',
+  title: 'About Us | Premier IT Academy in UP',
   description:
     'CodeGurru (UK VK Pvt. Ltd.) is an IT training, software development and computer repair company based in Ayodhya, Uttar Pradesh, founded by Kishan Pandey.',
   keywords: [
@@ -22,7 +22,16 @@ export const metadata = {
     title: 'About CodeGurru | Premier IT Academy & Tech Hub in Uttar Pradesh',
     description:
       'CodeGurru (UK VK Pvt. Ltd.) is an IT training, software development and computer repair company based in Uttar Pradesh, founded by Kishan Pandey.',
-    url: 'https://codegurru.in/about',
+    siteName: 'CodeGurru (UK VK Pvt. Ltd.)',
+    images: [{ url: '/logo.png', width: 800, height: 600, alt: 'About CodeGurru' }],
+    locale: 'en_IN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About CodeGurru | Premier IT Academy in Uttar Pradesh',
+    description: 'Founded by Kishan Pandey under UK VK Pvt. Ltd., empowering youth with practical IT training.',
+    images: ['/logo.png'],
   },
 };
 
@@ -46,11 +55,34 @@ export default function AboutPage() {
     ],
   };
 
+  const aboutJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name: 'About CodeGurru (UK VK Pvt. Ltd.)',
+    description:
+      'CodeGurru is an IT training, software development and computer repair company based in Ayodhya, Uttar Pradesh, founded by Kishan Pandey.',
+    mainEntity: {
+      '@type': 'Person',
+      name: 'Kishan Pandey',
+      jobTitle: 'Founder & CEO',
+      worksFor: {
+        '@type': 'Organization',
+        name: 'CodeGurru (UK VK Pvt. Ltd.)',
+        url: 'https://codegurru.in',
+      },
+      description: 'Founder & CEO of CodeGurru (UK VK Pvt. Ltd.), driving technology education and software development across Uttar Pradesh.',
+    },
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutJsonLd) }}
       />
       <div className="w-full bg-slate-50 min-h-screen pb-16">
         

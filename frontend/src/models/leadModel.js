@@ -35,6 +35,28 @@ export const leadModel = {
 
   /**
    * --------------------------------------------------------------------------
+   * API: Update Student Lead Inquiry with Profile Details (Step 2)
+   * --------------------------------------------------------------------------
+   * @route   POST http://localhost:5000/api/leads/update-details
+   * @desc    Updates the Step 1 lead in Admin database with student Name & Email
+   * @access  Public
+   */
+  updateLead: async (leadId, updateData) => {
+    try {
+      const res = await apiFetch('/leads/update-details', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ leadId, ...updateData })
+      });
+      return await res.json();
+    } catch (err) {
+      console.warn('[leadModel updateLead Warning]:', err);
+      return { success: false, message: 'Update failed' };
+    }
+  },
+
+  /**
+   * --------------------------------------------------------------------------
    * API: Ping Student Visitor Traffic Analytics
    * --------------------------------------------------------------------------
    * @route   POST http://localhost:5000/api/traffic/ping

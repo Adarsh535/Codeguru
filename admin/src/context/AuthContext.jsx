@@ -2,8 +2,10 @@
  * CONTEXT: Admin Authentication Provider
  * Manages admin login/logout state and session persistence.
  */
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authModel } from '../models/authModel';
+import { logoutAdminSession } from '../models/apiClient';
+import { realtimeAdminService } from '../services/realtimeAdminService';
 
 const AuthContext = createContext(null);
 const AUTH_KEY = 'codeguru_admin_session';
@@ -51,7 +53,9 @@ export function AuthProvider({ children }) {
       const loggedTime = new Date(user.loggedAt).getTime();
       if (isNaN(loggedTime)) return false;
       const ageMs = Date.now() - loggedTime;
-      const MAX_SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 Hours Session Lock
+      // Match the backend admin JWT lifetime (8h) so the UI doesn't look
+      // logged-in after the token has already expired.
+      const MAX_SESSION_DURATION = 8 * 60 * 60 * 1000;
       return ageMs < MAX_SESSION_DURATION;
     } catch {
       return false;
@@ -66,11 +70,42 @@ export function AuthProvider({ children }) {
     });
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Revoke the session on the server (clears HttpOnly cookie + bumps tokenVersion)
+    // so the admin cookie can't be reused after logout.
+    try {
+      await logoutAdminSession();
+    } catch {
+      /* even if the network call fails, still clear local state below */
+    }
     setUser(null);
     sessionStorage.removeItem(AUTH_KEY);
     localStorage.removeItem(AUTH_KEY);
   };
+
+  // If any API call detects an invalid/expired session (401), drop the user state
+  // so the UI stops showing a logged-in dashboard and polling endlessly.
+  useEffect(() => {
+    const onForcedLogout = () => {
+      setUser(null);
+      realtimeAdminService.destroy();
+      try {
+        sessionStorage.removeItem(AUTH_KEY);
+        localStorage.removeItem(AUTH_KEY);
+      } catch { /* ignore */ }
+    };
+    window.addEventListener('admin_logout_event', onForcedLogout);
+    return () => window.removeEventListener('admin_logout_event', onForcedLogout);
+  }, []);
+
+  // Sync realtime SSE service with active admin session
+  useEffect(() => {
+    if (user && user.token && isSessionValid()) {
+      realtimeAdminService.start();
+    } else {
+      realtimeAdminService.destroy();
+    }
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{ user, login, logout, updateUser, isAuthenticated: !!user, isSessionValid }}>

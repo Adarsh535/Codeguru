@@ -30,7 +30,8 @@ const studentSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    default: 'Student'
+    default: 'Student',
+    immutable: true
   },
   createdAt: {
     type: Date,

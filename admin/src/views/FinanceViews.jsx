@@ -18,17 +18,17 @@ export function FeesPaymentsView() {
       setLoading(true);
       const data = await enrollmentService.getEnrollments();
       if (data && data.length > 0) {
-        const formatted = data.map(item => ({
-          id: item.transactionId || item.enrollmentId || item.id || `TXN-${Math.floor(Math.random()*10000)}`,
-          studentName: item.studentName || 'Student User',
-          admId: item.studentId || 'CG-STU-101',
-          course: item.courseName || 'Full Stack Web Development',
-          totalFee: item.fee || '₹24,999',
-          paidAmount: item.paidAmount || item.fee || '₹24,999',
-          pendingAmount: item.pendingAmount || '₹0',
+        const formatted = data.map((item, idx) => ({
+          id: item.transactionId || item.enrollmentId || item._id || item.id || `TXN-${idx + 1}`,
+          studentName: item.studentName || '—',
+          admId: item.studentId || item.enrollmentId || '—',
+          course: item.courseName || '—',
+          totalFee: item.fee || '—',
+          paidAmount: item.paidAmount || '₹0',
+          pendingAmount: item.pendingAmount || '—',
           mode: item.paymentMethod || 'UPI QR',
-          status: item.feeStatus || 'Paid',
-          date: item.enrollmentDate || new Date().toLocaleDateString('en-IN')
+          status: item.feeStatus || 'Pending',
+          date: item.enrollmentDate || (item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-IN') : '—')
         }));
         setPayments(formatted);
       } else {
@@ -100,7 +100,7 @@ export function FeesPaymentsView() {
       </div>
 
       {/* PAYMENTS TABLE */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-2xs">
+      <div className="bg-white rounded-3xl border border-slate-200/80 overflow-x-auto shadow-2xs">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 text-[11px] font-extrabold text-slate-400 uppercase border-b border-slate-100">
@@ -219,7 +219,7 @@ export function InvoicesView() {
         <p className="text-xs font-semibold text-slate-500">Generate, download & print official GST tax invoices for student admissions</p>
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-2xs">
+      <div className="bg-white rounded-3xl border border-slate-200/80 overflow-x-auto shadow-2xs">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="bg-slate-50 text-[11px] font-extrabold text-slate-400 uppercase border-b border-slate-100">
@@ -287,7 +287,7 @@ export function RefundsView() {
         <p className="text-xs font-semibold text-slate-500">Manage course withdrawal requests, refund approvals & bank reversal logs</p>
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-2xs">
+      <div className="bg-white rounded-3xl border border-slate-200/80 overflow-x-auto shadow-2xs">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="bg-slate-50 text-[11px] font-extrabold text-slate-400 uppercase border-b border-slate-100">

@@ -2,42 +2,35 @@
  * ============================================================================
  * MODEL LAYER: LEAD DATA MODEL & API SERVICE (leadModel.js)
  * ============================================================================
- * Handles all CRUD operations, analytics aggregation, local storage cache fallbacks,
- * and backend REST API communication for Student Lead Inquiries.
+ * Handles all CRUD operations, analytics aggregation, and backend REST API
+ * communication for Student Lead Inquiries using authenticated apiFetch.
  */
 
-import { API_BASE } from './apiClient';
+import { apiFetch, API_BASE } from './apiClient';
 
-const API_URL = `${API_BASE}/leads`;
-const STORAGE_KEY = 'codeguru_leads';
+const API_URL = '/leads';
 
 export const leadModel = {
   /**
-   * --------------------------------------------------------------------------
-   * API: Get All Student Leads
-   * --------------------------------------------------------------------------
-   * @route   GET http://localhost:5000/api/leads
-   * @desc    Backend MongoDB database se live student inquiry leads fetch karta hai.
-   * @access  Admin Private
-   * @returns {Promise<Array>} Array of lead objects fetched strictly from backend database
+   * Retrieves all student inquiry leads from backend database.
+   * @returns {Promise<Array>}
    */
   getLeads: async () => {
     try {
-      const res = await fetch(API_URL);
+      const res = await apiFetch(API_URL);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch leads (${res.status})`);
+      }
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         return data.data.map(item => {
           let phone = (item.phone || '').trim();
           let email = (item.email || '').trim();
 
-          // If phone is an email
           if (phone.includes('@')) {
             if (!email) email = phone;
             phone = '';
-          }
-
-          // If email is actually a phone number
-          if (email && !email.includes('@') && /^[\d\s\+\-\(\)]{7,15}$/.test(email)) {
+          } else if (email && !email.includes('@') && /^[\d\s\+\-\(\)]{7,15}$/.test(email)) {
             if (!phone) phone = email;
             email = '';
           }
@@ -47,25 +40,22 @@ export const leadModel = {
             id: item._id || item.leadId || item.id,
             phone,
             email,
-            location: item.location || 'Ayodhya, UP',
-            createdAt: item.createdAt || new Date().toISOString()
+            location: item.location || item.city || 'Unknown',
+            createdAt: item.createdAt || null
           };
         });
       }
     } catch (err) {
-      console.warn('[leadModel API Warning] Backend API error:', err);
+      console.error('[leadModel Error] Failed to get leads:', err);
+      throw err;
     }
     return [];
   },
 
-
   /**
-   * --------------------------------------------------------------------------
-   * DATA TRANSFORMER: Calculate Lead Analytics & Metrics
-   * --------------------------------------------------------------------------
-   * @desc    Leads array se live key metrics summarize karta hai (Today count, New, Contacted, Enrolled, Conversion Rate, Course Breakdown).
-   * @param   {Array} leadsList - Array of lead objects
-   * @returns {Object} Aggregated metrics object
+   * Calculates Lead Analytics & Metrics from array of leads.
+   * @param {Array} leadsList
+   * @returns {Object}
    */
   getStats: (leadsList = []) => {
     const leads = Array.isArray(leadsList) ? leadsList : [];
@@ -107,66 +97,53 @@ export const leadModel = {
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Update Lead Status
-   * --------------------------------------------------------------------------
-   * @route   PUT http://localhost:5000/api/leads/:id
-   * @desc    Backend MongoDB database me specific lead ka status ('New' | 'Contacted' | 'In Progress' | 'Enrolled') update karta hai.
-   * @param   {string} id - Lead MongoDB _id ya leadId
-   * @param   {string} newStatus - New updated status string
-   * @returns {Promise<void>}
+   * Updates lead status on backend. Throws on error (A7).
+   * @param {string} id
+   * @param {string} newStatus
    */
   updateStatus: async (id, newStatus) => {
-    try {
-      await fetch(`${API_URL}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
-    } catch (err) {
-      console.error('[leadModel API Error] Error updating lead status on backend:', err);
+    const res = await apiFetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || `Failed to update lead status (${res.status})`);
     }
+    return res.json();
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Delete Student Lead
-   * --------------------------------------------------------------------------
-   * @route   DELETE http://localhost:5000/api/leads/:id
-   * @desc    Backend MongoDB database se specific student lead record delete karta hai.
-   * @param   {string} id - Lead MongoDB _id ya leadId
-   * @returns {Promise<void>}
+   * Deletes a student lead record. Throws on error (A7).
+   * @param {string} id
    */
   deleteLead: async (id) => {
-    try {
-      await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE'
-      });
-    } catch (err) {
-      console.error('[leadModel API Error] Error deleting lead on backend:', err);
+    const res = await apiFetch(`${API_URL}/${id}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || `Failed to delete lead (${res.status})`);
     }
+    return res.json();
   },
 
   /**
-   * --------------------------------------------------------------------------
-   * API: Add New Student Lead
-   * --------------------------------------------------------------------------
-   * @route   POST http://localhost:5000/api/leads
-   * @desc    Backend MongoDB database me naya student inquiry record create karta hai.
-   * @param   {Object} leadData - { name, phone, course, location, notes, status }
-   * @returns {Promise<Object>} Created lead object returned from server API
+   * Adds a new student inquiry lead. Throws on error (A7).
+   * @param {Object} leadData
    */
   addLead: async (leadData) => {
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(leadData)
-      });
-      const data = await res.json();
-      return data.data;
-    } catch (err) {
-      console.error('[leadModel API Error] Error adding lead on backend:', err);
+    const res = await apiFetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(leadData)
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || `Failed to record lead (${res.status})`);
     }
+    const data = await res.json();
+    return data.data;
   }
 };

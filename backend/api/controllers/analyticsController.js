@@ -10,6 +10,7 @@
 import crypto from 'crypto';
 import mongoose from 'mongoose';
 import { PageView, ActiveSession, DailyMetric } from '../../models/Analytics.js';
+import { cleanText } from '../../utils/sanitizeInput.js';
 import { 
   getTodayKey, 
   getYesterdayKey, 
@@ -373,9 +374,9 @@ export const trackPageView = async (req, res) => {
       visitorId: cleanVisitorId,
       sessionId: cleanSessionId,
       path: cleanPath,
-      url: (url || cleanPath).substring(0, 300),
-      title: (title || 'CodeGurru').substring(0, 150),
-      referrer: (referrer || 'Direct').substring(0, 200),
+      url: cleanText(url || cleanPath).substring(0, 300),
+      title: (cleanText(title) || 'CodeGurru').substring(0, 150),
+      referrer: (cleanText(referrer) || 'Direct').substring(0, 200),
       referrerCategory,
       device: safeDevice,
       browser: (browser || 'Other').substring(0, 50),

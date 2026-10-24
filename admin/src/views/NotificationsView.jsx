@@ -1,66 +1,88 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Bell, CheckCircle2, AlertCircle, Info, Trash2, CheckCheck, 
   Filter, Search, Clock, ArrowRight, Settings, ShieldAlert, DollarSign, UserCheck, BookOpen 
 } from 'lucide-react';
-
-const initialNotifications = [
-  {
-    id: 'n1',
-    title: 'New Student Admission Registered',
-    message: 'Rahul Sharma completed payment of ₹25,000 for Full Stack Web Dev Batch #FS-42.',
-    timestamp: '10 minutes ago',
-    type: 'finance',
-    unread: true,
-    icon: DollarSign,
-    color: 'text-emerald-600 bg-emerald-50 border-emerald-200'
-  },
-  {
-    id: 'n2',
-    title: 'High Priority Lead Inquiry',
-    message: 'Ananya Verma requested an urgent call back for Data Science & AI course.',
-    timestamp: '25 minutes ago',
-    type: 'lead',
-    unread: true,
-    icon: Bell,
-    color: 'text-blue-600 bg-blue-50 border-blue-200'
-  },
-  {
-    id: 'n3',
-    title: 'Batch Attendance Pending',
-    message: 'Attendance for Python Data Analytics Batch #DA-09 has not been marked by Mentor Vikrant.',
-    timestamp: '1 hour ago',
-    type: 'academic',
-    unread: true,
-    icon: BookOpen,
-    color: 'text-amber-600 bg-amber-50 border-amber-200'
-  },
-  {
-    id: 'n4',
-    title: 'System Security Alert',
-    message: 'New login detected from IP 192.168.1.105 (Chrome on Windows).',
-    timestamp: '3 hours ago',
-    type: 'system',
-    unread: false,
-    icon: ShieldAlert,
-    color: 'text-purple-600 bg-purple-50 border-purple-200'
-  },
-  {
-    id: 'n5',
-    title: 'Certificate Issued',
-    message: 'Certificate #CG-2026-889 issued for Priya Singh (UI/UX Masterclass).',
-    timestamp: '5 hours ago',
-    type: 'academic',
-    unread: false,
-    icon: UserCheck,
-    color: 'text-indigo-600 bg-indigo-50 border-indigo-200'
-  }
-];
+import { leadModel } from '../models/leadModel';
+import { enrollmentModel } from '../models/enrollmentModel';
 
 export default function NotificationsView() {
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const [notifications, setNotifications] = useState([]);
   const [filterTab, setFilterTab] = useState('all');
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadRealNotifications = async () => {
+      setLoading(true);
+      try {
+        const [leadsData, enrollmentsData] = await Promise.allSettled([
+          leadModel.getLeads(),
+          enrollmentModel.getEnrollments()
+        ]);
+
+        const rawLeads = leadsData.status === 'fulfilled' 
+          ? (Array.isArray(leadsData.value) ? leadsData.value : leadsData.value?.leads || [])
+          : [];
+        const rawEnrollments = enrollmentsData.status === 'fulfilled'
+          ? (Array.isArray(enrollmentsData.value) ? enrollmentsData.value : enrollmentsData.value?.enrollments || [])
+          : [];
+
+        let readSet = new Set();
+        try {
+          readSet = new Set(JSON.parse(localStorage.getItem('codeguru_read_notifs') || '[]'));
+        } catch {
+          // ignore parsing error
+        }
+
+        const notifs = [];
+
+        rawEnrollments.forEach(enr => {
+          const id = `enr-${enr._id || enr.id}`;
+          notifs.push({
+            id,
+            title: 'Student Admission Application',
+            message: `${enr.studentName || enr.name || 'Student'} enrolled for ${enr.courseName || enr.batchName || 'Course'} (${enr.feeStatus || 'Pending'} payment).`,
+            timestamp: enr.createdAt ? new Date(enr.createdAt).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent',
+            type: 'finance',
+            unread: !readSet.has(id) && (enr.status === 'Pending Verification' || enr.status === 'Pending'),
+            icon: DollarSign,
+            color: 'text-emerald-600 bg-emerald-50 border-emerald-200',
+            createdAt: enr.createdAt ? new Date(enr.createdAt).getTime() : 0
+          });
+        });
+
+        rawLeads.forEach(lead => {
+          const id = `lead-${lead._id || lead.id}`;
+          notifs.push({
+            id,
+            title: 'Course Inquiry Lead',
+            message: `${lead.name || 'Anonymous'} (${lead.phone || lead.email || 'No contact'}) requested info for ${lead.courseInterest || lead.course || 'Course'}.`,
+            timestamp: lead.createdAt ? new Date(lead.createdAt).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent',
+            type: 'lead',
+            unread: !readSet.has(id) && lead.status === 'New',
+            icon: Bell,
+            color: 'text-blue-600 bg-blue-50 border-blue-200',
+            createdAt: lead.createdAt ? new Date(lead.createdAt).getTime() : 0
+          });
+        });
+
+        notifs.sort((a, b) => b.createdAt - a.createdAt);
+
+        if (isMounted) {
+          setNotifications(notifs);
+        }
+      } catch (err) {
+        console.error("Failed to load notifications:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    loadRealNotifications();
+    return () => { isMounted = false; };
+  }, []);
 
   const handleMarkAllRead = () => {
     setNotifications(notifications.map(n => ({ ...n, unread: false })));

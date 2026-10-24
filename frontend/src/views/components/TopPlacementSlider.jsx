@@ -32,16 +32,8 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
     window.addEventListener('codeguru_refresh_all', fetchPlacements);
     window.addEventListener('focus', fetchPlacements);
 
-    // 2. Background polling fallback (every 4 seconds)
-    const interval = setInterval(() => {
-      if (typeof document !== 'undefined' && !document.hidden) {
-        fetchPlacements();
-      }
-    }, 4000);
-
     return () => {
       isMounted = false;
-      clearInterval(interval);
       window.removeEventListener('codeguru_refresh_placements', fetchPlacements);
       window.removeEventListener('codeguru_refresh_all', fetchPlacements);
       window.removeEventListener('focus', fetchPlacements);

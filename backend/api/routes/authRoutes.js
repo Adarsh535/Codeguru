@@ -12,21 +12,29 @@ import {
   updateCredentials, 
   registerStudent, 
   loginStudent,
-  sendStudentOtp,
-  verifyStudentOtp,
+  phoneLoginStudent,
   updateStudentProfile,
-  logoutUser
+  logoutUser,
+  getCsrfToken
 } from '../controllers/authController.js';
 import { requireAdmin, requireAuth } from '../../middleware/authMiddleware.js';
+import { authLimiter } from '../../middleware/rateLimiter.js';
 
 const router = express.Router();
 
 /**
- * @api    POST /api/auth/login
- * @desc   Authenticates master admin user against MongoDB admins collection
+ * @api    GET /api/auth/csrf-token
+ * @desc    Provides anti-CSRF token
  * @access Public
  */
-router.post('/login', loginAdmin);
+router.get('/csrf-token', getCsrfToken);
+
+/**
+ * @api    POST /api/auth/login
+ * @desc   Authenticates master admin user against MongoDB admins collection
+ * @access Public (Rate limited: 5/15min)
+ */
+router.post('/login', authLimiter, loginAdmin);
 
 /**
  * @api    POST /api/auth/update-credentials
@@ -44,24 +52,17 @@ router.post('/student/register', registerStudent);
 
 /**
  * @api    POST /api/auth/student/login
- * @desc   Authenticates student user
+ * @desc   Authenticates student user via email and password
  * @access Public
  */
 router.post('/student/login', loginStudent);
 
 /**
- * @api    POST /api/auth/student/send-otp
- * @desc   Sends 6-digit verification OTP to student phone
+ * @api    POST /api/auth/student/phone-login
+ * @desc   Saves student inquiry lead (zero JWT, zero cookie, zero session)
  * @access Public
  */
-router.post('/student/send-otp', sendStudentOtp);
-
-/**
- * @api    POST /api/auth/student/verify-otp
- * @desc   Verifies OTP code and logs in/registers student
- * @access Public
- */
-router.post('/student/verify-otp', verifyStudentOtp);
+router.post('/student/phone-login', phoneLoginStudent);
 
 /**
  * @api    POST /api/auth/student/update-profile
