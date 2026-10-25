@@ -60,7 +60,8 @@ export function usePlacementsController() {
       role: 'Software Engineer',
       photo: '',
       companyLogo: '',
-      college: ''
+      college: '',
+      isActive: true
     });
     setShowAddModal(true);
   };
@@ -74,7 +75,8 @@ export function usePlacementsController() {
       role: item.role || 'Software Engineer',
       photo: item.photo || item.avatarUrl || '',
       companyLogo: item.companyLogo || '',
-      college: item.college || ''
+      college: item.college || '',
+      isActive: item.isActive !== false && !item.isHidden
     });
     setShowAddModal(true);
   };
@@ -107,6 +109,21 @@ export function usePlacementsController() {
     setUploadingCompany(false);
   };
 
+  const handleToggleVisibility = async (item) => {
+    const id = item._id || item.id;
+    const currentlyActive = item.isActive !== false && !item.isHidden;
+    const newIsActive = !currentlyActive;
+    const payload = {
+      ...item,
+      isActive: newIsActive,
+      isHidden: !newIsActive
+    };
+    await adminCmsModel.updatePlacement(id, payload);
+    await loadPlacements();
+    window.dispatchEvent(new Event('codeguru_refresh_all'));
+    window.dispatchEvent(new Event('codeguru_refresh_placements'));
+  };
+
   const handleCreatePlacement = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.company || !formData.package) {
@@ -122,7 +139,9 @@ export function usePlacementsController() {
       role: formData.role || 'Software Engineer',
       package: formData.package,
       photo: formData.photo || '',
-      college: formData.college || 'CodeGuru Academy'
+      college: formData.college || 'CodeGuru Academy',
+      isActive: formData.isActive !== false,
+      isHidden: !formData.isActive
     };
 
     let result = null;
@@ -143,7 +162,8 @@ export function usePlacementsController() {
         role: 'Software Engineer',
         photo: '',
         companyLogo: '',
-        college: ''
+        college: '',
+        isActive: true
       });
       window.dispatchEvent(new Event('codeguru_refresh_all'));
     }
@@ -172,6 +192,7 @@ export function usePlacementsController() {
     handleStudentPhotoUpload,
     handleCompanyLogoUpload,
     handleCreatePlacement,
-    handleDeletePlacement
+    handleDeletePlacement,
+    handleToggleVisibility
   };
 }

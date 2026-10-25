@@ -13,7 +13,9 @@ const teamSchema = new mongoose.Schema({
   photo: { type: String, default: '' },
   experience: { type: String, default: '8+ Yrs Exp' },
   bio: { type: String, default: '' },
-  specialization: { type: String, default: 'Full Stack & System Design' }
+  specialization: { type: String, default: 'Full Stack & System Design' },
+  isActive: { type: Boolean, default: true },
+  isHidden: { type: Boolean, default: false }
 }, {
   timestamps: true
 });

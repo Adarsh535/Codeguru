@@ -36,7 +36,9 @@ export const addTeamMember = async (req, res) => {
       photo: req.body.photo || req.body.photoUrl || '',
       experience: req.body.experience || '8+ Yrs Exp',
       bio: req.body.bio || '',
-      specialization: req.body.specialization || req.body.bio || 'Full Stack & System Design'
+      specialization: req.body.specialization || req.body.bio || 'Full Stack & System Design',
+      isActive: req.body.isActive !== undefined ? Boolean(req.body.isActive) : (req.body.isHidden ? false : true),
+      isHidden: req.body.isHidden !== undefined ? Boolean(req.body.isHidden) : (req.body.isActive === false ? true : false)
     });
 
     broadcastRealtimeEvent('team', member);

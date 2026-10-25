@@ -5,6 +5,8 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloseIcon from '@mui/icons-material/Close';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useTeamController } from '../controllers/useTeamController';
 
 export default function TeamManagerView() {
@@ -20,7 +22,8 @@ export default function TeamManagerView() {
     setFormData,
     handlePhotoUpload,
     handleCreateTeamMember: handleSubmit,
-    handleDeleteTeamMember: handleDelete
+    handleDeleteTeamMember: handleDelete,
+    handleToggleVisibility
   } = useTeamController();
 
   const [confirmModal, setConfirmModal] = useState({
@@ -64,11 +67,33 @@ export default function TeamManagerView() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {team.map((member) => {
           const memberId = member._id || member.id;
+          const isMemberActive = member.isActive !== false && !member.isHidden;
           return (
-            <div key={memberId} className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col group hover:border-slate-300 transition-all">
+            <div key={memberId} className={`bg-white rounded-2xl border shadow-xs overflow-hidden flex flex-col group transition-all relative ${
+              isMemberActive ? 'border-slate-200 hover:border-slate-300' : 'border-rose-300 bg-rose-50/20'
+            }`}>
+              {/* HIDDEN BADGE IF INACTIVE */}
+              {!isMemberActive && (
+                <div className="absolute top-3 left-3 z-10 bg-rose-600 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-xs flex items-center gap-1">
+                  <VisibilityOffIcon className="!w-3 !h-3" />
+                  <span>Hidden from Website</span>
+                </div>
+              )}
+
               <div className="p-6 flex flex-col items-center text-center gap-3 relative flex-1">
                 
                 <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => handleToggleVisibility(member)}
+                    className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
+                      isMemberActive 
+                        ? 'bg-slate-100 hover:bg-emerald-50 text-slate-500 hover:text-emerald-600' 
+                        : 'bg-rose-100 hover:bg-rose-200 text-rose-700'
+                    }`}
+                    title={isMemberActive ? 'Hide from Frontend (Click to Hide)' : 'Show on Frontend (Click to Show)'}
+                  >
+                    {isMemberActive ? <VisibilityIcon className="!w-4 !h-4" /> : <VisibilityOffIcon className="!w-4 !h-4" />}
+                  </button>
                   <button
                     onClick={() => handleEdit(member)}
                     className="p-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
@@ -109,9 +134,32 @@ export default function TeamManagerView() {
                 )}
               </div>
 
-              <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
+              {/* CARD FOOTER WITH INTERACTIVE HIDE / SHOW BUTTON */}
+              <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500 gap-2">
                 <span>Verified Instructor</span>
-                <span className="text-emerald-600 font-bold">● Active Status</span>
+
+                <button
+                  type="button"
+                  onClick={() => handleToggleVisibility(member)}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 border ${
+                    isMemberActive
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 shadow-2xs'
+                      : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 shadow-2xs'
+                  }`}
+                  title={isMemberActive ? 'Visible on Website (Click to Hide from Frontend)' : 'Hidden from Website (Click to Show on Frontend)'}
+                >
+                  {isMemberActive ? (
+                    <>
+                      <VisibilityIcon className="!w-3.5 !h-3.5 text-emerald-600" />
+                      <span>Live on Frontend</span>
+                    </>
+                  ) : (
+                    <>
+                      <VisibilityOffIcon className="!w-3.5 !h-3.5 text-rose-600" />
+                      <span>Hidden from Frontend</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           );
@@ -240,6 +288,23 @@ export default function TeamManagerView() {
                     placeholder="Short bio or mentor description..."
                     className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500"
                   />
+                </div>
+
+                {/* VISIBILITY TOGGLE SWITCH */}
+                <div className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-slate-50/80">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-slate-800">Show on Website Frontend</span>
+                    <span className="text-[10px] text-slate-500 font-medium">Toggle whether this mentor card appears on website faculty roster</span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.isActive !== false}
+                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
                 </div>
               </div>
 

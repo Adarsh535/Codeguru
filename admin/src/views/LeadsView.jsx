@@ -12,6 +12,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import CourseDropdown from './components/CourseDropdown';
 
 export default function LeadsView({ leads = [], searchQuery, onUpdateStatus, onDeleteLead, onAddLead }) {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -616,21 +617,12 @@ export default function LeadsView({ leads = [], searchQuery, onUpdateStatus, onD
                   />
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-slate-700">Course</label>
-                  <select
-                    value={newLeadData.course}
-                    onChange={(e) => setNewLeadData({ ...newLeadData, course: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500 bg-white"
-                  >
-                    <option value="Full Stack Web Development">Full Stack Web Development</option>
-                    <option value="Java Full Stack & DSA">Java Full Stack & DSA</option>
-                    <option value="Python Data Science & AI">Python Data Science & AI</option>
-                    <option value="C++ & Competitive Programming">C++ & Competitive Programming</option>
-                    <option value="DevOps & Cloud Engineering">DevOps & Cloud Engineering</option>
-                    <option value="Cyber Security & Ethical Hacking">Cyber Security & Ethical Hacking</option>
-                  </select>
-                </div>
+                <CourseDropdown
+                  label="Choose your course"
+                  name="course"
+                  value={newLeadData.course}
+                  onChange={(e) => setNewLeadData({ ...newLeadData, course: e.target.value })}
+                />
 
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-bold text-slate-700">Notes / Remarks</label>

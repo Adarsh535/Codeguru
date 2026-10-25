@@ -15,7 +15,9 @@ const placementSchema = new mongoose.Schema({
   role: { type: String, default: 'Software Engineer' },
   package: { type: String, required: true },
   photo: { type: String, default: '' },
-  batch: { type: String, default: 'PLACEMENT BATCH 2026' }
+  batch: { type: String, default: 'PLACEMENT BATCH 2026' },
+  isActive: { type: Boolean, default: true },
+  isHidden: { type: Boolean, default: false }
 }, {
   timestamps: true
 });

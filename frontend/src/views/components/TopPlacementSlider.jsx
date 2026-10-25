@@ -13,13 +13,15 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
 
     const fetchPlacements = () => {
       apiService.getPlacements().then(data => {
-        if (isMounted && data && data.length > 0) {
-          const formatted = data.map(item => ({
-            ...item,
-            id: item.id || item._id,
-            photo: item.photo || item.avatarUrl || item.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-            companyLogo: item.companyLogo || item.logo || 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg'
-          }));
+        if (isMounted && Array.isArray(data)) {
+          const formatted = data
+            .filter(item => item.isActive !== false && !item.isHidden && item.status !== 'hidden')
+            .map(item => ({
+              ...item,
+              id: item.id || item._id,
+              photo: item.photo || item.avatarUrl || item.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+              companyLogo: item.companyLogo || item.logo || 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg'
+            }));
           setStudents(formatted);
         }
       }).catch(() => {});

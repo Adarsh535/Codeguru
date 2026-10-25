@@ -58,16 +58,45 @@ export default function ClientShell({ children }) {
   const isOtpSheetOpenRef = useRef(isOtpSheetOpen);
   isOtpSheetOpenRef.current = isOtpSheetOpen;
 
-  // Sheet is opened strictly on user action (e.g. clicking Enroll or Login)
-  // Remember dismissal in sessionStorage so it is never forced on users (F8)
   const handleCloseOtpSheet = () => {
     try {
       if (typeof window !== 'undefined') {
-        sessionStorage.setItem('codeguru_otp_sheet_dismissed', '1');
+        sessionStorage.removeItem('codeguru_otp_sheet_dismissed');
       }
     } catch (e) {}
     setIsOtpSheetOpen(false);
   };
+
+  // Har 18 second baad popup aana chahiye jab tak student login na ho
+  useEffect(() => {
+    // Agar student already logged in hai to popup bilkul na aaye
+    const isStudentLoggedIn = Boolean(user && (user.isLoggedIn || user.phone || user.email || user.name));
+    if (isStudentLoggedIn) {
+      return;
+    }
+
+    // Agar popup abhi open hai ya koi interactive modal open hai to wait kare
+    if (isOtpSheetOpen || isInquiryModalOpen || isEnrollModalOpen) {
+      return;
+    }
+
+    // 18 second baad popup show kare
+    const timer = setTimeout(() => {
+      try {
+        const raw = typeof window !== 'undefined' ? localStorage.getItem('codeguru_user') : null;
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && (parsed.isLoggedIn || parsed.phone || parsed.email || parsed.name)) {
+            return;
+          }
+        }
+      } catch (e) {}
+
+      setIsOtpSheetOpen(true);
+    }, 18000);
+
+    return () => clearTimeout(timer);
+  }, [user, isOtpSheetOpen, isInquiryModalOpen, isEnrollModalOpen]);
 
   const handleOpenEnrollModal = (batch = null) => {
     if (!user) {
@@ -210,7 +239,7 @@ export default function ClientShell({ children }) {
             setActiveTab={setActiveTab}
           />
 
-          <main className="flex-1 overflow-x-hidden">
+          <main className="flex-1 relative z-30">
             {childrenWithProps}
           </main>
 

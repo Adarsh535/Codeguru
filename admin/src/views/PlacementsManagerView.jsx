@@ -6,6 +6,8 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import CloseIcon from '@mui/icons-material/Close';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { usePlacementsController } from '../controllers/usePlacementsController';
 
 export default function PlacementsManagerView() {
@@ -23,7 +25,8 @@ export default function PlacementsManagerView() {
     handleStudentPhotoUpload,
     handleCompanyLogoUpload,
     handleCreatePlacement: handleSubmit,
-    handleDeletePlacement: handleDelete
+    handleDeletePlacement: handleDelete,
+    handleToggleVisibility
   } = usePlacementsController();
 
 
@@ -75,18 +78,31 @@ export default function PlacementsManagerView() {
           const itemId = item._id || item.id || idx;
           const photoUrl = item.photo || item.avatarUrl || item.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
           const companyLogo = item.companyLogo || item.logo || 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg';
+          const isPlacementActive = item.isActive !== false && !item.isHidden;
 
           return (
             <div
               key={itemId}
-              className="bg-white border border-slate-200/90 rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] flex flex-col relative overflow-hidden group hover:shadow-md hover:border-blue-400 transition-all duration-300 select-none"
+              className={`bg-white border rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] flex flex-col relative overflow-hidden group hover:shadow-md transition-all duration-300 select-none ${
+                isPlacementActive ? 'border-slate-200/90 hover:border-blue-400' : 'border-rose-300 bg-rose-50/10'
+              }`}
             >
+              {/* HIDDEN BADGE ON PHOTO IF INACTIVE */}
+              {!isPlacementActive && (
+                <div className="absolute top-2.5 left-2.5 z-10 bg-rose-600 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md flex items-center gap-1 backdrop-blur-xs">
+                  <VisibilityOffIcon className="!w-3 !h-3" />
+                  <span>Hidden from Website</span>
+                </div>
+              )}
+
               {/* TOP PORTRAIT PHOTO AREA - CLEAN FULL VIEW */}
               <div className="w-full h-[190px] sm:h-[200px] bg-slate-100 relative overflow-hidden flex items-center justify-center">
                 <img
                   src={photoUrl}
                   alt={item.name}
-                  className="w-full h-full object-cover object-center transition-transform duration-300 ease-out group-hover:scale-105"
+                  className={`w-full h-full object-cover object-center transition-transform duration-300 ease-out group-hover:scale-105 ${
+                    !isPlacementActive ? 'opacity-85' : ''
+                  }`}
                 />
               </div>
 
@@ -124,13 +140,35 @@ export default function PlacementsManagerView() {
                   </div>
                 </div>
 
-                {/* FOOTER ROW: VERIFIED BADGE + EDIT/DELETE ACTION BUTTONS */}
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100 w-full">
-                  <span className="text-[10px] font-extrabold text-emerald-700 flex items-center gap-1">
-                    <VerifiedIcon className="!w-3.5 !h-3.5 text-emerald-600" /> Placed & Verified
-                  </span>
+                {/* FOOTER ROW: VERIFIED BADGE / TOGGLE BUTTON + EDIT/DELETE ACTION BUTTONS */}
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 w-full gap-1">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleVisibility(item)}
+                    className={`text-[10px] font-extrabold flex items-center gap-1.5 px-2.5 py-1 rounded-full cursor-pointer transition-all active:scale-95 border ${
+                      isPlacementActive
+                        ? 'text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100 shadow-2xs'
+                        : 'text-rose-700 bg-rose-50 border-rose-200 hover:bg-rose-100 shadow-2xs'
+                    }`}
+                    title={isPlacementActive ? 'Visible on Website (Click to Hide from Frontend)' : 'Hidden from Website (Click to Show on Frontend)'}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${isPlacementActive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                    <span>{isPlacementActive ? 'Live on Frontend' : 'Hidden from Frontend'}</span>
+                  </button>
 
                   <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleVisibility(item)}
+                      className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                        isPlacementActive
+                          ? 'text-slate-500 hover:text-emerald-600 hover:bg-emerald-50'
+                          : 'text-rose-600 bg-rose-50 hover:bg-rose-100'
+                      }`}
+                      title={isPlacementActive ? 'Hide from Frontend (Click to Hide)' : 'Show on Frontend (Click to Show)'}
+                    >
+                      {isPlacementActive ? <VisibilityIcon className="!w-4 !h-4" /> : <VisibilityOffIcon className="!w-4 !h-4" />}
+                    </button>
                     <button
                       onClick={() => handleEdit(item)}
                       className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
@@ -262,6 +300,23 @@ export default function PlacementsManagerView() {
                     placeholder="e.g. IET LUCKNOW"
                     className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500"
                   />
+                </div>
+
+                {/* VISIBILITY TOGGLE SWITCH */}
+                <div className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-slate-50/80">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-slate-800">Show on Website Frontend</span>
+                    <span className="text-[10px] text-slate-500 font-medium">Toggle whether this student placement poster appears on website</span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.isActive !== false}
+                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
                 </div>
               </div>
 

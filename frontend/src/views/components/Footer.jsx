@@ -92,7 +92,7 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
   ];
 
   return (
-    <footer className="w-full bg-gradient-to-b from-[#090d16] via-[#050811] to-[#02040a] text-slate-200 pt-12 sm:pt-16 pb-8 border-t border-slate-800/80 relative z-20 select-none overflow-hidden font-sans">
+    <footer className="w-full bg-gradient-to-b from-[#090d16] via-[#050811] to-[#02040a] text-slate-200 pt-12 sm:pt-16 pb-8 border-t border-slate-800/80 relative z-10 select-none overflow-hidden font-sans">
       
       {/* AMBIENT BACKGROUND GLOW EFFECTS */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />

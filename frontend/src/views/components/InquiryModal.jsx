@@ -7,6 +7,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import Logo from './Logo';
 import AlertModal from './AlertModal';
+import CourseDropdown from './CourseDropdown';
 import { useContactFormController } from '../../controllers/useContactFormController';
 
 export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
@@ -187,26 +188,13 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
               </div>
             </div>
 
-            {/* ROW 2: Interested Course */}
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-extrabold text-slate-800 flex items-center gap-1 ml-2">
-                <span>Interested Course</span>
-              </label>
-              <select
-                suppressHydrationWarning
-                name="course"
-                value={formData.course}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded-full border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs font-semibold outline-none transition-all bg-white"
-              >
-                <option value="Full Stack Web Development">Full Stack Web Development</option>
-                <option value="Java Full Stack & DSA">Java Full Stack & DSA</option>
-                <option value="Python Data Science & AI">Python Data Science & AI</option>
-                <option value="C++ & Competitive Programming">C++ & Competitive Programming</option>
-                <option value="DevOps & Cloud Engineering">DevOps & Cloud Engineering</option>
-                <option value="Cyber Security & Ethical Hacking">Cyber Security & Ethical Hacking</option>
-              </select>
-            </div>
+            {/* ROW 2: Choose your course (CUSTOM DROPDOWN UI) */}
+            <CourseDropdown
+              label="Choose your course"
+              name="course"
+              value={formData.course}
+              onChange={handleChange}
+            />
 
             {/* ROW 3: Student Location (GPS Verification / Manual Entry) */}
             <div className="flex flex-col gap-1">

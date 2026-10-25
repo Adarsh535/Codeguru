@@ -158,19 +158,23 @@ export const placementModel = {
     try {
       const res = await apiFetch('/placements');
       const data = await res.json();
-      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-        return data.data.map((item, idx) => ({
-          id: item._id || item.id || idx,
-          name: item.studentName || item.name || 'Student Achiever',
-          college: item.collegeName || item.college || 'CodeGurru Alumni',
-          photo: item.studentPhoto || item.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
-          company: item.companyName || item.company || 'Top Tech MNC',
-          companyLogo: item.companyLogo || 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?auto=format&fit=crop&w=100&q=80',
-          role: item.jobRole || item.role || 'Full Stack Engineer',
-          package: item.packageLpa ? `${item.packageLpa} LPA` : (item.package || '8.5 LPA'),
-          batch: item.badgeLabel || item.batch || 'TOP PLACEMENT DRIVES 2026',
-          verified: true
-        }));
+      if (data.success && Array.isArray(data.data)) {
+        const activePlacements = data.data.filter(item => item.isActive !== false && !item.isHidden && item.status !== 'hidden');
+        if (activePlacements.length > 0) {
+          return activePlacements.map((item, idx) => ({
+            id: item._id || item.id || idx,
+            name: item.studentName || item.name || 'Student Achiever',
+            college: item.collegeName || item.college || 'CodeGurru Alumni',
+            photo: item.studentPhoto || item.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+            company: item.companyName || item.company || 'Top Tech MNC',
+            companyLogo: item.companyLogo || 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?auto=format&fit=crop&w=100&q=80',
+            role: item.jobRole || item.role || 'Full Stack Engineer',
+            package: item.packageLpa ? `${item.packageLpa} LPA` : (item.package || '8.5 LPA'),
+            batch: item.badgeLabel || item.batch || 'TOP PLACEMENT DRIVES 2026',
+            verified: true,
+            isActive: true
+          }));
+        }
       }
     } catch (err) {
       console.warn('[placementModel API Warning] Live placement fetch error:', err);

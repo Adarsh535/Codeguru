@@ -52,17 +52,19 @@ export default function OurTeamSlider({ onOpenContactModal }) {
 
     const fetchTeam = () => {
       apiService.getTeam().then(data => {
-        if (isMounted && data && data.length > 0) {
-          const formatted = data.map(item => ({
-            id: item.id || item._id,
-            name: item.name,
-            role: item.role || 'Senior Tech Instructor',
-            tag: '#TEAMCODEGURRU',
-            photo: item.photoUrl || item.photo || item.image || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=500&fit=crop&crop=faces',
-            specialization: item.specialization || '',
-            bio: item.bio || item.specialization || '',
-            phone: item.phone || '7238829360'
-          }));
+        if (isMounted && Array.isArray(data)) {
+          const formatted = data
+            .filter(item => item.isActive !== false && !item.isHidden && item.status !== 'hidden')
+            .map(item => ({
+              id: item.id || item._id,
+              name: item.name,
+              role: item.role || 'Senior Tech Instructor',
+              tag: '#TEAMCODEGURRU',
+              photo: item.photoUrl || item.photo || item.image || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=500&fit=crop&crop=faces',
+              specialization: item.specialization || '',
+              bio: item.bio || item.specialization || '',
+              phone: item.phone || '7238829360'
+            }));
           setTeamMembers(formatted);
         }
       }).catch(() => {});

@@ -6,6 +6,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import Logo from './Logo';
 import AlertModal from './AlertModal';
+import CourseDropdown from './CourseDropdown';
 import { useContactFormController } from '../../controllers/useContactFormController';
 
 export default function ContactUsSection() {
@@ -32,7 +33,7 @@ export default function ContactUsSection() {
   } = useContactFormController();
 
   return (
-    <div id="contact-section" className="w-full max-w-7xl mx-auto px-2 xxs:px-3 sm:px-6 my-1 select-none">
+    <div id="contact-section" className="w-full max-w-7xl mx-auto px-2 xxs:px-3 sm:px-6 my-1 select-none relative z-30">
       {/* POPUP ALERT MODAL */}
       <AlertModal
         isOpen={alertModalConfig.isOpen}
@@ -43,7 +44,7 @@ export default function ContactUsSection() {
         onClose={closeAlertModal}
       />
 
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl xxs:rounded-[32px] p-4 xxs:p-5 sm:p-7 border border-slate-200/90 shadow-2xs relative overflow-hidden flex flex-col gap-2.5 xxs:gap-3">
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl xxs:rounded-[32px] p-4 xxs:p-5 sm:p-7 border border-slate-200/90 shadow-2xs relative z-30 flex flex-col gap-2.5 xxs:gap-3">
         
         {/* FORM TITLE: CODEGURU LOGO + GET IN TOUCH */}
         <div className="flex flex-col gap-1 border-b border-slate-100 pb-2">
@@ -123,26 +124,13 @@ export default function ContactUsSection() {
 
           </div>
 
-          {/* ROW 2: INTERESTED COURSE */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-extrabold text-slate-800 tracking-tight flex items-center gap-1">
-              <span>Interested Course</span>
-            </label>
-            <select
-              suppressHydrationWarning
-              name="course"
-              value={formData.course}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-full border border-slate-200/90 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs font-semibold text-slate-900 outline-none transition-all bg-white"
-            >
-              <option value="Full Stack Web Development">Full Stack Web Development</option>
-              <option value="Java Full Stack & DSA">Java Full Stack & DSA</option>
-              <option value="Python Data Science & AI">Python Data Science & AI</option>
-              <option value="C++ & Competitive Programming">C++ & Competitive Programming</option>
-              <option value="DevOps & Cloud Engineering">DevOps & Cloud Engineering</option>
-              <option value="Cyber Security & Ethical Hacking">Cyber Security & Ethical Hacking</option>
-            </select>
-          </div>
+          {/* ROW 2: CHOOSE YOUR COURSE (CUSTOM DROPDOWN UI) */}
+          <CourseDropdown
+            label="Choose your course"
+            name="course"
+            value={formData.course}
+            onChange={handleChange}
+          />
 
           {/* ROW 3: STUDENT CURRENT CITY (GPS / MANUAL) */}
           <div className="flex flex-col gap-1">

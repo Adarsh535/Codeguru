@@ -39,7 +39,9 @@ export const addPlacement = async (req, res) => {
       role: req.body.role || 'Software Engineer',
       package: req.body.package || '12.0 LPA',
       photo: req.body.photo || req.body.avatarUrl || '',
-      batch: req.body.batch || 'PLACEMENT BATCH 2026'
+      batch: req.body.batch || 'PLACEMENT BATCH 2026',
+      isActive: req.body.isActive !== undefined ? Boolean(req.body.isActive) : (req.body.isHidden ? false : true),
+      isHidden: req.body.isHidden !== undefined ? Boolean(req.body.isHidden) : (req.body.isActive === false ? true : false)
     });
 
     broadcastRealtimeEvent('placements', placement);

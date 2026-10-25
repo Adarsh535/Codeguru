@@ -57,7 +57,8 @@ export function useTeamController() {
       specialization: 'Full Stack & System Design',
       bio: '',
       photoUrl: '',
-      experience: '8+ Years Exp'
+      experience: '8+ Years Exp',
+      isActive: true
     });
     setShowAddModal(true);
   };
@@ -70,7 +71,8 @@ export function useTeamController() {
       specialization: member.specialization || member.bio || 'Full Stack & System Design',
       bio: member.bio || '',
       photoUrl: member.photoUrl || member.photo || '',
-      experience: member.experience || '8+ Years Exp'
+      experience: member.experience || '8+ Years Exp',
+      isActive: member.isActive !== false && !member.isHidden
     });
     setShowAddModal(true);
   };
@@ -89,6 +91,22 @@ export function useTeamController() {
     setUploading(false);
   };
 
+  const handleToggleVisibility = async (member) => {
+    const id = member._id || member.id;
+    const currentlyActive = member.isActive !== false && !member.isHidden;
+    const newIsActive = !currentlyActive;
+    const payload = {
+      ...member,
+      photo: member.photoUrl || member.photo,
+      isActive: newIsActive,
+      isHidden: !newIsActive
+    };
+    await adminCmsModel.updateTeamMember(id, payload);
+    await loadTeam();
+    window.dispatchEvent(new Event('codeguru_refresh_all'));
+    window.dispatchEvent(new Event('codeguru_refresh_team'));
+  };
+
   const handleCreateTeamMember = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.role) {
@@ -98,7 +116,9 @@ export function useTeamController() {
 
     const payload = {
       ...formData,
-      photo: formData.photoUrl
+      photo: formData.photoUrl,
+      isActive: formData.isActive !== false,
+      isHidden: !formData.isActive
     };
 
     let result = null;
@@ -117,7 +137,8 @@ export function useTeamController() {
         role: 'Senior Instructor',
         bio: '',
         photoUrl: '',
-        experience: '8+ Years Exp'
+        experience: '8+ Years Exp',
+        isActive: true
       });
       window.dispatchEvent(new Event('codeguru_refresh_all'));
     }
@@ -144,6 +165,7 @@ export function useTeamController() {
     loadTeam,
     handlePhotoUpload,
     handleCreateTeamMember,
-    handleDeleteTeamMember
+    handleDeleteTeamMember,
+    handleToggleVisibility
   };
 }
