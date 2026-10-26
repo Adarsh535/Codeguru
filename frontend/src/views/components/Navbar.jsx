@@ -109,17 +109,18 @@ export default function Navbar({
               />
             </button>
 
-            {/* Brand Title & Subtitle (Image 1: CODE GURRU + CODEGURU PLACEMENT ACADEMY) */}
+            {/* Brand Title & Subtitle: 3D Embossed CODE GURRU Logo */}
             <div className="flex flex-col justify-center min-w-0 flex-shrink">
               <div
                 onClick={handleBrandClick}
-                className="flex items-center cursor-pointer min-w-0"
+                className="flex items-center cursor-pointer min-w-0 group"
                 title="CodeGurru Home"
               >
-                <span className="text-[17px] min-[360px]:text-[19px] sm:text-xl md:text-2xl font-black tracking-tight font-heading leading-tight flex items-center gap-1 select-none">
-                  <span className="text-slate-900">CODE</span>
-                  <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 bg-clip-text text-transparent">GURRU</span>
-                </span>
+                <img
+                  src="/brand-text-logo.png"
+                  alt="CODE GURRU"
+                  className="h-5 min-[360px]:h-6 sm:h-7 md:h-8 w-auto object-contain shrink-0 select-none drop-shadow-2xs group-hover:scale-105 active:scale-95 transition-transform"
+                />
               </div>
 
               {/* Location Tag */}
