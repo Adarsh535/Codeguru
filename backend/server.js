@@ -3,14 +3,34 @@
  * Hardened Express REST API Server
  */
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Intelligent Environment Configuration:
+// Prioritize .env.production when NODE_ENV is production, otherwise fallback gracefully
+const prodEnvPath = path.join(__dirname, '.env.production');
+const devEnvPath = path.join(__dirname, '.env');
+
+if (process.env.NODE_ENV === 'production' && fs.existsSync(prodEnvPath)) {
+  dotenv.config({ path: prodEnvPath });
+} else if (fs.existsSync(devEnvPath)) {
+  dotenv.config({ path: devEnvPath });
+} else if (fs.existsSync(prodEnvPath)) {
+  dotenv.config({ path: prodEnvPath });
+} else {
+  dotenv.config();
+}
+
 import { validateEnv } from './config/env.js';
 import { connectDB } from './config/db.js';
 import { globalLimiter, apiMinuteLimiter } from './middleware/rateLimiter.js';
@@ -20,9 +40,6 @@ import apiRouter from './api/index.js';
 
 // Validate required environment variables at startup
 validateEnv();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -50,7 +67,7 @@ app.use(helmet({
 // 3. Cookie Parser for HttpOnly Session & JWT token handling
 app.use(cookieParser());
 
-// 4. Strict CORS with exact allowlist
+// 4. Production-Ready CORS with Dynamic Allowlist & Subdomain Support
 const getCORSOrigins = () => {
   if (process.env.CORS_ORIGINS) {
     return process.env.CORS_ORIGINS.split(',').map(s => s.trim()).filter(Boolean);
@@ -77,10 +94,30 @@ const getCORSOrigins = () => {
 
 const allowedOrigins = getCORSOrigins();
 
+const isOriginAllowed = (origin) => {
+  if (!origin) return true; // Allow non-browser requests (mobile apps, server-to-server, curl)
+  if (allowedOrigins.includes(origin)) return true;
+  try {
+    const url = new URL(origin);
+    const host = url.hostname.toLowerCase();
+    if (
+      host === 'codegurru.in' ||
+      host.endsWith('.codegurru.in') ||
+      host.endsWith('.vercel.app') ||
+      host === 'localhost' ||
+      host === '127.0.0.1'
+    ) {
+      return true;
+    }
+  } catch (e) {
+    if (origin.endsWith('.vercel.app') || origin.includes('codegurru.in')) return true;
+  }
+  return false;
+};
+
 app.use(cors({
   origin: (origin, callback) => {
-    // Requests with no origin (curl, server-to-server) or in exact allowlist
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (isOriginAllowed(origin)) {
       callback(null, true);
     } else {
       callback(null, false);
@@ -91,9 +128,13 @@ app.use(cors({
   allowedHeaders: [
     'Content-Type',
     'Authorization',
+    'x-api-key',
+    'x-secret-key',
     'x-admin-token',
     'x-admin-email',
-    'x-csrf-token'
+    'x-csrf-token',
+    'x-requested-with',
+    'Accept'
   ]
 }));
 

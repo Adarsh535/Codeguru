@@ -2,13 +2,15 @@
 node_modules/
 **/node_modules/
 
-# Environment files (Security Protection - secrets should not be committed)
+# Environment files (Secrets Protection: local .env and .env.local are ignored, while template and production configs are tracked)
 .env
 .env.*
 !.env.example
+!.env.production
 **/.env
 **/.env.*
 !**/.env.example
+!**/.env.production
 
 # Production Build Outputs
 dist/
