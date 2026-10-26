@@ -56,6 +56,14 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
     fetchCoursesAndCategories();
 
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const urlCat = params.get('category');
+      if (urlCat) {
+        setActiveCategory(urlCat);
+      }
+    }
+
     // 1. Live SSE and cross-tab update events
     window.addEventListener('codeguru_refresh_courses', fetchCoursesAndCategories);
     window.addEventListener('codeguru_refresh_categories', fetchCoursesAndCategories);
@@ -70,6 +78,29 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       window.removeEventListener('focus', fetchCoursesAndCategories);
     };
   }, []);
+
+  useEffect(() => {
+    if (apiCategories.length > 0) {
+      const activeExists = apiCategories.some(ac => (ac.category || ac.id) === activeCategory);
+      if (!activeExists && activeCategory === 'coding') {
+        const found = apiCategories.find(ac => {
+          const cid = (ac.category || ac.id || '').toLowerCase();
+          const clbl = (ac.label || '').toLowerCase();
+          return cid.includes('coding') || cid.includes('softw') || clbl.includes('software') || clbl.includes('coding');
+        });
+        if (found) {
+          const newCatId = found.category || found.id;
+          setActiveCategory(newCatId);
+          if (Array.isArray(found.subCategories) && found.subCategories.length > 0) {
+            const firstSub = found.subCategories[0];
+            const subId = typeof firstSub === 'object' ? (firstSub.id || firstSub.label) : String(firstSub);
+            const normId = (subId || '').toLowerCase().replace(/[^a-z0-9]/g, '') || 'sub';
+            setActiveSubCategory(normId);
+          }
+        }
+      }
+    }
+  }, [apiCategories, activeCategory]);
 
   const DEFAULT_SUB_CATEGORIES = {
     coding: [
@@ -111,6 +142,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       if (subList && subList.length > 0) {
         setActiveSubCategory(subList[0].id);
       }
+      setActiveFilter('All');
       scrollToCatalogSection(40);
       scrollToCatalogSection(120);
     }
@@ -118,6 +150,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
   const handleSubCategoryClick = (subId) => {
     setActiveSubCategory(subId);
+    setActiveFilter('All');
   };
 
   const handleFilterClick = (filterVal) => {
@@ -252,12 +285,13 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     SUB_CATEGORIES[cat.id] = uniqueSubs.length > 0 ? uniqueSubs : [{ id: 'all', label: 'All Courses' }];
   });
 
-  const trainingFilters = [
-    { label: 'All', value: 'All', matchKeys: ['All'] },
-    { label: '3 Months', value: '3 Months', matchKeys: ['3 Months', '3 Month', 'Internship'] },
-    { label: '45 Days', value: '45 Days', matchKeys: ['45 Days', '45D', 'Summer', 'Winter'] },
-    { label: '6 Months', value: '6 Months', matchKeys: ['6 Month', '6 Months'] },
-    { label: 'One Year', value: 'One Year', matchKeys: ['One Year', '1 Year', 'Year'] }
+  const ALL_TRAINING_FILTERS = [
+    { label: '3 Months', value: '3 Months', matchKeys: ['3 Months', '3 months', '3 Month', '3 month', '3M', '3m', 'Internship'] },
+    { label: '45 Days', value: '45 Days', matchKeys: ['45 Days', '45 days', '45D', '45d', '45 Day', 'Summer', 'Winter'] },
+    { label: '4 Months', value: '4 Months', matchKeys: ['4 Months', '4 months', '4 Month', '4 month', '4M', '4m'] },
+    { label: '5 Months', value: '5 Months', matchKeys: ['5 Months', '5 months', '5 Month', '5 month', '5M', '5m'] },
+    { label: '6 Months', value: '6 Months', matchKeys: ['6 Month', '6 Months', '6month', '6months', '6M', '6m', 'Industrial'] },
+    { label: 'One Year', value: 'One Year', matchKeys: ['One Year', 'one year', '1 Year', '1 year', '1Year', '12 Months', '12 months', 'Year'] }
   ];
 
   const INITIAL_COURSES = [
@@ -636,20 +670,45 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     headingTitle = `${currentSubObj.label} Programs`;
   }
 
-  const displayedCourses = allCourses.filter(c => {
-    const activeCatSlug = (activeCategory || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const courseMatchesFilter = (c, filterObj) => {
+    if (!filterObj || filterObj.value === 'All') return true;
+    const keys = filterObj.matchKeys || [filterObj.value, filterObj.label];
+    const dur = (c.duration || '').toLowerCase();
+    const title = (c.title || '').toLowerCase();
+    return keys.some(k => {
+      const kLow = k.toLowerCase().trim();
+      return dur.includes(kLow) || title.includes(kLow);
+    });
+  };
+
+  const isCourseInCategoryAndSub = (c, catId, subId) => {
+    const activeCatSlug = (catId || '').toLowerCase().replace(/[^a-z0-9]/g, '');
     const courseCatSlug = (c.categoryId || c.category || '').toLowerCase().replace(/[^a-z0-9]/g, '');
     const courseCatRaw = (c.categoryId || c.category || '').toLowerCase();
-    const activeCatRaw = (activeCategory || '').toLowerCase();
+    const activeCatRaw = (catId || '').toLowerCase();
 
-    const matchesCat = !activeCategory || 
+    const isCodingMatch = (activeCatSlug.includes('coding') || activeCatSlug.includes('softw')) &&
+                          (courseCatSlug.includes('coding') || courseCatSlug.includes('softw'));
+    const isRepairMatch = (activeCatSlug.includes('repair') || activeCatSlug.includes('mobil') || activeCatSlug.includes('comp')) &&
+                          (courseCatSlug.includes('repair') || courseCatSlug.includes('mobil') || courseCatSlug.includes('comp'));
+    const isNetworkMatch = (activeCatSlug === 'n' || activeCatSlug.includes('network') || activeCatSlug.includes('server')) &&
+                           (courseCatSlug === 'n' || courseCatSlug.includes('network') || courseCatSlug.includes('server'));
+    const isRoboticsMatch = (activeCatSlug.includes('robot') || activeCatSlug.includes('iot')) &&
+                            (courseCatSlug.includes('robot') || courseCatSlug.includes('iot'));
+    const isElecMatch = (activeCatSlug.includes('elect') || activeCatSlug.includes('appliance')) &&
+                        (courseCatSlug.includes('elect') || courseCatSlug.includes('appliance'));
+    const isMarketMatch = (activeCatSlug.includes('market') || activeCatSlug.includes('seo')) &&
+                          (courseCatSlug.includes('market') || courseCatSlug.includes('seo'));
+
+    const matchesCat = !catId || 
                        courseCatSlug === activeCatSlug || 
                        courseCatRaw === activeCatRaw || 
-                       (courseCatSlug && activeCatSlug && (courseCatSlug.includes(activeCatSlug) || activeCatSlug.includes(courseCatSlug)));
+                       (courseCatSlug && activeCatSlug && (courseCatSlug.includes(activeCatSlug) || activeCatSlug.includes(courseCatSlug))) ||
+                       isCodingMatch || isRepairMatch || isNetworkMatch || isRoboticsMatch || isElecMatch || isMarketMatch;
     
     let matchesSubCat = true;
-    if (activeSubCategory && activeSubCategory !== 'all') {
-      const subLower = activeSubCategory.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (subId && subId !== 'all') {
+      const subLower = subId.toLowerCase().replace(/[^a-z0-9]/g, '');
       const courseSub = (c.subCategory || c.subCat || '').toLowerCase();
       const courseSubs = (Array.isArray(c.subCategories) && c.subCategories.length > 0 ? c.subCategories : courseSub.split(','))
         .map(s => String(s).toLowerCase().replace(/[^a-z0-9]/g, ''))
@@ -660,21 +719,52 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                       courseSubs.some(s => s === subLower || s.includes(subLower) || subLower.includes(s)) || 
                       courseTitle.includes(subLower);
     }
-    
-    let matchesFilter = activeFilter === 'All';
-    if (!matchesFilter) {
-      const selectedFilterObj = trainingFilters.find(f => f.value === activeFilter || f.label === activeFilter);
-      if (selectedFilterObj) {
-        const keys = selectedFilterObj.matchKeys || [selectedFilterObj.value, selectedFilterObj.label];
-        matchesFilter = keys.some(k => 
-          c.duration?.toLowerCase().includes(k.toLowerCase()) || 
-          c.title?.toLowerCase().includes(k.toLowerCase())
-        );
-      } else {
-        matchesFilter = c.duration?.includes(activeFilter) || c.title?.includes(activeFilter);
+
+    return matchesCat && matchesSubCat;
+  };
+
+  // Courses in current category & subcategory before applying duration filter
+  const scopedCourses = allCourses.filter(c => isCourseInCategoryAndSub(c, activeCategory, activeSubCategory));
+
+  // Determine which durations ACTUALLY have courses in current selection
+  const availableTrainingFilters = ALL_TRAINING_FILTERS.filter(filter => {
+    return scopedCourses.some(course => courseMatchesFilter(course, filter));
+  });
+
+  // Dynamically include any custom duration present in scopedCourses
+  scopedCourses.forEach(course => {
+    const rawDur = (course.duration || '').trim();
+    if (!rawDur) return;
+    const isCovered = ALL_TRAINING_FILTERS.some(filter => courseMatchesFilter(course, filter));
+    if (!isCovered && !availableTrainingFilters.some(f => f.value.toLowerCase() === rawDur.toLowerCase())) {
+      availableTrainingFilters.push({
+        label: rawDur,
+        value: rawDur,
+        matchKeys: [rawDur]
+      });
+    }
+  });
+
+  // Automatically reset activeFilter to 'All' if the selected filter no longer has any courses
+  useEffect(() => {
+    if (activeFilter !== 'All') {
+      const isAvailable = availableTrainingFilters.some(
+        f => f.value === activeFilter || f.label === activeFilter
+      );
+      if (!isAvailable) {
+        setActiveFilter('All');
       }
     }
-    return matchesCat && matchesSubCat && matchesFilter;
+  }, [activeCategory, activeSubCategory, availableTrainingFilters, activeFilter]);
+
+  // Displayed courses based on activeFilter
+  const displayedCourses = scopedCourses.filter(c => {
+    if (activeFilter === 'All') return true;
+    const selectedFilterObj = [
+      ...ALL_TRAINING_FILTERS,
+      ...availableTrainingFilters
+    ].find(f => f.value === activeFilter || f.label === activeFilter);
+    return courseMatchesFilter(c, selectedFilterObj || { value: activeFilter, label: activeFilter, matchKeys: [activeFilter] });
   });
 
   return (
@@ -774,31 +864,42 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                       All
                     </button>
                   </div>
-                  <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 overflow-x-auto scrollbar-none [ms-overflow-style:none] [scrollbar-width:none] pb-0.5">
-                    {trainingFilters.slice(1).map((filter) => {
-                      const isFilterActive = activeFilter === filter.value;
-                      return (
-                        <button
-                          suppressHydrationWarning
-                          key={filter.value}
-                          onClick={() => handleFilterClick(filter.value)}
-                          className={`flex-1 min-w-[70px] sm:min-w-0 text-center whitespace-nowrap px-1.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl font-extrabold text-[10.5px] min-[360px]:text-[11.5px] sm:text-[13.5px] tracking-tight transition-all duration-200 cursor-pointer ${
-                            isFilterActive
-                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 scale-[1.02]'
-                              : 'bg-white text-slate-700 border border-slate-200/90 shadow-2xs hover:bg-slate-50 hover:border-blue-300'
-                          }`}
-                        >
-                          {filter.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {availableTrainingFilters.length > 0 ? (
+                    <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 overflow-x-auto scrollbar-none [ms-overflow-style:none] [scrollbar-width:none] pb-0.5">
+                      {availableTrainingFilters.map((filter) => {
+                        const isFilterActive = activeFilter === filter.value;
+                        return (
+                          <button
+                            suppressHydrationWarning
+                            key={filter.value}
+                            onClick={() => handleFilterClick(filter.value)}
+                            className={`flex-1 min-w-[70px] sm:min-w-0 text-center whitespace-nowrap px-1.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl font-extrabold text-[10.5px] min-[360px]:text-[11.5px] sm:text-[13.5px] tracking-tight transition-all duration-200 cursor-pointer ${
+                              isFilterActive
+                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 scale-[1.02]'
+                                : 'bg-white text-slate-700 border border-slate-200/90 shadow-2xs hover:bg-slate-50 hover:border-blue-300'
+                            }`}
+                          >
+                            {filter.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-1 text-[11px] sm:text-xs font-bold text-slate-500">
+                      All courses for this category are shown
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* COURSE CARDS GRID - SCROLLABLE CONTAINER FOR ALL CATEGORIES */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 pb-10 max-h-[68vh] sm:max-h-[72vh] overflow-y-auto pr-1.5 pt-4 sm:pt-5 scrollbar-thin">
+              {displayedCourses.length === 0 && (
+                <div className="col-span-1 lg:col-span-2 text-center py-12 px-4 bg-white/80 rounded-2xl border border-dashed border-slate-200 shadow-2xs">
+                  <p className="text-slate-600 font-bold text-sm">No courses found matching this selection.</p>
+                </div>
+              )}
               {displayedCourses.map((course) => {
                 const isLiked = !!likedCourses[course.id];
                 const titleLower = (course.title || '').toLowerCase();
