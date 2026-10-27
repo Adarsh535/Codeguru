@@ -126,11 +126,11 @@ export default function FAQPage() {
         
         {/* HERO BANNER */}
         <div className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white px-4 pt-12 pb-16 text-center select-none">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-[10px] sm:text-xs font-black uppercase tracking-wider mb-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-xs sm:text-xs font-bold mb-3">
             <Sparkles className="w-3.5 h-3.5" />
             <span>KNOWLEDGE BASE &amp; HELP DESK</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black font-heading tracking-tight mb-3">
+          <h1 className="text-3xl sm:text-5xl font-bold font-heading tracking-tight mb-3">
             Frequently Asked Questions
           </h1>
           <p className="text-xs sm:text-base text-slate-300 max-w-xl mx-auto font-normal">
@@ -145,8 +145,8 @@ export default function FAQPage() {
               key={idx}
               className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-sm hover:border-amber-400 transition-all"
             >
-              <h2 className="text-base sm:text-lg font-black text-slate-900 font-heading mb-2 flex items-start gap-2.5">
-                <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-800 text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 font-heading mb-2 flex items-start gap-2.5">
+                <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-800 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
                   Q{idx + 1}
                 </span>
                 <span>{faq.question}</span>
@@ -160,7 +160,7 @@ export default function FAQPage() {
           {/* CONTACT ASSISTANCE CARD */}
           <div className="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
-              <h3 className="text-base sm:text-lg font-black font-heading">
+              <h3 className="text-base sm:text-lg font-bold font-heading">
                 Have a different question?
               </h3>
               <p className="text-xs text-slate-400 mt-1">
@@ -170,13 +170,13 @@ export default function FAQPage() {
             <div className="flex items-center gap-3 shrink-0">
               <a
                 href={`tel:${BUSINESS_CONFIG.contact.primaryPhone.replace(/\s+/g, '')}`}
-                className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl uppercase tracking-wider transition-all"
+                className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-xl transition-all"
               >
                 Call +91 72388 29360
               </a>
               <Link
                 href="/contact"
-                className="bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-4 py-2.5 rounded-xl uppercase tracking-wider border border-white/20 transition-all"
+                className="bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-4 py-2.5 rounded-xl border border-white/20 transition-all"
               >
                 Contact Desk
               </Link>

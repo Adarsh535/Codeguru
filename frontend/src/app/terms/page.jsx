@@ -9,7 +9,7 @@ export default function TermsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 text-slate-800 space-y-6">
       <div className="border-b border-slate-200 pb-4">
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-heading">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight font-heading">
           Terms & Conditions
         </h1>
         <p className="text-xs text-slate-500 mt-1">Last updated: October 2026</p>

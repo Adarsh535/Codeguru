@@ -1,17 +1,7 @@
 'use client';
 
+import { X as CloseIcon, CheckCircle2 as CheckCircleIcon, GraduationCap as SchoolIcon, Clock as AccessTimeIcon, User as PersonIcon, CreditCard as PaymentIcon, QrCode as QrCode2Icon, ArrowRight as ArrowForwardIcon, Copy as ContentCopyIcon, Lock as LockIcon, Shield as ShieldIcon } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import CloseIcon from '@mui/icons-material/Close';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import SchoolIcon from '@mui/icons-material/School';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import PersonIcon from '@mui/icons-material/Person';
-import PaymentIcon from '@mui/icons-material/Payment';
-import QrCode2Icon from '@mui/icons-material/QrCode2';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import LockIcon from '@mui/icons-material/Lock';
-import ShieldIcon from '@mui/icons-material/Shield';
 import { apiService } from '../../services/apiService';
 import { getQuickLocationSync } from '../../utils/geoLocator';
 import { BUSINESS_CONFIG } from '../../config/business';
@@ -141,23 +131,23 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
   const upiQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${upiId}&pn=CodeGurru%20Academy&am=${numericFee}&cu=INR`)}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-backdrop-in">
       <div 
-        className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col transition-all max-h-[92vh] overflow-y-auto"
+        className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] overflow-y-auto animate-modal-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* MODAL HEADER */}
         <div className="p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between sticky top-0 z-10">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-amber-400 bg-amber-400/15 px-2.5 py-0.5 rounded-full border border-amber-400/30">
+              <span className="text-xs font-bold text-amber-400 bg-amber-400/15 px-2.5 py-0.5 rounded-full border border-amber-400/30">
                 Course Enrollment & UPI Payment
               </span>
-              <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
+              <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
                 <ShieldIcon className="!w-3 !h-3" /> Secure Enrollment
               </span>
             </div>
-            <h2 className="text-lg font-black font-heading tracking-tight mt-1 text-white">
+            <h2 className="text-lg font-bold font-heading tracking-tight mt-1 text-white">
               {step === 1 ? 'Confirm Batch & Contact Details' : step === 2 ? 'Complete Payment via UPI' : 'Enrollment Submitted!'}
             </h2>
           </div>
@@ -196,10 +186,10 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
               <div className="p-4 bg-indigo-50/60 border border-indigo-100 rounded-2xl flex flex-col gap-2">
                 <div className="flex items-start justify-between">
                   <div>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600">Selected Program</span>
-                    <h3 className="text-sm font-black text-slate-900 font-heading">{defaultBatch.courseName}</h3>
+                    <span className="text-xs font-semibold text-indigo-600">Selected Program</span>
+                    <h3 className="text-sm font-bold text-slate-900 font-heading">{defaultBatch.courseName}</h3>
                   </div>
-                  <span className="px-2.5 py-1 bg-white border border-indigo-200 text-indigo-700 text-xs font-black rounded-lg font-mono">
+                  <span className="px-2.5 py-1 bg-white border border-indigo-200 text-indigo-700 text-xs font-bold rounded-lg font-mono">
                     {defaultBatch.batchCode}
                   </span>
                 </div>
@@ -211,7 +201,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
 
               {/* PAYMENT PLAN SELECTION */}
               <div>
-                <label className="text-xs font-extrabold text-slate-700 block mb-2">Select Payment Plan</label>
+                <label className="text-xs font-semibold text-slate-700 block mb-2">Select Payment Plan</label>
                 <div className="grid grid-cols-2 gap-3">
                   <label 
                     className={`p-3 rounded-2xl border-2 cursor-pointer transition-all flex flex-col gap-1 ${
@@ -227,11 +217,11 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
                       className="sr-only" 
                     />
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-black text-slate-900">One-Time Fee</span>
-                      <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">BEST VALUE</span>
+                      <span className="text-xs font-bold text-slate-900">One-Time Fee</span>
+                      <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">BEST VALUE</span>
                     </div>
-                    <span className="text-sm font-black text-blue-600 font-mono">{defaultBatch.fee}</span>
-                    <span className="text-[10px] text-slate-500">100% Course Fee cleared</span>
+                    <span className="text-sm font-bold text-blue-600 font-mono">{defaultBatch.fee}</span>
+                    <span className="text-xs text-slate-500">100% Course Fee cleared</span>
                   </label>
 
                   <label 
@@ -248,11 +238,11 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
                       className="sr-only" 
                     />
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-black text-slate-900">Easy Installment</span>
-                      <span className="text-[10px] font-black bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">40% NOW</span>
+                      <span className="text-xs font-bold text-slate-900">Easy Installment</span>
+                      <span className="text-xs font-bold bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">40% NOW</span>
                     </div>
-                    <span className="text-sm font-black text-blue-600 font-mono">₹{Math.round(numericFee * 0.4).toLocaleString('en-IN')}</span>
-                    <span className="text-[10px] text-slate-500">Remaining 60% in Month 2</span>
+                    <span className="text-sm font-bold text-blue-600 font-mono">₹{Math.round(numericFee * 0.4).toLocaleString('en-IN')}</span>
+                    <span className="text-xs text-slate-500">Remaining 60% in Month 2</span>
                   </label>
                 </div>
               </div>
@@ -298,7 +288,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-black text-xs shadow-lg shadow-blue-500/25 transition-all cursor-pointer flex items-center justify-center gap-2 mt-4"
+                className="w-full py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-bold text-xs shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 mt-4"
               >
                 Proceed to UPI Payment ({paidAmountVal}) <ArrowForwardIcon className="!w-4 !h-4" />
               </button>
@@ -310,13 +300,13 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
             <div className="space-y-4">
               <div className="p-3.5 bg-slate-900 text-white rounded-2xl flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase tracking-widest block font-bold">Payable Amount</span>
-                  <span className="text-base font-black text-amber-400 font-mono">{paidAmountVal}</span>
+                  <span className="text-xs text-slate-400 block font-bold">Payable Amount</span>
+                  <span className="text-base font-bold text-amber-400 font-mono">{paidAmountVal}</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="text-[11px] font-bold text-blue-400 hover:underline cursor-pointer"
+                  className="text-xs font-bold text-blue-400 hover:underline cursor-pointer"
                 >
                   Change Plan
                 </button>
@@ -324,11 +314,11 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
 
               {/* UPI QR CODE & DIRECT TRANSFER */}
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-3">
-                <p className="text-[11px] font-bold text-slate-700">Scan QR Code using GPay, PhonePe, Paytm, or any UPI App</p>
+                <p className="text-xs font-bold text-slate-700">Scan QR Code using GPay, PhonePe, Paytm, or any UPI App</p>
                 
                 <div className="inline-block p-3 bg-white border-2 border-slate-900 rounded-2xl shadow-md relative">
                   <img src={upiQrUrl} alt="UPI Payment QR Code" className="w-36 h-36 mx-auto rounded-lg" />
-                  <span className="absolute -bottom-2 bg-amber-400 text-slate-950 text-[9px] font-black px-2 py-0.5 rounded-full border border-slate-900">
+                  <span className="absolute -bottom-2 bg-amber-400 text-slate-950 text-xs font-bold px-2 py-0.5 rounded-full border border-slate-900">
                     CodeGurru Official UPI
                   </span>
                 </div>
@@ -340,7 +330,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
                   <button
                     type="button"
                     onClick={handleCopyUpi}
-                    className="px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                    className="px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
                   >
                     <ContentCopyIcon className="!w-3 !h-3" /> {copiedUpi ? 'Copied!' : 'Copy'}
                   </button>
@@ -349,7 +339,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
 
               {/* UTR / TRANSACTION REFERENCE NUMBER INPUT */}
               <div className="space-y-1.5 p-3.5 bg-blue-50/60 border border-blue-200 rounded-2xl">
-                <label className="text-xs font-black text-slate-900 block">
+                <label className="text-xs font-bold text-slate-900 block">
                   Enter UPI UTR / Transaction Reference Number
                 </label>
                 <input
@@ -360,7 +350,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
                   onChange={(e) => setUpiRefInput(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-white rounded-xl border border-slate-300 font-mono text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500"
                 />
-                <p className="text-[10px] text-slate-500">
+                <p className="text-xs text-slate-500">
                   After paying via UPI, enter the 12-digit transaction UTR number shown in your UPI app receipt to submit for verification.
                 </p>
               </div>
@@ -370,7 +360,7 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
                 type="button"
                 onClick={handleCompletePayment}
                 disabled={isSubmitting}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs shadow-lg shadow-emerald-500/25 transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2 animate-pulse">
@@ -392,9 +382,9 @@ export default function BatchEnrollModal({ isOpen, onClose, batchData, user, onE
               <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center animate-bounce">
                 <CheckCircleIcon className="!w-12 !h-12 text-emerald-600" />
               </div>
-              <h3 className="text-xl font-black text-slate-900 font-heading">Enrollment Submitted!</h3>
+              <h3 className="text-xl font-bold text-slate-900 font-heading">Enrollment Submitted!</h3>
               
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px] text-slate-600 space-y-1 my-1">
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-slate-600 space-y-1 my-1">
                 <div>UTR Reference: <span className="font-bold text-slate-900">{transactionId}</span></div>
                 <div>Course: <span className="font-bold text-blue-600">{defaultBatch.courseName}</span></div>
                 <div>Status: <span className="font-bold text-amber-600">Pending Admin Verification</span></div>

@@ -99,10 +99,10 @@ export default function ContactPage() {
         
         {/* HERO BANNER */}
         <div className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white px-4 pt-12 pb-16 text-center select-none">
-          <span className="text-amber-400 font-extrabold text-xs uppercase tracking-widest block mb-2">
+          <span className="text-amber-400 font-semibold text-xs block mb-2">
             OFFICIAL CAMPUS &amp; SUPPORT HELPDESK
           </span>
-          <h1 className="text-3xl sm:text-5xl font-black font-heading tracking-tight mb-3">
+          <h1 className="text-3xl sm:text-5xl font-bold font-heading tracking-tight mb-3">
             Contact CodeGurru
           </h1>
           <p className="text-xs sm:text-base text-slate-300 max-w-xl mx-auto font-normal">
@@ -117,10 +117,10 @@ export default function ContactPage() {
             {/* AYODHYA BRANCH */}
             <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm hover:border-cyan-400 transition-all flex flex-col justify-between">
               <div>
-                <span className="text-[10px] font-black uppercase text-cyan-600 tracking-wider block mb-1">
+                <span className="text-xs font-bold text-cyan-600 block mb-1">
                   REGIONAL BRANCH &amp; TRAINING CAMPUS
                 </span>
-                <h2 className="text-lg font-black text-slate-900 font-heading mb-3">
+                <h2 className="text-lg font-bold text-slate-900 font-heading mb-3">
                   {BUSINESS_CONFIG.branches[0].title}
                 </h2>
                 
@@ -168,11 +168,11 @@ export default function ContactPage() {
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                 <a
                   href={`tel:${BUSINESS_CONFIG.contact.primaryPhone.replace(/\s+/g, '')}`}
-                  className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs px-4 py-2 rounded-xl uppercase tracking-wider transition-all"
+                  className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all"
                 >
                   Call Ayodhya Campus
                 </a>
-                <span className="text-[10px] text-slate-400 font-bold">Ayodhya, Uttar Pradesh</span>
+                <span className="text-xs text-slate-400 font-bold">Ayodhya, Uttar Pradesh</span>
               </div>
             </div>
 
@@ -185,7 +185,7 @@ export default function ContactPage() {
                 <h3 className="font-bold text-sm font-heading">
                   Interactive Campus Navigation &amp; Location
                 </h3>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-xs text-slate-400">
                   Located near Saket College Petrol Pump, Ayodhya, Uttar Pradesh.
                 </p>
               </div>
@@ -193,9 +193,9 @@ export default function ContactPage() {
                 href="https://wa.me/917238829360?text=Hello%20CodeGurru%2C%20I%20want%20to%20visit%20your%20campus"
                 target="_blank"
                 rel="noreferrer"
-                className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs px-4 py-2 rounded-xl uppercase tracking-wider shrink-0 transition-all flex items-center gap-1.5"
+                className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl shrink-0 transition-all flex items-center gap-1.5"
               >
-                <span>💬 WhatsApp Location</span>
+                <span>WhatsApp Location</span>
               </a>
             </div>
             

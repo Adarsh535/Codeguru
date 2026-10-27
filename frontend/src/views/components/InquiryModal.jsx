@@ -1,10 +1,7 @@
 'use client';
 
+import { Send as SendIcon, CheckCircle2 as CheckCircleIcon, X as CloseIcon, LocateFixed as MyLocationIcon, MapPin as MapPinIcon } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import SendIcon from '@mui/icons-material/Send';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CloseIcon from '@mui/icons-material/Close';
-import MyLocationIcon from '@mui/icons-material/MyLocation';
 import Logo from './Logo';
 import AlertModal from './AlertModal';
 import CourseDropdown from './CourseDropdown';
@@ -91,13 +88,13 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
 
       <div
         onClick={handleClose}
-        className={`fixed inset-0 z-50 flex items-center justify-center p-3 xxs:p-4 bg-slate-950/70 backdrop-blur-md select-none transition-all duration-300 ${
+        className={`fixed inset-0 z-50 flex items-center justify-center p-3 xxs:p-4 bg-slate-950/60 backdrop-blur-sm select-none transition-all duration-300 ${
           isClosing ? 'animate-backdrop-out' : 'animate-backdrop-in'
         }`}
       >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`w-full max-w-lg bg-white rounded-3xl xxs:rounded-[36px] overflow-hidden border border-slate-200/90 shadow-2xl flex flex-col transition-all duration-300 transform ${
+        className={`w-full max-w-lg bg-white rounded-2xl xxs:rounded-2xl overflow-hidden border border-slate-200/90 shadow-2xl flex flex-col transition-all duration-300 transform ${
           isClosing ? 'animate-modal-slide-down' : 'animate-modal-slide-up'
         }`}
       >
@@ -131,7 +128,7 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
 
           {/* Bottom Row: Title & Subtitle */}
           <div className="flex flex-col gap-0.5">
-            <h3 className="text-base xxs:text-lg font-black font-heading tracking-tight text-slate-900 leading-tight">
+            <h3 className="text-base xxs:text-lg font-bold font-heading tracking-tight text-slate-900 leading-tight">
               Get in Touch
             </h3>
             <p className="text-[10.5px] xxs:text-xs text-slate-500 font-medium">Quick Course & Placement Registration</p>
@@ -153,7 +150,7 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
             {/* ROW 1: Name & Phone */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-extrabold text-slate-800 flex items-center gap-1 ml-2">
+                <label className="text-xs font-semibold text-slate-800 flex items-center gap-1 ml-2">
                   <span>Your Name</span>
                   <span className="text-red-500 font-bold">*</span>
                 </label>
@@ -170,7 +167,7 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-extrabold text-slate-800 flex items-center gap-1 ml-2">
+                <label className="text-xs font-semibold text-slate-800 flex items-center gap-1 ml-2">
                   <span>Your Phone</span>
                   <span className="text-red-500 font-bold">*</span>
                 </label>
@@ -206,11 +203,11 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
               ) : locationStatus === 'detected' && !isManualEdit ? (
                 <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-emerald-50 border border-emerald-200/90 text-emerald-950 text-xs">
                   <div className="flex items-center gap-2 truncate">
-                    <span className="text-emerald-600 text-sm shrink-0">📍</span>
+                    <MapPinIcon className="w-4 h-4 text-emerald-600 shrink-0" aria-hidden="true" />
                     <span className="truncate font-bold">
                       {locationData.city}{locationData.state ? `, ${locationData.state}` : ''}
                     </span>
-                    <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-black uppercase shrink-0">
+                    <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold shrink-0">
                       GPS Verified
                     </span>
                   </div>
@@ -220,7 +217,7 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
                       setIsManualEdit(true);
                       setManualCity(locationData.city || '');
                     }}
-                    className="text-[11px] font-bold text-emerald-700 hover:text-emerald-900 underline ml-2 shrink-0 cursor-pointer"
+                    className="text-xs font-bold text-emerald-700 hover:text-emerald-900 underline ml-2 shrink-0 cursor-pointer"
                   >
                     Change
                   </button>
@@ -228,25 +225,25 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
               ) : locationStatus === 'ip_approx' && !isManualEdit ? (
                 <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 text-xs">
                   <div className="flex items-center gap-2 truncate">
-                    <span className="text-amber-600 text-sm shrink-0">📍</span>
+                    <MapPinIcon className="w-4 h-4 text-amber-600 shrink-0" aria-hidden="true" />
                     <span className="truncate font-bold">
                       {manualCity || locationData.city}
                     </span>
-                    <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-black shrink-0">
+                    <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold shrink-0">
                       Approximate (IP)
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setIsManualEdit(true)}
-                    className="text-[11px] font-bold text-amber-800 hover:text-amber-950 underline ml-2 shrink-0 cursor-pointer"
+                    className="text-xs font-bold text-amber-800 hover:text-amber-950 underline ml-2 shrink-0 cursor-pointer"
                   >
                     Change
                   </button>
                 </div>
               ) : (
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-extrabold text-slate-800 flex items-center justify-between ml-2">
+                  <label className="text-xs font-semibold text-slate-800 flex items-center justify-between ml-2">
                     <span className="flex items-center gap-1">
                       <span>Your Current City</span>
                       <span className="text-red-500 font-bold">*</span>
@@ -257,7 +254,7 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
                         setIsManualEdit(false);
                         retryLocationDetection();
                       }}
-                      className="text-[11px] text-cyan-600 hover:text-cyan-800 font-bold flex items-center gap-1 cursor-pointer"
+                      className="text-xs text-cyan-600 hover:text-cyan-800 font-bold flex items-center gap-1 cursor-pointer"
                     >
                       <MyLocationIcon className="!w-3 !h-3" />
                       <span>Auto-detect</span>
@@ -274,7 +271,7 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
                     className="w-full px-4 py-2.5 rounded-full border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs font-semibold outline-none transition-all"
                   />
                   {ipSuggestion && !manualCity && (
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 ml-2">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 ml-2">
                       <span>Near:</span>
                       <button
                         type="button"
@@ -297,7 +294,7 @@ export default function InquiryModal({ isOpen, onClose, onSubmitSuccess }) {
               suppressHydrationWarning
               type="submit"
               disabled={isSubmitting || isSubmitted}
-              className={`w-full text-white font-black text-xs uppercase tracking-wider py-3 px-4 rounded-full transition-all duration-200 shadow-md flex items-center justify-center gap-2 mt-1 ${
+              className={`w-full text-white font-bold text-xs py-3 px-4 rounded-full transition-all duration-200 shadow-md flex items-center justify-center gap-2 mt-1 ${
                 isSubmitting || isSubmitted
                   ? 'bg-slate-400 cursor-not-allowed opacity-80'
                   : 'bg-[#549ebf] hover:bg-[#4387a6] active:bg-[#35728f] cursor-pointer active:scale-[0.99]'

@@ -86,23 +86,23 @@ export default function Navbar({
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-xs z-50">
+    <header className="fixed top-0 left-0 right-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-xs z-50">
       <div className="w-full max-w-7xl mx-auto px-2.5 sm:px-4 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-20 py-1 sm:py-0 w-full gap-1 sm:gap-4">
           
           {/* LEFT SIDE: LOGO ICON, LOGO TEXT, AND LOCATION */}
-          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 flex-shrink-0">
             {/* Logo Icon */}
             <button
               suppressHydrationWarning
               onClick={handleBrandClick}
-              className="w-8 h-8 min-w-[32px] sm:w-11 sm:h-11 md:w-12 md:h-12 flex-shrink-0 flex items-center justify-center bg-transparent cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+              className="w-7 h-7 min-w-[28px] sm:w-10 sm:h-10 md:w-11 md:h-11 flex-shrink-0 flex items-center justify-center bg-transparent cursor-pointer hover:scale-105 active:scale-95 transition-transform"
               title="CodeGurru Home"
             >
               <img
                 src="/logo.png"
                 alt="CODE GURRU"
-                className="w-full h-full object-contain drop-shadow-xs"
+                className="w-full h-full object-contain-xs"
                 onError={(e) => {
                   e.target.src = '/logo-icon.png';
                 }}
@@ -119,7 +119,7 @@ export default function Navbar({
                 <img
                   src="/brand-text-logo.png"
                   alt="CODE GURRU"
-                  className="h-5 min-[360px]:h-6 sm:h-7 md:h-8 w-auto object-contain shrink-0 select-none drop-shadow-2xs group-hover:scale-105 active:scale-95 transition-transform"
+                  className="h-4 min-[360px]:h-[18px] sm:h-6 md:h-7 w-auto max-w-[120px] min-[360px]:max-w-[140px] sm:max-w-[180px] md:max-w-[210px] object-contain shrink-0 select-none-2xs group-hover:scale-105 active:scale-95 transition-transform"
                 />
               </div>
 
@@ -128,7 +128,7 @@ export default function Navbar({
                 <div className="flex items-center min-w-0 mt-0.5">
                   <button
                     onClick={onOpenLocationModal}
-                    className="inline-flex items-center gap-0.5 text-[9px] text-slate-400 hover:text-amber-600 font-semibold transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-0.5 text-xs text-slate-400 hover:text-amber-600 font-semibold transition-colors cursor-pointer"
                     title="Change Location"
                   >
                     <MapPin className="text-amber-500 flex-shrink-0 w-2.5 h-2.5" />
@@ -219,10 +219,10 @@ export default function Navbar({
                   className="flex items-center justify-center gap-1.5 sm:gap-2.5 pl-1.5 sm:pl-2 pr-2.5 sm:pr-3 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl bg-white border border-slate-200/90 border-l-[3.5px] border-l-orange-500 text-slate-800 shadow-2xs hover:shadow-xs transition-all cursor-pointer active:scale-95 group"
                   title="View Profile"
                 >
-                  <span className="w-6 h-6 sm:w-7 sm:h-7 min-w-[24px] min-h-[24px] sm:min-w-[28px] sm:min-h-[28px] aspect-square rounded-lg sm:rounded-xl bg-orange-500 text-white font-black flex items-center justify-center text-xs sm:text-sm shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
+                  <span className="w-6 h-6 sm:w-7 sm:h-7 min-w-[24px] min-h-[24px] sm:min-w-[28px] sm:min-h-[28px] aspect-square rounded-lg sm:rounded-xl bg-orange-500 text-white font-bold flex items-center justify-center text-xs sm:text-sm shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
                     {user.name?.[0] || 'U'}
                   </span>
-                  <span className="font-extrabold text-slate-900 text-xs sm:text-sm capitalize tracking-tight truncate max-w-[75px] sm:max-w-[115px]">
+                  <span className="font-semibold text-slate-900 text-xs sm:text-sm capitalize tracking-tight truncate max-w-[75px] sm:max-w-[115px]">
                     {user.name}
                   </span>
                 </button>
@@ -230,37 +230,37 @@ export default function Navbar({
                 <button
                   suppressHydrationWarning
                   onClick={handleLogout}
-                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md shadow-red-500/30 hover:shadow-lg hover:shadow-red-500/40 flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg hover: flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0"
                   title="Logout"
                 >
                   <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white stroke-[2.2]" />
                 </button>
               </div>
             ) : (
-              <div className="inline-flex items-stretch rounded-full bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all duration-300 overflow-hidden flex-shrink-0 animate-glow-pulse">
+              <div className="inline-flex items-stretch rounded-full bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all duration-300 overflow-hidden flex-shrink-0">
                 {/* LOGIN BUTTON */}
                 <button
                   suppressHydrationWarning
                   onClick={onOpenLogin || onOpenContactModal}
-                  className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 text-slate-800 hover:text-slate-950 hover:bg-slate-50 font-extrabold text-[11px] sm:text-sm transition-all duration-200 cursor-pointer active:scale-95 group"
+                  className="flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 text-slate-800 hover:text-slate-950 hover:bg-slate-50 font-semibold text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-95 group"
                   title="Student Login"
                 >
                   <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-900 stroke-[2.3] group-hover:translate-x-0.5 transition-transform duration-200 shrink-0" />
-                  <span className="font-extrabold text-slate-900 tracking-tight">Login</span>
+                  <span className="font-semibold text-slate-900 tracking-tight">Login</span>
                 </button>
 
                 {/* REGISTER BUTTON */}
                 <button
                   suppressHydrationWarning
                   onClick={onOpenRegister || onOpenInquiryModal}
-                  className="flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-1.5 sm:py-2 bg-gradient-to-r from-orange-500 via-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-extrabold text-[11px] sm:text-sm transition-all duration-200 cursor-pointer active:scale-95 group relative overflow-hidden"
+                  className="flex items-center justify-center gap-1.5 px-3.5 sm:px-5 py-1.5 sm:py-2 bg-gradient-to-r from-orange-500 via-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-95 group relative overflow-hidden"
                   title="New Registration"
                 >
                   {/* Subtle Light Shimmer Sweep Animation */}
-                  <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 animate-btn-shimmer pointer-events-none" />
+                  <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 pointer-events-none" />
 
                   <UserPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white stroke-[2.3] group-hover:scale-110 group-hover:rotate-6 transition-transform duration-200 shrink-0 relative z-10" />
-                  <span className="font-extrabold text-white tracking-tight relative z-10">Register</span>
+                  <span className="font-semibold text-white tracking-tight relative z-10">Register</span>
                 </button>
               </div>
             )}

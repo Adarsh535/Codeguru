@@ -74,7 +74,7 @@ export default function BottomNav({
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 w-full h-[68px] bg-white/95 backdrop-blur-md sm:hidden z-50 rounded-t-2xl border-t border-slate-100 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] px-2 select-none" suppressHydrationWarning>
+    <div className="fixed bottom-0 left-0 right-0 w-full h-[68px] bg-white/95 backdrop-blur-sm sm:hidden z-50 rounded-t-2xl border-t border-slate-100 shadow-lg px-2 select-none" suppressHydrationWarning>
       <div className="flex justify-around items-center h-full relative max-w-md mx-auto">
         {navItems.map((item) => {
           if (item.isCenter) {
@@ -85,7 +85,7 @@ export default function BottomNav({
                     type="button"
                     suppressHydrationWarning
                     onClick={handleCallClick}
-                    className="relative bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 w-[52px] h-[52px] rounded-full flex items-center justify-center shadow-lg shadow-orange-500/30 z-20 transition-transform active:scale-90 hover:scale-105 duration-300 cursor-pointer"
+                    className="relative bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 w-[52px] h-[52px] rounded-full flex items-center justify-center shadow-lg z-20 transition-transform active:scale-90 hover:scale-105 duration-300 cursor-pointer"
                     title={user ? 'My Account' : 'Instant Login / Inquiry'}
                   >
                     <Phone className="w-6 h-6 fill-slate-900 stroke-none rotate-[10deg]" />
@@ -118,8 +118,8 @@ export default function BottomNav({
                 <IconComponent className={`relative z-10 ${isActive ? 'stroke-[2.5px]' : 'stroke-[2px]'}`} width={22} height={22} />
               </div>
               <span
-                className={`text-[10px] transition-all duration-300 font-bold tracking-tight ${
-                  isActive ? 'text-orange-500 font-extrabold' : 'text-slate-400 group-hover:text-slate-600'
+                className={`text-xs transition-all duration-300 font-bold tracking-tight ${
+                  isActive ? 'text-orange-500 font-semibold' : 'text-slate-400 group-hover:text-slate-600'
                 }`}
               >
                 {item.label}

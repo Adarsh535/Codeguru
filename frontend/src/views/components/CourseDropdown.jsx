@@ -100,7 +100,7 @@ export default function CourseDropdown({
       {isOpen && (
         <div
           suppressHydrationWarning
-          className="absolute left-0 right-0 top-full mt-2 z-[99999] bg-white border border-slate-200/90 rounded-2xl shadow-[0_14px_36px_rgba(0,0,0,0.12),0_4px_12px_rgba(0,0,0,0.04)] p-1.5 flex flex-col gap-0.5 animate-fadeIn"
+          className="absolute left-0 right-0 top-full mt-2 z-[99999] bg-white border border-slate-200/90 rounded-2xl shadow-lg p-1.5 flex flex-col gap-0.5 animate-fadeIn"
           role="listbox"
         >
           {options.map((option) => {

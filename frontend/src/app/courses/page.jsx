@@ -119,7 +119,7 @@ export default function CoursesPage({ onOpenContactModal, onOpenEnrollModal }) {
         CodeGurru Job-Oriented IT Courses &amp; Coding Bootcamps in Uttar Pradesh
       </h1>
 
-      <div className="flex flex-col gap-0 pb-6 bg-slate-50 pt-2 sm:pt-4">
+      <div className="flex flex-col gap-0 pb-0 bg-slate-50 pt-1 sm:pt-2">
         <CategoryNavbar onOpenContactModal={onOpenContactModal} onOpenEnrollModal={onOpenEnrollModal} isHomePage={false} />
       </div>
     </>

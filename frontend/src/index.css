@@ -12,16 +12,35 @@
   }
 
   body {
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: var(--font-inter), var(--font-mukta), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: #f8fafc;
     color: #0f172a;
+    line-height: 1.6;
     transition: background-color 0.3s ease, color 0.3s ease;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
-  
+
   h1, h2, h3, h4, h5, h6, .font-heading {
-    font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    letter-spacing: -0.02em;
+    font-family: var(--font-jakarta), var(--font-mukta), system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  /* Hindi pages: Devanagari needs Mukta first and a taller line */
+  [lang='hi'],
+  [lang='hi'] h1, [lang='hi'] h2, [lang='hi'] h3 {
+    font-family: var(--font-mukta), var(--font-inter), system-ui, sans-serif;
+    letter-spacing: 0;
+    line-height: 1.7;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid #ea580c;
+    outline-offset: 2px;
   }
 
   /* Enhanced Mobile Typography Rules */
@@ -48,11 +67,38 @@
   }
 }
 
-/* Smooth Custom Animations */
+/* ---------------------------------------------------------------------------
+   MODAL MOTION (shared by every modal / sheet on the site)
+   Phones: the panel rises from the bottom like an iOS sheet.
+   Tablet & desktop: a short fade + lift + scale, no bounce.
+   Every modal's backdrop carries .animate-backdrop-in, which also locks page scroll.
+--------------------------------------------------------------------------- */
 @keyframes modalSlideUp {
   0% {
+    opacity: 0.6;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalSlideDown {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0.6;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes modalZoomIn {
+  0% {
     opacity: 0;
-    transform: translateY(100%) scale(0.96);
+    transform: translateY(12px) scale(0.97);
   }
   100% {
     opacity: 1;
@@ -60,15 +106,19 @@
   }
 }
 
-@keyframes modalSlideDown {
+@keyframes modalZoomOut {
   0% {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
   100% {
     opacity: 0;
-    transform: translateY(100%) scale(0.96);
+    transform: translateY(8px) scale(0.98);
   }
+}
+
+html:has(.animate-backdrop-in) {
+  overflow: hidden;
 }
 
 @keyframes backdropFadeIn {
@@ -101,28 +151,36 @@
 }
 
 .animate-modal-slide-up {
-  animation: modalSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: modalSlideUp 0.42s cubic-bezier(0.32, 0.72, 0, 1) both;
+  will-change: transform, opacity;
 }
 
 .animate-modal-slide-down {
-  animation: modalSlideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: modalSlideDown 0.24s cubic-bezier(0.5, 0, 0.75, 0) both;
+}
+
+@media (min-width: 640px) {
+  .animate-modal-slide-up {
+    animation: modalZoomIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .animate-modal-slide-down {
+    animation: modalZoomOut 0.18s cubic-bezier(0.5, 0, 0.75, 0) both;
+  }
 }
 
 .animate-backdrop-in {
-  animation: backdropFadeIn 0.3s ease-out forwards;
+  animation: backdropFadeIn 0.24s ease-out both;
 }
 
 .animate-backdrop-out {
-  animation: backdropFadeOut 0.25s ease-in forwards;
+  animation: backdropFadeOut 0.22s ease-in both;
 }
 
 @keyframes popScaleIn {
   0% {
     opacity: 0;
-    transform: scale(0.65) translateY(20px);
-  }
-  70% {
-    transform: scale(1.05) translateY(-4px);
+    transform: scale(0.94) translateY(8px);
   }
   100% {
     opacity: 1;
@@ -131,7 +189,22 @@
 }
 
 .animate-pop-scale-in {
-  animation: popScaleIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  animation: popScaleIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fadeIn {
+  animation: backdropFadeIn 0.24s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-modal-slide-up,
+  .animate-modal-slide-down,
+  .animate-pop-scale-in,
+  .animate-backdrop-in,
+  .animate-backdrop-out,
+  .animate-fadeIn {
+    animation-duration: 1ms !important;
+  }
 }
 
 @keyframes infiniteScroll {
@@ -174,7 +247,7 @@
 .animate-infinite-scroll-reverse {
   display: flex;
   width: max-content;
-  animation: infiniteScrollReverse 28s linear infinite;
+  animation: marquee-reverse 28s linear infinite;
 }
 
 .animate-infinite-scroll-reverse:hover {

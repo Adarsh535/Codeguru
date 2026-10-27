@@ -13,6 +13,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import { BUSINESS_CONFIG } from '../../config/business';
+import SoundToggle from './SoundToggle';
 
 export default function Footer({ selectedLocation, onOpenLocationModal, onOpenContactModal }) {
 
@@ -122,10 +123,10 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-2xl font-black tracking-wide font-heading text-white flex items-center gap-1 select-none">
+                <span className="text-2xl font-bold tracking-wide font-heading text-white flex items-center gap-1 select-none">
                   CODE<span className="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">GURRU</span>
                 </span>
-                <span className="text-[10px] text-amber-400 font-extrabold uppercase tracking-widest mt-0.5">
+                <span className="text-xs text-amber-400 font-semibold mt-0.5">
                   CODEGURRU ACADEMY • UK VK PVT. LTD.
                 </span>
               </div>
@@ -139,27 +140,27 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
             <div className="flex flex-col gap-2 pt-2 border-t border-slate-800/80 text-xs text-slate-300">
               <div className="flex items-start gap-2">
                 <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                <span className="text-[11px] leading-snug">
+                <span className="text-xs leading-snug">
                   <strong>Campus &amp; Office:</strong> {BUSINESS_CONFIG.branches[0].fullAddress}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <a href={`tel:${BUSINESS_CONFIG.contact.primaryPhone.replace(/\s+/g, '')}`} className="text-[11px] font-bold text-white hover:text-amber-400 transition-colors">
+                <a href={`tel:${BUSINESS_CONFIG.contact.primaryPhone.replace(/\s+/g, '')}`} className="text-xs font-bold text-white hover:text-amber-400 transition-colors">
                   {BUSINESS_CONFIG.contact.primaryPhone}
                 </a>
                 <span className="text-slate-600">/</span>
-                <a href={`tel:${BUSINESS_CONFIG.contact.secondaryPhone.replace(/\s+/g, '')}`} className="text-[11px] font-bold text-white hover:text-amber-400 transition-colors">
+                <a href={`tel:${BUSINESS_CONFIG.contact.secondaryPhone.replace(/\s+/g, '')}`} className="text-xs font-bold text-white hover:text-amber-400 transition-colors">
                   {BUSINESS_CONFIG.contact.secondaryPhone}
                 </a>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                <a href={`mailto:${BUSINESS_CONFIG.contact.email}`} className="text-[11px] font-bold text-slate-200 hover:text-amber-400 transition-colors">
+                <a href={`mailto:${BUSINESS_CONFIG.contact.email}`} className="text-xs font-bold text-slate-200 hover:text-amber-400 transition-colors">
                   {BUSINESS_CONFIG.contact.email}
                 </a>
                 <span className="text-slate-600">•</span>
-                <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                <span className="text-xs text-slate-400 flex items-center gap-1">
                   <Clock className="w-3 h-3 text-amber-400" /> {BUSINESS_CONFIG.contact.workingHours}
                 </span>
               </div>
@@ -171,7 +172,7 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
           <div className="lg:col-span-4 flex flex-col gap-6">
             <div>
               <div className="mb-3">
-                <h4 className="text-white font-extrabold text-sm uppercase tracking-wider flex items-center gap-2">
+                <h4 className="text-white font-semibold text-sm flex items-center gap-2">
                   <span>Quick Links</span>
                 </h4>
                 <div className="h-0.5 w-10 bg-gradient-to-r from-orange-500 to-amber-400 rounded-full mt-1.5" />
@@ -190,7 +191,7 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
 
             <div>
               <div className="mb-3">
-                <h4 className="text-white font-extrabold text-sm uppercase tracking-wider flex items-center gap-2">
+                <h4 className="text-white font-semibold text-sm flex items-center gap-2">
                   <span>Policies & Feedback</span>
                 </h4>
                 <div className="h-0.5 w-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full mt-1.5" />
@@ -225,7 +226,7 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
           {/* COLUMN 3: POPULAR PROGRAMS (3 cols) */}
           <div className="lg:col-span-3 flex flex-col gap-4">
             <div>
-              <h4 className="text-white font-extrabold text-sm uppercase tracking-wider">
+              <h4 className="text-white font-semibold text-sm">
                 Popular Programs
               </h4>
               <div className="h-0.5 w-10 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full mt-1.5 mb-3" />
@@ -275,7 +276,7 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
         {/* POPULAR TRAINING PROGRAMS (F18) */}
         <div className="py-6 border-b border-slate-800/80 flex flex-col gap-3 text-xs">
           <div>
-            <h5 className="font-extrabold text-slate-300 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <h5 className="font-semibold text-slate-300 text-xs mb-2 flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5 text-amber-400" />
               <span>Popular Training Programs & Tracks</span>
             </h5>
@@ -297,12 +298,13 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
             <span>© {new Date().getFullYear()} CodeGurru (UK VK Pvt. Ltd.). All Rights Reserved. Founded by Kishan Pandey.</span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-300 font-semibold text-xs">
-            <span className="hover:text-amber-400 cursor-pointer transition-colors" onClick={onOpenContactModal}>Privacy Policy</span>
-            <span className="text-slate-600">•</span>
-            <span className="hover:text-amber-400 cursor-pointer transition-colors" onClick={onOpenContactModal}>Terms & Conditions</span>
-            <span className="text-slate-600">•</span>
-            <span className="hover:text-amber-400 cursor-pointer transition-colors" onClick={onOpenContactModal}>Contact Us</span>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-slate-300 font-medium text-xs">
+            <Link href="/learn" className="hover:text-amber-400 transition-colors">Courses by city</Link>
+            <Link href="/hi/learn" hrefLang="hi" className="hover:text-amber-400 transition-colors">हिंदी में देखें</Link>
+            <Link href="/privacy" className="hover:text-amber-400 transition-colors">Privacy policy</Link>
+            <Link href="/terms" className="hover:text-amber-400 transition-colors">Terms</Link>
+            <button type="button" className="hover:text-amber-400 transition-colors" onClick={onOpenContactModal}>Contact us</button>
+            <SoundToggle />
           </div>
         </div>
 

@@ -1,14 +1,7 @@
 'use client';
 
+import { Briefcase as WorkIcon, Code2 as CodeIcon, GraduationCap as SchoolIcon, Building2 as BusinessIcon, Zap as FlashOnIcon, Cpu as MemoryIcon, X as CloseIcon, Check as CheckIcon } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import WorkIcon from '@mui/icons-material/Work';
-import CodeIcon from '@mui/icons-material/Code';
-import SchoolIcon from '@mui/icons-material/School';
-import BusinessIcon from '@mui/icons-material/Business';
-import FlashOnIcon from '@mui/icons-material/FlashOn';
-import MemoryIcon from '@mui/icons-material/Memory';
-import CloseIcon from '@mui/icons-material/Close';
-import CheckIcon from '@mui/icons-material/Check';
 
 const ICON_MAP = {
   Briefcase: WorkIcon,
@@ -55,18 +48,18 @@ export default function PlacementSelectorModal({
   return (
     <div
       onClick={handleClose}
-      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-md select-none transition-all duration-300 ${
+      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm select-none transition-all duration-300 ${
         isClosing ? 'animate-backdrop-out' : 'animate-backdrop-in'
       }`}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`w-full max-w-full sm:max-w-md min-w-[280px] max-h-[90vh] sm:max-h-[85vh] bg-white rounded-t-3xl sm:rounded-3xl border border-indigo-200 shadow-2xl flex flex-col transition-all duration-300 transform overflow-hidden ${
+        className={`w-full max-w-full sm:max-w-md min-w-[280px] max-h-[90vh] sm:max-h-[85vh] bg-white rounded-t-2xl sm:rounded-2xl border border-slate-200 shadow-2xl flex flex-col transition-all duration-300 transform overflow-hidden ${
           isClosing ? 'animate-modal-slide-down' : 'animate-modal-slide-up'
         }`}
       >
         {/* Sticky Header Container */}
-        <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md p-3 xxs:p-4 pb-2.5 border-b border-slate-200 shrink-0">
+        <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm p-3 xxs:p-4 pb-2.5 border-b border-slate-200 shrink-0">
           {/* Top Pull Handle Indicator */}
           <div className="pb-1.5 flex justify-center cursor-pointer" onClick={handleClose}>
             <div className="w-10 xxs:w-12 h-1.5 bg-slate-300 hover:bg-slate-400 rounded-full transition-colors" />
@@ -80,7 +73,7 @@ export default function PlacementSelectorModal({
               </div>
               <div>
                 <h3 className="text-xs xxs:text-sm sm:text-base font-bold text-slate-900 font-heading">Placement Options</h3>
-                <p className="text-[10px] xxs:text-xs text-slate-500">Choose drive type & industry track</p>
+                <p className="text-xs xxs:text-xs text-slate-500">Choose drive type & industry track</p>
               </div>
             </div>
             <button
@@ -125,7 +118,7 @@ export default function PlacementSelectorModal({
                       {cat.label}
                     </div>
                     <div className="mt-1 flex items-center gap-2">
-                      <span className="px-2 py-0.5 text-[9px] font-semibold bg-indigo-100 text-indigo-700 rounded-md border border-indigo-200">
+                      <span className="px-2 py-0.5 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded-md border border-indigo-200">
                         {cat.badge}
                       </span>
                     </div>

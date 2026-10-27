@@ -66,7 +66,7 @@ function Markdown({ text }) {
         }
         if (block.type === 'p') return <p key={i}>{inline(block.text)}</p>;
         const Heading = block.type;
-        return <Heading key={i} className="font-black text-slate-900 text-base pt-2">{inline(block.text)}</Heading>;
+        return <Heading key={i} className="font-bold text-slate-900 text-base pt-2">{inline(block.text)}</Heading>;
       })}
     </div>
   );

@@ -1,7 +1,20 @@
 import '../index.css';
+import { Inter, Plus_Jakarta_Sans, Mukta } from 'next/font/google';
 import '../models/apiClient';
 import ClientShell from './ClientShell';
+import ClickSound from '../views/components/ClickSound';
 import { BUSINESS_CONFIG } from '../config/business';
+
+// Self-hosted by next/font: no request to Google at runtime and no layout shift on load
+const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-inter', display: 'swap' });
+const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['500', '600', '700'], variable: '--font-jakarta', display: 'swap' });
+const mukta = Mukta({ subsets: ['devanagari', 'latin'], weight: ['400', '500', '600'], variable: '--font-mukta', display: 'swap' });
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#0f172a',
+};
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://codegurru.in'),
@@ -275,7 +288,7 @@ export default function RootLayout({ children }) {
   };
 
   return (
-    <html lang="en-IN" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="en-IN" className={`scroll-smooth ${inter.variable} ${jakarta.variable} ${mukta.variable}`} suppressHydrationWarning>
       <head>
         <meta
           httpEquiv="Content-Security-Policy"
@@ -286,20 +299,14 @@ export default function RootLayout({ children }) {
         <meta name="geo.placename" content="Ayodhya, Uttar Pradesh" />
         <meta name="geo.position" content="26.7922;82.1998" />
         <meta name="ICBM" content="26.7922, 82.1998" />
-
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap"
-          rel="stylesheet"
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="font-sans bg-slate-50 text-slate-900 antialiased selection:bg-orange-500 selection:text-white" suppressHydrationWarning>
+      <body className="font-sans bg-slate-50 text-slate-900 antialiased selection:bg-orange-200 selection:text-slate-900" suppressHydrationWarning>
         <ClientShell>{children}</ClientShell>
+        <ClickSound />
       </body>
     </html>
   );

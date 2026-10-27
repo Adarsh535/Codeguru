@@ -105,11 +105,11 @@ export default function HomePage({ onOpenContactModal, onOpenEnrollModal }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
       />
       {/* SEMANTIC H1 FOR GOOGLE CRAWLER INDEXING */}
-      <div className="max-w-6xl mx-auto px-4 pt-4">
-        <h1 className="text-base sm:text-xl font-black text-slate-900 tracking-tight">
+      <div className="max-w-6xl mx-auto px-4 pt-3 pb-3 sm:pt-4 sm:pb-4">
+        <h1 className="text-[15px] leading-snug sm:text-xl font-semibold text-slate-900">
           CodeGurru (Code Gurru) – Computer, Coding, Animation &amp; Repair Training Institute in Ayodhya
         </h1>
-        <p className="text-xs sm:text-sm text-slate-600 mt-1">
+        <p className="hidden sm:block text-sm text-slate-600 mt-1">
           Courses for students from Class 6 to Polytechnic, BA, BCA &amp; MCA across Uttar Pradesh and Bihar.{' '}
           <Link href="/learn" className="font-bold text-orange-600 hover:text-orange-700">Find courses in your city →</Link>
         </p>

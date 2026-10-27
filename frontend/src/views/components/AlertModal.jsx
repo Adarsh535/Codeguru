@@ -1,9 +1,7 @@
 'use client';
 
+import { Check as CheckRoundedIcon, AlertCircle as PriorityHighRoundedIcon, Trash2 as DeleteOutlineRoundedIcon } from 'lucide-react';
 import React from 'react';
-import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
-import PriorityHighRoundedIcon from '@mui/icons-material/PriorityHighRounded';
-import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 
 /**
  * AlertModal component replicating SweetAlert style popups
@@ -31,7 +29,7 @@ export default function AlertModal({
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 text-center shadow-2xl border border-slate-100 dark:border-slate-800 animate-pop-scale-in mt-6"
+        className="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-7 text-center shadow-2xl border border-slate-100 dark:border-slate-800 animate-pop-scale-in mt-6"
       >
         {/* TOP FLOATING OVERLAPPING CIRCULAR ICON BADGE */}
         <div 
@@ -49,7 +47,7 @@ export default function AlertModal({
         </div>
 
         {/* TITLE */}
-        <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white font-heading tracking-tight mt-6 mb-2">
+        <h3 className="text-2xl font-semibold text-slate-800 dark:text-white font-heading tracking-tight mt-6 mb-2">
           {title || (isSuccess ? 'Thank You!' : 'Ooops')}
         </h3>
 
@@ -62,10 +60,10 @@ export default function AlertModal({
         <button
           type="button"
           onClick={onClose}
-          className={`w-full font-bold text-sm uppercase tracking-wider py-3.5 px-6 rounded-2xl text-white shadow-md transition-all duration-200 cursor-pointer active:scale-[0.98] ${
+          className={`w-full font-bold text-sm py-3.5 px-6 rounded-2xl text-white shadow-md transition-all duration-200 cursor-pointer active:scale-[0.98] ${
             isSuccess 
-              ? 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 shadow-emerald-500/20' 
-              : 'bg-[#e53935] hover:bg-[#d32f2f] active:bg-[#c62828] shadow-red-500/20'
+              ? 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800' 
+              : 'bg-[#e53935] hover:bg-[#d32f2f] active:bg-[#c62828]'
           }`}
         >
           {buttonText}

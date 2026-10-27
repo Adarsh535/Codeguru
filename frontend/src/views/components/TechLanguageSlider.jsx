@@ -71,10 +71,10 @@ export default function TechLanguageSlider({ onOpenContactModal }) {
                 alt={tech.name}
                 className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 object-contain"
               />
-              <span className="font-extrabold text-[10px] sm:text-xs whitespace-nowrap tracking-tight">
+              <span className="font-semibold text-xs sm:text-xs whitespace-nowrap tracking-tight">
                 {tech.name}
               </span>
-              <span className={`text-[8.5px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tech.tagBg}`}>
+              <span className={`text-[8.5px] sm:text-xs font-bold px-1.5 py-0.5 rounded-full ${tech.tagBg}`}>
                 {tech.tag}
               </span>
             </li>

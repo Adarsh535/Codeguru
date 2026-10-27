@@ -243,7 +243,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
   };
 
   return (
-    <div className="fixed inset-0 z-[100] w-full h-full bg-white flex flex-col overflow-hidden animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] w-full h-full bg-white flex flex-col overflow-hidden animate-modal-slide-up">
       
       {/* FULL PAGE CONTAINER */}
       <div className="relative w-full h-full max-w-2xl mx-auto bg-white flex flex-col overflow-hidden">
@@ -271,10 +271,10 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               />
             </div>
             <div className="flex flex-col">
-              <span className="font-extrabold text-slate-900 text-xs sm:text-sm tracking-tight leading-none flex items-center gap-1">
+              <span className="font-semibold text-slate-900 text-xs sm:text-sm tracking-tight leading-none flex items-center gap-1">
                 CODE <span className="text-orange-500">GURRU</span>
               </span>
-              <span className="text-[9px] font-semibold text-slate-500 leading-none mt-0.5">
+              <span className="text-xs font-semibold text-slate-500 leading-none mt-0.5">
                 Skills Today, Better Tomorrow
               </span>
             </div>
@@ -308,10 +308,10 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               <div className="relative z-10 flex items-center justify-center gap-1.5 sm:gap-2.5 mb-1">
                 {/* M - MongoDB */}
                 <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#10b981] font-black text-sm sm:text-base shadow-xs flex-shrink-0">
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#10b981] font-bold text-sm sm:text-base shadow-xs flex-shrink-0">
                     M
                   </div>
-                  <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5">
+                  <span className="text-xs sm:text-xs font-medium text-slate-400 mt-1.5">
                     MongoDB
                   </span>
                 </div>
@@ -320,10 +320,10 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
 
                 {/* E - Express */}
                 <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-white font-black text-sm sm:text-base shadow-xs flex-shrink-0">
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-xs flex-shrink-0">
                     E
                   </div>
-                  <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5">
+                  <span className="text-xs sm:text-xs font-medium text-slate-400 mt-1.5">
                     Express
                   </span>
                 </div>
@@ -332,10 +332,10 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
 
                 {/* R - React */}
                 <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#f59e0b] font-black text-sm sm:text-base shadow-xs flex-shrink-0">
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#f59e0b] font-bold text-sm sm:text-base shadow-xs flex-shrink-0">
                     R
                   </div>
-                  <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5">
+                  <span className="text-xs sm:text-xs font-medium text-slate-400 mt-1.5">
                     React
                   </span>
                 </div>
@@ -344,10 +344,10 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
 
                 {/* N - Node.js */}
                 <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#84cc16] font-black text-sm sm:text-base shadow-xs flex-shrink-0">
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#84cc16] font-bold text-sm sm:text-base shadow-xs flex-shrink-0">
                     N
                   </div>
-                  <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 mt-1.5">
+                  <span className="text-xs sm:text-xs font-medium text-slate-400 mt-1.5">
                     Node.js
                   </span>
                 </div>
@@ -360,27 +360,27 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
 
             {/* TITLE & SUBTITLE */}
             <div className="relative z-10 text-center space-y-1 max-w-sm mx-auto mt-2">
-              <h1 className="text-base sm:text-lg font-black text-white tracking-tight leading-tight">
+              <h1 className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight">
                 {course.title}
               </h1>
-              <p className="text-[11px] sm:text-xs text-slate-400 font-medium">
+              <p className="text-xs sm:text-xs text-slate-400 font-medium">
                 {course.subtitle || course.description || 'Learn to build real-world web applications from scratch'}
               </p>
 
               {/* HERO PRICE BADGE */}
               {showPrice && (
                 <div className="pt-1.5 flex items-center justify-center">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md border border-white/15 rounded-full shadow-inner">
-                    <span className="text-white font-black text-xs sm:text-sm tracking-tight">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full shadow-inner">
+                    <span className="text-white font-bold text-xs sm:text-sm tracking-tight">
                       {coursePrice}
                     </span>
                     {hasDiscount && courseOriginalPrice && (
-                      <span className="line-through text-slate-400 text-[11px] font-semibold">
+                      <span className="line-through text-slate-400 text-xs font-semibold">
                         {courseOriginalPrice}
                       </span>
                     )}
                     {hasDiscount && discountDisplay && (
-                      <span className="bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 text-[9.5px] font-black px-1.5 py-0.2 rounded-full">
+                      <span className="bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 text-[9.5px] font-bold px-1.5 py-0.2 rounded-full">
                         {discountDisplay}
                       </span>
                     )}
@@ -392,7 +392,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
             {/* WATCH INTRO VIDEO BUTTON */}
             <button
               onClick={() => setShowVideoModal(true)}
-              className="relative z-10 w-full bg-[#f59e0b] hover:bg-[#e08e00] text-slate-950 font-black text-xs sm:text-sm py-2.5 px-4 rounded-full flex items-center justify-center gap-2 shadow-md shadow-amber-500/20 active:scale-[0.99] transition-all cursor-pointer mt-3"
+              className="relative z-10 w-full bg-[#f59e0b] hover:bg-[#e08e00] text-slate-950 font-bold text-xs sm:text-sm py-2.5 px-4 rounded-full flex items-center justify-center gap-2 shadow-md active:scale-[0.99] transition-all cursor-pointer mt-3"
             >
               <Play className="w-3.5 h-3.5 fill-slate-950 text-slate-950 translate-x-0.5" />
               <span>Watch Intro Video</span>
@@ -422,15 +422,15 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   />
                 </svg>
-                <span className="absolute font-black text-slate-900 text-xs leading-none">
+                <span className="absolute font-bold text-slate-900 text-xs leading-none">
                   {(courseDuration.match(/\d+/) || ['6'])[0]}
                 </span>
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="font-extrabold text-slate-900 text-xs sm:text-sm leading-tight truncate">
+                <span className="font-semibold text-slate-900 text-xs sm:text-sm leading-tight truncate">
                   {courseDuration}
                 </span>
-                <span className="text-[10px] font-medium text-slate-400 leading-tight">
+                <span className="text-xs font-medium text-slate-400 leading-tight">
                   Duration
                 </span>
               </div>
@@ -460,13 +460,13 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
 
           {/* WHAT YOU WILL LEARN */}
           <div className="bg-white rounded-xl border border-slate-200/80 p-2.5 shadow-2xs">
-            <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-1.5">
+            <h3 className="font-semibold text-slate-900 text-xs sm:text-sm mb-1.5">
               What You Will Learn
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
               {getWhatYouWillLearn().map((item, idx) => (
                 <div key={idx} className="flex items-center gap-1.5 text-[10.5px] font-semibold text-slate-700">
-                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8.5px] font-black flex-shrink-0 shadow-2xs">
+                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8.5px] font-bold flex-shrink-0 shadow-2xs">
                     ✓
                   </span>
                   <span className="truncate">{item}</span>
@@ -477,7 +477,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
 
           {/* BATCH DETAILS */}
           <div className="bg-white rounded-xl border border-slate-200/80 p-2.5 sm:p-3 shadow-2xs">
-            <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm mb-2">
+            <h3 className="font-semibold text-slate-900 text-xs sm:text-sm mb-2">
               Batch Details
             </h3>
             <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-xs">
@@ -486,8 +486,8 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
                 <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
                   <Calendar className="w-3.5 h-3.5 text-white stroke-[2.2]" />
                 </div>
-                <span className="text-[10.5px] sm:text-[11px] leading-snug">
-                  <strong className="font-extrabold text-slate-900">Duration:</strong>{' '}
+                <span className="text-[10.5px] sm:text-xs leading-snug">
+                  <strong className="font-semibold text-slate-900">Duration:</strong>{' '}
                   <span className="text-slate-600 font-normal">{courseDuration}</span>
                 </span>
               </div>
@@ -497,8 +497,8 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
                 <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
                   <Video className="w-3.5 h-3.5 text-white stroke-[2.2]" />
                 </div>
-                <span className="text-[10.5px] sm:text-[11px] leading-snug">
-                  <strong className="font-extrabold text-slate-900">Classes:</strong>{' '}
+                <span className="text-[10.5px] sm:text-xs leading-snug">
+                  <strong className="font-semibold text-slate-900">Classes:</strong>{' '}
                   <span className="text-slate-600 font-normal">{course.batchClasses || 'Live + Recorded'}</span>
                 </span>
               </div>
@@ -508,8 +508,8 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
                 <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
                   <Clock className="w-3.5 h-3.5 text-white stroke-[2.2]" />
                 </div>
-                <span className="text-[10.5px] sm:text-[11px] leading-snug">
-                  <strong className="font-extrabold text-slate-900">Batch:</strong>{' '}
+                <span className="text-[10.5px] sm:text-xs leading-snug">
+                  <strong className="font-semibold text-slate-900">Batch:</strong>{' '}
                   <span className="text-slate-600 font-normal">{course.batchTimings || 'Morning/Evening'}</span>
                 </span>
               </div>
@@ -519,8 +519,8 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
                 <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
                   <MapPin className="w-3.5 h-3.5 text-white stroke-[2.2]" />
                 </div>
-                <span className="text-[10.5px] sm:text-[11px] leading-snug">
-                  <strong className="font-extrabold text-slate-900">Mode:</strong>{' '}
+                <span className="text-[10.5px] sm:text-xs leading-snug">
+                  <strong className="font-semibold text-slate-900">Mode:</strong>{' '}
                   <span className="text-slate-600 font-normal">{course.batchMode || courseMode}</span>
                 </span>
               </div>
@@ -530,8 +530,8 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
                 <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-2xs overflow-hidden">
                   <ShieldCheck className="w-3.5 h-3.5 text-white stroke-[2.2]" />
                 </div>
-                <span className="text-[10.5px] sm:text-[11px] leading-snug">
-                  <strong className="font-extrabold text-slate-900">Certificate:</strong>{' '}
+                <span className="text-[10.5px] sm:text-xs leading-snug">
+                  <strong className="font-semibold text-slate-900">Certificate:</strong>{' '}
                   <span className="text-slate-600 font-normal">{course.certificateProvided || 'Provided'}</span>
                 </span>
               </div>
@@ -539,15 +539,15 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
           </div>
 
           {activeTab === 'reviews' && (
-            <div className="space-y-2 animate-in fade-in duration-200">
+            <div className="space-y-2 animate-fadeIn">
               <div className="bg-blue-50 border border-blue-100 rounded-lg p-2.5 flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-black text-slate-900 flex items-center gap-1">
+                  <div className="text-sm font-bold text-slate-900 flex items-center gap-1">
                     4.9 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                   </div>
-                  <div className="text-[10px] font-semibold text-slate-500">Based on 450+ Student Ratings</div>
+                  <div className="text-xs font-semibold text-slate-500">Based on 450+ Student Ratings</div>
                 </div>
-                <div className="text-[10px] font-bold text-blue-600 bg-white px-2.5 py-1 rounded border border-blue-200">
+                <div className="text-xs font-bold text-blue-600 bg-white px-2.5 py-1 rounded border border-blue-200">
                   100% Verified
                 </div>
               </div>
@@ -555,7 +555,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               {getReviewsList().map((rev, idx) => (
                 <div key={idx} className="bg-white rounded-lg border border-slate-200/80 p-2.5 shadow-2xs space-y-0.5">
                   <div className="flex items-center justify-between">
-                    <div className="font-extrabold text-slate-900 text-[11px]">{rev.name}</div>
+                    <div className="font-semibold text-slate-900 text-xs">{rev.name}</div>
                     <div className="flex text-amber-400">
                       {[...Array(rev.rating)].map((_, i) => (
                         <Star key={i} className="w-3 h-3 fill-amber-400" />
@@ -575,7 +575,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
           {showPrice ? (
             <div className="flex flex-col min-w-0">
               <div className="flex items-baseline gap-1.5 flex-wrap">
-                <span className="text-base sm:text-lg font-black text-slate-900 leading-tight">
+                <span className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
                   {coursePrice}
                 </span>
                 {hasDiscount && courseOriginalPrice && (
@@ -586,11 +586,11 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               </div>
               <div className="flex items-center gap-1 mt-0.5">
                 {hasDiscount && discountDisplay ? (
-                  <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/60 leading-none">
+                  <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/60 leading-none">
                     {discountDisplay}
                   </span>
                 ) : (
-                  <span className="text-[10px] font-semibold text-slate-500 leading-none">
+                  <span className="text-xs font-semibold text-slate-500 leading-none">
                     Course Fee
                   </span>
                 )}
@@ -598,8 +598,8 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
             </div>
           ) : (
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-extrabold text-slate-900 leading-tight">Admissions Open</span>
-              <span className="text-[10px] font-medium text-slate-500 leading-tight">Limited seats available</span>
+              <span className="text-xs font-semibold text-slate-900 leading-tight">Admissions Open</span>
+              <span className="text-xs font-medium text-slate-500 leading-tight">Limited seats available</span>
             </div>
           )}
 
@@ -609,7 +609,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               onClose();
               if (onEnroll) onEnroll(course);
             }}
-            className="w-auto min-w-[130px] sm:min-w-[160px] bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-5 rounded-full text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/25 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap ml-auto"
+            className="w-auto min-w-[130px] sm:min-w-[160px] bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-5 rounded-full text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 shadow-md transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap ml-auto"
           >
             Enroll Now <ChevronRight className="w-4 h-4 stroke-[3]" />
           </button>

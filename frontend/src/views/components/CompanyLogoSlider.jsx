@@ -66,7 +66,7 @@ export default function CompanyLogoSlider({ onOpenContactModal }) {
                 onError={(e) => { e.target.style.display = 'none'; }}
                 className="w-3.5 h-3.5 sm:w-4 sm:h-4 object-contain opacity-90"
               />
-              <span className="font-extrabold text-[10px] sm:text-xs whitespace-nowrap tracking-tight">
+              <span className="font-semibold text-xs sm:text-xs whitespace-nowrap tracking-tight">
                 {comp.name}
               </span>
             </li>

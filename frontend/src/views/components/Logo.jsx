@@ -7,7 +7,7 @@ export default function Logo({ className = "h-8" }) {
         <img
           src="/logo-icon.png"
           alt="CodeGurru Logo"
-          className={`${className} object-contain rounded-lg filter drop-shadow-xs`}
+          className={`${className} object-contain rounded-lg filter-xs`}
         />
       </div>
     </div>

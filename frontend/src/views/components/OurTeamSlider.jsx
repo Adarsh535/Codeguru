@@ -106,7 +106,7 @@ export default function OurTeamSlider({ onOpenContactModal }) {
 
   return (
     <section className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-[#f8fafc] overflow-hidden select-none" suppressHydrationWarning>
-      <div className="max-w-7xl mx-auto border border-slate-200 rounded-[18px] sm:rounded-[24px] bg-white pt-2.5 pb-3 sm:pt-3.5 sm:pb-4 shadow-xs relative z-10 w-full overflow-hidden" suppressHydrationWarning>
+      <div className="max-w-7xl mx-auto border border-slate-200 rounded-[18px] sm:rounded-2xl bg-white pt-2.5 pb-3 sm:pt-3.5 sm:pb-4 shadow-xs relative z-10 w-full overflow-hidden" suppressHydrationWarning>
         
         {/* HEADER */}
         <div className="flex justify-between items-center px-4 sm:px-6 mb-2 sm:mb-3" suppressHydrationWarning>
@@ -117,7 +117,7 @@ export default function OurTeamSlider({ onOpenContactModal }) {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3" suppressHydrationWarning>
-            <span className="text-slate-400 font-bold text-[9px] sm:text-[10.5px] uppercase tracking-widest hidden sm:block">
+            <span className="text-slate-400 font-bold text-xs sm:text-[10.5px] hidden sm:block">
               #TEAMCODEGURRU
             </span>
           </div>
@@ -144,7 +144,7 @@ export default function OurTeamSlider({ onOpenContactModal }) {
                     contactElem.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="w-[160px] xs:w-[175px] sm:w-[190px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[16px] shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col mx-1.5 relative overflow-hidden group cursor-pointer hover:shadow-md hover:border-blue-300 transition-all select-none"
+                className="w-[160px] xs:w-[175px] sm:w-[190px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[16px] shadow-lg flex flex-col mx-1.5 relative overflow-hidden group cursor-pointer hover:shadow-md hover:border-blue-300 transition-all select-none"
               >
                 {/* TOP PHOTO AREA */}
                 <div 
@@ -162,17 +162,17 @@ export default function OurTeamSlider({ onOpenContactModal }) {
                 {/* BOTTOM WHITE CONTENT CONTAINER */}
                 <div className="p-2.5 sm:p-3 bg-white flex flex-col flex-1 justify-between border-t border-slate-100">
                   <div className="flex flex-col">
-                    <h3 className="font-extrabold text-slate-900 text-[12px] sm:text-[13px] tracking-tight leading-snug mb-0.5 truncate">
+                    <h3 className="font-semibold text-slate-900 text-xs sm:text-[13px] tracking-tight leading-snug mb-0.5 truncate">
                       {member.name}
                     </h3>
-                    <p className="text-slate-500 text-[9.5px] sm:text-[10px] leading-snug font-medium line-clamp-2 whitespace-pre-line">
+                    <p className="text-slate-500 text-[9.5px] sm:text-xs leading-snug font-medium line-clamp-2 whitespace-pre-line">
                       {member.bio || member.specialization || ''}
                     </p>
                   </div>
 
                   {/* FOOTER ROLE ROW */}
                   <div className="flex items-center pt-2 mt-2 border-t border-slate-100 w-full">
-                    <span className="text-[9.5px] sm:text-[10px] font-bold text-slate-700 truncate">
+                    <span className="text-[9.5px] sm:text-xs font-bold text-slate-700 truncate">
                       {member.role}
                     </span>
                   </div>

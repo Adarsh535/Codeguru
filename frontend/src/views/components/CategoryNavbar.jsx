@@ -25,16 +25,16 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       if (typeof window === 'undefined') return;
       const catalogElem = document.getElementById('course-catalog-section');
       if (catalogElem) {
-        const isMobile = window.innerWidth < 640;
-        const headerHeight = isMobile ? 54 : 76;
-        let absTop = catalogElem.offsetTop;
-        let el = catalogElem.offsetParent;
-        while (el) {
-          absTop += el.offsetTop;
-          el = el.offsetParent;
-        }
-        const targetY = Math.max(0, absTop - headerHeight);
-        window.scrollTo({ top: targetY, behavior: 'smooth' });
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.getBoundingClientRect().height : (window.innerWidth < 640 ? 56 : 80);
+        const rect = catalogElem.getBoundingClientRect();
+        const currentScroll = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+        const targetY = Math.max(0, Math.round(currentScroll + rect.top - headerHeight + 1));
+        
+        window.scrollTo({
+          top: targetY,
+          behavior: 'smooth'
+        });
       }
     }, delay);
   };
@@ -61,6 +61,8 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       const urlCat = params.get('category');
       if (urlCat) {
         setActiveCategory(urlCat);
+        scrollToCatalogSection(150);
+        scrollToCatalogSection(400);
       }
     }
 
@@ -143,8 +145,9 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
         setActiveSubCategory(subList[0].id);
       }
       setActiveFilter('All');
-      scrollToCatalogSection(40);
+      scrollToCatalogSection(30);
       scrollToCatalogSection(120);
+      scrollToCatalogSection(280);
     }
   };
 
@@ -786,10 +789,10 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
               >
                 {/* SMOOTH ROUNDED CARD CONTAINER */}
                 <div
-                  className={`relative flex items-center justify-center p-3 sm:p-4 md:p-5 rounded-[24px] sm:rounded-[32px] md:rounded-[36px] transition-all duration-300 w-full max-w-[120px] sm:max-w-[155px] md:max-w-[180px] aspect-square ${
+                  className={`relative flex items-center justify-center p-3 sm:p-4 md:p-5 rounded-2xl sm:rounded-2xl md:rounded-2xl transition-all duration-300 w-full max-w-[120px] sm:max-w-[155px] md:max-w-[180px] aspect-square ${
                     isCatActive && !isHome
-                      ? 'border-2 border-blue-600 shadow-xl shadow-blue-500/15 ring-4 ring-blue-100/70 bg-white scale-[1.03]'
-                      : 'border border-blue-100/90 shadow-[0_6px_24px_-6px_rgba(0,0,0,0.06)] hover:border-blue-400 hover:shadow-lg hover:-translate-y-1 bg-white'
+                      ? 'border-2 border-blue-600 shadow-xl ring-4 ring-blue-100/70 bg-white scale-[1.03]'
+                      : 'border border-blue-100/90 shadow-lg hover:border-blue-400 hover:shadow-lg hover:-translate-y-1 bg-white'
                   }`}
                 >
                   <img
@@ -805,7 +808,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
                 {/* CATEGORY NAME TEXT BELOW CARD */}
                 <span
-                  className={`text-[12.5px] sm:text-[14.5px] md:text-[16px] font-black text-center leading-tight tracking-tight px-0.5 max-w-[160px] transition-colors ${
+                  className={`text-[12.5px] sm:text-[14.5px] md:text-[16px] font-bold text-center leading-tight tracking-tight px-0.5 max-w-[160px] transition-colors ${
                     isCatActive && !isHome ? 'text-blue-600' : 'text-[#0f172a] group-hover:text-blue-600'
                   }`}
                 >
@@ -818,10 +821,11 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
         {/* ON COURSES PAGE ONLY: SHOW FULL CATALOG BELOW CATEGORY CARDS */}
         {!isHome && (
-          <div id="course-catalog-section" className="pt-2 min-h-[120vh] pb-[60vh]">
-            {/* DOMAIN SUB-CATEGORY TABS FOR ALL CATEGORIES - STICKY SEGMENTED CONTROL */}
-            {SUB_CATEGORIES[activeCategory] && SUB_CATEGORIES[activeCategory].length > 0 && (
-              <div className="sticky top-[52px] sm:top-[74px] z-30 bg-slate-50/95 backdrop-blur-md py-1.5 sm:py-2 border-t border-b border-slate-200/80 shadow-xs my-1 sm:my-2 -mx-3 sm:mx-0 px-3 sm:px-0">
+          <div id="course-catalog-section" className="scroll-mt-[56px] sm:scroll-mt-[80px] pt-1 pb-1">
+            {/* FROZEN FILTER HEADER: SUB-CATEGORIES + TRAINING DURATION FROZEN UNDER NAVBAR */}
+            <div className="sticky top-[56px] sm:top-[80px] z-30 bg-slate-50/98 backdrop-blur-sm pt-1 sm:pt-2 pb-2 border-b border-slate-200/80 shadow-xs mb-3 -mx-3 sm:mx-0 px-3 sm:px-0 flex flex-col gap-1.5">
+              {/* DOMAIN SUB-CATEGORY TABS FOR ALL CATEGORIES */}
+              {SUB_CATEGORIES[activeCategory] && SUB_CATEGORIES[activeCategory].length > 0 && (
                 <div className="w-full max-w-xl mx-auto bg-slate-200/80 p-1 rounded-xl sm:rounded-2xl flex items-center justify-between gap-1 shadow-inner border border-slate-300/50 overflow-x-auto scrollbar-none [ms-overflow-style:none] [scrollbar-width:none]">
                   {SUB_CATEGORIES[activeCategory].map((sub, sIdx) => {
                     const isSubActive = activeSubCategory === sub.id;
@@ -830,10 +834,10 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                         suppressHydrationWarning
                         key={`${sub.id}-${sIdx}`}
                         onClick={() => handleSubCategoryClick(sub.id)}
-                        className={`flex-1 min-w-max text-center whitespace-nowrap px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-extrabold text-[11px] min-[360px]:text-[12px] sm:text-[13.5px] transition-all duration-200 cursor-pointer ${
+                        className={`flex-1 min-w-max text-center whitespace-nowrap px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-semibold text-xs min-[360px]:text-xs sm:text-[13.5px] transition-all duration-200 cursor-pointer ${
                           isSubActive
-                            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 scale-[1.02]'
-                            : 'text-slate-700 hover:text-slate-900 hover:bg-white/70 font-extrabold'
+                            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md scale-[1.02]'
+                            : 'text-slate-700 hover:text-slate-900 hover:bg-white/70 font-semibold'
                         }`}
                       >
                         {sub.label}
@@ -841,23 +845,21 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                     );
                   })}
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* TRAINING DURATION FILTER CONTAINER - STICKY BELOW SUB-CATEGORY TABS */}
-            <div className="sticky top-[102px] sm:top-[126px] z-20 bg-slate-50/95 backdrop-blur-md py-1.5 border-b border-slate-200/80 shadow-2xs mb-3">
+              {/* TRAINING DURATION FILTER CONTAINER */}
               <div className="w-full max-w-7xl mx-auto px-1 sm:px-4">
-                <div className="bg-slate-100/90 p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 shadow-inner flex flex-col gap-2">
+                <div className="bg-slate-100/90 p-1.5 sm:p-2 rounded-2xl border border-slate-200/90 shadow-inner flex flex-col gap-1.5">
                   <div className="flex items-center justify-between px-1 pt-0.5">
-                    <h4 className="text-[11px] sm:text-xs font-black text-slate-800 uppercase tracking-wider">
+                    <h4 className="text-xs sm:text-xs font-bold text-slate-800">
                       Training Duration
                     </h4>
                     <button
                       suppressHydrationWarning
                       onClick={() => handleFilterClick('All')}
-                      className={`px-3 py-1 rounded-xl text-[10.5px] sm:text-[12px] font-extrabold tracking-tight transition-all duration-200 cursor-pointer ${
+                      className={`px-3 py-0.5 sm:py-1 rounded-xl text-[10.5px] sm:text-xs font-semibold tracking-tight transition-all duration-200 cursor-pointer ${
                         activeFilter === 'All'
-                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 scale-[1.02]'
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md scale-[1.02]'
                           : 'bg-white text-slate-700 border border-slate-200/90 shadow-2xs hover:bg-slate-50 hover:border-blue-300'
                       }`}
                     >
@@ -873,9 +875,9 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                             suppressHydrationWarning
                             key={filter.value}
                             onClick={() => handleFilterClick(filter.value)}
-                            className={`flex-1 min-w-[70px] sm:min-w-0 text-center whitespace-nowrap px-1.5 sm:px-4 py-1.5 sm:py-2.5 rounded-xl font-extrabold text-[10.5px] min-[360px]:text-[11.5px] sm:text-[13.5px] tracking-tight transition-all duration-200 cursor-pointer ${
+                            className={`flex-1 min-w-[70px] sm:min-w-0 text-center whitespace-nowrap px-1.5 sm:px-4 py-1 sm:py-2 rounded-xl font-semibold text-[10.5px] min-[360px]:text-[11.5px] sm:text-[13.5px] tracking-tight transition-all duration-200 cursor-pointer ${
                               isFilterActive
-                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 scale-[1.02]'
+                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md scale-[1.02]'
                                 : 'bg-white text-slate-700 border border-slate-200/90 shadow-2xs hover:bg-slate-50 hover:border-blue-300'
                             }`}
                           >
@@ -885,7 +887,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                       })}
                     </div>
                   ) : (
-                    <div className="text-center py-1 text-[11px] sm:text-xs font-bold text-slate-500">
+                    <div className="text-center py-1 text-xs sm:text-xs font-bold text-slate-500">
                       All courses for this category are shown
                     </div>
                   )}
@@ -893,8 +895,8 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
               </div>
             </div>
 
-            {/* COURSE CARDS GRID - SCROLLABLE CONTAINER FOR ALL CATEGORIES */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 pb-10 max-h-[68vh] sm:max-h-[72vh] overflow-y-auto pr-1.5 pt-4 sm:pt-5 scrollbar-thin">
+            {/* COURSE CARDS GRID - NATURAL SCROLLING FIT WITHOUT BLANK VOID */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 pb-2 sm:pb-4 pt-2 sm:pt-4">
               {displayedCourses.length === 0 && (
                 <div className="col-span-1 lg:col-span-2 text-center py-12 px-4 bg-white/80 rounded-2xl border border-dashed border-slate-200 shadow-2xs">
                   <p className="text-slate-600 font-bold text-sm">No courses found matching this selection.</p>
@@ -970,12 +972,12 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                 return (
                   <div
                     key={course.id}
-                    className="group relative flex flex-col bg-white border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] rounded-[20px] sm:rounded-[24px] p-3.5 min-[400px]:p-4 sm:p-6 transition-all duration-300 hover:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.12)] hover:border-blue-200 justify-between gap-3 sm:gap-4"
+                    className="group relative flex flex-col bg-white border border-slate-200/90 shadow-lg rounded-[20px] sm:rounded-2xl p-3.5 min-[400px]:p-4 sm:p-6 transition-all duration-300 hover:shadow-lg hover:border-blue-200 justify-between gap-3 sm:gap-4"
                   >
                     {/* ATTACHED BESTSELLER / TOP BADGE */}
                     {course.tag && (
                       <div className="absolute top-0 -translate-y-1/2 left-4 sm:left-6 z-10 pointer-events-none">
-                        <div className="px-2.5 sm:px-3 py-0.5 bg-[#fde047] border border-[#facc15] text-[#713f12] font-black text-[9.5px] sm:text-[10.5px] rounded-lg shadow-2xs tracking-wider uppercase">
+                        <div className="px-2.5 sm:px-3 py-0.5 bg-[#fde047] border border-[#facc15] text-[#713f12] font-bold text-[9.5px] sm:text-[10.5px] rounded-lg shadow-2xs">
                           {course.tag}
                         </div>
                       </div>
@@ -996,10 +998,10 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                       ) : isMern ? (
                         <div className="w-16 h-16 min-[400px]:w-20 min-[400px]:h-20 sm:w-26 sm:h-26 bg-slate-50/90 border border-slate-200/80 rounded-xl sm:rounded-2xl p-1.5 min-[400px]:p-2 sm:p-2.5 flex-shrink-0 shadow-2xs mt-[8px]">
                           <div className="grid grid-cols-2 gap-1 min-[400px]:gap-1.5 w-full h-full">
-                            <div className="bg-[#10b981] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">M</div>
-                            <div className="bg-[#1e293b] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">E</div>
-                            <div className="bg-[#06b6d4] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">R</div>
-                            <div className="bg-[#84cc16] text-white font-black rounded flex items-center justify-center text-[10px] min-[400px]:text-xs sm:text-sm">N</div>
+                            <div className="bg-[#10b981] text-white font-bold rounded flex items-center justify-center text-xs min-[400px]:text-xs sm:text-sm">M</div>
+                            <div className="bg-[#1e293b] text-white font-bold rounded flex items-center justify-center text-xs min-[400px]:text-xs sm:text-sm">E</div>
+                            <div className="bg-[#06b6d4] text-white font-bold rounded flex items-center justify-center text-xs min-[400px]:text-xs sm:text-sm">R</div>
+                            <div className="bg-[#84cc16] text-white font-bold rounded flex items-center justify-center text-xs min-[400px]:text-xs sm:text-sm">N</div>
                           </div>
                         </div>
                       ) : (
@@ -1015,7 +1017,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
                       {/* TITLE & 2x2 PILLS GRID */}
                       <div className="flex flex-col min-w-0 flex-1">
-                        <h3 className="font-extrabold text-slate-900 text-[14px] min-[400px]:text-[16px] sm:text-[19px] leading-tight mb-2 sm:mb-3 line-clamp-2">
+                        <h3 className="font-semibold text-slate-900 text-[14px] min-[400px]:text-[16px] sm:text-[19px] leading-tight mb-2 sm:mb-3 line-clamp-2">
                           {course.title}
                         </h3>
 
@@ -1024,9 +1026,9 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                           {gridPills.map((pill, idx) => (
                             <div
                               key={idx}
-                              className="bg-[#f0f6ff] border border-[#dbeafe] text-slate-600 px-1.5 min-[400px]:px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[9.5px] min-[400px]:text-[10.5px] sm:text-[12px] font-semibold flex items-center gap-1 sm:gap-1.5 whitespace-nowrap truncate"
+                              className="bg-[#f0f6ff] border border-[#dbeafe] text-slate-600 px-1.5 min-[400px]:px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[9.5px] min-[400px]:text-[10.5px] sm:text-xs font-semibold flex items-center gap-1 sm:gap-1.5 whitespace-nowrap truncate"
                             >
-                              <span className="font-black text-slate-900">{pill.val}</span>
+                              <span className="font-bold text-slate-900">{pill.val}</span>
                               {pill.label && <span className="truncate">{pill.label}</span>}
                             </div>
                           ))}
@@ -1042,8 +1044,8 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                       {/* CHECKMARK BULLETS */}
                       <div className="flex flex-col gap-1.5 sm:gap-2 min-w-0 flex-1">
                         {checkmarkFeatures.map((feat, idx) => (
-                          <div key={idx} className="flex items-center gap-1.5 sm:gap-2 text-[11px] min-[400px]:text-[12px] sm:text-[13px] font-semibold text-slate-700">
-                            <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded bg-blue-50 border border-blue-200/80 text-blue-600 font-extrabold text-[9px] sm:text-[10px] flex items-center justify-center flex-shrink-0">
+                          <div key={idx} className="flex items-center gap-1.5 sm:gap-2 text-xs min-[400px]:text-xs sm:text-[13px] font-semibold text-slate-700">
+                            <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded bg-blue-50 border border-blue-200/80 text-blue-600 font-semibold text-xs sm:text-xs flex items-center justify-center flex-shrink-0">
                               ✓
                             </span>
                             <span className="truncate">{feat}</span>
@@ -1055,7 +1057,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
                       <button
                         suppressHydrationWarning
                         onClick={() => setSelectedCourseForDetails(course)}
-                        className="w-auto bg-[#2463eb] hover:bg-blue-700 text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl text-[11.5px] sm:text-xs md:text-sm font-extrabold flex items-center justify-center gap-1 sm:gap-1.5 shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap flex-shrink-0 self-end"
+                        className="w-auto bg-[#2463eb] hover:bg-blue-700 text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl text-[11.5px] sm:text-xs md:text-sm font-semibold flex items-center justify-center gap-1 sm:gap-1.5 shadow-md transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap flex-shrink-0 self-end"
                       >
                         View Details <ArrowRight className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
                       </button>

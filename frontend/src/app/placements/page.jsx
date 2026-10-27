@@ -91,11 +91,11 @@ export default function PlacementsPage({ onOpenContactModal }) {
       {/* SEO HERO BANNER FOR PLACEMENTS PAGE */}
       <div className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white px-4 pt-10 pb-12 sm:pt-12 sm:pb-14 text-center select-none">
         <div className="max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400/15 border border-emerald-400/30 text-emerald-300 text-[10px] sm:text-xs font-black uppercase tracking-wider mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400/15 border border-emerald-400/30 text-emerald-300 text-xs sm:text-xs font-bold mb-3">
             <Award className="w-3.5 h-3.5" />
             <span>PROVEN TRACK RECORD &amp; CAREER SUCCESS</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black font-heading tracking-tight mb-3">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold font-heading tracking-tight mb-3">
             Student Placements &amp; Hiring Network
           </h1>
           <p className="text-xs sm:text-base text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed mb-6">
@@ -105,16 +105,16 @@ export default function PlacementsPage({ onOpenContactModal }) {
           {/* QUICK STATS */}
           <div className="grid grid-cols-3 gap-2 sm:gap-4 max-w-lg mx-auto">
             <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
-              <div className="text-lg sm:text-2xl font-black text-amber-400">18.5 LPA</div>
-              <div className="text-[10px] sm:text-xs text-slate-400 font-semibold">Highest CTC</div>
+              <div className="text-lg sm:text-2xl font-bold text-amber-400">18.5 LPA</div>
+              <div className="text-xs sm:text-xs text-slate-400 font-semibold">Highest CTC</div>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
-              <div className="text-lg sm:text-2xl font-black text-emerald-400">200+</div>
-              <div className="text-[10px] sm:text-xs text-slate-400 font-semibold">Students Placed</div>
+              <div className="text-lg sm:text-2xl font-bold text-emerald-400">200+</div>
+              <div className="text-xs sm:text-xs text-slate-400 font-semibold">Students Placed</div>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
-              <div className="text-lg sm:text-2xl font-black text-cyan-400">50+</div>
-              <div className="text-[10px] sm:text-xs text-slate-400 font-semibold">Hiring Partners</div>
+              <div className="text-lg sm:text-2xl font-bold text-cyan-400">50+</div>
+              <div className="text-xs sm:text-xs text-slate-400 font-semibold">Hiring Partners</div>
             </div>
           </div>
         </div>

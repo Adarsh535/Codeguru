@@ -1,11 +1,7 @@
 'use client';
 
+import { MapPin as LocationOnIcon, Search as SearchIcon, LocateFixed as MyLocationIcon, X as CloseIcon, Check as CheckIcon } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import SearchIcon from '@mui/icons-material/Search';
-import MyLocationIcon from '@mui/icons-material/MyLocation';
-import CloseIcon from '@mui/icons-material/Close';
-import CheckIcon from '@mui/icons-material/Check';
 import { sanitizeLocation, DEFAULT_AYODHYA_LOCATION } from '../../utils/locationSanitizer';
 import { detectStudentRealLocation } from '../../utils/geoLocator';
 
@@ -67,13 +63,13 @@ export default function LocationModal({ isOpen, onClose, selectedLocation, onSel
   return (
     <div
       onClick={handleClose}
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md select-none transition-all duration-300 ${
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm select-none transition-all duration-300 ${
         isClosing ? 'animate-backdrop-out' : 'animate-backdrop-in'
       }`}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`w-full max-w-sm bg-white rounded-3xl border border-cyan-200 shadow-2xl flex flex-col p-5 transition-all duration-300 transform overflow-hidden ${
+        className={`w-full max-w-sm bg-white rounded-2xl border border-slate-200 shadow-2xl flex flex-col p-5 transition-all duration-300 transform overflow-hidden ${
           isClosing ? 'animate-modal-slide-down' : 'animate-modal-slide-up'
         }`}
       >
@@ -84,7 +80,7 @@ export default function LocationModal({ isOpen, onClose, selectedLocation, onSel
             </div>
             <div>
               <h3 className="text-sm sm:text-base font-bold text-slate-900 font-heading">Auto Location Detection</h3>
-              <p className="text-[11px] text-slate-500">Detecting your current live city</p>
+              <p className="text-xs text-slate-500">Detecting your current live city</p>
             </div>
           </div>
           <button
@@ -102,7 +98,7 @@ export default function LocationModal({ isOpen, onClose, selectedLocation, onSel
           </div>
 
           <div className="flex flex-col gap-1">
-            <h4 className="text-sm font-extrabold text-slate-800">
+            <h4 className="text-sm font-semibold text-slate-800">
               {isLocating ? 'Requesting GPS Location...' : (selectedLocation ? `Current City: ${selectedLocation.name}` : 'Auto-Detecting Location')}
             </h4>
             <p className="text-xs text-slate-500 max-w-xs">

@@ -6,6 +6,15 @@ export default {
   ],
   theme: {
     extend: {
+      // Mukta sits in every stack so Hindi (Devanagari) text gets a matching font
+      fontFamily: {
+        sans: ['var(--font-inter)', 'var(--font-mukta)', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        heading: ['var(--font-jakarta)', 'var(--font-mukta)', 'system-ui', 'sans-serif'],
+      },
+      transitionTimingFunction: {
+        'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+        'in-quart': 'cubic-bezier(0.5, 0, 0.75, 0)',
+      },
       screens: {
         'xxs': '280px',
         'xs': '360px',

@@ -16,9 +16,9 @@ export const FALLBACK_BANNERS = [
     subtitle: 'CodeGurru Alumni placed at Top MNCs & Unicorn Startups with packages up to 18.5 LPA',
     imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1400&q=80',
     badge: 'TOP PLACEMENTS 2026',
-    badgeColor: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-400 text-slate-950 font-black border-amber-300 shadow-md',
+    badgeColor: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-400 text-slate-950 font-bold border-amber-300 shadow-md',
     ctaText: 'Explore Placement Drives',
-    ctaColor: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white hover:from-emerald-400 hover:to-cyan-400 shadow-emerald-900/30'
+    ctaColor: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white hover:from-emerald-400 hover:to-cyan-400'
   }
 ];
 
@@ -46,9 +46,9 @@ export const bannerModel = {
           videoUrl: item.type === 'video' ? item.mediaUrl : null,
           poster: item.poster || item.thumbnailUrl || (item.type === 'video' ? (item.imageUrl || '') : item.mediaUrl),
           badge: item.badge || 'TOP PLACEMENT DRIVES 2026',
-          badgeColor: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-400 text-slate-950 font-black border-amber-300 shadow-md',
+          badgeColor: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-400 text-slate-950 font-bold border-amber-300 shadow-md',
           ctaText: item.ctaText || 'Explore Placement Drives',
-          ctaColor: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white hover:from-emerald-400 hover:to-cyan-400 shadow-emerald-900/30'
+          ctaColor: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white hover:from-emerald-400 hover:to-cyan-400'
         }));
       }
     } catch (err) {

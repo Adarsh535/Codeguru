@@ -1,17 +1,7 @@
 'use client';
 
+import { GraduationCap as SchoolIcon, Clock as AccessTimeIcon, User as PersonIcon, CheckCircle2 as CheckCircleIcon, Download as DownloadIcon, PlayCircle as PlayCircleOutlineOutlinedIcon, FileText as PictureAsPdfIcon, Video as VideoLibraryIcon, CalendarCheck as EventAvailableIcon, BadgeCheck as VerifiedIcon, LifeBuoy as ContactSupportIcon } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import SchoolIcon from '@mui/icons-material/School';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import PersonIcon from '@mui/icons-material/Person';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import DownloadIcon from '@mui/icons-material/Download';
-import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import VerifiedIcon from '@mui/icons-material/Verified';
-import ContactSupportIcon from '@mui/icons-material/ContactSupport';
 
 export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
   const [user, setUser] = useState(null);
@@ -170,22 +160,22 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
     <div className="w-full max-w-6xl mx-auto px-3 sm:px-6 py-6 space-y-6 select-none animate-fadeIn">
       
       {/* TOP STUDENT PORTAL BANNER */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 p-6 sm:p-8 rounded-2xl text-white shadow-xl relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-black text-xl sm:text-2xl flex items-center justify-center border-2 border-white/20 shadow-md uppercase">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-bold text-xl sm:text-2xl flex items-center justify-center border-2 border-white/20 shadow-md">
               {user?.name?.[0] || 'S'}
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/20 flex items-center gap-1">
+                <span className="text-xs font-bold text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/20 flex items-center gap-1">
                   <VerifiedIcon className="!w-3 !h-3" /> Enrolled Student Portal
                 </span>
-                <span className="font-mono text-[10px] text-slate-300 bg-white/10 px-2 py-0.5 rounded">
+                <span className="font-mono text-xs text-slate-300 bg-white/10 px-2 py-0.5 rounded">
                   {currentBatch?.studentId || 'CG-STU-8821'}
                 </span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-black font-heading text-white tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-bold font-heading text-white tracking-tight">
                 {user?.name || 'CodeGurru Student'}
               </h1>
               <p className="text-xs text-slate-300 font-medium">
@@ -197,7 +187,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={onOpenContactModal}
-              className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-md transition-all flex items-center gap-1.5 cursor-pointer border border-white/10"
+              className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-sm transition-all flex items-center gap-1.5 cursor-pointer border border-white/10"
             >
               <ContactSupportIcon className="!w-4 !h-4 text-amber-400" />
               <span>Ask Mentor Support</span>
@@ -208,15 +198,15 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
 
       {/* ENROLLED BATCHES GRID */}
       {enrolledBatches.length === 0 ? (
-        <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center flex flex-col items-center gap-3">
+        <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center flex flex-col items-center gap-3">
           <SchoolIcon className="!w-12 !h-12 text-slate-300" />
-          <h3 className="text-lg font-black text-slate-800 font-heading">No Active Batch Enrollments</h3>
+          <h3 className="text-lg font-bold text-slate-800 font-heading">No Active Batch Enrollments</h3>
           <p className="text-xs text-slate-500 max-w-sm">
             You haven't enrolled in any batch yet. Explore available course batches and enroll to start learning!
           </p>
           <button
             onClick={onOpenEnrollModal}
-            className="mt-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black text-xs shadow-md cursor-pointer"
+            className="mt-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs shadow-md cursor-pointer"
           >
             Browse & Enroll in Batch →
           </button>
@@ -225,19 +215,19 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
         <div className="space-y-6">
           
           {/* ACTIVE BATCH CARD */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-2xs space-y-6">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs space-y-6">
             
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">
+                  <span className="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">
                     Batch #{currentBatch.batchCode}
                   </span>
-                  <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
                     Active Batch
                   </span>
                 </div>
-                <h2 className="text-xl font-black text-slate-900 mt-2 font-heading">
+                <h2 className="text-xl font-bold text-slate-900 mt-2 font-heading">
                   {currentBatch.courseName}
                 </h2>
               </div>
@@ -247,7 +237,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
                   href={currentBatch.zoomLink || '#'}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <VideoLibraryIcon className="!w-4 !h-4" />
                   <span>Join Live Class Room</span>
@@ -258,32 +248,32 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
             {/* BATCH TIMINGS & MENTOR DETAILS */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Class Timing</span>
-                <div className="text-xs font-black text-slate-900 flex items-center gap-1">
+                <span className="text-xs font-semibold text-slate-400 block">Class Timing</span>
+                <div className="text-xs font-bold text-slate-900 flex items-center gap-1">
                   <AccessTimeIcon className="!w-3.5 !h-3.5 text-amber-500" />
                   <span>{currentBatch.timing}</span>
                 </div>
               </div>
 
               <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Assigned Mentor</span>
-                <div className="text-xs font-black text-slate-900 flex items-center gap-1">
+                <span className="text-xs font-semibold text-slate-400 block">Assigned Mentor</span>
+                <div className="text-xs font-bold text-slate-900 flex items-center gap-1">
                   <PersonIcon className="!w-3.5 !h-3.5 text-indigo-500" />
                   <span>{currentBatch.mentor}</span>
                 </div>
               </div>
 
               <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Attendance Rate</span>
-                <div className="text-xs font-black text-emerald-600 flex items-center gap-1">
+                <span className="text-xs font-semibold text-slate-400 block">Attendance Rate</span>
+                <div className="text-xs font-bold text-emerald-600 flex items-center gap-1">
                   <EventAvailableIcon className="!w-3.5 !h-3.5" />
                   <span>{currentBatch.attendance} Attendance</span>
                 </div>
               </div>
 
               <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Course Fee Status</span>
-                <div className="text-xs font-black text-blue-600 flex items-center gap-1">
+                <span className="text-xs font-semibold text-slate-400 block">Course Fee Status</span>
+                <div className="text-xs font-bold text-blue-600 flex items-center gap-1">
                   <VerifiedIcon className="!w-3.5 !h-3.5" />
                   <span>{currentBatch.feeStatus} ({currentBatch.paidAmount})</span>
                 </div>
@@ -292,7 +282,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
 
             {/* SYLLABUS PROGRESS BAR */}
             <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs font-extrabold">
+              <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-slate-800">Overall Course Progress</span>
                 <span className="text-blue-600">{currentBatch.overallProgress} Completed</span>
               </div>
@@ -304,7 +294,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
           </div>
 
           {/* TAB CONTENT: CURRICULUM, CERTIFICATE, RESOURCES & FEES */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-2xs space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-6">
             
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3 overflow-x-auto">
               {[
@@ -316,7 +306,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
                 <button
                   key={t.id}
                   onClick={() => setActiveTab(t.id)}
-                  className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                     activeTab === t.id ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
@@ -331,10 +321,10 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
                 {currentBatch.modules.map((m, idx) => (
                   <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
                     <div className="space-y-0.5">
-                      <div className="font-extrabold text-slate-900 text-sm">{m.name}</div>
+                      <div className="font-semibold text-slate-900 text-sm">{m.name}</div>
                       <div className="text-slate-500 font-medium">{m.lessons} Video Lessons & Project Work</div>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-black ${
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                       m.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' :
                       m.status === 'In Progress' ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-600'
                     }`}>
@@ -348,18 +338,18 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
             {/* TAB 2: CERTIFICATE STATUS & DOWNLOAD */}
             {activeTab === 'certificate' && (!studentCert ? (
               <div className="p-8 text-center text-slate-500 font-bold bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                <div className="text-base font-extrabold text-slate-800">No Certificate Issued Yet</div>
+                <div className="text-base font-semibold text-slate-800">No Certificate Issued Yet</div>
                 <p className="text-xs text-slate-500">Your graduation certificate will become available upon completion of the 6-month batch curriculum and admin verification.</p>
               </div>
             ) : (
               <div className="space-y-5">
-                <div className="p-6 rounded-3xl bg-slate-900 text-white space-y-4 relative overflow-hidden">
+                <div className="p-6 rounded-2xl bg-slate-900 text-white space-y-4 relative overflow-hidden">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase bg-amber-400/10 px-2.5 py-1 rounded-md border border-amber-400/20">
+                      <span className="text-xs font-bold text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-md border border-amber-400/20">
                         Official CodeGurru Graduation Certificate
                       </span>
-                      <h3 className="text-lg font-black text-white mt-2 font-heading">
+                      <h3 className="text-lg font-bold text-white mt-2 font-heading">
                         {studentCert.course}
                       </h3>
                       <p className="text-xs text-slate-400">
@@ -368,12 +358,12 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
                     </div>
 
                     <div className="shrink-0">
-                      <span className={`px-3 py-1.5 rounded-full text-xs font-black border ${
+                      <span className={`px-3 py-1.5 rounded-full text-xs font-bold border ${
                         studentCert.status === 'Approved' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
                         studentCert.status === 'Pending Approval' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-slate-800 text-slate-400 border-slate-700'
                       }`}>
                         {studentCert.status === 'Approved' ? '● Verified & Approved by Admin' :
-                         studentCert.status === 'Pending Approval' ? '⏳ Process Status: Pending Admin Approval' : '● Course Ongoing (6 Months Required)'}
+                         studentCert.status === 'Pending Approval' ? 'Process Status: Pending Admin Approval' : '● Course Ongoing (6 Months Required)'}
                       </span>
                     </div>
                   </div>
@@ -394,19 +384,19 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
                   {/* STATUS EXPLANATION BOX */}
                   {studentCert.status === 'Ongoing' && (
                     <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs font-medium leading-relaxed">
-                      ⚠️ <strong>Course Duration In Progress:</strong> Your course is currently in progress ({studentCert.monthsCompleted} of {studentCert.totalMonths} months). Official Graduation Certificate will be generated after completing the full 6 months course duration.
+                      <strong>Course Duration In Progress:</strong> Your course is currently in progress ({studentCert.monthsCompleted} of {studentCert.totalMonths} months). Official Graduation Certificate will be generated after completing the full 6 months course duration.
                     </div>
                   )}
 
                   {studentCert.status === 'Pending Approval' && (
                     <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-200 text-xs font-medium leading-relaxed">
-                      ⏳ <strong>Status: Processing / Waiting for Admin Approval:</strong> Your 6-month course duration is 100% complete! Your certificate has been submitted for CodeGurru Admin approval. Once Admin approves, your download button will become active immediately.
+                      <strong>Status: Processing / Waiting for Admin Approval:</strong> Your 6-month course duration is 100% complete! Your certificate has been submitted for CodeGurru Admin approval. Once Admin approves, your download button will become active immediately.
                     </div>
                   )}
 
                   {studentCert.status === 'Approved' && (
                     <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 text-xs font-medium leading-relaxed">
-                      🎉 <strong>Approved & Issued:</strong> Congratulations! Your official CodeGurru Certificate of Achievement has been approved by Admin and is ready for download/printing.
+                      <strong>Approved & Issued:</strong> Congratulations! Your official CodeGurru Certificate of Achievement has been approved by Admin and is ready for download/printing.
                     </div>
                   )}
 
@@ -415,16 +405,16 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
                     {studentCert.status === 'Approved' ? (
                       <button
                         onClick={() => setSelectedCert(studentCert)}
-                        className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg hover:shadow-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+                        className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-slate-950 font-bold text-xs sm:text-sm shadow-lg hover:shadow-xl transition-all cursor-pointer flex items-center justify-center gap-2"
                       >
-                        <span>🎓 Preview & Download Official Black/Gold Certificate</span>
+                        <span>Preview & Download Official Black/Gold Certificate</span>
                       </button>
                     ) : (
                       <button
                         disabled
-                        className="px-6 py-3 rounded-2xl bg-slate-800 text-slate-500 font-bold text-xs uppercase tracking-wider cursor-not-allowed flex items-center justify-center gap-2 border border-slate-700"
+                        className="px-6 py-3 rounded-2xl bg-slate-800 text-slate-500 font-bold text-xs cursor-not-allowed flex items-center justify-center gap-2 border border-slate-700"
                       >
-                        {studentCert.status === 'Pending Approval' ? '⏳ Certificate In Process (Waiting for Admin Approval)' : '🔒 Certificate Locked (Unlocks After 6 Months)'}
+                        {studentCert.status === 'Pending Approval' ? 'Certificate In Process (Waiting for Admin Approval)' : 'Certificate Locked (Unlocks After 6 Months)'}
                       </button>
                     )}
                   </div>
@@ -436,7 +426,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
             {activeTab === 'resources' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-medium">
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                  <div className="flex items-center gap-2 font-extrabold text-slate-900">
+                  <div className="flex items-center gap-2 font-semibold text-slate-900">
                     <PlayCircleOutlineOutlinedIcon className="text-blue-600" />
                     <span>Live Class Recorded Lectures</span>
                   </div>
@@ -447,7 +437,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
                 </div>
 
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                  <div className="flex items-center gap-2 font-extrabold text-slate-900">
+                  <div className="flex items-center gap-2 font-semibold text-slate-900">
                     <PictureAsPdfIcon className="text-rose-500" />
                     <span>Downloadable Study Notes & Cheatsheets</span>
                   </div>
@@ -462,7 +452,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
             {/* TAB 4: FEES */}
             {activeTab === 'fees' && (
               <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 text-xs font-medium">
-                <h4 className="font-black text-slate-900 text-sm">Fee Payment Details</h4>
+                <h4 className="font-bold text-slate-900 text-sm">Fee Payment Details</h4>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div><span className="text-slate-400 font-bold block">Total Course Fee:</span> <strong className="text-slate-900">{currentBatch.fee}</strong></div>
                   <div><span className="text-slate-400 font-bold block">Amount Paid:</span> <strong className="text-emerald-600">{currentBatch.paidAmount}</strong></div>
@@ -471,7 +461,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
                 </div>
                 <button
                   onClick={() => alert(`Printing Fee Receipt for Enrollment #${currentBatch.id}...`)}
-                  className="px-4 py-2 bg-blue-600 text-white font-extrabold rounded-xl text-xs shadow-md flex items-center gap-1 cursor-pointer"
+                  className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-xl text-xs shadow-md flex items-center gap-1 cursor-pointer"
                 >
                   <DownloadIcon className="!w-4 !h-4" /> Download Official Receipt PDF
                 </button>
@@ -485,8 +475,8 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
 
       {/* STUDENT BLACK & GOLD CERTIFICATE PREVIEW MODAL */}
       {selectedCert && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#09090b] rounded-3xl p-6 sm:p-10 max-w-4xl w-full border-4 border-[#18181b] shadow-2xl relative space-y-6 text-center text-white my-auto animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#09090b] rounded-2xl p-6 sm:p-10 max-w-4xl w-full border-4 border-[#18181b] shadow-2xl relative space-y-6 text-center text-white my-auto animate-fade-in">
             
             {/* CLOSE BUTTON */}
             <button
@@ -504,34 +494,34 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
 
               {/* HEADER */}
               <div>
-                <h2 className="text-3xl sm:text-5xl font-black font-serif text-white tracking-[0.2em] uppercase text-shadow-sm">
+                <h2 className="text-3xl sm:text-5xl font-bold font-serif text-white tracking-[0.2em] text-shadow-sm">
                   CERTIFICATE
                 </h2>
-                <p className="text-xs sm:text-sm font-semibold tracking-[0.4em] text-[#d4af37] uppercase mt-1">
+                <p className="text-xs sm:text-sm font-semibold tracking-[0.4em] text-[#d4af37] mt-1">
                   OF ACHIEVEMENT
                 </p>
               </div>
 
-              <p className="text-[11px] sm:text-xs font-bold tracking-[0.3em] text-slate-400 uppercase pt-2">
+              <p className="text-xs sm:text-xs font-bold tracking-[0.3em] text-slate-400 pt-2">
                 PRESENTED TO :
               </p>
 
               {/* STUDENT NAME IN GOLD BORDER BOX */}
               <div className="inline-block border-y border-[#d4af37]/40 py-2.5 px-8 my-2 max-w-full">
-                <h3 className="text-2xl sm:text-4xl font-extrabold font-serif text-[#fef08a] tracking-wider capitalize drop-shadow-md">
+                <h3 className="text-2xl sm:text-4xl font-semibold font-serif text-[#fef08a] capitalize">
                   {selectedCert.studentName}
                 </h3>
               </div>
 
-              <p className="text-xs sm:text-sm font-medium tracking-widest text-slate-300 max-w-xl mx-auto uppercase leading-relaxed">
+              <p className="text-xs sm:text-sm font-medium text-slate-300 max-w-xl mx-auto leading-relaxed">
                 FOR THE ACHIEVEMENT OF GRADUATION WHILE STUDYING AT CODEGURU ACADEMY
               </p>
 
-              <div className="text-sm sm:text-base font-extrabold text-[#facc15] tracking-widest font-sans uppercase">
+              <div className="text-sm sm:text-base font-semibold text-[#facc15] font-sans">
                 {selectedCert.course}
               </div>
 
-              <div className="font-mono text-[10px] sm:text-xs text-slate-400 tracking-wider pt-2">
+              <div className="font-mono text-xs sm:text-xs text-slate-400 pt-2">
                 VERIFICATION CODE: {selectedCert.id} • ISSUED: {selectedCert.issueDate || '05 SEP 2026'}
               </div>
 
@@ -540,7 +530,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
                 <div className="text-center">
                   <div className="font-serif italic text-xl sm:text-2xl text-[#fef08a]">Bailey Dupont</div>
                   <div className="w-36 sm:w-48 border-b border-[#d4af37] my-1"></div>
-                  <div className="text-[9px] sm:text-[10px] font-bold text-slate-400 tracking-widest uppercase">
+                  <div className="text-xs sm:text-xs font-bold text-slate-400">
                     BAILEY DUPONT<br/><span className="text-slate-500 font-normal">CHIEF EXECUTIVE</span>
                   </div>
                 </div>
@@ -548,7 +538,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
                 <div className="text-center">
                   <div className="font-serif italic text-xl sm:text-2xl text-[#fef08a]">Avery Davis</div>
                   <div className="w-36 sm:w-48 border-b border-[#d4af37] my-1"></div>
-                  <div className="text-[9px] sm:text-[10px] font-bold text-slate-400 tracking-widest uppercase">
+                  <div className="text-xs sm:text-xs font-bold text-slate-400">
                     AVERY DAVIS<br/><span className="text-slate-500 font-normal">HEADMASTER</span>
                   </div>
                 </div>
@@ -567,7 +557,7 @@ export default function MyBatchPage({ onOpenContactModal, onOpenEnrollModal }) {
 
               <button
                 onClick={() => printBlackGoldCertificate(selectedCert)}
-                className="px-6 py-2.5 rounded-xl bg-[#d4af37] hover:bg-[#c5a028] text-slate-950 font-black text-xs shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+                className="px-6 py-2.5 rounded-xl bg-[#d4af37] hover:bg-[#c5a028] text-slate-950 font-bold text-xs shadow-lg transition-all flex items-center gap-2 cursor-pointer"
               >
                 <DownloadIcon className="!w-4 !h-4" /> Download / Print PDF Certificate
               </button>

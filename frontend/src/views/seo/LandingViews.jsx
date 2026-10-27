@@ -121,11 +121,11 @@ export async function TopicCityPage({ topicSlug, citySlug, lang }) {
 
       <div className="max-w-5xl mx-auto px-4 mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h2 className="text-lg sm:text-2xl font-black text-slate-900 mb-4">{t.who}</h2>
+          <h2 className="text-lg sm:text-2xl font-bold text-slate-900 mb-4">{t.who}</h2>
           <Pills items={audienceList(topic, lang)} />
         </div>
         <div>
-          <h2 className="text-lg sm:text-2xl font-black text-slate-900 mb-4">{t.careers}</h2>
+          <h2 className="text-lg sm:text-2xl font-bold text-slate-900 mb-4">{t.careers}</h2>
           <Pills items={lang === 'hi' ? topic.careersHi : topic.careersEn} />
         </div>
       </div>
@@ -198,18 +198,18 @@ export async function TopicPage({ topicSlug, lang }) {
       </Section>
       <div className="max-w-5xl mx-auto px-4 mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h2 className="text-lg sm:text-2xl font-black text-slate-900 mb-4">{t.who}</h2>
+          <h2 className="text-lg sm:text-2xl font-bold text-slate-900 mb-4">{t.who}</h2>
           <Pills items={audienceList(topic, lang)} />
         </div>
         <div>
-          <h2 className="text-lg sm:text-2xl font-black text-slate-900 mb-4">{t.careers}</h2>
+          <h2 className="text-lg sm:text-2xl font-bold text-slate-900 mb-4">{t.careers}</h2>
           <Pills items={lang === 'hi' ? topic.careersHi : topic.careersEn} />
         </div>
       </div>
       <Section title={t.allCities}>
         {groups.map((group) => (
           <div key={group.heading} className="mb-6">
-            <h3 className="text-sm font-black text-slate-500 uppercase tracking-wider mb-2">{group.heading}</h3>
+            <h3 className="text-sm font-bold text-slate-500 mb-2">{group.heading}</h3>
             <LinkGrid links={group.links} columns="sm:grid-cols-4 lg:grid-cols-6" />
           </div>
         ))}
@@ -335,7 +335,7 @@ export async function LearnIndexPage({ lang }) {
       <Section title={t.allCities}>
         {groups.map((group) => (
           <div key={group.heading} className="mb-6">
-            <h3 className="text-sm font-black text-slate-500 uppercase tracking-wider mb-2">{group.heading}</h3>
+            <h3 className="text-sm font-bold text-slate-500 mb-2">{group.heading}</h3>
             <LinkGrid links={group.links} columns="sm:grid-cols-4 lg:grid-cols-6" />
           </div>
         ))}

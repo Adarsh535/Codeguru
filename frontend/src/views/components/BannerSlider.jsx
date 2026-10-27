@@ -41,8 +41,19 @@ const DEFAULT_SLIDES = [
   }
 ];
 
+// Banner titles come from the admin panel; emoji are stripped so headlines stay clean
+const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu;
+const cleanText = (text) => (typeof text === 'string' ? text.replace(EMOJI, '').replace(/\s{2,}/g, ' ').trim() : text);
+const cleanSlide = (slide) => ({ ...slide, title: cleanText(slide.title), subtitle: cleanText(slide.subtitle), badge: cleanText(slide.badge) });
+
+// Ask Cloudinary for a compressed, right-sized image (WebP/AVIF where supported)
+const optimizeImage = (url) =>
+  typeof url === 'string' && url.includes('res.cloudinary.com') && url.includes('/upload/') && !url.includes('/upload/f_auto')
+    ? url.replace('/upload/', '/upload/f_auto,q_auto,w_1600/')
+    : url;
+
 export default function BannerSlider({ onOpenContactModal }) {
-  const [slides, setSlides] = useState(DEFAULT_SLIDES);
+  const [slides, setSlides] = useState(() => DEFAULT_SLIDES.map(cleanSlide));
 
   useEffect(() => {
     let isMounted = true;
@@ -54,7 +65,7 @@ export default function BannerSlider({ onOpenContactModal }) {
             const media = b.mediaUrl || b.videoUrl || b.imageUrl || '';
             const isVid = b.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(media) || media.includes('/video/');
             return {
-              ...b,
+              ...cleanSlide(b),
               id: b._id || b.id,
               type: isVid ? 'video' : 'image',
               mediaUrl: media,
@@ -168,7 +179,7 @@ export default function BannerSlider({ onOpenContactModal }) {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="relative w-full aspect-[16/9] sm:aspect-[24/8] lg:aspect-[28/8] max-h-[380px] rounded-b-[36px] sm:rounded-b-[48px] md:rounded-b-[56px] overflow-hidden bg-slate-900 group"
+        className="relative w-full aspect-[16/9] sm:aspect-[24/8] lg:aspect-[28/8] max-h-[380px] rounded-b-2xl sm:rounded-b-[48px] md:rounded-b-[56px] overflow-hidden bg-slate-900 group"
       >
         {/* SLIDES TRACK */}
         <div
@@ -191,7 +202,8 @@ export default function BannerSlider({ onOpenContactModal }) {
                       poster={slide.poster}
                       muted={isMuted}
                       playsInline
-                      autoPlay
+                      preload={index === 0 ? 'auto' : 'none'}
+                      autoPlay={index === 0}
                       loop
                       onEnded={handleNext}
                       className="w-full h-full object-cover opacity-100"
@@ -200,9 +212,12 @@ export default function BannerSlider({ onOpenContactModal }) {
                 ) : (
                   <div className="relative w-full h-full">
                     <img
-                      src={imageSource}
-                      alt={slide.title}
-                      className="w-full h-full object-cover opacity-100 group-hover:scale-105 transition-transform duration-700"
+                      src={optimizeImage(imageSource)}
+                      alt={slide.title || 'CodeGurru'}
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      fetchPriority={index === 0 ? 'high' : 'auto'}
+                      decoding="async"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                 )}
@@ -212,15 +227,15 @@ export default function BannerSlider({ onOpenContactModal }) {
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent flex flex-col justify-end p-6 sm:p-10 pointer-events-none">
                     <div className="max-w-2xl space-y-2 pointer-events-auto">
                       {slide.badge && (
-                        <span className="inline-block px-3 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider bg-amber-400 text-slate-950 shadow-md">
+                        <span className="inline-block px-2.5 py-1 rounded-md text-xs font-medium bg-white/15 text-amber-200 backdrop-blur-sm">
                           {slide.badge}
                         </span>
                       )}
-                      <h2 className="text-xl sm:text-3xl md:text-4xl font-black text-white font-heading tracking-tight drop-shadow-md">
+                      <h2 className="text-xl sm:text-3xl md:text-4xl font-bold text-white font-heading leading-tight">
                         {slide.title}
                       </h2>
                       {slide.subtitle && (
-                        <p className="text-xs sm:text-sm text-slate-200 line-clamp-2 drop-shadow">
+                        <p className="text-sm sm:text-base text-slate-200/90 line-clamp-2 max-w-xl">
                           {slide.subtitle}
                         </p>
                       )}
@@ -230,7 +245,7 @@ export default function BannerSlider({ onOpenContactModal }) {
                             suppressHydrationWarning
                             type="button"
                             onClick={onOpenContactModal}
-                            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg transition-transform hover:scale-105 cursor-pointer"
+                            className="px-5 py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-semibold text-sm transition-colors cursor-pointer"
                           >
                             {slide.ctaText} →
                           </button>
@@ -242,7 +257,7 @@ export default function BannerSlider({ onOpenContactModal }) {
 
               {/* TOP-RIGHT CONTROLS (Play/Pause & Mute) */}
               <div className="absolute top-4 right-4 z-10 pointer-events-auto">
-                <div className="bg-[#1e293b]/70 backdrop-blur-md rounded-full flex items-center p-1 shadow-lg gap-1">
+                <div className="bg-[#1e293b]/70 backdrop-blur-sm rounded-full flex items-center p-1 shadow-lg gap-1">
                   {(slide.type === 'video' || (slide.videoUrl && (/\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(slide.videoUrl) || slide.videoUrl.includes('/video/')))) && (
                     <>
                       <button

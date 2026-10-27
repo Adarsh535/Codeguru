@@ -2,7 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   devIndicators: false,
+  poweredByHeader: false,
+  compress: true,
   images: {
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',

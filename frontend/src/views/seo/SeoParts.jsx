@@ -39,8 +39,8 @@ export function PageHero({ breadcrumbs, eyebrow, title, intro, lang, topicName, 
     <section className="bg-gradient-to-b from-slate-900 to-slate-950 text-white px-4 pt-10 pb-12">
       <div className="max-w-5xl mx-auto">
         <Breadcrumbs items={breadcrumbs} />
-        {eyebrow && <p className="text-xs font-black uppercase tracking-wider text-amber-300 mb-2">{eyebrow}</p>}
-        <h1 className="text-2xl sm:text-4xl font-black font-heading tracking-tight mb-3">{title}</h1>
+        {eyebrow && <p className="text-xs font-bold text-amber-300 mb-2">{eyebrow}</p>}
+        <h1 className="text-2xl sm:text-4xl font-bold font-heading tracking-tight mb-3">{title}</h1>
         {intro && <p className="text-sm sm:text-base text-slate-300 max-w-3xl leading-relaxed mb-6">{intro}</p>}
         <EnquiryActions lang={lang} topicName={topicName} />
         {altLink && (
@@ -56,7 +56,7 @@ export function PageHero({ breadcrumbs, eyebrow, title, intro, lang, topicName, 
 export function Section({ title, children, id }) {
   return (
     <section id={id} className="max-w-5xl mx-auto px-4 mt-10">
-      {title && <h2 className="text-lg sm:text-2xl font-black text-slate-900 mb-4">{title}</h2>}
+      {title && <h2 className="text-lg sm:text-2xl font-bold text-slate-900 mb-4">{title}</h2>}
       {children}
     </section>
   );
@@ -70,7 +70,7 @@ export function CourseCard({ course, lang }) {
       <div className="flex items-start gap-3 mb-3">
         {course.icon && <img src={course.icon} alt="" width={40} height={40} className="w-10 h-10 rounded-lg bg-slate-50 p-1" loading="lazy" />}
         <div>
-          <h3 className="text-base font-black text-slate-900 leading-snug">
+          <h3 className="text-base font-bold text-slate-900 leading-snug">
             <Link href={paths.course(course)} className="hover:text-orange-600">{course.title}</Link>
           </h3>
           {course.categoryLabel && <p className="text-xs text-slate-500">{course.categoryLabel}</p>}

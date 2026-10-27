@@ -1,17 +1,8 @@
 'use client';
 
+import { PhoneCall as PhoneInTalkIcon, Phone as PhoneIcon, Mail as EmailIcon, Twitter as TwitterIcon, Instagram as InstagramIcon, Linkedin as LinkedInIcon, Facebook as FacebookIcon, X as CloseIcon, ChevronRight as ChevronRightIcon } from 'lucide-react';
+import { WhatsAppIcon as WhatsAppIcon, TelegramIcon as TelegramIcon } from './BrandIcons';
 import React, { useEffect, useState } from 'react';
-import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
-import PhoneIcon from '@mui/icons-material/Phone';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import EmailIcon from '@mui/icons-material/Email';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import InstagramIcon from '@mui/icons-material/Instagram';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import TelegramIcon from '@mui/icons-material/Telegram';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import CloseIcon from '@mui/icons-material/Close';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 export default function ContactModal({ isOpen, onClose }) {
   const [renderModal, setRenderModal] = useState(false);
@@ -146,18 +137,18 @@ export default function ContactModal({ isOpen, onClose }) {
   return (
     <div
       onClick={handleClose}
-      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-md select-none transition-all duration-300 ${
+      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm select-none transition-all duration-300 ${
         isClosing ? 'animate-backdrop-out' : 'animate-backdrop-in'
       }`}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`w-full max-w-full sm:max-w-md min-w-[280px] max-h-[92vh] sm:max-h-[88vh] bg-white rounded-t-[28px] sm:rounded-[32px] overflow-hidden border border-amber-300/80 shadow-[0_-10px_40px_rgba(245,158,11,0.15)] sm:shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex flex-col transition-all duration-300 transform ${
+        className={`w-full max-w-full sm:max-w-md min-w-[280px] max-h-[92vh] sm:max-h-[88vh] bg-white rounded-t-2xl sm:rounded-2xl overflow-hidden border border-slate-200 shadow-2xl flex flex-col transition-all duration-300 transform ${
           isClosing ? 'animate-modal-slide-down' : 'animate-modal-slide-up'
         }`}
       >
         {/* Sticky Header Container (Handle + Title + Close) */}
-        <div className="sticky top-0 z-20 bg-white/98 backdrop-blur-md px-4 pt-2.5 pb-3 border-b border-amber-100/90 shrink-0">
+        <div className="sticky top-0 z-20 bg-white/98 backdrop-blur-sm px-4 pt-2.5 pb-3 border-b border-amber-100/90 shrink-0">
           {/* Top Pull Handle Indicator */}
           <div className="pb-2 flex justify-center cursor-pointer" onClick={handleClose}>
             <div className="w-12 h-1.5 bg-amber-400 hover:bg-amber-500 rounded-full transition-colors shadow-xs" />
@@ -170,13 +161,13 @@ export default function ContactModal({ isOpen, onClose }) {
                 <PhoneInTalkIcon className="!w-5 !h-5 text-amber-600" />
               </div>
               <div>
-                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 font-heading tracking-tight flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-semibold text-slate-900 font-heading tracking-tight flex items-center gap-2">
                   Connect with CodeGurru
-                  <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 rounded-full border border-amber-300/90 shadow-2xs">
+                  <span className="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-800 rounded-full border border-amber-300/90 shadow-2xs">
                     24/7
                   </span>
                 </h3>
-                <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Select a channel to get instant response</p>
+                <p className="text-xs text-slate-500 mt-0.5 font-medium">Select a channel to get instant response</p>
               </div>
             </div>
 
@@ -211,14 +202,14 @@ export default function ContactModal({ isOpen, onClose }) {
                     <IconComponent className="!w-5 !h-5" />
                   </div>
                   <div className="min-w-0 truncate">
-                    <div className="text-xs sm:text-sm font-extrabold text-slate-900 truncate group-hover:text-amber-700 transition-colors">
+                    <div className="text-xs sm:text-sm font-semibold text-slate-900 truncate group-hover:text-amber-700 transition-colors">
                       {item.name}
                     </div>
-                    <span className="text-[10px] sm:text-[11px] text-slate-500 truncate block font-medium mt-0.5">{item.subtitle}</span>
+                    <span className="text-xs sm:text-xs text-slate-500 truncate block font-medium mt-0.5">{item.subtitle}</span>
                   </div>
                 </div>
 
-                <span className={`px-3 py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-wider rounded-full border transition-all duration-200 ${item.actionStyle} shrink-0 ml-2 flex items-center gap-0.5 shadow-2xs`}>
+                <span className={`px-3 py-1 text-xs sm:text-xs font-bold rounded-full border transition-all duration-200 ${item.actionStyle} shrink-0 ml-2 flex items-center gap-0.5 shadow-2xs`}>
                   {item.actionText}
                   <ChevronRightIcon className="!w-3 !h-3 group-hover:translate-x-0.5 transition-transform" />
                 </span>
@@ -228,7 +219,7 @@ export default function ContactModal({ isOpen, onClose }) {
         </div>
 
         {/* Footer Hint */}
-        <div className="px-4 py-2.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
+        <div className="px-4 py-2.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 shrink-0">
           <span className="flex items-center gap-1.5 font-bold text-emerald-700">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
             <span>Agents Available Online</span>

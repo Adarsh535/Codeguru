@@ -1,21 +1,17 @@
 'use client';
 
+import { MapPin as LocationOnIcon, Phone as CallIcon, Clock as AccessTimeIcon, ArrowRight as ArrowForwardIcon, Building2 as BusinessIcon } from 'lucide-react';
 import React from 'react';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import CallIcon from '@mui/icons-material/Call';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import BusinessIcon from '@mui/icons-material/Business';
 import { OUR_BRANCHES_DATA } from '../../models/placementModel';
 
 export default function OurBranchesSection({ onOpenContactModal }) {
   return (
     <div className="w-full max-w-7xl mx-auto px-2 xxs:px-3 sm:px-6 my-1.5 select-none">
-      <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-2.5 xxs:p-3 sm:p-4 border border-slate-200/90 shadow-2xs relative overflow-hidden flex flex-col gap-3">
+      <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-2.5 xxs:p-3 sm:p-4 border border-slate-200/90 shadow-2xs relative overflow-hidden flex flex-col gap-3">
         
         {/* HEADER SECTION: OUR BRANCHES */}
         <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
-          <h3 className="text-xs xxs:text-sm sm:text-base font-black text-slate-900 font-heading tracking-tight truncate">
+          <h3 className="text-xs xxs:text-sm sm:text-base font-bold text-slate-900 font-heading tracking-tight truncate">
             Our Offices & Branch Locations
           </h3>
         </div>
@@ -72,19 +68,19 @@ export default function OurBranchesSection({ onOpenContactModal }) {
               <div className="w-full md:w-[58%] lg:w-[60%] flex flex-col justify-between gap-2">
                 <div>
                   {/* Category Subtitle */}
-                  <span className="text-[8px] xxs:text-[9px] sm:text-[10px] font-black text-cyan-700 uppercase tracking-wider">
+                  <span className="text-[8px] xxs:text-xs sm:text-xs font-bold text-cyan-700">
                     {branch.category}
                   </span>
 
                   {/* Branch Title / Name */}
-                  <h2 className="text-xs xxs:text-sm sm:text-lg font-black text-slate-900 font-heading mt-0.5 leading-tight">
+                  <h2 className="text-xs xxs:text-sm sm:text-lg font-bold text-slate-900 font-heading mt-0.5 leading-tight">
                     {branch.title}
                   </h2>
 
                   {/* Location Address */}
                   <div className="flex items-start gap-1.5 mt-1.5">
                     <LocationOnIcon className="!w-3 !h-3 xxs:!w-3.5 xxs:!h-3.5 text-cyan-600 shrink-0 mt-0.5" />
-                    <p className="text-[8.5px] xxs:text-[9.5px] sm:text-xs font-extrabold text-slate-700 uppercase leading-tight">
+                    <p className="text-[8.5px] xxs:text-[9.5px] sm:text-xs font-semibold text-slate-700 leading-tight">
                       {branch.address || branch.fullAddress || branch.streetAddress}
                     </p>
                   </div>
@@ -92,7 +88,7 @@ export default function OurBranchesSection({ onOpenContactModal }) {
                   {/* Phone Contact */}
                   <div className="flex items-center gap-1.5 mt-1">
                     <CallIcon className="!w-3 !h-3 xxs:!w-3.5 xxs:!h-3.5 text-cyan-600 shrink-0" />
-                    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[9.5px] xxs:text-[10.5px] sm:text-xs font-black text-slate-800">
+                    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[9.5px] xxs:text-[10.5px] sm:text-xs font-bold text-slate-800">
                       {(branch.phones || (branch.phone ? branch.phone.split(/[,/]/).map((s) => s.trim()) : [])).map((num, idx, arr) => {
                         const rawTel = num.replace(/[^0-9+]/g, '');
                         return (
@@ -115,7 +111,7 @@ export default function OurBranchesSection({ onOpenContactModal }) {
                   {/* Working Hours / Timings */}
                   <div className="flex items-center gap-1.5 mt-1">
                     <AccessTimeIcon className="!w-3 !h-3 xxs:!w-3.5 xxs:!h-3.5 text-cyan-600 shrink-0" />
-                    <p className="text-[8.5px] xxs:text-[9.5px] sm:text-xs font-extrabold text-slate-700">
+                    <p className="text-[8.5px] xxs:text-[9.5px] sm:text-xs font-semibold text-slate-700">
                       {branch.timings}
                     </p>
                   </div>
@@ -126,13 +122,13 @@ export default function OurBranchesSection({ onOpenContactModal }) {
                   <button
                     suppressHydrationWarning
                     onClick={onOpenContactModal}
-                    className="border-2 border-cyan-600 hover:bg-cyan-600 text-cyan-700 hover:text-white px-2.5 py-1 rounded-lg text-[8.5px] xxs:text-[9.5px] sm:text-xs font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
+                    className="border-2 border-cyan-600 hover:bg-cyan-600 text-cyan-700 hover:text-white px-2.5 py-1 rounded-lg text-[8.5px] xxs:text-[9.5px] sm:text-xs font-bold transition-all duration-200 flex items-center gap-1 shadow-2xs active:scale-95 cursor-pointer"
                   >
                     <span>Know More</span>
                     <ArrowForwardIcon className="!w-3 !h-3" />
                   </button>
 
-                  <span className="text-[8px] xxs:text-[9px] font-bold text-slate-400 truncate">
+                  <span className="text-[8px] xxs:text-xs font-bold text-slate-400 truncate">
                     Official Campus Location
                   </span>
                 </div>

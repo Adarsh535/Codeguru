@@ -1,19 +1,8 @@
 'use client';
 
+import { User as PersonIcon, Info as InfoIcon, RefreshCw as RefreshIcon, Settings as SettingsIcon, Shield as ShieldIcon, ShieldAlert as GppMaybeIcon, File as DescriptionIcon, HelpCircle as HelpIcon, ChevronRight as ChevronRightIcon, X as CloseIcon, CheckCircle2 as CheckCircleIcon, Phone as CallIcon } from 'lucide-react';
+import { WhatsAppIcon as WhatsAppIcon } from './BrandIcons';
 import React, { useState, useEffect } from 'react';
-import PersonIcon from '@mui/icons-material/Person';
-import InfoIcon from '@mui/icons-material/Info';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import SettingsIcon from '@mui/icons-material/Settings';
-import ShieldIcon from '@mui/icons-material/Shield';
-import GppMaybeIcon from '@mui/icons-material/GppMaybe';
-import DescriptionIcon from '@mui/icons-material/Description';
-import HelpIcon from '@mui/icons-material/Help';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import CloseIcon from '@mui/icons-material/Close';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CallIcon from '@mui/icons-material/Call';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 
 export default function ProfilePage({ onOpenContactModal }) {
   const [user, setUser] = useState(null);
@@ -168,10 +157,10 @@ export default function ProfilePage({ onOpenContactModal }) {
           <PersonIcon className="!w-9 !h-9 xxs:!w-11 xxs:!h-11 text-amber-400 group-hover:scale-110 transition-transform" />
           <div className="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white" />
         </div>
-        <h2 className="text-lg xxs:text-xl font-black text-slate-900 tracking-tight font-heading">
+        <h2 className="text-lg xxs:text-xl font-bold text-slate-900 tracking-tight font-heading">
           {user ? user.name : 'Guest User'}
         </h2>
-        <span className="text-[9px] xxs:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">
+        <span className="text-xs xxs:text-xs font-bold text-slate-400 mt-0.5">
           {user ? user.email : 'LIMITED ACCESS'}
         </span>
       </div>
@@ -181,7 +170,7 @@ export default function ProfilePage({ onOpenContactModal }) {
         {user ? (
           <button
             onClick={handleLogout}
-            className="w-full bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-xs xxs:text-sm uppercase py-3 rounded-2xl shadow-md hover:shadow-lg transition-all tracking-wider text-center cursor-pointer flex items-center justify-center gap-2"
+            className="w-full bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold text-xs xxs:text-sm py-3 rounded-2xl shadow-md hover:shadow-lg transition-all text-center cursor-pointer flex items-center justify-center gap-2"
           >
             <span>LOGOUT FROM ACCOUNT</span>
           </button>
@@ -192,7 +181,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                 setAuthMode('login');
                 setActiveModal('auth');
               }}
-              className="flex-1 bg-amber-400 hover:bg-amber-500 active:scale-95 text-slate-950 font-black text-xs xxs:text-sm uppercase py-3 rounded-2xl shadow-md hover:shadow-lg transition-all tracking-wider text-center cursor-pointer"
+              className="flex-1 bg-amber-400 hover:bg-amber-500 active:scale-95 text-slate-950 font-bold text-xs xxs:text-sm py-3 rounded-2xl shadow-md hover:shadow-lg transition-all text-center cursor-pointer"
             >
               LOGIN
             </button>
@@ -201,7 +190,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                 setAuthMode('signup');
                 setActiveModal('auth');
               }}
-              className="flex-1 bg-white hover:bg-amber-50/50 border-2 border-amber-400 text-amber-500 hover:text-amber-600 active:scale-95 font-black text-xs xxs:text-sm uppercase py-2.5 rounded-2xl shadow-xs transition-all tracking-wider text-center cursor-pointer"
+              className="flex-1 bg-white hover:bg-amber-50/50 border-2 border-amber-400 text-amber-500 hover:text-amber-600 active:scale-95 font-bold text-xs xxs:text-sm py-2.5 rounded-2xl shadow-xs transition-all text-center cursor-pointer"
             >
               SIGN UP
             </button>
@@ -236,11 +225,11 @@ export default function ProfilePage({ onOpenContactModal }) {
       {/* MODAL POPUPS FOR EACH POLICY & AUTH */}
       {activeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="bg-white rounded-3xl p-5 xxs:p-6 w-full max-w-lg sm:max-w-xl shadow-2xl border border-slate-100 relative max-h-[88vh] flex flex-col justify-between overflow-hidden">
+          <div className="bg-white rounded-2xl p-5 xxs:p-6 w-full max-w-lg sm:max-w-xl shadow-2xl border border-slate-100 relative max-h-[88vh] flex flex-col justify-between overflow-hidden">
             
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
-              <h3 className="text-base xxs:text-lg font-black text-slate-900 font-heading">
+              <h3 className="text-base xxs:text-lg font-bold text-slate-900 font-heading">
                 {activeModal === 'auth'
                   ? authMode === 'login'
                     ? 'Login to CodeGurru'
@@ -262,7 +251,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   {isSuccess ? (
                     <div className="flex flex-col items-center justify-center py-6 text-center text-emerald-600 gap-2">
                       <CheckCircleIcon className="!w-12 !h-12 text-emerald-500 animate-bounce" />
-                      <p className="font-black text-base">
+                      <p className="font-bold text-base">
                         {authMode === 'login' ? 'Successfully Logged In!' : 'Account Created Successfully!'}
                       </p>
                     </div>
@@ -305,7 +294,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                       </div>
                       <button
                         type="submit"
-                        className="w-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black py-3 rounded-xl shadow-md uppercase tracking-wider text-xs mt-2 transition-all cursor-pointer"
+                        className="w-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold py-3 rounded-xl shadow-md text-xs mt-2 transition-all cursor-pointer"
                       >
                         {authMode === 'login' ? 'Login Now' : 'Create Account'}
                       </button>
@@ -318,7 +307,7 @@ export default function ProfilePage({ onOpenContactModal }) {
               {activeModal === 'about' && (
                 <div className="space-y-4 text-xs xxs:text-[13px] text-slate-700 leading-relaxed pr-1">
                   <div className="p-3.5 bg-indigo-50/80 border border-indigo-100 rounded-2xl">
-                    <h4 className="font-black text-indigo-950 text-sm mb-1">
+                    <h4 className="font-bold text-indigo-950 text-sm mb-1">
                       CodeGurru IT Training, Software Development &amp; Tech Academy
                     </h4>
                     <p className="text-indigo-800 text-xs font-medium">
@@ -327,7 +316,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-indigo-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-indigo-600 flex items-center gap-1.5">
                       <span>●</span> Who We Are &amp; Our Core Vision
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -347,7 +336,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-indigo-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-indigo-600 flex items-center gap-1.5">
                       <span>●</span> Key Training Pillars &amp; Methodology
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -371,7 +360,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-indigo-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-indigo-600 flex items-center gap-1.5">
                       <span>●</span> Campus Infrastructure &amp; Contact
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -400,7 +389,7 @@ export default function ProfilePage({ onOpenContactModal }) {
               {activeModal === 'refund' && (
                 <div className="space-y-4 text-xs xxs:text-[13px] text-slate-700 leading-relaxed pr-1">
                   <div className="p-3.5 bg-rose-50/80 border border-rose-100 rounded-2xl">
-                    <h4 className="font-black text-rose-950 text-sm mb-1">
+                    <h4 className="font-bold text-rose-950 text-sm mb-1">
                       7-Day 100% Money-Back Guarantee
                     </h4>
                     <p className="text-rose-800 text-xs font-medium">
@@ -409,7 +398,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-rose-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-rose-600 flex items-center gap-1.5">
                       <span>●</span> Refund Eligibility Criteria
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -433,7 +422,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-rose-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-rose-600 flex items-center gap-1.5">
                       <span>●</span> Non-Refundable Situations
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -453,7 +442,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-rose-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-rose-600 flex items-center gap-1.5">
                       <span>●</span> Refund Processing &amp; Disbursement
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -482,7 +471,7 @@ export default function ProfilePage({ onOpenContactModal }) {
               {activeModal === 'settings' && (
                 <div className="space-y-4 text-xs xxs:text-[13px] text-slate-700 leading-relaxed pr-1">
                   <div className="p-3.5 bg-slate-100/90 border border-slate-200/80 rounded-2xl">
-                    <h4 className="font-black text-slate-900 text-sm mb-1">
+                    <h4 className="font-bold text-slate-900 text-sm mb-1">
                       Account Preferences &amp; Platform Controls
                     </h4>
                     <p className="text-slate-600 text-xs font-medium">
@@ -494,7 +483,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   <div className="flex items-center justify-between py-2 border-b border-slate-100">
                     <div className="flex flex-col">
                       <span className="font-bold text-xs text-slate-900">App Theme Preference</span>
-                      <span className="text-[10px] font-semibold text-slate-500">
+                      <span className="text-xs font-semibold text-slate-500">
                         {isDarkMode ? 'Dark Theme (Reduced Eye Strain)' : 'Light Theme (Classic Clean)'}
                       </span>
                     </div>
@@ -519,28 +508,28 @@ export default function ProfilePage({ onOpenContactModal }) {
 
                   {/* Notification Channels */}
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-slate-700 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-slate-700 flex items-center gap-1.5">
                       <span>●</span> Notification Preferences
                     </h5>
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
                         <div className="flex flex-col">
                           <span className="font-bold text-xs text-slate-900">WhatsApp Class Reminders</span>
-                          <span className="text-[10px] text-slate-500">Daily batch timings, lab notices, and schedule updates</span>
+                          <span className="text-xs text-slate-500">Daily batch timings, lab notices, and schedule updates</span>
                         </div>
                         <input type="checkbox" defaultChecked className="toggle-checkbox accent-emerald-600 w-4 h-4" />
                       </div>
                       <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
                         <div className="flex flex-col">
                           <span className="font-bold text-xs text-slate-900">Placement Drive Alerts</span>
-                          <span className="text-[10px] text-slate-500">Instant notifications for new recruitment drives and eligibility criteria</span>
+                          <span className="text-xs text-slate-500">Instant notifications for new recruitment drives and eligibility criteria</span>
                         </div>
                         <input type="checkbox" defaultChecked className="toggle-checkbox accent-emerald-600 w-4 h-4" />
                       </div>
                       <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
                         <div className="flex flex-col">
                           <span className="font-bold text-xs text-slate-900">Weekly Performance Report</span>
-                          <span className="text-[10px] text-slate-500">Email digest summarizing attendance, project scores, and quiz ranks</span>
+                          <span className="text-xs text-slate-500">Email digest summarizing attendance, project scores, and quiz ranks</span>
                         </div>
                         <input type="checkbox" defaultChecked className="toggle-checkbox accent-emerald-600 w-4 h-4" />
                       </div>
@@ -552,12 +541,12 @@ export default function ProfilePage({ onOpenContactModal }) {
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="font-bold text-xs text-slate-900">Account Security</span>
-                        <span className="text-[10px] font-semibold text-slate-500">Change or Create New Password</span>
+                        <span className="text-xs font-semibold text-slate-500">Change or Create New Password</span>
                       </div>
                       <button
                         type="button"
                         onClick={() => setShowPasswordForm(!showPasswordForm)}
-                        className="text-xs font-black text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer border border-amber-200"
+                        className="text-xs font-bold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer border border-amber-200"
                       >
                         {showPasswordForm ? 'Hide' : 'Change Password'}
                       </button>
@@ -572,7 +561,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                           </div>
                         )}
                         <div>
-                          <label className="text-[10px] font-extrabold text-slate-700 block mb-1">
+                          <label className="text-xs font-semibold text-slate-700 block mb-1">
                             Current Password (Optional)
                           </label>
                           <input
@@ -584,7 +573,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] font-extrabold text-slate-700 block mb-1">
+                          <label className="text-xs font-semibold text-slate-700 block mb-1">
                             Create New Password *
                           </label>
                           <input
@@ -597,7 +586,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] font-extrabold text-slate-700 block mb-1">
+                          <label className="text-xs font-semibold text-slate-700 block mb-1">
                             Confirm New Password *
                           </label>
                           <input
@@ -611,7 +600,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                         </div>
                         <button
                           type="submit"
-                          className="w-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95 mt-1"
+                          className="w-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer shadow-xs active:scale-95 mt-1"
                         >
                           Update / Create Password
                         </button>
@@ -631,7 +620,7 @@ export default function ProfilePage({ onOpenContactModal }) {
               {activeModal === 'privacy' && (
                 <div className="space-y-4 text-xs xxs:text-[13px] text-slate-700 leading-relaxed pr-1">
                   <div className="p-3.5 bg-emerald-50/80 border border-emerald-100 rounded-2xl">
-                    <h4 className="font-black text-emerald-950 text-sm mb-1">
+                    <h4 className="font-bold text-emerald-950 text-sm mb-1">
                       Data Privacy &amp; Student Protection Policy
                     </h4>
                     <p className="text-emerald-800 text-xs font-medium">
@@ -640,7 +629,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-emerald-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-emerald-600 flex items-center gap-1.5">
                       <span>●</span> Information We Collect
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -664,7 +653,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-emerald-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-emerald-600 flex items-center gap-1.5">
                       <span>●</span> How We Use Your Information
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -684,7 +673,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-emerald-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-emerald-600 flex items-center gap-1.5">
                       <span>●</span> Zero-Spam Guarantee &amp; Security Protocols
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -709,7 +698,7 @@ export default function ProfilePage({ onOpenContactModal }) {
               {activeModal === 'cancellation' && (
                 <div className="space-y-4 text-xs xxs:text-[13px] text-slate-700 leading-relaxed pr-1">
                   <div className="p-3.5 bg-rose-50/80 border border-rose-100 rounded-2xl">
-                    <h4 className="font-black text-rose-950 text-sm mb-1">
+                    <h4 className="font-bold text-rose-950 text-sm mb-1">
                       Batch Cancellation &amp; Deferral Policy
                     </h4>
                     <p className="text-rose-800 text-xs font-medium">
@@ -718,7 +707,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-rose-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-rose-600 flex items-center gap-1.5">
                       <span>●</span> Cancellation Prior to Batch Orientation
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -734,7 +723,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-rose-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-rose-600 flex items-center gap-1.5">
                       <span>●</span> Course Freeze &amp; Batch Deferral
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -754,7 +743,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-rose-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-rose-600 flex items-center gap-1.5">
                       <span>●</span> Cancellation Process &amp; Key Conditions
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -779,7 +768,7 @@ export default function ProfilePage({ onOpenContactModal }) {
               {activeModal === 'terms' && (
                 <div className="space-y-4 text-xs xxs:text-[13px] text-slate-700 leading-relaxed pr-1">
                   <div className="p-3.5 bg-amber-50/80 border border-amber-100 rounded-2xl">
-                    <h4 className="font-black text-amber-950 text-sm mb-1">
+                    <h4 className="font-bold text-amber-950 text-sm mb-1">
                       Institutional Terms of Service &amp; Campus Code
                     </h4>
                     <p className="text-amber-800 text-xs font-medium">
@@ -788,7 +777,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-amber-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-amber-600 flex items-center gap-1.5">
                       <span>●</span> 1. Academic Standards &amp; Attendance Rules
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -808,7 +797,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-amber-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-amber-600 flex items-center gap-1.5">
                       <span>●</span> 2. Campus &amp; Lab Guidelines
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -828,7 +817,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-amber-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-amber-600 flex items-center gap-1.5">
                       <span>●</span> 3. Intellectual Property &amp; Legal Jurisdiction
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -853,7 +842,7 @@ export default function ProfilePage({ onOpenContactModal }) {
               {activeModal === 'help' && (
                 <div className="space-y-4 text-xs xxs:text-[13px] text-slate-700 leading-relaxed pr-1">
                   <div className="p-3.5 bg-purple-50/80 border border-purple-100 rounded-2xl">
-                    <h4 className="font-black text-purple-950 text-sm mb-1">
+                    <h4 className="font-bold text-purple-950 text-sm mb-1">
                       24/7 Student Helpdesk &amp; Support Cell
                     </h4>
                     <p className="text-purple-800 text-xs font-medium">
@@ -862,7 +851,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-purple-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-purple-600 flex items-center gap-1.5">
                       <span>●</span> Support Channels &amp; Assistance Desks
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -882,7 +871,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                   </div>
 
                   <div>
-                    <h5 className="font-black text-slate-900 uppercase tracking-wider text-[11px] mb-2 text-purple-600 flex items-center gap-1.5">
+                    <h5 className="font-bold text-slate-900 text-xs mb-2 text-purple-600 flex items-center gap-1.5">
                       <span>●</span> Direct Campus Coordinates
                     </h5>
                     <ul className="space-y-2 pl-1">
@@ -948,7 +937,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                       <button
                         type="button"
                         onClick={(e) => handleCallSupport(e, '+917238829360')}
-                        className="bg-purple-600 hover:bg-purple-700 active:scale-95 text-white font-black py-2.5 px-3 rounded-xl text-xs uppercase tracking-wider text-center transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer select-none"
+                        className="bg-purple-600 hover:bg-purple-700 active:scale-95 text-white font-bold py-2.5 px-3 rounded-xl text-xs text-center transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer select-none"
                         title="Click to Call +91 72388 29360"
                       >
                         <CallIcon className="!w-4 !h-4 text-white" />
@@ -957,7 +946,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                       <button
                         type="button"
                         onClick={handleWhatsAppRedirect}
-                        className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black py-2.5 px-3 rounded-xl text-xs uppercase tracking-wider text-center transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer select-none"
+                        className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-2.5 px-3 rounded-xl text-xs text-center transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer select-none"
                         title="Click to Open WhatsApp Chat"
                       >
                         <WhatsAppIcon className="!w-4 !h-4 text-white" />
@@ -971,7 +960,7 @@ export default function ProfilePage({ onOpenContactModal }) {
                           <CallIcon className="!w-3.5 !h-3.5 text-purple-600 animate-pulse" />
                           <span>Connecting / Copied: <strong>{callNotice}</strong></span>
                         </span>
-                        <span className="text-[10px] bg-purple-200/80 text-purple-900 px-1.5 py-0.5 rounded font-black uppercase tracking-wider">Dialing</span>
+                        <span className="text-xs bg-purple-200/80 text-purple-900 px-1.5 py-0.5 rounded font-bold">Dialing</span>
                       </div>
                     )}
                   </div>
@@ -983,7 +972,7 @@ export default function ProfilePage({ onOpenContactModal }) {
             <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end">
               <button
                 onClick={() => setActiveModal(null)}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-2 rounded-xl text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-2 rounded-xl text-xs transition-colors cursor-pointer"
               >
                 Close
               </button>

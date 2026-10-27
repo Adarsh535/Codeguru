@@ -46,14 +46,14 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
 
   return (
     <section className="w-full px-3 sm:px-4 py-3 sm:py-5 bg-[#f8fafc] overflow-hidden select-none">
-      <div className="max-w-7xl mx-auto border border-slate-200/90 rounded-[20px] sm:rounded-[28px] bg-white pt-4 pb-4 sm:pt-5 sm:pb-6 shadow-xs relative z-10 w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto border border-slate-200/90 rounded-[20px] sm:rounded-2xl bg-white pt-4 pb-4 sm:pt-5 sm:pb-6 shadow-xs relative z-10 w-full overflow-hidden">
         
         {/* HEADING */}
         <div className="flex justify-between items-center px-4 md:px-8 mb-3 sm:mb-4">
-          <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight font-heading">
+          <h2 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight font-heading">
             Top Placements & Achievers
           </h2>
-          <span className="text-emerald-800 font-extrabold text-[9.5px] sm:text-xs uppercase tracking-widest hidden sm:block bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+          <span className="text-emerald-800 font-semibold text-[9.5px] sm:text-xs hidden sm:block bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
             100% Verified Placements
           </span>
         </div>
@@ -79,7 +79,7 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
                     contactElem.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="w-[160px] xs:w-[175px] sm:w-[190px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[16px] shadow-[0_2px_8px_rgba(0,0,0,0.03)] flex flex-col mx-1.5 relative overflow-hidden group cursor-pointer hover:shadow-md hover:border-blue-300 transition-all select-none"
+                className="w-[160px] xs:w-[175px] sm:w-[190px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[16px] shadow-lg flex flex-col mx-1.5 relative overflow-hidden group cursor-pointer hover:shadow-md hover:border-blue-300 transition-all select-none"
               >
                 {/* TOP PORTRAIT PHOTO AREA - EXACT SAME CLEAN DISPLAY AS OUR TEAM */}
                 <div 
@@ -97,26 +97,26 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
                 {/* BOTTOM WHITE CONTENT CONTAINER */}
                 <div className="p-2.5 sm:p-3 bg-white flex flex-col flex-1 justify-between border-t border-slate-100">
                   <div className="flex flex-col">
-                    <h3 className="font-extrabold text-slate-900 text-[12px] sm:text-[13px] tracking-tight leading-snug mb-0.5 truncate">
+                    <h3 className="font-semibold text-slate-900 text-xs sm:text-[13px] tracking-tight leading-snug mb-0.5 truncate">
                       {student.name}
                     </h3>
-                    <p className="text-slate-500 text-[9.5px] sm:text-[10px] leading-snug font-medium line-clamp-1">
+                    <p className="text-slate-500 text-[9.5px] sm:text-xs leading-snug font-medium line-clamp-1">
                       {student.role || student.trainingType || 'Full Stack & System Design'}
                     </p>
                   </div>
 
                   {/* FOOTER COMPANY & PACKAGE DETAILS WITH CLEAN GAP */}
                   <div className="pt-2 mt-2 border-t border-slate-100 w-full flex flex-col gap-1.5">
-                    <span className="text-[10.5px] sm:text-[11.5px] font-extrabold text-slate-800 truncate" title={student.company || student.batch}>
+                    <span className="text-[10.5px] sm:text-[11.5px] font-semibold text-slate-800 truncate" title={student.company || student.batch}>
                       {student.company || student.batch || 'Placed Student'}
                     </span>
 
                     {student.package && (
                       <div className="flex items-center justify-between gap-1 pt-0.5">
-                        <span className="text-[8.5px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                        <span className="text-[8.5px] sm:text-xs font-bold text-slate-400">
                           Package
                         </span>
-                        <span className="text-[9.5px] sm:text-[10.5px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/80 shrink-0 shadow-2xs">
+                        <span className="text-[9.5px] sm:text-[10.5px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/80 shrink-0 shadow-2xs">
                           {student.package.startsWith('₹') ? student.package : `₹ ${student.package}`}
                         </span>
                       </div>

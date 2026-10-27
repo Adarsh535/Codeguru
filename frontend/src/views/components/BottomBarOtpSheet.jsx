@@ -1,15 +1,7 @@
 'use client';
 
+import { X as CloseIcon, CheckCircle2 as CheckCircleIcon, ArrowRight as ArrowForwardIcon, Phone as CallIcon, GraduationCap as SchoolIcon, LogOut as LogoutIcon, User as PersonIcon, Mail as EmailIcon, Pencil as EditIcon } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
-import CloseIcon from '@mui/icons-material/Close';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import CallIcon from '@mui/icons-material/Call';
-import SchoolIcon from '@mui/icons-material/School';
-import LogoutIcon from '@mui/icons-material/Logout';
-import PersonIcon from '@mui/icons-material/Person';
-import EmailIcon from '@mui/icons-material/Email';
-import EditIcon from '@mui/icons-material/Edit';
 import { apiService } from '../../services/apiService';
 import { getApiBase } from '../../models/apiClient';
 import { getQuickLocationSync } from '../../utils/geoLocator';
@@ -227,7 +219,7 @@ export default function BottomBarOtpSheet({
     >
       {/* BACKDROP OVERLAY */}
       <div 
-        className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm animate-backdrop-in"
         onClick={handleClose}
       />
 
@@ -235,8 +227,8 @@ export default function BottomBarOtpSheet({
       {/* BADHA CARD (BACKGROUND ELEVATED CARD / FRAME)                   */}
       {/* ============================================================== */}
       <div 
-        className={`relative z-10 w-full max-w-[440px] mx-auto rounded-t-[36px] sm:rounded-[40px] p-2.5 sm:p-3.5 bg-gradient-to-b from-slate-200/95 via-slate-100/95 to-slate-200/95 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.45)] border-t sm:border border-white/70 backdrop-blur-xl transform transition-all duration-300 ease-out ${
-          isClosing ? 'translate-y-full sm:scale-95 opacity-0' : 'translate-y-0 sm:scale-100 opacity-100'
+        className={`relative z-10 w-full max-w-[440px] mx-auto rounded-t-2xl sm:rounded-2xl p-2.5 sm:p-3.5 bg-slate-100 shadow-2xl border-t sm:border border-slate-200 transform transition-all duration-300 ease-out ${
+          isClosing ? 'translate-y-full sm:translate-y-2 sm:scale-95 opacity-0' : 'animate-modal-slide-up'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -249,7 +241,7 @@ export default function BottomBarOtpSheet({
         {/* CHHOTA CARD (INNER WHITE CARD WITH MULTI-STEP FORM)            */}
         {/* ============================================================== */}
         <div 
-          className="relative w-full bg-white rounded-[28px] sm:rounded-[30px] shadow-[0_12px_36px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100/80 px-6 sm:px-7 pt-5 pb-6 overflow-hidden flex flex-col"
+          className="relative w-full bg-white rounded-2xl sm:rounded-2xl shadow-lg border border-slate-100/80 px-6 sm:px-7 pt-5 pb-6 overflow-hidden flex flex-col"
           style={{
             background: 'radial-gradient(circle at 50% 10%, rgba(249, 115, 22, 0.08) 0%, rgba(255, 255, 255, 0) 65%), #ffffff'
           }}
@@ -267,13 +259,13 @@ export default function BottomBarOtpSheet({
           {/* ---------------- 1. ALREADY LOGGED IN VIEW ---------------- */}
           {user ? (
             <div className="flex flex-col gap-4 pt-2">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#fb923c] to-[#ea580c] text-white flex items-center justify-center shadow-lg shadow-orange-500/25 mx-auto font-black text-2xl uppercase">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#fb923c] to-[#ea580c] text-white flex items-center justify-center shadow-lg mx-auto font-bold text-2xl">
                 {user.name ? user.name[0] : 'S'}
               </div>
               <div className="text-center">
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">{user.name}</h3>
+                <h3 className="text-xl font-bold text-slate-900 tracking-tight">{user.name}</h3>
                 <p className="text-xs font-semibold text-slate-500 mt-0.5">{user.email || user.phone}</p>
-                <span className="inline-block mt-2 px-3 py-1 bg-emerald-100 text-emerald-800 text-[11px] font-extrabold rounded-full">
+                <span className="inline-block mt-2 px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full">
                   ● Active Student
                 </span>
               </div>
@@ -318,31 +310,31 @@ export default function BottomBarOtpSheet({
               
               {/* SOCIAL PROOF AVATAR CLUSTER */}
               <div className="flex items-center justify-center -space-x-2 pt-1 mb-2 select-none">
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f97316] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f97316] text-white font-semibold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
                   R
                 </span>
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#8b5cf6] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#8b5cf6] text-white font-semibold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
                   A
                 </span>
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0ea5e9] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0ea5e9] text-white font-semibold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
                   S
                 </span>
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#10b981] text-white font-extrabold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#10b981] text-white font-semibold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
                   P
                 </span>
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0f172a] text-white font-black text-[11px] sm:text-xs flex items-center justify-center ring-2 ring-white shadow-xs">
+                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0f172a] text-white font-bold text-xs sm:text-xs flex items-center justify-center ring-2 ring-white shadow-xs">
                   5k+
                 </span>
               </div>
 
               {/* SOCIAL PROOF SUB-BANNER */}
               <p className="text-center text-xs sm:text-[13px] text-slate-600 font-medium mb-4 select-none">
-                Join <strong className="text-orange-500 font-black">5000+</strong> students learning with us
+                Join <strong className="text-orange-500 font-bold">5000+</strong> students learning with us
               </p>
 
               {/* HEADLINE & SUBTITLE */}
               <div className="text-center mb-5">
-                <h2 className="text-[25px] sm:text-[27px] font-black text-slate-900 tracking-tight font-heading">
+                <h2 className="text-[25px] sm:text-[27px] font-bold text-slate-900 tracking-tight font-heading">
                   Login / Sign up
                 </h2>
                 <p className="text-xs sm:text-[13.5px] font-medium text-slate-500 mt-1">
@@ -359,9 +351,9 @@ export default function BottomBarOtpSheet({
 
               {/* PHONE NUMBER INPUT CARD */}
               <div className="bg-white border border-slate-200/90 hover:border-slate-300 focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/10 rounded-2xl px-4 py-3 sm:py-3.5 flex items-center gap-3 transition-all mb-4 shadow-xs">
-                <div className="flex items-center gap-1.5 text-xs sm:text-sm font-black text-slate-900 select-none shrink-0">
-                  <span className="font-extrabold text-slate-900">IN</span>
-                  <span className="font-extrabold text-slate-900">+91</span>
+                <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-900 select-none shrink-0">
+                  <span className="font-semibold text-slate-900">IN</span>
+                  <span className="font-semibold text-slate-900">+91</span>
                 </div>
                 <div className="h-5 w-[1px] bg-slate-200 shrink-0" />
                 <input
@@ -394,7 +386,7 @@ export default function BottomBarOtpSheet({
               <button
                 type="submit"
                 disabled={phone.length < 10 || phoneLoading}
-                className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-base sm:text-[17px] tracking-wide shadow-[0_8px_20px_rgba(249,115,22,0.28)] hover:shadow-[0_10px_24px_rgba(249,115,22,0.38)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-bold text-base sm:text-[17px] tracking-wide shadow-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {phoneLoading ? (
                   <>
@@ -410,7 +402,7 @@ export default function BottomBarOtpSheet({
               </button>
 
               {/* TERMS & PRIVACY */}
-              <p className="text-[11px] sm:text-xs text-slate-400 text-center font-medium mt-4 sm:mt-5 leading-relaxed select-none">
+              <p className="text-xs sm:text-xs text-slate-400 text-center font-medium mt-4 sm:mt-5 leading-relaxed select-none">
                 By continuing, you agree to our Terms &amp; Privacy Policy
               </p>
             </form>
@@ -424,12 +416,12 @@ export default function BottomBarOtpSheet({
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-orange-500 shrink-0" />
                   <span className="text-xs font-bold text-slate-600">Mobile:</span>
-                  <span className="text-xs font-extrabold text-slate-900">+91 {phone}</span>
+                  <span className="text-xs font-semibold text-slate-900">+91 {phone}</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => { setStep('phone'); setErrorMsg(''); }}
-                  className="text-[11px] font-black text-orange-600 hover:text-orange-700 flex items-center gap-1 cursor-pointer hover:underline"
+                  className="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 cursor-pointer hover:underline"
                 >
                   <EditIcon className="!w-3 !h-3" />
                   <span>Change</span>
@@ -438,7 +430,7 @@ export default function BottomBarOtpSheet({
 
               {/* HEADLINE & SUBTITLE */}
               <div className="text-center mb-4">
-                <h2 className="text-[23px] sm:text-[25px] font-black text-slate-900 tracking-tight font-heading">
+                <h2 className="text-[23px] sm:text-[25px] font-bold text-slate-900 tracking-tight font-heading">
                   Complete Your Profile
                 </h2>
                 <p className="text-xs sm:text-[13px] font-medium text-slate-500 mt-0.5">
@@ -455,7 +447,7 @@ export default function BottomBarOtpSheet({
 
               {/* FULL NAME INPUT */}
               <div className="flex flex-col gap-1 mb-3">
-                <label className="text-[10.5px] font-black text-slate-500 uppercase tracking-wider pl-1">
+                <label className="text-[10.5px] font-bold text-slate-500 pl-1">
                   Full Name
                 </label>
                 <div className="bg-white border border-slate-200/90 hover:border-slate-300 focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/10 rounded-2xl px-3.5 py-3 flex items-center gap-2.5 transition-all shadow-xs">
@@ -477,7 +469,7 @@ export default function BottomBarOtpSheet({
 
               {/* EMAIL ADDRESS INPUT */}
               <div className="flex flex-col gap-1 mb-4">
-                <label className="text-[10.5px] font-black text-slate-500 uppercase tracking-wider pl-1">
+                <label className="text-[10.5px] font-bold text-slate-500 pl-1">
                   Email Address
                 </label>
                 <div className="bg-white border border-slate-200/90 hover:border-slate-300 focus-within:border-orange-500 focus-within:ring-4 focus-within:ring-orange-500/10 rounded-2xl px-3.5 py-3 flex items-center gap-2.5 transition-all shadow-xs">
@@ -501,7 +493,7 @@ export default function BottomBarOtpSheet({
               <button
                 type="submit"
                 disabled={loading || !name.trim() || !email.trim()}
-                className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-black text-base sm:text-[17px] tracking-wide shadow-[0_8px_20px_rgba(249,115,22,0.28)] hover:shadow-[0_10px_24px_rgba(249,115,22,0.38)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-bold text-base sm:text-[17px] tracking-wide shadow-lg hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
@@ -519,7 +511,7 @@ export default function BottomBarOtpSheet({
               <button
                 type="button"
                 onClick={() => { setStep('phone'); setErrorMsg(''); }}
-                className="mt-3 text-xs font-extrabold text-slate-500 hover:text-slate-700 text-center cursor-pointer transition-colors"
+                className="mt-3 text-xs font-semibold text-slate-500 hover:text-slate-700 text-center cursor-pointer transition-colors"
               >
                 ← Back to Mobile Number
               </button>
@@ -528,20 +520,20 @@ export default function BottomBarOtpSheet({
           ) : (
             /* ---------------- 4. STEP 3: INSTANT SUCCESS CONFIRMATION ---------------- */
             <div className="py-6 text-center flex flex-col items-center gap-3.5 animate-fadeIn">
-              <div className="w-18 h-18 rounded-full bg-emerald-50 border-4 border-emerald-100 text-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 relative">
+              <div className="w-18 h-18 rounded-full bg-emerald-50 border-4 border-emerald-100 text-emerald-600 flex items-center justify-center shadow-lg relative">
                 <CheckCircleIcon className="!w-12 !h-12 text-emerald-500" />
                 <div className="absolute inset-0 rounded-full border-2 border-emerald-400 animate-ping opacity-25" />
               </div>
               
               <div className="flex flex-col gap-1">
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight font-heading">
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-heading">
                   Inquiry Submitted!
                 </h3>
                 <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 self-center mt-0.5">
                   ● Lead Sent to Admin
                 </span>
                 <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-1 max-w-xs leading-relaxed">
-                  Welcome, <strong className="text-slate-900 font-extrabold">{name || 'Student'}</strong>! Our counselor will call you at <strong className="text-slate-900 font-extrabold">+91 {phone}</strong> shortly.
+                  Welcome, <strong className="text-slate-900 font-semibold">{name || 'Student'}</strong>! Our counselor will call you at <strong className="text-slate-900 font-semibold">+91 {phone}</strong> shortly.
                 </p>
               </div>
 
