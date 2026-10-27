@@ -132,14 +132,6 @@ export default function ClientShell({ children }) {
     setIsContactModalOpen
   } = usePlacementController();
 
-  useEffect(() => {
-    apiService.pingTraffic('', selectedLocation?.name || '');
-    const interval = setInterval(() => {
-      apiService.pingTraffic('', selectedLocation?.name || '');
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [selectedLocation]);
-
   // Track visitor page views on route changes and maintain live presence
   useEffect(() => {
     trackPageView(pathname);

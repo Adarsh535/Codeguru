@@ -1,5 +1,6 @@
 'use client';
 
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft,
@@ -242,7 +243,8 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
     ];
   };
 
-  return (
+  // Portal to <body> so the modal is never trapped under the page header's stacking context
+  return createPortal(
     <div className="fixed inset-0 z-[100] w-full h-full bg-white flex flex-col overflow-hidden animate-modal-slide-up">
       
       {/* FULL PAGE CONTAINER */}
@@ -354,7 +356,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               </div>
             ) : (
               <div className="relative z-10 w-11 h-11 sm:w-12 sm:h-12 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 p-2.5 flex items-center justify-center shadow-xs mb-1.5 flex-shrink-0">
-                <img src={course.icon} alt={course.title} className="w-full h-full object-contain" />
+                {course.icon ? <img src={course.icon} alt={course.title} className="w-full h-full object-contain" /> : <GraduationCap className="w-full h-full text-amber-400" aria-hidden="true" />}
               </div>
             )}
 
@@ -641,5 +643,5 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
       )}
 
     </div>
-  );
+  , document.body);
 }

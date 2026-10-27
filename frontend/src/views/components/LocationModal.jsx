@@ -58,6 +58,16 @@ export default function LocationModal({ isOpen, onClose, selectedLocation, onSel
     }
   }, [isOpen]);
 
+  // Escape closes the modal (closing animation runs from the isOpen effect)
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
   if (!renderModal) return null;
 
   return (

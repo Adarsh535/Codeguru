@@ -1,6 +1,7 @@
 'use client';
 
 import { Check as CheckRoundedIcon, AlertCircle as PriorityHighRoundedIcon, Trash2 as DeleteOutlineRoundedIcon } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import React from 'react';
 
 /**
@@ -22,7 +23,8 @@ export default function AlertModal({
 
   const isSuccess = type === 'success';
 
-  return (
+  // Portal to <body> so the modal is never trapped under the page header's stacking context
+  return createPortal(
     <div 
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm select-none animate-backdrop-in"
       onClick={onClose}
@@ -70,5 +72,5 @@ export default function AlertModal({
         </button>
       </div>
     </div>
-  );
+  , document.body);
 }

@@ -656,10 +656,9 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     }
   ];
 
-  const allCourses = [
-    ...customCourses,
-    ...INITIAL_COURSES.filter(ic => !customCourses.some(cc => (cc.id === ic.id || (cc.title && cc.title.toLowerCase() === ic.title.toLowerCase()))))
-  ];
+  // Admin-panel courses only; the built-in list is shown just when the API returns nothing,
+  // otherwise sample courses that do not exist would appear next to the real ones
+  const allCourses = customCourses.length > 0 ? customCourses : INITIAL_COURSES;
 
   const currentCategoryObj = categories.find(c => c.id === activeCategory) || categories[0] || { name: 'Featured', id: 'all' };
 

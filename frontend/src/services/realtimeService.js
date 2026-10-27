@@ -42,8 +42,9 @@ class RealtimeSyncManager {
       }
     }
 
-    // 2. Start SSE Stream
-    this.connectSSE();
+    // 2. SSE stream is not opened on the public site: /realtime/stream needs a one-time
+    //    ticket that the backend only issues to logged-in admins, so every attempt here
+    //    was a 401 retried forever. Visitors get fresh data on focus / tab return below.
 
     // 2. Window focus and visibility revalidation
     window.addEventListener('focus', () => {

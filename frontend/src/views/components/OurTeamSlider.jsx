@@ -77,12 +77,12 @@ export default function OurTeamSlider({ onOpenContactModal }) {
     window.addEventListener('codeguru_refresh_all', fetchTeam);
     window.addEventListener('focus', fetchTeam);
 
-    // 2. Background polling fallback (every 4 seconds)
+    // 2. Background refresh while the tab is visible (team changes rarely)
     const interval = setInterval(() => {
       if (typeof document !== 'undefined' && !document.hidden) {
         fetchTeam();
       }
-    }, 4000);
+    }, 120000);
 
     return () => {
       isMounted = false;

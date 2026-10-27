@@ -70,6 +70,16 @@ export default function BottomBarOtpSheet({
     }
   }, [isOpen, user]);
 
+  // Escape closes the modal (closing animation runs from the isOpen effect)
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
   if (!renderSheet) return null;
 
   const handleClose = () => {
