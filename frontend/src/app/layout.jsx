@@ -119,7 +119,7 @@ export default function RootLayout({ children }) {
         '@id': 'https://codegurru.in/#organization',
         name: BUSINESS_CONFIG.brandName,
         legalName: BUSINESS_CONFIG.legalName,
-        alternateName: [...BUSINESS_CONFIG.alternateNames, 'CodeGuru', 'CodeGuru Web', 'CodeGuru Academy'],
+        alternateName: [...BUSINESS_CONFIG.alternateNames, 'कोड गुरु', 'कोडगुरु'],
         url: BUSINESS_CONFIG.urls.siteUrl,
         logo: BUSINESS_CONFIG.urls.logo,
         founder: {
@@ -208,7 +208,7 @@ export default function RootLayout({ children }) {
         '@id': 'https://codegurru.in/#website',
         url: BUSINESS_CONFIG.urls.siteUrl,
         name: BUSINESS_CONFIG.brandName,
-        alternateName: ['CodeGuru', 'Code Gurru', 'CodeGuru Web'],
+        alternateName: ['Code Gurru', 'कोड गुरु'],
         potentialAction: {
           '@type': 'SearchAction',
           target: `${BUSINESS_CONFIG.urls.siteUrl}/courses?search={search_term_string}`,

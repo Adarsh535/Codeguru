@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import HeroSection from '../views/components/HeroSection';
 import BannerSlider from '../views/components/BannerSlider';
 import TechLanguageSlider from '../views/components/TechLanguageSlider';
@@ -11,9 +12,12 @@ import ContactUsSection from '../views/components/ContactUsSection';
 import { BUSINESS_CONFIG } from '../config/business';
 
 export const metadata = {
-  title: 'IT Training, Software Development & Laptop Repair',
+  // `absolute` because the root layout's '%s | CodeGurru' template does not apply to the root page
+  title: {
+    absolute: 'CodeGurru (Code Gurru) Ayodhya – Coding, Arena Animation, Robotics & Repair Training Institute',
+  },
   description:
-    'CodeGurru (UK VK Pvt. Ltd.) is Uttar Pradesh’s premier IT ecosystem founded by Kishan Pandey. Offering 100% placement IT bootcamps, custom software development & same-day laptop repair in Ayodhya & Lucknow.',
+    'CodeGurru (Code Gurru), Ayodhya: coding, web & app development, AI/ML, Arena Animation, robotics, digital marketing, server admin, and mobile, laptop & home appliance repairing courses for students from Class 6 to MCA across UP and Bihar.',
   keywords: [
     'CodeGurru',
     'Code Gurru',
@@ -101,9 +105,15 @@ export default function HomePage({ onOpenContactModal, onOpenEnrollModal }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
       />
       {/* SEMANTIC H1 FOR GOOGLE CRAWLER INDEXING */}
-      <h1 className="sr-only">
-        CodeGurru (UK VK Pvt. Ltd.) - Best IT Training Institute, Software Development &amp; Laptop Repair in Uttar Pradesh
-      </h1>
+      <div className="max-w-6xl mx-auto px-4 pt-4">
+        <h1 className="text-base sm:text-xl font-black text-slate-900 tracking-tight">
+          CodeGurru (Code Gurru) – Computer, Coding, Animation &amp; Repair Training Institute in Ayodhya
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-600 mt-1">
+          Courses for students from Class 6 to Polytechnic, BA, BCA &amp; MCA across Uttar Pradesh and Bihar.{' '}
+          <Link href="/learn" className="font-bold text-orange-600 hover:text-orange-700">Find courses in your city →</Link>
+        </p>
+      </div>
 
       <div className="flex flex-col w-full pb-12 bg-slate-50">
         <BannerSlider onOpenContactModal={onOpenContactModal} />
