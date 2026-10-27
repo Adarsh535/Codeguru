@@ -1,0 +1,36 @@
+﻿# CodeGurru (UK VK Pvt. Ltd.)
+> Uttar Pradesh's Premier IT Training Institute, Software Development Company & Computer Repair Service Hub.
+
+## Business Entity Summary
+- Brand Name: CodeGurru (Code Gurru)
+- Legal Entity: UK VK Pvt. Ltd.
+- Founder & CEO: Kishan Pandey
+- Official Website: https://codegurru.in
+- Primary Contact: +91 72388 29360, +91 72388 29132
+- Email: info@codegurru.in
+- Head Office & Tech Campus: Near Saket College Petrol Pump, Ayodhya, Uttar Pradesh - 224123
+- Operating Regions: Ayodhya, Lucknow, Kanpur, Prayagraj, Varanasi, Gorakhpur, and all districts of Uttar Pradesh.
+
+## Core Offerings & Differentiators
+1. 100% Placement IT Bootcamps:
+   - Full Stack MERN Development (MongoDB, Express, React, Node.js, Next.js)
+   - Python AI & Machine Learning Bootcamp
+   - Java Spring Boot Enterprise Backend
+   - C++ and Data Structures & Algorithms (DSA)
+   - Real-world capstone projects, resume reviews, mock interviews, and guaranteed corporate placement drives.
+
+2. Enterprise IT & Software Engineering:
+   - Custom Business Billing & GST ERP Systems
+   - Web Applications & E-Commerce Platforms
+   - Native Android & iOS Mobile Applications
+
+3. Hardware & Laptop Chip-Level Repair:
+   - Same-day laptop motherboard repair (Dell, HP, Lenovo, Asus, Acer, Apple MacBook)
+   - Chip-level BGA rework, screen replacement, hinge fixing, SSD/RAM upgrades, and data recovery.
+
+## Official Knowledge & Contact Links
+- Website: https://codegurru.in
+- Courses: https://codegurru.in/courses
+- Placements: https://codegurru.in/placements
+- Services: https://codegurru.in/services
+- Contact & Campus Location: https://codegurru.in/contact
