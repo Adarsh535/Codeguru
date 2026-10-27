@@ -1,14 +1,20 @@
 import '../index.css';
-import { Inter, Plus_Jakarta_Sans, Mukta } from 'next/font/google';
+import { Inter, Plus_Jakarta_Sans, Mukta, Bricolage_Grotesque, Tiro_Devanagari_Hindi } from 'next/font/google';
 import '../models/apiClient';
 import ClientShell from './ClientShell';
 import ClickSound from '../views/components/ClickSound';
+import ScrollReveal from '../views/components/ScrollReveal';
+import CustomCursor from '../views/components/CustomCursor';
+import ListenButton from '../views/components/ListenButton';
 import { BUSINESS_CONFIG } from '../config/business';
 
 // Self-hosted by next/font: no request to Google at runtime and no layout shift on load
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-inter', display: 'swap' });
 const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['500', '600', '700'], variable: '--font-jakarta', display: 'swap' });
 const mukta = Mukta({ subsets: ['devanagari', 'latin'], weight: ['400', '500', '600'], variable: '--font-mukta', display: 'swap' });
+// Display faces for h1/h2 only: the cinematic headline look
+const bricolage = Bricolage_Grotesque({ subsets: ['latin'], weight: ['600', '700'], variable: '--font-display', display: 'swap' });
+const tiro = Tiro_Devanagari_Hindi({ subsets: ['devanagari'], weight: '400', variable: '--font-display-hi', display: 'swap' });
 
 export const viewport = {
   width: 'device-width',
@@ -288,7 +294,7 @@ export default function RootLayout({ children }) {
   };
 
   return (
-    <html lang="en-IN" className={`scroll-smooth ${inter.variable} ${jakarta.variable} ${mukta.variable}`} suppressHydrationWarning>
+    <html lang="en-IN" className={`scroll-smooth ${inter.variable} ${jakarta.variable} ${mukta.variable} ${bricolage.variable} ${tiro.variable}`} suppressHydrationWarning>
       <head>
         <meta
           httpEquiv="Content-Security-Policy"
@@ -307,6 +313,9 @@ export default function RootLayout({ children }) {
       <body className="font-sans bg-slate-50 text-slate-900 antialiased selection:bg-orange-200 selection:text-slate-900" suppressHydrationWarning>
         <ClientShell>{children}</ClientShell>
         <ClickSound />
+        <ScrollReveal />
+        <CustomCursor />
+        <ListenButton />
       </body>
     </html>
   );

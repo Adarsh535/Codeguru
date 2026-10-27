@@ -43,7 +43,16 @@ const DEFAULT_SLIDES = [
 
 // Banner titles come from the admin panel; emoji are stripped so headlines stay clean
 const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu;
-const cleanText = (text) => (typeof text === 'string' ? text.replace(EMOJI, '').replace(/\s{2,}/g, ' ').trim() : text);
+// ALL-CAPS titles typed in the admin panel are shown in Title Case; known acronyms stay upper case
+const ACRONYMS = new Set(['AI', 'ML', 'IT', 'IOT', 'MNC', 'MNCS', 'LPA', 'UP', 'MERN', 'HTML', 'CSS', 'JS', 'PHP', 'SQL', 'DSA', 'AWS', 'CCNA', 'BCA', 'MCA', 'ITI', 'VFX', 'UI', 'UX', 'SEO', 'CEO', 'HR', 'PC', 'AC', 'GST', 'CCC', 'DCA', 'ADCA']);
+const softenCaps = (text) => {
+  const letters = text.replace(/[^A-Za-z]/g, '');
+  if (letters.length < 8 || letters !== letters.toUpperCase()) return text;
+  return text.replace(/[A-Za-z][A-Za-z0-9.+#]*/g, (word) =>
+    ACRONYMS.has(word.toUpperCase().replace(/[^A-Z]/g, '')) ? word.toUpperCase() : word.charAt(0) + word.slice(1).toLowerCase()
+  );
+};
+const cleanText = (text) => (typeof text === 'string' ? softenCaps(text.replace(EMOJI, '').replace(/\s{2,}/g, ' ').trim()) : text);
 const cleanSlide = (slide) => ({ ...slide, title: cleanText(slide.title), subtitle: cleanText(slide.subtitle), badge: cleanText(slide.badge) });
 
 // Ask Cloudinary for a compressed, right-sized image (WebP/AVIF where supported)

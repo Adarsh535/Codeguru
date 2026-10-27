@@ -104,12 +104,12 @@ export default function HomePage({ onOpenContactModal, onOpenEnrollModal }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
       />
-      {/* SEMANTIC H1 FOR GOOGLE CRAWLER INDEXING */}
-      <div className="max-w-6xl mx-auto px-4 pt-3 pb-3 sm:pt-4 sm:pb-4">
-        <h1 className="text-[15px] leading-snug sm:text-xl font-semibold text-slate-900">
+      {/* SEMANTIC H1 FOR SEARCH ENGINES: in the HTML, visually hidden so the banner sits right under the navbar */}
+      <div className="sr-only">
+        <h1>
           CodeGurru (Code Gurru) – Computer, Coding, Animation &amp; Repair Training Institute in Ayodhya
         </h1>
-        <p className="hidden sm:block text-sm text-slate-600 mt-1">
+        <p>
           Courses for students from Class 6 to Polytechnic, BA, BCA &amp; MCA across Uttar Pradesh and Bihar.{' '}
           <Link href="/learn" className="font-bold text-orange-600 hover:text-orange-700">Find courses in your city →</Link>
         </p>
@@ -122,13 +122,13 @@ export default function HomePage({ onOpenContactModal, onOpenEnrollModal }) {
         <CategoryNavbar onOpenContactModal={onOpenContactModal} onOpenEnrollModal={onOpenEnrollModal} isHomePage={true} />
         
         {/* DYNAMIC FEATURED AD BANNER (MANAGED FROM ADMIN CRM) */}
-        <FeaturedAdBanner onOpenContactModal={onOpenContactModal} />
+        <div data-reveal><FeaturedAdBanner onOpenContactModal={onOpenContactModal} /></div>
 
-        <HeroSection onOpenContactModal={onOpenContactModal} />
-        <TopPlacementSlider onOpenContactModal={onOpenContactModal} />
-        <OurTeamSlider onOpenContactModal={onOpenContactModal} />
-        <OurBranchesSection onOpenContactModal={onOpenContactModal} />
-        <ContactUsSection />
+        <div data-reveal><HeroSection onOpenContactModal={onOpenContactModal} /></div>
+        <div data-reveal><TopPlacementSlider onOpenContactModal={onOpenContactModal} /></div>
+        <div data-reveal><OurTeamSlider onOpenContactModal={onOpenContactModal} /></div>
+        <div data-reveal><OurBranchesSection onOpenContactModal={onOpenContactModal} /></div>
+        <div data-reveal><ContactUsSection /></div>
       </div>
     </>
   );

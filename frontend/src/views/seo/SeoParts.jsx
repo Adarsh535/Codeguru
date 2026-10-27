@@ -55,7 +55,7 @@ export function PageHero({ breadcrumbs, eyebrow, title, intro, lang, topicName, 
 
 export function Section({ title, children, id }) {
   return (
-    <section id={id} className="max-w-5xl mx-auto px-4 mt-10">
+    <section id={id} data-reveal className="max-w-5xl mx-auto px-4 mt-10">
       {title && <h2 className="text-lg sm:text-2xl font-bold text-slate-900 mb-4">{title}</h2>}
       {children}
     </section>
@@ -112,7 +112,7 @@ export function CourseGrid({ courses, lang, emptyText }) {
     return <p className="bg-white rounded-2xl border border-dashed border-slate-300 p-6 text-sm text-slate-600">{emptyText}</p>;
   }
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div data-reveal-stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {courses.map((course) => <CourseCard key={course.slug} course={course} lang={lang} />)}
     </div>
   );
