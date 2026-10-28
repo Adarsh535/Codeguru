@@ -23,10 +23,6 @@ export { default as TechLanguageSlider } from './components/TechLanguageSlider';
 export { default as OurBranchesSection } from './components/OurBranchesSection';
 export { default as ContactUsSection } from './components/ContactUsSection';
 
-// PWA Features
-export { default as PwaInstallBanner } from './components/PwaInstallBanner';
-export { default as PwaSplashScreen } from './components/PwaSplashScreen';
-
 // Modals
 export { default as CourseDetailsModal } from './components/CourseDetailsModal';
 export { default as BatchEnrollModal } from './components/BatchEnrollModal';
