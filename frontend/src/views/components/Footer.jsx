@@ -295,7 +295,7 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
         {/* BOTTOM COPYRIGHT & LEGAL BAR */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 text-xs text-slate-400 font-medium">
           <div className="flex items-center gap-1.5 text-center sm:text-left">
-            <span>© {new Date().getFullYear()} CodeGurru (UK VK Pvt. Ltd.). All Rights Reserved. Founded by Kishan Pandey.</span>
+            <span suppressHydrationWarning>© {new Date().getFullYear()} CodeGurru (UK VK Pvt. Ltd.). All Rights Reserved. Founded by Kishan Pandey.</span>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-slate-300 font-medium text-xs">
@@ -303,7 +303,14 @@ export default function Footer({ selectedLocation, onOpenLocationModal, onOpenCo
             <Link href="/hi/learn" hrefLang="hi" className="hover:text-amber-400 transition-colors">हिंदी में देखें</Link>
             <Link href="/privacy" className="hover:text-amber-400 transition-colors">Privacy policy</Link>
             <Link href="/terms" className="hover:text-amber-400 transition-colors">Terms</Link>
-            <button type="button" className="hover:text-amber-400 transition-colors" onClick={onOpenContactModal}>Contact us</button>
+            <button
+              suppressHydrationWarning
+              type="button"
+              className="hover:text-amber-400 transition-colors"
+              onClick={onOpenContactModal}
+            >
+              Contact us
+            </button>
             <SoundToggle />
           </div>
         </div>

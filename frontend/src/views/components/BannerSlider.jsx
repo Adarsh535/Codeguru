@@ -4,43 +4,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Zap } from 'lucide-react';
 import { apiService } from '../../services/apiService';
 
-const DEFAULT_SLIDES = [
-  {
-    id: 'default-1',
-    type: 'image',
-    title: 'Success Stories & Campus Placement Highlights 🚀',
-    subtitle: 'Watch Exclusive Campus Placement & Tech Drive Highlights with 100% Verified Placements',
-    imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop',
-    badge: 'SUCCESS STORIES',
-    badgeColor: 'bg-[#10b981] text-white',
-    ctaText: 'Explore Placements'
-  },
-  {
-    id: 'default-2',
-    type: 'video',
-    title: 'CodeGurru Official Video 🎥',
-    subtitle: 'Watch Exclusive Campus Placement & Tech Drive Highlights',
-    videoUrl: '/codeguru%20video.mp4',
-    poster: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',
-    badge: 'FEATURED VIDEO',
-    badgeColor: 'bg-rose-500 text-white',
-    ctaText: 'Apply Drive'
-  },
-  {
-    id: 'default-3',
-    type: 'image',
-    title: 'MERN Stack Developer Bootcamp 🔥',
-    subtitle: 'MongoDB • Express • React • Node.js | Live Projects + 100% Placement Support',
-    imageUrl: 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?auto=format&fit=crop&w=1200&q=80',
-    badge: 'NEW BATCH 2026',
-    badgeColor: 'bg-gradient-to-r from-orange-400 to-amber-500 text-white',
-    originalPrice: '₹14,999',
-    price: '₹4,999',
-    discount: '66% OFF',
-    ctaText: 'Enroll Now @ ₹4,999'
-  }
-];
-
 // Banner titles come from the admin panel; emoji are stripped so headlines stay clean
 const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu;
 // ALL-CAPS titles typed in the admin panel are shown in Title Case; known acronyms stay upper case
@@ -53,7 +16,13 @@ const softenCaps = (text) => {
   );
 };
 const cleanText = (text) => (typeof text === 'string' ? softenCaps(text.replace(EMOJI, '').replace(/\s{2,}/g, ' ').trim()) : text);
-const cleanSlide = (slide) => ({ ...slide, title: cleanText(slide.title), subtitle: cleanText(slide.subtitle), badge: cleanText(slide.badge) });
+const cleanSlide = (slide) => ({
+  ...slide,
+  title: cleanText(slide.title) || '',
+  subtitle: cleanText(slide.subtitle) || '',
+  badge: cleanText(slide.badge) || '',
+  ctaText: cleanText(slide.ctaText) || ''
+});
 
 // Ask Cloudinary for a compressed, right-sized image (WebP/AVIF where supported)
 const optimizeImage = (url) =>
@@ -62,14 +31,33 @@ const optimizeImage = (url) =>
     : url;
 
 export default function BannerSlider({ onOpenContactModal }) {
-  const [slides, setSlides] = useState(() => DEFAULT_SLIDES.map(cleanSlide));
+  const [slides, setSlides] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  const videoRefs = useRef({});
 
   useEffect(() => {
     let isMounted = true;
 
+    // Immediately load from cache on client mount (safe from SSR hydration mismatch)
+    try {
+      const cached = sessionStorage.getItem('cg_cached_banners');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSlides(parsed.map(cleanSlide));
+        }
+      }
+    } catch (e) {}
+
     const fetchBanners = () => {
       apiService.getBanners().then(dynamicBanners => {
-        if (isMounted && dynamicBanners && dynamicBanners.length > 0) {
+        if (!isMounted) return;
+        if (Array.isArray(dynamicBanners) && dynamicBanners.length > 0) {
           const formatted = dynamicBanners.map(b => {
             const media = b.mediaUrl || b.videoUrl || b.imageUrl || '';
             const isVid = b.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(media) || media.includes('/video/');
@@ -83,6 +71,14 @@ export default function BannerSlider({ onOpenContactModal }) {
             };
           });
           setSlides(formatted);
+          try {
+            sessionStorage.setItem('cg_cached_banners', JSON.stringify(formatted));
+          } catch (e) {}
+        } else if (Array.isArray(dynamicBanners) && dynamicBanners.length === 0) {
+          setSlides([]);
+          try {
+            sessionStorage.removeItem('cg_cached_banners');
+          } catch (e) {}
         }
       }).catch(() => {});
     };
@@ -102,15 +98,8 @@ export default function BannerSlider({ onOpenContactModal }) {
     };
   }, []);
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
-
-  const videoRefs = useRef({});
-
   useEffect(() => {
+    if (slides.length <= 1) return;
     const currentSlide = slides[currentIndex];
     const isVid = currentSlide && (currentSlide.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(currentSlide.mediaUrl || currentSlide.videoUrl || ''));
     const timer = setInterval(() => {
@@ -135,10 +124,12 @@ export default function BannerSlider({ onOpenContactModal }) {
   }, [currentIndex]);
 
   const handleNext = () => {
+    if (slides.length <= 1) return;
     setCurrentIndex((prev) => (prev + 1) % slides.length);
   };
 
   const handlePrev = () => {
+    if (slides.length <= 1) return;
     setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
@@ -181,6 +172,21 @@ export default function BannerSlider({ onOpenContactModal }) {
     setTouchStart(null);
     setTouchEnd(null);
   };
+
+  // While loading on first load (no cache yet), show an elegant dark skeleton
+  if (slides.length === 0) {
+    return (
+      <div className="w-full px-0 pt-0 mb-4 sm:mb-6 select-none">
+        <div className="relative w-full aspect-[16/9] sm:aspect-[24/8] lg:aspect-[28/8] max-h-[380px] rounded-b-2xl sm:rounded-b-[48px] md:rounded-b-[56px] overflow-hidden bg-slate-900 border border-slate-800 animate-pulse flex items-end p-6 sm:p-10">
+          <div className="space-y-3 w-full max-w-md">
+            <div className="h-4 w-28 bg-slate-800 rounded-md" />
+            <div className="h-7 w-64 sm:w-80 bg-slate-800 rounded-lg" />
+            <div className="h-4 w-40 sm:w-56 bg-slate-800 rounded-md" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full px-0 pt-0 mb-4 sm:mb-6 select-none">
@@ -232,23 +238,25 @@ export default function BannerSlider({ onOpenContactModal }) {
                 )}
 
                 {/* HEADLINE / SUBTITLE / CTA OVERLAY (F12) */}
-                {(slide.title || slide.subtitle) && (
+                {Boolean(slide.badge || slide.title || slide.subtitle || slide.ctaText) && (
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent flex flex-col justify-end p-6 sm:p-10 pointer-events-none">
                     <div className="max-w-2xl space-y-2 pointer-events-auto">
-                      {slide.badge && (
+                      {Boolean(slide.badge) && (
                         <span className="inline-block px-2.5 py-1 rounded-md text-xs font-medium bg-white/15 text-amber-200 backdrop-blur-sm">
                           {slide.badge}
                         </span>
                       )}
-                      <h2 className="text-xl sm:text-3xl md:text-4xl font-bold text-white font-heading leading-tight">
-                        {slide.title}
-                      </h2>
-                      {slide.subtitle && (
+                      {Boolean(slide.title) && (
+                        <h2 className="text-xl sm:text-3xl md:text-4xl font-bold text-white font-heading leading-tight">
+                          {slide.title}
+                        </h2>
+                      )}
+                      {Boolean(slide.subtitle) && (
                         <p className="text-sm sm:text-base text-slate-200/90 line-clamp-2 max-w-xl">
                           {slide.subtitle}
                         </p>
                       )}
-                      {slide.ctaText && (
+                      {Boolean(slide.ctaText) && (
                         <div className="pt-2">
                           <button
                             suppressHydrationWarning
@@ -295,24 +303,25 @@ export default function BannerSlider({ onOpenContactModal }) {
         </div>
 
         {/* BOTTOM PAGINATION DOTS */}
-        <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-col items-center pointer-events-none">
-          <div className="flex items-center gap-1.5 bg-slate-900/50 backdrop-blur-sm px-3 py-2 rounded-full pointer-events-auto">
-            {slides.map((_, idx) => (
-              <button
-                suppressHydrationWarning
-                key={idx}
-                onClick={() => setCurrentIndex(idx)}
-                className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                  currentIndex === idx ? 'w-4 bg-[#facc15]' : 'w-1.5 bg-slate-400'
-                }`}
-                title={`Slide ${idx + 1}`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
+        {slides.length > 1 && (
+          <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-col items-center pointer-events-none">
+            <div className="flex items-center gap-1.5 bg-slate-900/50 backdrop-blur-sm px-3 py-2 rounded-full pointer-events-auto">
+              {slides.map((_, idx) => (
+                <button
+                  suppressHydrationWarning
+                  key={idx}
+                  onClick={() => setCurrentIndex(idx)}
+                  className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                    currentIndex === idx ? 'w-4 bg-[#facc15]' : 'w-1.5 bg-slate-400'
+                  }`}
+                  title={`Slide ${idx + 1}`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
-

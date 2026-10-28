@@ -148,6 +148,7 @@ export default function ListenButton() {
       {state === 'idle' ? (
         <button
           type="button"
+          suppressHydrationWarning
           onClick={start}
           className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium hover:bg-white/10 transition-colors"
           aria-label={hi ? 'यह पेज सुनें' : 'Listen to this page'}
@@ -171,6 +172,7 @@ export default function ListenButton() {
           </span>
           <button
             type="button"
+            suppressHydrationWarning
             onClick={togglePause}
             className="w-9 h-9 inline-flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
             aria-label={state === 'playing' ? (hi ? 'रोकें' : 'Pause') : hi ? 'फिर से चलाएं' : 'Resume'}
@@ -179,6 +181,7 @@ export default function ListenButton() {
           </button>
           <button
             type="button"
+            suppressHydrationWarning
             onClick={stop}
             className="w-9 h-9 inline-flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
             aria-label={hi ? 'बंद करें' : 'Stop'}

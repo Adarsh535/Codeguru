@@ -18,6 +18,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
   const [likedCourses, setLikedCourses] = useState({});
   const [customCourses, setCustomCourses] = useState([]);
   const [apiCategories, setApiCategories] = useState([]);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [selectedCourseForDetails, setSelectedCourseForDetails] = useState(null);
 
   const scrollToCatalogSection = (delay = 40) => {
@@ -26,7 +27,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       const catalogElem = document.getElementById('course-catalog-section');
       if (catalogElem) {
         const header = document.querySelector('header');
-        const headerHeight = header ? header.getBoundingClientRect().height : (window.innerWidth < 640 ? 56 : 80);
+        const headerHeight = header ? header.getBoundingClientRect().height : (window.innerWidth < 640 ? 70 : 84);
         const rect = catalogElem.getBoundingClientRect();
         const currentScroll = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
         const targetY = Math.max(0, Math.round(currentScroll + rect.top - headerHeight + 1));
@@ -42,14 +43,35 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
   useEffect(() => {
     let isMounted = true;
 
+    try {
+      const cachedCourses = sessionStorage.getItem('cg_cached_courses');
+      if (cachedCourses) {
+        const parsed = JSON.parse(cachedCourses);
+        if (Array.isArray(parsed) && parsed.length > 0) setCustomCourses(parsed);
+      }
+      const cachedCats = sessionStorage.getItem('cg_cached_categories');
+      if (cachedCats) {
+        const parsed = JSON.parse(cachedCats);
+        const hasOrder = parsed.some(c => typeof c.order === 'number' && c.order > 0);
+        if (hasOrder && Array.isArray(parsed) && parsed.length > 0) setApiCategories(parsed);
+      }
+    } catch (e) {}
+
     const fetchCoursesAndCategories = () => {
       Promise.all([
         apiService.getCourses().catch(() => []),
         apiService.getCategories().catch(() => [])
       ]).then(([coursesData, catData]) => {
         if (isMounted) {
-          if (coursesData && coursesData.length > 0) setCustomCourses(coursesData);
-          if (catData && catData.length > 0) setApiCategories(catData);
+          if (Array.isArray(coursesData)) {
+            setCustomCourses(coursesData);
+            try { sessionStorage.setItem('cg_cached_courses', JSON.stringify(coursesData)); } catch (e) {}
+          }
+          if (Array.isArray(catData)) {
+            setApiCategories(catData);
+            try { sessionStorage.setItem('cg_cached_categories', JSON.stringify(catData)); } catch (e) {}
+          }
+          setHasLoadedOnce(true);
         }
       });
     };
@@ -247,18 +269,27 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
   };
 
   const categories = (apiCategories.length > 0
-    ? apiCategories.filter(ac => ac.isActive !== false).map(ac => {
-        const catId = ac.category || ac.id;
-        const foundDefault = defaultCategories.find(dc => dc.id === catId || dc.id === ac.id);
-        return {
-          id: catId,
-          name: ac.label,
-          icon: foundDefault ? foundDefault.icon : Layers,
-          img: resolveCategoryLogo(catId, ac.label, ac.icon),
-          bgColor: ac.bgColor || foundDefault?.bgColor || 'bg-blue-50',
-          isActive: ac.isActive !== false
-        };
-      })
+    ? [...apiCategories]
+        .filter(ac => ac.isActive !== false)
+        .sort((a, b) => {
+          const ordA = Number(a.order) || 999;
+          const ordB = Number(b.order) || 999;
+          if (ordA !== ordB) return ordA - ordB;
+          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+        })
+        .map(ac => {
+          const catId = ac.category || ac.id;
+          const foundDefault = defaultCategories.find(dc => dc.id === catId || dc.id === ac.id);
+          return {
+            id: catId,
+            name: ac.label,
+            order: typeof ac.order !== 'undefined' ? Number(ac.order) : 0,
+            icon: foundDefault ? foundDefault.icon : Layers,
+            img: resolveCategoryLogo(catId, ac.label, ac.icon),
+            bgColor: ac.bgColor || foundDefault?.bgColor || 'bg-blue-50',
+            isActive: ac.isActive !== false
+          };
+        })
     : defaultCategories).filter(c => c.isActive !== false);
 
   const SUB_CATEGORIES = {};
@@ -297,368 +328,7 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     { label: 'One Year', value: 'One Year', matchKeys: ['One Year', 'one year', '1 Year', '1 year', '1Year', '12 Months', '12 months', 'Year'] }
   ];
 
-  const INITIAL_COURSES = [
-    // 1. SOFTWARE DEVELOPMENT (coding)
-    {
-      id: 'mern-stack',
-      categoryId: 'coding',
-      subCategory: 'web',
-      title: 'Full-Stack Web Development (MERN)',
-      duration: '6 Months',
-      level: 'Intermediate',
-      mode: 'Live Classes',
-      price: '₹8,999',
-      originalPrice: '₹14,000',
-      discount: '35% OFF',
-      tag: 'BESTSELLER',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
-      iconBg: 'bg-cyan-50'
-    },
-    {
-      id: 'react-nextjs',
-      categoryId: 'coding',
-      subCategory: 'web',
-      title: 'Frontend Masterclass (React & Next.js)',
-      duration: '4 Months',
-      level: 'Advanced',
-      mode: 'Self-Paced',
-      price: '₹3,999',
-      originalPrice: '₹6,999',
-      discount: '42% OFF',
-      tag: 'BESTSELLER',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg',
-      iconBg: 'bg-slate-100'
-    },
-    {
-      id: 'backend-node',
-      categoryId: 'coding',
-      subCategory: 'web',
-      title: 'Backend Engineering & REST APIs',
-      duration: '4 Months',
-      level: 'Intermediate',
-      mode: 'Live + Record',
-      price: '₹5,499',
-      originalPrice: '₹8,500',
-      discount: '35% OFF',
-      tag: null,
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
-      iconBg: 'bg-green-50'
-    },
-    {
-      id: 'java-springboot',
-      categoryId: 'coding',
-      subCategory: 'web',
-      title: 'Java & Spring Boot Enterprise Dev',
-      duration: '6 Months',
-      level: 'Advanced',
-      mode: 'Live + Record',
-      price: '₹7,499',
-      originalPrice: '₹12,999',
-      discount: '42% OFF',
-      tag: null,
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-      iconBg: 'bg-red-50'
-    },
-    {
-      id: 'swift-ios',
-      categoryId: 'coding',
-      subCategory: 'app',
-      title: 'iOS App Development with Swift',
-      duration: '5 Months',
-      level: 'Beginner',
-      mode: 'Live Classes',
-      price: '₹6,999',
-      originalPrice: '₹11,000',
-      discount: '36% OFF',
-      tag: 'BESTSELLER',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg',
-      iconBg: 'bg-orange-50'
-    },
-    {
-      id: 'flutter-app',
-      categoryId: 'coding',
-      subCategory: 'app',
-      title: 'Flutter Cross-Platform App Development',
-      duration: '4 Months',
-      level: 'Intermediate',
-      mode: 'Live Classes',
-      price: '₹5,999',
-      originalPrice: '₹9,999',
-      discount: '40% OFF',
-      tag: 'POPULAR',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flutter/flutter-original.svg',
-      iconBg: 'bg-sky-50'
-    },
-    {
-      id: 'android-kotlin',
-      categoryId: 'coding',
-      subCategory: 'app',
-      title: 'Android App Development (Kotlin)',
-      duration: '5 Months',
-      level: 'Beginner',
-      mode: 'Live + Record',
-      price: '₹6,499',
-      originalPrice: '₹10,500',
-      discount: '38% OFF',
-      tag: null,
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kotlin/kotlin-original.svg',
-      iconBg: 'bg-purple-50'
-    },
-    {
-      id: 'python-aiml',
-      categoryId: 'coding',
-      subCategory: 'ai',
-      title: 'Python Programming & AI/ML Masterclass',
-      duration: '4 Months',
-      level: 'Beginner to Advanced',
-      mode: 'Live + Record',
-      price: '₹6,999',
-      originalPrice: '₹11,999',
-      discount: '41% OFF',
-      tag: 'BESTSELLER',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-      iconBg: 'bg-blue-50'
-    },
-    {
-      id: 'machine-learning',
-      categoryId: 'coding',
-      subCategory: 'ai',
-      title: 'Machine Learning & Neural Networks',
-      duration: '6 Months',
-      level: 'Advanced',
-      mode: 'Live Classes',
-      price: '₹8,499',
-      originalPrice: '₹14,999',
-      discount: '43% OFF',
-      tag: 'HOT',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tensorflow/tensorflow-original.svg',
-      iconBg: 'bg-amber-50'
-    },
-    {
-      id: 'data-science',
-      categoryId: 'coding',
-      subCategory: 'ai',
-      title: 'Data Science & Big Data Engineering',
-      duration: '6 Months',
-      level: 'Advanced',
-      mode: 'Live + Project',
-      price: '₹8,999',
-      originalPrice: '₹15,000',
-      discount: '40% OFF',
-      tag: 'FEATURED',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-      iconBg: 'bg-emerald-50'
-    },
-
-    // 2. ROBOTICS & IOT (robotics)
-    {
-      id: 'robotics-automation',
-      categoryId: 'robotics',
-      subCategory: 'robotics',
-      title: 'Robotics & Hardware Automation',
-      duration: '4 Months',
-      level: 'Intermediate',
-      mode: 'Live + Lab',
-      price: '₹7,999',
-      originalPrice: '₹12,000',
-      discount: '33% OFF',
-      tag: 'BESTSELLER',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg',
-      iconBg: 'bg-indigo-50'
-    },
-    {
-      id: 'arduino-iot',
-      categoryId: 'robotics',
-      subCategory: 'robotics',
-      title: 'Arduino & Raspberry Pi Industrial IoT',
-      duration: '3 Months',
-      level: 'Beginner',
-      mode: 'Hands-on Workshop',
-      price: '₹5,499',
-      originalPrice: '₹8,999',
-      discount: '38% OFF',
-      tag: 'POPULAR',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/arduino/arduino-original.svg',
-      iconBg: 'bg-teal-50'
-    },
-    {
-      id: 'embedded-systems',
-      categoryId: 'robotics',
-      subCategory: 'robotics',
-      title: 'Embedded Systems & Microcontroller Dev',
-      duration: '6 Months',
-      level: 'Advanced',
-      mode: 'Live + Lab Kit',
-      price: '₹9,999',
-      originalPrice: '₹16,000',
-      discount: '37% OFF',
-      tag: 'FEATURED',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg',
-      iconBg: 'bg-blue-50'
-    },
-
-    // 3. NETWORKING & SERVER (networking)
-    {
-      id: 'ccna-net',
-      categoryId: 'networking',
-      subCategory: 'networking',
-      title: 'Networking & Server Admin (CCNA)',
-      duration: '3 Months',
-      level: 'Beginner',
-      mode: 'Live Classes',
-      price: '₹4,499',
-      originalPrice: '₹7,500',
-      discount: '40% OFF',
-      tag: 'POPULAR',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg',
-      iconBg: 'bg-cyan-50'
-    },
-    {
-      id: 'cloud-aws-devops',
-      categoryId: 'networking',
-      subCategory: 'networking',
-      title: 'Cloud Engineering & AWS DevOps',
-      duration: '6 Months',
-      level: 'Advanced',
-      mode: 'Live + Cloud Lab',
-      price: '₹8,999',
-      originalPrice: '₹14,999',
-      discount: '40% OFF',
-      tag: 'BESTSELLER',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg',
-      iconBg: 'bg-amber-50'
-    },
-    {
-      id: 'ethical-hacking-cyber',
-      categoryId: 'networking',
-      subCategory: 'networking',
-      title: 'Cyber Security & Ethical Hacking',
-      duration: '4 Months',
-      level: 'Intermediate',
-      mode: 'Live + Lab',
-      price: '₹6,999',
-      originalPrice: '₹11,500',
-      discount: '39% OFF',
-      tag: 'HOT',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg',
-      iconBg: 'bg-slate-100'
-    },
-
-    // 4. COMPUTER & MOBILE REPAIR (repair)
-    {
-      id: 'mobile-chip-repair',
-      categoryId: 'repair',
-      subCategory: 'repair',
-      title: 'Chip-Level Mobile Hardware Repairing',
-      duration: '3 Months',
-      level: 'Beginner to Pro',
-      mode: 'Practical Workshop',
-      price: '₹4,999',
-      originalPrice: '₹8,999',
-      discount: '44% OFF',
-      tag: 'BESTSELLER',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/android/android-original.svg',
-      iconBg: 'bg-emerald-50'
-    },
-    {
-      id: 'laptop-chip-repair',
-      categoryId: 'repair',
-      subCategory: 'repair',
-      title: 'Laptop & Desktop Motherboard Chip-Level Repair',
-      duration: '4 Months',
-      level: 'Intermediate',
-      mode: 'Practical Lab',
-      price: '₹6,499',
-      originalPrice: '₹11,000',
-      discount: '41% OFF',
-      tag: 'POPULAR',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/windows8/windows8-original.svg',
-      iconBg: 'bg-blue-50'
-    },
-    {
-      id: 'smartphone-bga-ic',
-      categoryId: 'repair',
-      subCategory: 'repair',
-      title: 'Advanced Smartphone BGA IC & CPU Reballing',
-      duration: '6 Months',
-      level: 'Master Class',
-      mode: 'Practical Lab',
-      price: '₹8,499',
-      originalPrice: '₹14,500',
-      discount: '41% OFF',
-      tag: 'FEATURED',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apple/apple-original.svg',
-      iconBg: 'bg-slate-100'
-    },
-
-    // 5. HOME APPLIANCE REPAIR (electrical)
-    {
-      id: 'ac-fridge-repair',
-      categoryId: 'electrical',
-      subCategory: 'electrical',
-      title: 'AC, Refrigerator & Washing Machine Master Course',
-      duration: '3 Months',
-      level: 'Beginner',
-      mode: 'Field Practical',
-      price: '₹5,299',
-      originalPrice: '₹9,000',
-      discount: '41% OFF',
-      tag: 'BESTSELLER',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/raspberrypi/raspberrypi-original.svg',
-      iconBg: 'bg-rose-50'
-    },
-    {
-      id: 'inverter-pcb-repair',
-      categoryId: 'electrical',
-      subCategory: 'electrical',
-      title: 'Inverter AC & PCB Micro-Circuit Repairing',
-      duration: '4 Months',
-      level: 'Intermediate',
-      mode: 'Lab Practical',
-      price: '₹6,999',
-      originalPrice: '₹12,000',
-      discount: '41% OFF',
-      tag: 'HOT',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/electron/electron-original.svg',
-      iconBg: 'bg-amber-50'
-    },
-
-    // 6. DIGITAL MARKETING (marketing)
-    {
-      id: 'digital-marketing-ads',
-      categoryId: 'marketing',
-      subCategory: 'marketing',
-      title: 'Master Digital Marketing & Performance Ads',
-      duration: '3 Months',
-      level: 'Beginner',
-      mode: 'Live Projects',
-      price: '₹4,999',
-      originalPrice: '₹8,500',
-      discount: '41% OFF',
-      tag: 'BESTSELLER',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg',
-      iconBg: 'bg-blue-50'
-    },
-    {
-      id: 'seo-social-media',
-      categoryId: 'marketing',
-      subCategory: 'marketing',
-      title: 'SEO, Social Media & Content Growth Hacking',
-      duration: '4 Months',
-      level: 'Intermediate',
-      mode: 'Live + Case Study',
-      price: '₹5,999',
-      originalPrice: '₹9,999',
-      discount: '40% OFF',
-      tag: 'POPULAR',
-      icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg',
-      iconBg: 'bg-indigo-50'
-    }
-  ];
-
-  // Admin-panel courses only; the built-in list is shown just when the API returns nothing,
-  // otherwise sample courses that do not exist would appear next to the real ones
-  const allCourses = customCourses.length > 0 ? customCourses : INITIAL_COURSES;
+  const allCourses = customCourses;
 
   const currentCategoryObj = categories.find(c => c.id === activeCategory) || categories[0] || { name: 'Featured', id: 'all' };
 
@@ -759,15 +429,22 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     }
   }, [activeCategory, activeSubCategory, availableTrainingFilters, activeFilter]);
 
-  // Displayed courses based on activeFilter
-  const displayedCourses = scopedCourses.filter(c => {
-    if (activeFilter === 'All') return true;
-    const selectedFilterObj = [
-      ...ALL_TRAINING_FILTERS,
-      ...availableTrainingFilters
-    ].find(f => f.value === activeFilter || f.label === activeFilter);
-    return courseMatchesFilter(c, selectedFilterObj || { value: activeFilter, label: activeFilter, matchKeys: [activeFilter] });
-  });
+  // Displayed courses based on activeFilter and custom order
+  const displayedCourses = scopedCourses
+    .filter(c => {
+      if (activeFilter === 'All') return true;
+      const selectedFilterObj = [
+        ...ALL_TRAINING_FILTERS,
+        ...availableTrainingFilters
+      ].find(f => f.value === activeFilter || f.label === activeFilter);
+      return courseMatchesFilter(c, selectedFilterObj || { value: activeFilter, label: activeFilter, matchKeys: [activeFilter] });
+    })
+    .sort((a, b) => {
+      const ordA = typeof a.order === 'number' && !isNaN(a.order) && a.order > 0 ? a.order : 999999;
+      const ordB = typeof b.order === 'number' && !isNaN(b.order) && b.order > 0 ? b.order : 999999;
+      if (ordA !== ordB) return ordA - ordB;
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
 
   return (
     <section className="w-full px-3 sm:px-4 pt-[5px] pb-1 bg-slate-50/50 select-none">
@@ -820,9 +497,9 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
         {/* ON COURSES PAGE ONLY: SHOW FULL CATALOG BELOW CATEGORY CARDS */}
         {!isHome && (
-          <div id="course-catalog-section" className="scroll-mt-[56px] sm:scroll-mt-[80px] pt-1 pb-1">
+          <div id="course-catalog-section" className="scroll-mt-[70px] sm:scroll-mt-[84px] pt-1 pb-1">
             {/* FROZEN FILTER HEADER: SUB-CATEGORIES + TRAINING DURATION FROZEN UNDER NAVBAR */}
-            <div className="sticky top-[56px] sm:top-[80px] z-30 bg-slate-50/98 backdrop-blur-sm pt-1 sm:pt-2 pb-2 border-b border-slate-200/80 shadow-xs mb-3 -mx-3 sm:mx-0 px-3 sm:px-0 flex flex-col gap-1.5">
+            <div className="sticky top-[70px] sm:top-[84px] z-30 bg-slate-50/98 backdrop-blur-sm pt-2 sm:pt-2.5 pb-2 border-b border-slate-200/80 shadow-xs mb-3 -mx-3 sm:mx-0 px-3 sm:px-0 flex flex-col gap-1.5">
               {/* DOMAIN SUB-CATEGORY TABS FOR ALL CATEGORIES */}
               {SUB_CATEGORIES[activeCategory] && SUB_CATEGORIES[activeCategory].length > 0 && (
                 <div className="w-full max-w-xl mx-auto bg-slate-200/80 p-1 rounded-xl sm:rounded-2xl flex items-center justify-between gap-1 shadow-inner border border-slate-300/50 overflow-x-auto scrollbar-none [ms-overflow-style:none] [scrollbar-width:none]">
@@ -896,7 +573,21 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
 
             {/* COURSE CARDS GRID - NATURAL SCROLLING FIT WITHOUT BLANK VOID */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 pb-2 sm:pb-4 pt-2 sm:pt-4">
-              {displayedCourses.length === 0 && (
+              {displayedCourses.length === 0 && !hasLoadedOnce && customCourses.length === 0 && (
+                [1, 2, 3, 4].map(n => (
+                  <div key={n} className="rounded-2xl border border-slate-200/90 bg-white p-5 animate-pulse space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-slate-100" />
+                      <div className="space-y-2 flex-1">
+                        <div className="h-4 w-40 bg-slate-100 rounded" />
+                        <div className="h-3 w-24 bg-slate-100 rounded" />
+                      </div>
+                    </div>
+                    <div className="h-12 w-full bg-slate-100 rounded-xl" />
+                  </div>
+                ))
+              )}
+              {displayedCourses.length === 0 && (hasLoadedOnce || customCourses.length > 0) && (
                 <div className="col-span-1 lg:col-span-2 text-center py-12 px-4 bg-white/80 rounded-2xl border border-dashed border-slate-200 shadow-2xs">
                   <p className="text-slate-600 font-bold text-sm">No courses found matching this selection.</p>
                 </div>

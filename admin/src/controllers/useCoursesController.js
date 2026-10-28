@@ -47,8 +47,16 @@ export function useCoursesController() {
     batchClasses: 'Live + Recorded',
     batchTimings: 'Morning/Evening',
     batchMode: 'Online / Offline',
-    certificateProvided: 'Provided'
+    certificateProvided: 'Provided',
+    order: 1
   });
+
+    // Dedicated state for Order Inputs and Save feedback
+  const [categoryOrderInputs, setCategoryOrderInputs] = useState({});
+  const [savedCategoryStatus, setSavedCategoryStatus] = useState({});
+
+  const [courseOrderInputs, setCourseOrderInputs] = useState({});
+  const [savedCourseStatus, setSavedCourseStatus] = useState({});
 
   // Category Modal States
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -59,7 +67,8 @@ export function useCoursesController() {
     subCategoriesText: '',
     badge: '',
     icon: '',
-    bgColor: 'bg-blue-50'
+    bgColor: 'bg-blue-50',
+    order: 1
   });
 
   const loadData = useCallback(async () => {
@@ -131,7 +140,8 @@ export function useCoursesController() {
       batchClasses: 'Live + Recorded',
       batchTimings: 'Morning/Evening',
       batchMode: 'Online / Offline',
-      certificateProvided: 'Provided'
+      certificateProvided: 'Provided',
+      order: (courses.length || 0) + 1
     });
     setShowAddModal(true);
   };
@@ -261,7 +271,8 @@ export function useCoursesController() {
       batchClasses: course.batchClasses || 'Live + Recorded',
       batchTimings: course.batchTimings || 'Morning/Evening',
       batchMode: course.mode || course.batchMode || 'Online / Offline',
-      certificateProvided: course.certificateProvided || 'Provided'
+      certificateProvided: course.certificateProvided || 'Provided',
+      order: typeof course.order === 'number' && !isNaN(course.order) && course.order > 0 ? course.order : (courses.findIndex(c => (c._id || c.id) === (course._id || course.id)) + 1)
     });
     setShowAddModal(true);
   };
@@ -378,7 +389,8 @@ export function useCoursesController() {
       batchClasses: formData.batchClasses || 'Live + Recorded',
       batchTimings: formData.batchTimings || 'Morning/Evening',
       batchMode: formData.batchMode || 'Online / Offline',
-      certificateProvided: formData.certificateProvided || 'Provided'
+      certificateProvided: formData.certificateProvided || 'Provided',
+      order: typeof formData.order !== 'undefined' && formData.order !== '' ? (Number(formData.order) || 0) : 0
     };
 
     let result = null;
@@ -448,7 +460,8 @@ export function useCoursesController() {
       subCategoriesText: '',
       badge: '',
       icon: '',
-      bgColor: 'bg-blue-50'
+      bgColor: 'bg-blue-50',
+      order: (categories.length || 0) + 1
     });
     setShowCategoryModal(true);
   };
@@ -468,7 +481,8 @@ export function useCoursesController() {
       subCategoriesText: subText,
       badge: cat.badge || '',
       icon: cat.icon || '',
-      bgColor: cat.bgColor || 'bg-blue-50'
+      bgColor: cat.bgColor || 'bg-blue-50',
+      order: typeof cat.order === 'number' && !isNaN(cat.order) ? cat.order : (categories.findIndex(c => (c._id || c.id || c.category) === (cat._id || cat.id || cat.category)) + 1)
     });
     setShowCategoryModal(true);
   };
@@ -497,7 +511,8 @@ export function useCoursesController() {
       subCategories,
       badge: categoryFormData.badge,
       icon: categoryFormData.icon,
-      bgColor: categoryFormData.bgColor || 'bg-blue-50'
+      bgColor: categoryFormData.bgColor || 'bg-blue-50',
+      order: typeof categoryFormData.order !== 'undefined' && categoryFormData.order !== '' ? (Number(categoryFormData.order) || 0) : 0
     };
 
     let result = null;
@@ -525,6 +540,93 @@ export function useCoursesController() {
     } else {
       alert('Failed to save category.');
       return null;
+    }
+  };
+
+  
+  const handleCategoryOrderChange = (catKey, value) => {
+    setCategoryOrderInputs(prev => ({ ...prev, [catKey]: value }));
+  };
+
+  const handleSaveCategoryOrder = async (targetId, catKey, currentOrder) => {
+    const rawVal = categoryOrderInputs[catKey] !== undefined ? categoryOrderInputs[catKey] : currentOrder;
+    const parsedOrder = parseInt(rawVal, 10);
+    if (isNaN(parsedOrder) || parsedOrder <= 0) {
+      alert('Please enter a valid positive number for Order (e.g. 1, 2, 3)!');
+      return;
+    }
+
+    setSavedCategoryStatus(prev => ({ ...prev, [catKey]: 'saving' }));
+
+    // Optimistic UI update
+    setCategories(prev => {
+      const updated = prev.map(cat => {
+        const matchId = String(cat._id || cat.id || cat.category || '');
+        if (matchId === String(targetId) || String(cat.category) === String(targetId) || String(cat.id) === String(targetId)) {
+          return { ...cat, order: parsedOrder };
+        }
+        return cat;
+      });
+      return [...updated].sort((a, b) => (Number(a.order) || 999999) - (Number(b.order) || 999999));
+    });
+
+    try {
+      await adminCmsModel.updateCategory(targetId, { order: parsedOrder });
+      await loadData();
+      window.dispatchEvent(new Event('codeguru_refresh_all'));
+      window.dispatchEvent(new Event('codeguru_refresh_categories'));
+      setSavedCategoryStatus(prev => ({ ...prev, [catKey]: 'saved' }));
+      setTimeout(() => {
+        setSavedCategoryStatus(prev => ({ ...prev, [catKey]: null }));
+      }, 2500);
+    } catch (err) {
+      console.error('[useCoursesController] Failed to update category order:', err);
+      alert('Failed to save category order: ' + (err.message || 'Error'));
+      await loadData();
+      setSavedCategoryStatus(prev => ({ ...prev, [catKey]: null }));
+    }
+  };
+
+  const handleCourseOrderChange = (courseKey, value) => {
+    setCourseOrderInputs(prev => ({ ...prev, [courseKey]: value }));
+  };
+
+  const handleSaveCourseOrder = async (courseId, currentOrder) => {
+    const rawVal = courseOrderInputs[courseId] !== undefined ? courseOrderInputs[courseId] : currentOrder;
+    const parsedOrder = parseInt(rawVal, 10);
+    if (isNaN(parsedOrder) || parsedOrder <= 0) {
+      alert('Please enter a valid positive number for Order (e.g. 1, 2, 3)!');
+      return;
+    }
+
+    setSavedCourseStatus(prev => ({ ...prev, [courseId]: 'saving' }));
+
+    // Optimistic UI update
+    setCourses(prev => {
+      const updated = prev.map(c => {
+        const matchId = String(c._id || c.id || '');
+        if (matchId === String(courseId)) {
+          return { ...c, order: parsedOrder };
+        }
+        return c;
+      });
+      return [...updated].sort((a, b) => (Number(a.order) || 999999) - (Number(b.order) || 999999));
+    });
+
+    try {
+      await adminCmsModel.updateCourse(courseId, { order: parsedOrder });
+      await loadData();
+      window.dispatchEvent(new Event('codeguru_refresh_all'));
+      window.dispatchEvent(new Event('codeguru_refresh_courses'));
+      setSavedCourseStatus(prev => ({ ...prev, [courseId]: 'saved' }));
+      setTimeout(() => {
+        setSavedCourseStatus(prev => ({ ...prev, [courseId]: null }));
+      }, 2500);
+    } catch (err) {
+      console.error('[useCoursesController] Failed to update course order:', err);
+      alert('Failed to save course order: ' + (err.message || 'Error'));
+      await loadData();
+      setSavedCourseStatus(prev => ({ ...prev, [courseId]: null }));
     }
   };
 
@@ -615,6 +717,14 @@ export function useCoursesController() {
     handleEditCategory,
     handleCreateCategory,
     handleDeleteCategory,
-    handleToggleCategoryVisibility
+    handleToggleCategoryVisibility,
+    categoryOrderInputs,
+    savedCategoryStatus,
+    handleCategoryOrderChange,
+    handleSaveCategoryOrder,
+    courseOrderInputs,
+    savedCourseStatus,
+    handleCourseOrderChange,
+    handleSaveCourseOrder
   };
 }

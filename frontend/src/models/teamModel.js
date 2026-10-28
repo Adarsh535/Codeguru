@@ -34,6 +34,6 @@ export const teamModel = {
     } catch (err) {
       console.warn('[teamModel API Warning] Live team fetch error:', err);
     }
-    return OUR_TEAM_MEMBERS;
+    return [];
   }
 };

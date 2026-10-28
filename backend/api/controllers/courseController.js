@@ -33,8 +33,16 @@ export const getCourses = async (req, res) => {
       }
     }
 
-    const courses = await Course.find(filter).sort({ createdAt: -1 });
-    return res.json({ success: true, data: courses });
+    const courses = await Course.find(filter).sort({ order: 1, createdAt: -1 });
+
+    const sortedCourses = [...courses].sort((a, b) => {
+      const ordA = (typeof a.order === 'number' && !isNaN(a.order) && a.order > 0) ? a.order : 999;
+      const ordB = (typeof b.order === 'number' && !isNaN(b.order) && b.order > 0) ? b.order : 999;
+      if (ordA !== ordB) return ordA - ordB;
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
+
+    return res.json({ success: true, data: sortedCourses });
   } catch (err) {
     console.error('[courseController Error]:', err.message);
     return res.status(500).json({ success: false, message: 'Failed to retrieve courses', data: [] });

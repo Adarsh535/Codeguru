@@ -179,6 +179,6 @@ export const placementModel = {
     } catch (err) {
       console.warn('[placementModel API Warning] Live placement fetch error:', err);
     }
-    return TOP_PLACEMENTS_STUDENTS;
+    return [];
   }
 };

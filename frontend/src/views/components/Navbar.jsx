@@ -87,6 +87,7 @@ export default function Navbar({
 
   return (
     <header className="fixed top-0 left-0 right-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-xs z-50">
+      <div className="w-full bg-[#f59e0b] h-3.5 sm:h-1" />
       <div className="w-full max-w-7xl mx-auto px-2.5 sm:px-4 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-20 py-1 sm:py-0 w-full gap-1 sm:gap-4">
           
@@ -127,6 +128,7 @@ export default function Navbar({
               {selectedLocation && (
                 <div className="flex items-center min-w-0 mt-0.5">
                   <button
+                    suppressHydrationWarning
                     onClick={onOpenLocationModal}
                     className="inline-flex items-center gap-0.5 text-xs text-slate-400 hover:text-amber-600 font-semibold transition-colors cursor-pointer"
                     title="Change Location"

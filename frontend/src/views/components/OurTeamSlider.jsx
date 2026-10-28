@@ -1,73 +1,54 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { OUR_TEAM_MEMBERS } from '../../models/placementModel';
 import { apiService } from '../../services/apiService';
 
-const DEFAULT_MEMBERS = [
-  {
-    id: 'roshani',
-    name: 'Roshani Yadav',
-    role: 'Social Media Manager',
-    tag: '#TEAMCODEGURRU',
-    photo: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=500&fit=crop&crop=faces',
-    bio: 'Overseeing content strategy, community engagement, and brand awareness.',
-    phone: '7238829360'
-  },
-  {
-    id: 'aman',
-    name: 'Aman Kumar',
-    role: 'Lead Full Stack',
-    tag: '#TEAMCODEGURRU',
-    photo: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=500&fit=crop&crop=faces',
-    bio: 'Specializing in React, Node.js and architecting scalable enterprise systems.',
-    phone: '7238829360'
-  },
-  {
-    id: 'kishan',
-    name: 'Kishan Pandey',
-    role: 'Founder & CEO',
-    tag: '#FOUNDER',
-    photo: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=400&h=500&fit=crop&crop=faces',
-    bio: 'Driving technical excellence and high-yield student success initiatives.',
-    phone: '7238829360'
-  },
-  {
-    id: 'priya',
-    name: 'Priya Singh',
-    role: 'UI/UX Lead Designer',
-    tag: '#DESIGNTEAM',
-    photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=500&fit=crop&crop=faces',
-    bio: 'Ensuring premium layouts and seamless, beautiful user experiences.',
-    phone: '7238829360'
-  }
-];
-
 export default function OurTeamSlider({ onOpenContactModal }) {
-  const [teamMembers, setTeamMembers] = useState(DEFAULT_MEMBERS);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
 
+    // Immediately load from cache on client mount (safe from SSR hydration mismatch)
+    try {
+      const cached = sessionStorage.getItem('cg_cached_team');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setTeamMembers(parsed);
+          setLoading(false);
+        }
+      }
+    } catch (e) {}
+
     const fetchTeam = () => {
       apiService.getTeam().then(data => {
-        if (isMounted && Array.isArray(data)) {
-          const formatted = data
-            .filter(item => item.isActive !== false && !item.isHidden && item.status !== 'hidden')
-            .map(item => ({
-              id: item.id || item._id,
-              name: item.name,
-              role: item.role || 'Senior Tech Instructor',
-              tag: '#TEAMCODEGURRU',
-              photo: item.photoUrl || item.photo || item.image || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=500&fit=crop&crop=faces',
-              specialization: item.specialization || '',
-              bio: item.bio || item.specialization || '',
-              phone: item.phone || '7238829360'
-            }));
-          setTeamMembers(formatted);
+        if (isMounted) {
+          setLoading(false);
+          if (Array.isArray(data)) {
+            const formatted = data
+              .filter(item => item.isActive !== false && !item.isHidden && item.status !== 'hidden')
+              .map(item => ({
+                id: item.id || item._id,
+                name: item.name,
+                role: item.role || 'Senior Tech Instructor',
+                tag: '#TEAMCODEGURRU',
+                photo: item.photoUrl || item.photo || item.image || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=500&fit=crop&crop=faces',
+                specialization: item.specialization || '',
+                bio: item.bio || item.specialization || '',
+                phone: item.phone || '7238829360'
+              }));
+            setTeamMembers(formatted);
+            try {
+              sessionStorage.setItem('cg_cached_team', JSON.stringify(formatted));
+            } catch (e) {}
+          }
         }
-      }).catch(() => {});
+      }).catch(() => {
+        if (isMounted) setLoading(false);
+      });
     };
 
     fetchTeam();
@@ -77,7 +58,7 @@ export default function OurTeamSlider({ onOpenContactModal }) {
     window.addEventListener('codeguru_refresh_all', fetchTeam);
     window.addEventListener('focus', fetchTeam);
 
-    // 2. Background refresh while the tab is visible (team changes rarely)
+    // 2. Background refresh while the tab is visible
     const interval = setInterval(() => {
       if (typeof document !== 'undefined' && !document.hidden) {
         fetchTeam();
@@ -98,11 +79,42 @@ export default function OurTeamSlider({ onOpenContactModal }) {
     index === self.findIndex((t) => (t.id && item.id && t.id === item.id) || (t.name && item.name && t.name.toLowerCase().trim() === item.name.toLowerCase().trim()))
   );
 
-  const baseList = uniqueMembers.length > 0 ? uniqueMembers : DEFAULT_MEMBERS;
-  // Ensure enough items to smoothly fill the viewport and create a seamless 50% translation loop
-  const targetCopies = Math.max(2, Math.ceil(6 / baseList.length));
-  const singleHalf = Array(targetCopies).fill(baseList).flat();
-  const displayMembers = [...singleHalf, ...singleHalf];
+  // When no team members from cache or database:
+  // If loading: render elegant skeleton placeholder
+  // If finished loading & truly empty: return null
+  if (uniqueMembers.length === 0) {
+    if (!loading) return null;
+
+    return (
+      <section className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-[#f8fafc] overflow-hidden select-none" suppressHydrationWarning>
+        <div className="max-w-7xl mx-auto border border-slate-200 rounded-[18px] sm:rounded-2xl bg-white pt-2.5 pb-3 sm:pt-3.5 sm:pb-4 shadow-xs relative z-10 w-full overflow-hidden" suppressHydrationWarning>
+          <div className="flex justify-between items-center px-4 sm:px-6 mb-2 sm:mb-3">
+            <div className="h-5 w-40 bg-slate-200 rounded animate-pulse" />
+            <div className="h-4 w-28 bg-slate-200 rounded animate-pulse hidden sm:block" />
+          </div>
+          <div className="flex gap-3 px-3 overflow-hidden">
+            {[1, 2, 3, 4, 5].map((idx) => (
+              <div
+                key={idx}
+                className="w-[160px] xs:w-[175px] sm:w-[190px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[16px] shadow-sm flex flex-col overflow-hidden animate-pulse"
+              >
+                <div className="w-full bg-slate-200 h-[175px]" />
+                <div className="p-3 flex flex-col gap-2">
+                  <div className="h-3.5 bg-slate-200 rounded w-3/4" />
+                  <div className="h-2.5 bg-slate-200 rounded w-full" />
+                  <div className="h-3 bg-slate-200 rounded w-1/2 mt-2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Ensure enough items to smoothly fill the viewport and create a seamless translation loop
+  const targetCopies = Math.max(2, Math.ceil(8 / uniqueMembers.length));
+  const displayMembers = Array(targetCopies).fill(uniqueMembers).flat();
 
   return (
     <section className="w-full px-2 sm:px-4 py-2 sm:py-3 bg-[#f8fafc] overflow-hidden select-none" suppressHydrationWarning>
@@ -112,7 +124,7 @@ export default function OurTeamSlider({ onOpenContactModal }) {
         <div className="flex justify-between items-center px-4 sm:px-6 mb-2 sm:mb-3" suppressHydrationWarning>
           <div className="flex items-center gap-2">
             <h2 className="text-base sm:text-lg font-bold text-slate-800 tracking-tight">
-              Our Team & Mentors
+              Our Team &amp; Mentors
             </h2>
           </div>
 

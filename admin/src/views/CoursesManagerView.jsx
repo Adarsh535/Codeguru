@@ -218,7 +218,15 @@ export default function CoursesManagerView() {
     handleEditCategory,
     handleCreateCategory,
     handleDeleteCategory,
-    handleToggleCategoryVisibility
+    handleToggleCategoryVisibility,
+    categoryOrderInputs,
+    savedCategoryStatus,
+    handleCategoryOrderChange,
+    handleSaveCategoryOrder,
+    courseOrderInputs,
+    savedCourseStatus,
+    handleCourseOrderChange,
+    handleSaveCourseOrder
   } = useCoursesController();
 
   const [enrollments, setEnrollments] = useState([]);
@@ -681,14 +689,20 @@ export default function CoursesManagerView() {
   };
 
   // All Course Categories directly from Database (All Editable & Deletable)
-  const mergedCategories = categories.length > 0
-    ? categories.map(cat => {
+  const mergedCategories = (categories.length > 0
+    ? categories.map((cat, idx) => {
         const catId = cat.category || cat.id;
         const iconPath = getCategoryIconBySlugOrLabel(catId, cat.label, cat.icon);
+        const orderNum = typeof cat.order === 'number' && !isNaN(cat.order) ? cat.order : 0;
         return {
           id: catId,
           _id: cat._id || cat.id,
           label: cat.label,
+          category: cat.category || cat.id,
+          subCat: cat.subCat,
+          badge: cat.badge,
+          bgColor: cat.bgColor,
+          order: orderNum,
           icon: iconPath,
           isActive: cat.isActive !== false,
           subCategories: cat.subCategories && cat.subCategories.length > 0
@@ -696,7 +710,13 @@ export default function CoursesManagerView() {
             : [{ id: 'all', label: 'All / General' }]
         };
       })
-    : MAIN_CATEGORIES_CONFIG.map(mc => ({ ...mc, _id: mc.id, isActive: true }));
+    : MAIN_CATEGORIES_CONFIG.map((mc, idx) => ({ ...mc, _id: mc.id, order: idx + 1, isActive: true }))
+  ).sort((a, b) => {
+    const ordA = a.order > 0 ? a.order : 999999;
+    const ordB = b.order > 0 ? b.order : 999999;
+    if (ordA !== ordB) return ordA - ordB;
+    return (a.label || '').localeCompare(b.label || '');
+  });
 
   // Currently selected Main Category object in course modal
   const currentSelectedMainCat = mergedCategories.find(c => c.id === formData.category) || mergedCategories[0];
@@ -927,7 +947,7 @@ export default function CoursesManagerView() {
                 }`}
               >
                 <div className="space-y-2.5">
-                  {/* TOP ROW: LOGO & CATEGORY BADGE */}
+                  {/* TOP ROW: LOGO & CATEGORY BADGE & ORDER NUMBER */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="w-10 h-10 rounded-xl bg-white border border-slate-200/90 shadow-2xs p-1.5 flex items-center justify-center shrink-0">
                       <img
@@ -937,9 +957,50 @@ export default function CoursesManagerView() {
                         onError={(e) => { e.target.src = '/images/categories/coding.png'; }}
                       />
                     </div>
-                    <span className="text-[10px] font-black bg-purple-100/90 text-purple-700 px-2.5 py-0.5 rounded-full border border-purple-200 shadow-2xs">
-                      Category
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <div 
+                        className="flex items-center bg-amber-50/90 hover:bg-amber-100 border border-amber-300 rounded-xl px-2 py-1 shadow-2xs transition-colors gap-1.5"
+                        title="Enter order number and click Save"
+                      >
+                        <span className="text-[10px] font-black text-amber-900 uppercase tracking-wider">
+                          Order #
+                        </span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="999"
+                          placeholder="—"
+                          value={categoryOrderInputs[cat.id] !== undefined ? categoryOrderInputs[cat.id] : (cat.order || '')}
+                          onChange={(e) => handleCategoryOrderChange(cat.id, e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleSaveCategoryOrder(cat._id || cat.id || cat.category, cat.id, cat.order);
+                            }
+                          }}
+                          className="w-11 text-center text-xs font-black text-amber-950 bg-white border border-amber-300 rounded py-0.5 px-1 focus:ring-2 focus:ring-amber-500 outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleSaveCategoryOrder(cat._id || cat.id || cat.category, cat.id, cat.order)}
+                          disabled={savedCategoryStatus[cat.id] === 'saving'}
+                          className={`px-2 py-0.5 text-[10px] font-black rounded-lg shadow-xs cursor-pointer active:scale-95 transition-all flex items-center gap-0.5 ${
+                            savedCategoryStatus[cat.id] === 'saved'
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-amber-600 hover:bg-amber-700 text-white'
+                          }`}
+                          title="Click to save order to database"
+                        >
+                          {savedCategoryStatus[cat.id] === 'saving'
+                            ? 'Saving...'
+                            : savedCategoryStatus[cat.id] === 'saved'
+                            ? '✓ Saved'
+                            : 'Save'}
+                        </button>
+                      </div>
+                      <span className="text-[10px] font-black bg-purple-100/90 text-purple-700 px-2.5 py-0.5 rounded-full border border-purple-200 shadow-2xs">
+                        Category
+                      </span>
+                    </div>
                   </div>
 
                   {/* CATEGORY TITLE & SLUG */}
@@ -1173,7 +1234,7 @@ export default function CoursesManagerView() {
                 isCourseActive ? 'border-slate-200/90' : 'border-amber-200 bg-amber-50/20'
               }`}>
                 {/* TOP HEADER: CATEGORY BADGE & LIVE STATUS TOGGLE */}
-                <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3 flex-wrap">
                   <span className="text-[11px] font-extrabold text-blue-800 bg-blue-50/90 px-3 py-1 rounded-xl border border-blue-200/80 flex items-center gap-1.5 shadow-2xs">
                     <img src={catDisplay.mainIcon} alt="" className="w-3.5 h-3.5 object-contain shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />
                     <span>{catDisplay.mainLabel}</span>
@@ -1181,9 +1242,50 @@ export default function CoursesManagerView() {
                     <span className="text-purple-700 font-extrabold">{catDisplay.subLabelText}</span>
                   </span>
 
-                  <button
-                    type="button"
-                    onClick={() => triggerCourseToggleWithConfirm(courseId, course.title, isCourseActive)}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div 
+                      className="flex items-center bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-xl px-2 py-1 shadow-2xs transition-colors gap-1.5"
+                      title="Set custom course order and click Save to arrange on frontend website"
+                    >
+                      <span className="text-[10px] font-black text-amber-900 uppercase tracking-wider">
+                        Order #
+                      </span>
+                      <input
+                        type="number"
+                        min="1"
+                        max="999"
+                        placeholder="—"
+                        value={courseOrderInputs[courseId] !== undefined ? courseOrderInputs[courseId] : (course.order || '')}
+                        onChange={(e) => handleCourseOrderChange(courseId, e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleSaveCourseOrder(courseId, course.order);
+                          }
+                        }}
+                        className="w-11 text-center text-xs font-black text-amber-950 bg-white border border-amber-300 rounded py-0.5 px-1 focus:ring-2 focus:ring-amber-500 outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleSaveCourseOrder(courseId, course.order)}
+                        disabled={savedCourseStatus[courseId] === 'saving'}
+                        className={`px-2 py-0.5 text-[10px] font-black rounded-lg shadow-xs cursor-pointer active:scale-95 transition-all flex items-center gap-0.5 ${
+                          savedCourseStatus[courseId] === 'saved'
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-amber-600 hover:bg-amber-700 text-white'
+                        }`}
+                        title="Click to save course order to database"
+                      >
+                        {savedCourseStatus[courseId] === 'saving'
+                          ? 'Saving...'
+                          : savedCourseStatus[courseId] === 'saved'
+                          ? '✓ Saved'
+                          : 'Save'}
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => triggerCourseToggleWithConfirm(courseId, course.title, isCourseActive)}
                     className={`text-[10.5px] font-black px-3 py-1 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap border ${
                       isCourseActive
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
@@ -1198,6 +1300,7 @@ export default function CoursesManagerView() {
                     </div>
                     <span>{isCourseActive ? 'Live on Website' : 'Hidden'}</span>
                   </button>
+                  </div>
                 </div>
 
                 {/* MIDDLE CONTENT: COURSE TITLE & PRICE SECTION */}
@@ -1476,19 +1579,36 @@ export default function CoursesManagerView() {
                         </div>
 
                         {/* Title Input */}
-                        <div className="flex flex-col gap-1">
-                          <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
-                            <span>Course Title <span className="text-rose-500">*</span></span>
-                            <span className="text-[10px] text-slate-400 font-semibold">Track name</span>
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={formData.title}
-                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            placeholder="e.g. Full Stack AI Web Development Track"
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500 bg-white shadow-2xs transition-all"
-                          />
+                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                          <div className="sm:col-span-3 flex flex-col gap-1">
+                            <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                              <span>Course Title <span className="text-rose-500">*</span></span>
+                              <span className="text-[10px] text-slate-400 font-semibold">Track name</span>
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              value={formData.title}
+                              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                              placeholder="e.g. Full Stack AI Web Development Track"
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500 bg-white shadow-2xs transition-all"
+                            />
+                          </div>
+
+                          <div className="sm:col-span-1 flex flex-col gap-1">
+                            <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                              <span>Display Order #</span>
+                              <span className="text-[10px] text-amber-600 font-bold">1 = 1st</span>
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              max="999"
+                              value={formData.order || 1}
+                              onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value, 10) || 1 })}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-amber-300 bg-amber-50/50 text-xs font-black text-amber-950 outline-none focus:border-amber-500 shadow-2xs transition-all text-center"
+                            />
+                          </div>
                         </div>
 
                         {/* Logo / Icon Uploader */}
@@ -3364,7 +3484,21 @@ export default function CoursesManagerView() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs font-bold text-slate-700">Display Order # <span className="text-amber-600 font-black">*</span></label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="999"
+                          value={categoryFormData.order ?? 1}
+                          onChange={(e) => setCategoryFormData({ ...categoryFormData, order: Number(e.target.value) || 0 })}
+                          placeholder="e.g. 1, 2, 3"
+                          className="w-full px-3.5 py-2 rounded-xl border border-amber-300 bg-amber-50/60 text-xs font-black text-amber-950 outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-500"
+                        />
+                        <span className="text-[10px] text-slate-400 font-medium">1 = First on website</span>
+                      </div>
+
                       <div className="flex flex-col gap-1">
                         <label className="text-xs font-bold text-slate-700">Category ID / Slug</label>
                         <input

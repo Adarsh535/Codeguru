@@ -297,10 +297,9 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
           </button>
         </div>
 
-        {/* INNER CONTAINER WITH COMPACT SCROLLING */}
-        <div className="flex-1 overflow-y-auto px-2.5 sm:px-3 py-2 space-y-2 scrollbar-thin">
-                 {/* DARK HERO CARD (PERFECTLY PROPORTIONED & STUNNING) */}
-          <div className="relative w-full bg-[#14161d] border border-slate-800 rounded-2xl p-3.5 sm:p-4 flex flex-col items-center text-center shadow-lg overflow-hidden">
+        {/* FIXED DARK HERO CARD (PINNED AT TOP AS REQUESTED) */}
+        <div className="px-2.5 sm:px-3 pt-2 pb-1.5 bg-white flex-shrink-0 border-b border-slate-100">
+          <div className="relative w-full bg-[#14161d] border border-slate-800 rounded-2xl p-3 sm:p-3.5 flex flex-col items-center text-center shadow-lg overflow-hidden">
             {/* BACKGROUND GLOW BLOBS */}
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
@@ -310,69 +309,69 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               <div className="relative z-10 flex items-center justify-center gap-1.5 sm:gap-2.5 mb-1">
                 {/* M - MongoDB */}
                 <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#10b981] font-bold text-sm sm:text-base shadow-xs flex-shrink-0">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#10b981] font-bold text-xs sm:text-sm shadow-xs flex-shrink-0">
                     M
                   </div>
-                  <span className="text-xs sm:text-xs font-medium text-slate-400 mt-1.5">
+                  <span className="text-[10.5px] sm:text-xs font-medium text-slate-400 mt-1">
                     MongoDB
                   </span>
                 </div>
 
-                <ChevronRight className="w-3.5 h-3.5 text-slate-600 mb-4 flex-shrink-0" />
+                <ChevronRight className="w-3 h-3 text-slate-600 mb-3 flex-shrink-0" />
 
                 {/* E - Express */}
                 <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-xs flex-shrink-0">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-white font-bold text-xs sm:text-sm shadow-xs flex-shrink-0">
                     E
                   </div>
-                  <span className="text-xs sm:text-xs font-medium text-slate-400 mt-1.5">
+                  <span className="text-[10.5px] sm:text-xs font-medium text-slate-400 mt-1">
                     Express
                   </span>
                 </div>
 
-                <ChevronRight className="w-3.5 h-3.5 text-slate-600 mb-4 flex-shrink-0" />
+                <ChevronRight className="w-3 h-3 text-slate-600 mb-3 flex-shrink-0" />
 
                 {/* R - React */}
                 <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#f59e0b] font-bold text-sm sm:text-base shadow-xs flex-shrink-0">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#f59e0b] font-bold text-xs sm:text-sm shadow-xs flex-shrink-0">
                     R
                   </div>
-                  <span className="text-xs sm:text-xs font-medium text-slate-400 mt-1.5">
+                  <span className="text-[10.5px] sm:text-xs font-medium text-slate-400 mt-1">
                     React
                   </span>
                 </div>
 
-                <ChevronRight className="w-3.5 h-3.5 text-slate-600 mb-4 flex-shrink-0" />
+                <ChevronRight className="w-3 h-3 text-slate-600 mb-3 flex-shrink-0" />
 
                 {/* N - Node.js */}
                 <div className="flex flex-col items-center">
-                  <div className="w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#84cc16] font-bold text-sm sm:text-base shadow-xs flex-shrink-0">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 flex items-center justify-center text-[#84cc16] font-bold text-xs sm:text-sm shadow-xs flex-shrink-0">
                     N
                   </div>
-                  <span className="text-xs sm:text-xs font-medium text-slate-400 mt-1.5">
+                  <span className="text-[10.5px] sm:text-xs font-medium text-slate-400 mt-1">
                     Node.js
                   </span>
                 </div>
               </div>
             ) : (
-              <div className="relative z-10 w-11 h-11 sm:w-12 sm:h-12 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 p-2.5 flex items-center justify-center shadow-xs mb-1.5 flex-shrink-0">
+              <div className="relative z-10 w-10 h-10 sm:w-11 sm:h-11 aspect-square rounded-xl bg-[#222530] border border-slate-700/80 p-2 flex items-center justify-center shadow-xs mb-1 flex-shrink-0">
                 {course.icon ? <img src={course.icon} alt={course.title} className="w-full h-full object-contain" /> : <GraduationCap className="w-full h-full text-amber-400" aria-hidden="true" />}
               </div>
             )}
 
             {/* TITLE & SUBTITLE */}
-            <div className="relative z-10 text-center space-y-1 max-w-sm mx-auto mt-2">
+            <div className="relative z-10 text-center space-y-0.5 max-w-sm mx-auto mt-1">
               <h1 className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight">
                 {course.title}
               </h1>
-              <p className="text-xs sm:text-xs text-slate-400 font-medium">
+              <p className="text-xs sm:text-xs text-slate-400 font-medium line-clamp-1">
                 {course.subtitle || course.description || 'Learn to build real-world web applications from scratch'}
               </p>
 
               {/* HERO PRICE BADGE */}
               {showPrice && (
-                <div className="pt-1.5 flex items-center justify-center">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full shadow-inner">
+                <div className="pt-1 flex items-center justify-center">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full shadow-inner">
                     <span className="text-white font-bold text-xs sm:text-sm tracking-tight">
                       {coursePrice}
                     </span>
@@ -382,7 +381,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
                       </span>
                     )}
                     {hasDiscount && discountDisplay && (
-                      <span className="bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 text-[9.5px] font-bold px-1.5 py-0.2 rounded-full">
+                      <span className="bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 text-[9px] font-bold px-1.5 py-0.2 rounded-full">
                         {discountDisplay}
                       </span>
                     )}
@@ -394,13 +393,16 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
             {/* WATCH INTRO VIDEO BUTTON */}
             <button
               onClick={() => setShowVideoModal(true)}
-              className="relative z-10 w-full bg-[#f59e0b] hover:bg-[#e08e00] text-slate-950 font-bold text-xs sm:text-sm py-2.5 px-4 rounded-full flex items-center justify-center gap-2 shadow-md active:scale-[0.99] transition-all cursor-pointer mt-3"
+              className="relative z-10 w-full bg-[#f59e0b] hover:bg-[#e08e00] text-slate-950 font-bold text-xs sm:text-sm py-2 px-4 rounded-full flex items-center justify-center gap-2 shadow-md active:scale-[0.99] transition-all cursor-pointer mt-2.5"
             >
               <Play className="w-3.5 h-3.5 fill-slate-950 text-slate-950 translate-x-0.5" />
               <span>Watch Intro Video</span>
             </button>
           </div>
+        </div>
 
+        {/* SCROLLABLE BODY CONTENT (SECOND IMAGE & DETAILS) */}
+        <div className="flex-1 overflow-y-auto px-2.5 sm:px-3 py-2 space-y-2 scrollbar-thin overscroll-contain">
           {/* NEW HIGHLIGHTS CARD */}
           <div className="bg-white border border-slate-200/80 rounded-xl p-2.5 space-y-2 shadow-2xs">
             {/* TOP ROW: DURATION CARD */}
@@ -572,12 +574,12 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
 
         </div>
 
-        {/* COMPACT FIXED BOTTOM BAR */}
-        <div className="bg-white border-t border-slate-100 px-3.5 sm:px-4 py-2.5 flex items-center justify-between gap-3 shadow-md flex-shrink-0">
+        {/* COMPACT FIXED BOTTOM BAR WITH SAFE AREA CLEARANCE */}
+        <div className="bg-white border-t border-slate-200/90 px-4 sm:px-6 pt-3 pb-7 sm:py-3.5 flex items-center justify-between gap-3 shadow-lg flex-shrink-0 [padding-bottom:max(24px,env(safe-area-inset-bottom,24px))] sm:[padding-bottom:14px]">
           {showPrice ? (
-            <div className="flex flex-col min-w-0">
+            <div className="flex flex-col min-w-0 justify-center">
               <div className="flex items-baseline gap-1.5 flex-wrap">
-                <span className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
+                <span className="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-tight">
                   {coursePrice}
                 </span>
                 {hasDiscount && courseOriginalPrice && (
@@ -588,11 +590,11 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               </div>
               <div className="flex items-center gap-1 mt-0.5">
                 {hasDiscount && discountDisplay ? (
-                  <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/60 leading-none">
+                  <span className="text-[10px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 leading-none">
                     {discountDisplay}
                   </span>
                 ) : (
-                  <span className="text-xs font-semibold text-slate-500 leading-none">
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500 leading-none">
                     Course Fee
                   </span>
                 )}
@@ -600,8 +602,8 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
             </div>
           ) : (
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-semibold text-slate-900 leading-tight">Admissions Open</span>
-              <span className="text-xs font-medium text-slate-500 leading-tight">Limited seats available</span>
+              <span className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Admissions Open</span>
+              <span className="text-[10.5px] sm:text-xs font-medium text-slate-500 leading-tight">Limited seats available</span>
             </div>
           )}
 
@@ -611,7 +613,7 @@ export default function CourseDetailsModal({ isOpen, onClose, course, onEnroll }
               onClose();
               if (onEnroll) onEnroll(course);
             }}
-            className="w-auto min-w-[130px] sm:min-w-[160px] bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-5 rounded-full text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 shadow-md transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap ml-auto"
+            className="w-auto min-w-[130px] sm:min-w-[160px] bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white py-2.5 sm:py-3 px-5 sm:px-6 rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/25 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap ml-auto"
           >
             Enroll Now <ChevronRight className="w-4 h-4 stroke-[3]" />
           </button>

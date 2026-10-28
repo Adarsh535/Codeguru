@@ -19,7 +19,7 @@ const tiro = Tiro_Devanagari_Hindi({ subsets: ['devanagari'], weight: '400', var
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0f172a',
+  themeColor: '#f59e0b',
 };
 
 export const metadata = {

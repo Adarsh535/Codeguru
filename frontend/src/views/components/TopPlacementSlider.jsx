@@ -1,35 +1,55 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { TOP_PLACEMENTS_STUDENTS } from '../../models/placementModel';
 import { apiService } from '../../services/apiService';
 
 export default function TopPlacementSlider({ onOpenContactModal }) {
-  const [students, setStudents] = useState(TOP_PLACEMENTS_STUDENTS);
+  const [students, setStudents] = useState([]);
   const [isPaused, setIsPaused] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
 
+    // Immediately load from cache on client mount (safe from SSR hydration mismatch)
+    try {
+      const cached = sessionStorage.getItem('cg_cached_placements');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setStudents(parsed);
+          setLoading(false);
+        }
+      }
+    } catch (e) {}
+
     const fetchPlacements = () => {
       apiService.getPlacements().then(data => {
-        if (isMounted && Array.isArray(data)) {
-          const formatted = data
-            .filter(item => item.isActive !== false && !item.isHidden && item.status !== 'hidden')
-            .map(item => ({
-              ...item,
-              id: item.id || item._id,
-              photo: item.photo || item.avatarUrl || item.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-              companyLogo: item.companyLogo || item.logo || 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg'
-            }));
-          setStudents(formatted);
+        if (isMounted) {
+          setLoading(false);
+          if (Array.isArray(data)) {
+            const formatted = data
+              .filter(item => item.isActive !== false && !item.isHidden && item.status !== 'hidden')
+              .map(item => ({
+                ...item,
+                id: item.id || item._id,
+                photo: item.photo || item.avatarUrl || item.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+                companyLogo: item.companyLogo || item.logo || 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg'
+              }));
+            setStudents(formatted);
+            try {
+              sessionStorage.setItem('cg_cached_placements', JSON.stringify(formatted));
+            } catch (e) {}
+          }
         }
-      }).catch(() => {});
+      }).catch(() => {
+        if (isMounted) setLoading(false);
+      });
     };
 
     fetchPlacements();
 
-    // 1. Live SSE update listeners
+    // Live SSE update listeners
     window.addEventListener('codeguru_refresh_placements', fetchPlacements);
     window.addEventListener('codeguru_refresh_all', fetchPlacements);
     window.addEventListener('focus', fetchPlacements);
@@ -42,7 +62,41 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
     };
   }, []);
 
-  const doubleStudents = [...students, ...students, ...students];
+  // When no students from cache or database:
+  // If loading: render elegant skeleton placeholder so layout doesn't shift
+  // If finished loading & truly empty: return null
+  if (students.length === 0) {
+    if (!loading) return null;
+
+    return (
+      <section className="w-full px-3 sm:px-4 py-3 sm:py-5 bg-[#f8fafc] overflow-hidden select-none">
+        <div className="max-w-7xl mx-auto border border-slate-200/90 rounded-[20px] sm:rounded-2xl bg-white pt-4 pb-4 sm:pt-5 sm:pb-6 shadow-xs relative z-10 w-full overflow-hidden">
+          <div className="flex justify-between items-center px-4 md:px-8 mb-3 sm:mb-4">
+            <div className="h-6 w-48 bg-slate-200 rounded animate-pulse" />
+            <div className="h-5 w-32 bg-slate-200 rounded-full animate-pulse hidden sm:block" />
+          </div>
+          <div className="flex gap-3 px-4 overflow-hidden">
+            {[1, 2, 3, 4, 5].map((idx) => (
+              <div
+                key={idx}
+                className="w-[160px] xs:w-[175px] sm:w-[190px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[16px] shadow-sm flex flex-col overflow-hidden animate-pulse"
+              >
+                <div className="w-full bg-slate-200 h-[175px]" />
+                <div className="p-3 flex flex-col gap-2">
+                  <div className="h-3.5 bg-slate-200 rounded w-3/4" />
+                  <div className="h-2.5 bg-slate-200 rounded w-1/2" />
+                  <div className="h-3 bg-slate-200 rounded w-full mt-2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const copiesNeeded = Math.max(2, Math.ceil(8 / students.length));
+  const doubleStudents = Array(copiesNeeded).fill(students).flat();
 
   return (
     <section className="w-full px-3 sm:px-4 py-3 sm:py-5 bg-[#f8fafc] overflow-hidden select-none">
@@ -51,7 +105,7 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
         {/* HEADING */}
         <div className="flex justify-between items-center px-4 md:px-8 mb-3 sm:mb-4">
           <h2 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight font-heading">
-            Top Placements & Achievers
+            Top Placements &amp; Achievers
           </h2>
           <span className="text-emerald-800 font-semibold text-[9.5px] sm:text-xs hidden sm:block bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
             100% Verified Placements
@@ -81,7 +135,7 @@ export default function TopPlacementSlider({ onOpenContactModal }) {
                 }}
                 className="w-[160px] xs:w-[175px] sm:w-[190px] flex-shrink-0 bg-white border border-slate-200/90 rounded-[16px] shadow-lg flex flex-col mx-1.5 relative overflow-hidden group cursor-pointer hover:shadow-md hover:border-blue-300 transition-all select-none"
               >
-                {/* TOP PORTRAIT PHOTO AREA - EXACT SAME CLEAN DISPLAY AS OUR TEAM */}
+                {/* TOP PORTRAIT PHOTO AREA */}
                 <div 
                   className="w-full bg-slate-100 relative overflow-hidden flex items-center justify-center shrink-0"
                   style={{ height: '175px', minHeight: '175px' }}

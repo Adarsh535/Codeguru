@@ -19,7 +19,8 @@ const categorySchema = new mongoose.Schema({
   badge: { type: String, default: '' },
   icon: { type: String, default: '' },
   bgColor: { type: String, default: 'bg-blue-50' },
-  isActive: { type: Boolean, default: true }
+  isActive: { type: Boolean, default: true },
+  order: { type: Number, default: 0 }
 }, {
   timestamps: true
 });

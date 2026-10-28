@@ -17,6 +17,7 @@ export default function SoundToggle() {
 
   return (
     <button
+      suppressHydrationWarning
       type="button"
       onClick={() => setClickSound(!on)}
       aria-pressed={on}

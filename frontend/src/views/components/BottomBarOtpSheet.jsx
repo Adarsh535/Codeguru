@@ -222,7 +222,7 @@ export default function BottomBarOtpSheet({
 
   return (
     <div 
-      className={`fixed inset-0 z-50 flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4 transition-opacity duration-300 ${
+      className={`fixed inset-0 z-50 flex flex-col justify-end sm:justify-center items-center p-3 sm:p-4 pb-[max(18px,env(safe-area-inset-bottom,18px))] transition-opacity duration-300 ${
         isClosing ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
       suppressHydrationWarning
@@ -237,7 +237,7 @@ export default function BottomBarOtpSheet({
       {/* BADHA CARD (BACKGROUND ELEVATED CARD / FRAME)                   */}
       {/* ============================================================== */}
       <div 
-        className={`relative z-10 w-full max-w-[440px] mx-auto rounded-t-2xl sm:rounded-2xl p-2.5 sm:p-3.5 bg-slate-100 shadow-2xl border-t sm:border border-slate-200 transform transition-all duration-300 ease-out ${
+        className={`relative z-10 w-full max-w-[440px] mx-auto rounded-3xl p-2.5 sm:p-3.5 bg-slate-100 shadow-2xl border border-slate-200/90 transform transition-all duration-300 ease-out ${
           isClosing ? 'translate-y-full sm:translate-y-2 sm:scale-95 opacity-0' : 'animate-modal-slide-up'
         }`}
         onClick={(e) => e.stopPropagation()}

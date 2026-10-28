@@ -21,6 +21,7 @@ const courseSchema = new mongoose.Schema({
   icon: { type: String, default: '' },
   logoUrl: { type: String, default: '' },
   isActive: { type: Boolean, default: true },
+  order: { type: Number, default: 0 },
   showPrice: { type: Boolean, default: true },
   discountPercent: { type: Number, default: 0 },
   originalPrice: { type: String, default: '' },

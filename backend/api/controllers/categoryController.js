@@ -94,12 +94,20 @@ const DEFAULT_CATEGORIES = [
  */
 export const getCategories = async (req, res) => {
   try {
-    let categories = await Category.find().sort({ createdAt: 1 });
+    let categories = await Category.find();
     if (categories.length === 0) {
       await Category.insertMany(DEFAULT_CATEGORIES);
-      categories = await Category.find().sort({ createdAt: 1 });
+      categories = await Category.find();
     }
-    res.json({ success: true, data: categories });
+
+    // Sort strictly by user's saved order (categories with order > 0 come first in exact numerical order)
+    const sorted = [...categories].sort((a, b) => {
+      const ordA = (typeof a.order === 'number' && !isNaN(a.order) && a.order > 0) ? a.order : 999999;
+      const ordB = (typeof b.order === 'number' && !isNaN(b.order) && b.order > 0) ? b.order : 999999;
+      if (ordA !== ordB) return ordA - ordB;
+      return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+    });
+    res.json({ success: true, data: sorted });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -112,7 +120,7 @@ export const getCategories = async (req, res) => {
  */
 export const createCategory = async (req, res) => {
   try {
-    const { label, category, subCat, subCategories, badge, icon, bgColor } = req.body;
+    const { label, category, subCat, subCategories, badge, icon, bgColor, order } = req.body;
     
     if (!label) {
       return res.status(400).json({ success: false, message: 'Category label is required' });
@@ -122,12 +130,15 @@ export const createCategory = async (req, res) => {
       ? category.trim().toLowerCase().replace(/[^a-z0-9]/g, '') 
       : label.toLowerCase().replace(/[^a-z0-9]/g, '');
 
+    const parsedOrder = typeof order !== 'undefined' && order !== '' && !isNaN(Number(order)) ? Number(order) : 0;
     let existing = await Category.findOne({ $or: [{ category: catSlug }, { id: catSlug }] });
     if (existing) {
       // Update existing category instead of failing
       existing.label = label;
-      if (badge) existing.badge = badge;
-      if (icon) existing.icon = icon;
+      if (badge !== undefined) existing.badge = badge;
+      if (icon !== undefined) existing.icon = icon;
+      if (bgColor !== undefined) existing.bgColor = bgColor;
+      if (typeof order !== 'undefined' && order !== '') existing.order = parsedOrder;
       if (Array.isArray(subCategories) && subCategories.length > 0) {
         existing.subCategories = subCategories;
       }
@@ -144,7 +155,8 @@ export const createCategory = async (req, res) => {
       subCategories: Array.isArray(subCategories) ? subCategories : [],
       badge: badge || '',
       icon: icon || '',
-      bgColor: bgColor || 'bg-blue-50'
+      bgColor: bgColor || 'bg-blue-50',
+      order: parsedOrder
     });
 
     await newCategory.save();
@@ -166,13 +178,16 @@ export const updateCategory = async (req, res) => {
     const { id } = req.params;
     const payload = { ...req.body };
     delete payload._id; delete payload.__v; delete payload.createdAt; delete payload.updatedAt;
+    if (typeof payload.order !== 'undefined' && payload.order !== '') {
+      payload.order = Number(payload.order) || 0;
+    }
     let updated = null;
     if (id && id.match(/^[0-9a-fA-F]{24}$/)) {
       updated = await Category.findByIdAndUpdate(id, payload, { new: true });
     }
     if (!updated) {
       updated = await Category.findOneAndUpdate(
-        { $or: [{ category: id }, { id: id }] },
+        { $or: [{ category: id }, { id: id }, { label: id }] },
         payload,
         { new: true }
       );

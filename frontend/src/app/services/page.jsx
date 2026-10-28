@@ -42,7 +42,7 @@ export const metadata = {
   },
 };
 
-export default function ServicesRoute({ onOpenContactModal }) {
+export default function ServicesRoute(props) {
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -134,7 +134,7 @@ export default function ServicesRoute({ onOpenContactModal }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
       />
-      <ServicesPage onOpenContactModal={onOpenContactModal} />
+      <ServicesPage {...props} />
     </>
   );
 }

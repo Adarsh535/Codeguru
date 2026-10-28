@@ -3,33 +3,18 @@
  * MODEL LAYER: HERO BANNER MODEL & API SERVICE (bannerModel.js)
  * ============================================================================
  * Handles fetching homepage hero section image and video banners from Express REST API
- * with fallback seed banners.
+ * with instant caching.
  */
 
 import { API_BASE, apiFetch } from './apiClient';
 
-export const FALLBACK_BANNERS = [
-  {
-    id: 'b-1',
-    type: 'image',
-    title: 'STAR ACHIEVERS & PLACEMENT DRIVES 2026',
-    subtitle: 'CodeGurru Alumni placed at Top MNCs & Unicorn Startups with packages up to 18.5 LPA',
-    imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1400&q=80',
-    badge: 'TOP PLACEMENTS 2026',
-    badgeColor: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-400 text-slate-950 font-bold border-amber-300 shadow-md',
-    ctaText: 'Explore Placement Drives',
-    ctaColor: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white hover:from-emerald-400 hover:to-cyan-400'
-  }
-];
-
 export const bannerModel = {
   /**
    * --------------------------------------------------------------------------
-   * API: Get All Hero Banners
+   * API: Get All Hero Banners (Direct from Database)
    * --------------------------------------------------------------------------
-   * @route   GET http://localhost:5000/api/banners
+   * @route   GET /api/banners
    * @desc    Website homepage slider banners (image & video slides) fetch karta hai.
-   *          Failure par fallback banner list return karta hai.
    * @access  Public
    * @returns {Promise<Array>} List of hero banner objects
    */
@@ -37,23 +22,36 @@ export const bannerModel = {
     try {
       const res = await apiFetch('/banners');
       const data = await res.json();
-      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-        return data.data.map((item, idx) => ({
+      if (data.success && Array.isArray(data.data)) {
+        const banners = data.data.map((item, idx) => ({
           id: item._id || item.id || idx,
           type: item.type || 'image',
-          title: item.title,
-          subtitle: item.subtitle,
+          title: item.title ? String(item.title).trim() : '',
+          subtitle: item.subtitle ? String(item.subtitle).trim() : '',
           videoUrl: item.type === 'video' ? item.mediaUrl : null,
           poster: item.poster || item.thumbnailUrl || (item.type === 'video' ? (item.imageUrl || '') : item.mediaUrl),
-          badge: item.badge || 'TOP PLACEMENT DRIVES 2026',
+          badge: item.badge ? String(item.badge).trim() : '',
           badgeColor: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-400 text-slate-950 font-bold border-amber-300 shadow-md',
-          ctaText: item.ctaText || 'Explore Placement Drives',
+          ctaText: item.ctaText ? String(item.ctaText).trim() : '',
           ctaColor: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white hover:from-emerald-400 hover:to-cyan-400'
         }));
+        if (typeof window !== 'undefined' && banners.length > 0) {
+          try { sessionStorage.setItem('cg_cached_banners', JSON.stringify(banners)); } catch (e) {}
+        }
+        return banners;
       }
     } catch (err) {
-      console.warn('[bannerModel API Warning] Live API fetch error, using fallback:', err);
+      console.warn('[bannerModel API Warning] Live API fetch error:', err);
     }
-    return FALLBACK_BANNERS;
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = sessionStorage.getItem('cg_cached_banners');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+    }
+    return [];
   }
 };

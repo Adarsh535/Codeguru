@@ -17,8 +17,8 @@ export function useBannersController() {
     title: '',
     subtitle: '',
     type: 'image',
-    badge: 'TOP PLACEMENT DRIVES 2026',
-    ctaText: 'Explore Courses',
+    badge: '',
+    ctaText: '',
     mediaUrl: ''
   });
 
@@ -55,8 +55,8 @@ export function useBannersController() {
       title: '',
       subtitle: '',
       type: 'image',
-      badge: 'TOP PLACEMENT DRIVES 2026',
-      ctaText: 'Explore Courses',
+      badge: '',
+      ctaText: '',
       mediaUrl: ''
     });
     setShowAddModal(true);
@@ -68,8 +68,8 @@ export function useBannersController() {
       title: banner.title || '',
       subtitle: banner.subtitle || '',
       type: banner.type || 'image',
-      badge: banner.badge || 'TOP PLACEMENT DRIVES 2026',
-      ctaText: banner.ctaText || 'Explore Courses',
+      badge: banner.badge || '',
+      ctaText: banner.ctaText || '',
       mediaUrl: banner.mediaUrl || banner.imageUrl || banner.videoUrl || ''
     });
     setShowAddModal(true);
@@ -97,14 +97,18 @@ export function useBannersController() {
 
   const handleCreateBanner = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.mediaUrl) {
-      alert('Please fill title and upload media!');
+    if (!formData.mediaUrl) {
+      alert('Please upload an image or video file for the banner!');
       return;
     }
 
     const isVideo = formData.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(formData.mediaUrl);
     const payload = {
       ...formData,
+      title: formData.title ? formData.title.trim() : '',
+      subtitle: formData.subtitle ? formData.subtitle.trim() : '',
+      badge: formData.badge ? formData.badge.trim() : '',
+      ctaText: formData.ctaText ? formData.ctaText.trim() : '',
       type: isVideo ? 'video' : 'image',
       videoUrl: isVideo ? formData.mediaUrl : '',
       imageUrl: !isVideo ? formData.mediaUrl : ''
@@ -125,8 +129,8 @@ export function useBannersController() {
         title: '',
         subtitle: '',
         type: 'image',
-        badge: 'TOP PLACEMENT DRIVES 2026',
-        ctaText: 'Explore Courses',
+        badge: '',
+        ctaText: '',
         mediaUrl: ''
       });
       window.dispatchEvent(new Event('codeguru_refresh_all'));

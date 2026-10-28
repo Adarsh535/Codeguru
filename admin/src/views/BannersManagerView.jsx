@@ -259,13 +259,13 @@ export default function BannersManagerView() {
                 {/* TITLE & SUBTITLE IN GRID */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-slate-700">Banner Title</label>
+                    <label className="text-xs font-bold text-slate-700">Banner Title (Optional)</label>
                     <input
                       type="text"
-                      required
+
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      placeholder="e.g. TOP PLACEMENT DRIVES 2026"
+                      placeholder="Leave empty if image already has text"
                       className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500"
                     />
                   </div>
@@ -290,7 +290,7 @@ export default function BannersManagerView() {
                       type="text"
                       value={formData.badge}
                       onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
-                      placeholder="TOP PLACEMENTS 2026"
+                      placeholder="Leave empty for no badge"
                       className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500"
                     />
                   </div>
@@ -301,7 +301,7 @@ export default function BannersManagerView() {
                       type="text"
                       value={formData.ctaText}
                       onChange={(e) => setFormData({ ...formData, ctaText: e.target.value })}
-                      placeholder="Explore Drives"
+                      placeholder="Leave empty for no button"
                       className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-blue-500"
                     />
                   </div>

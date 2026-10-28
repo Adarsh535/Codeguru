@@ -137,13 +137,13 @@ export default function ContactModal({ isOpen, onClose }) {
   return (
     <div
       onClick={handleClose}
-      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm select-none transition-all duration-300 ${
+      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 pb-[max(18px,env(safe-area-inset-bottom,18px))] bg-slate-950/60 backdrop-blur-sm select-none transition-all duration-300 ${
         isClosing ? 'animate-backdrop-out' : 'animate-backdrop-in'
       }`}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`w-full max-w-full sm:max-w-md min-w-[280px] max-h-[92vh] sm:max-h-[88vh] bg-white rounded-t-2xl sm:rounded-2xl overflow-hidden border border-slate-200 shadow-2xl flex flex-col transition-all duration-300 transform ${
+        className={`w-full max-w-full sm:max-w-md min-w-[280px] max-h-[92vh] sm:max-h-[88vh] bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-2xl flex flex-col transition-all duration-300 transform ${
           isClosing ? 'animate-modal-slide-down' : 'animate-modal-slide-up'
         }`}
       >

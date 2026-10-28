@@ -8,14 +8,14 @@
 import mongoose from 'mongoose';
 
 const bannerSchema = new mongoose.Schema({
-  title: { type: String, required: true },
+  title: { type: String, default: '' },
   subtitle: { type: String, default: '' },
   type: { type: String, enum: ['image', 'video'], default: 'image' },
   mediaUrl: { type: String, required: true },
   videoUrl: { type: String, default: '' },
   imageUrl: { type: String, default: '' },
-  badge: { type: String, default: 'PROMOTION' },
-  ctaText: { type: String, default: 'Learn More' },
+  badge: { type: String, default: '' },
+  ctaText: { type: String, default: '' },
   active: { type: Boolean, default: true }
 }, {
   timestamps: true

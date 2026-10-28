@@ -34,14 +34,14 @@ export const addBanner = async (req, res) => {
     const isVideo = req.body.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(mediaUrl);
 
     const banner = await Banner.create({
-      title: req.body.title || 'New Banner Title',
-      subtitle: req.body.subtitle || '',
+      title: req.body.title !== undefined ? String(req.body.title).trim() : '',
+      subtitle: req.body.subtitle !== undefined ? String(req.body.subtitle).trim() : '',
       type: isVideo ? 'video' : (req.body.type || 'image'),
       mediaUrl: mediaUrl,
       videoUrl: req.body.videoUrl || (isVideo ? mediaUrl : ''),
       imageUrl: req.body.imageUrl || (!isVideo ? mediaUrl : ''),
-      badge: req.body.badge || 'PROMOTION',
-      ctaText: req.body.ctaText || 'Learn More',
+      badge: req.body.badge !== undefined ? String(req.body.badge).trim() : '',
+      ctaText: req.body.ctaText !== undefined ? String(req.body.ctaText).trim() : '',
       active: true
     });
 
@@ -61,7 +61,13 @@ export const addBanner = async (req, res) => {
  */
 export const updateBanner = async (req, res) => {
   try {
-    const banner = await Banner.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updateData = { ...req.body };
+    if (updateData.title !== undefined) updateData.title = String(updateData.title).trim();
+    if (updateData.subtitle !== undefined) updateData.subtitle = String(updateData.subtitle).trim();
+    if (updateData.badge !== undefined) updateData.badge = String(updateData.badge).trim();
+    if (updateData.ctaText !== undefined) updateData.ctaText = String(updateData.ctaText).trim();
+
+    const banner = await Banner.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (banner) {
       broadcastRealtimeEvent('banners', banner);
       return res.json({ success: true, message: 'Banner updated in MongoDB Atlas', data: banner });

@@ -224,12 +224,18 @@ export default function ProfilePage({ onOpenContactModal }) {
 
       {/* MODAL POPUPS FOR EACH POLICY & AUTH */}
       {activeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="bg-white rounded-2xl p-5 xxs:p-6 w-full max-w-lg sm:max-w-xl shadow-2xl border border-slate-100 relative max-h-[88vh] flex flex-col justify-between overflow-hidden">
+        <div
+          onClick={() => setActiveModal(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/65 backdrop-blur-sm px-3.5 pt-[78px] pb-[85px] sm:p-6 animate-fadeIn select-none"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl p-4 xxs:p-5 sm:p-6 w-full max-w-lg sm:max-w-xl shadow-2xl border border-slate-200/90 relative max-h-[calc(100dvh-170px)] sm:max-h-[74vh] flex flex-col justify-between overflow-hidden my-auto select-text"
+          >
             
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
-              <h3 className="text-base xxs:text-lg font-bold text-slate-900 font-heading">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-2.5 sm:pb-3 sm:mb-3 shrink-0">
+              <h3 className="text-sm xxs:text-base sm:text-lg font-bold text-slate-900 font-heading">
                 {activeModal === 'auth'
                   ? authMode === 'login'
                     ? 'Login to CodeGurru'
@@ -238,14 +244,15 @@ export default function ProfilePage({ onOpenContactModal }) {
               </h3>
               <button
                 onClick={() => setActiveModal(null)}
-                className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center transition-colors cursor-pointer"
+                className="w-7 h-7 xxs:w-8 xxs:h-8 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Close modal"
               >
                 <CloseIcon className="!w-4 !h-4" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="overflow-y-auto flex-1 pr-2 text-slate-700 text-xs xxs:text-sm space-y-4">
+            <div className="overflow-y-auto flex-1 pr-1.5 sm:pr-2 text-slate-700 text-xs xxs:text-sm space-y-3 sm:space-y-4 overscroll-contain">
               {activeModal === 'auth' && (
                 <div>
                   {isSuccess ? (
@@ -969,10 +976,10 @@ export default function ProfilePage({ onOpenContactModal }) {
             </div>
 
             {/* Modal Footer */}
-            <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+            <div className="mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-slate-100 flex justify-end shrink-0">
               <button
                 onClick={() => setActiveModal(null)}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-2 rounded-xl text-xs transition-colors cursor-pointer"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-1.5 sm:px-5 sm:py-2 rounded-xl text-xs transition-colors cursor-pointer"
               >
                 Close
               </button>
