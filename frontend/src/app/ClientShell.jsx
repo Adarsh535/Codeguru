@@ -14,6 +14,8 @@ import ProfilePage from '../views/components/ProfilePage';
 import InquiryModal from '../views/components/InquiryModal';
 import BatchEnrollModal from '../views/components/BatchEnrollModal';
 import BottomBarOtpSheet from '../views/components/BottomBarOtpSheet';
+import PwaInstallBanner from '../views/components/PwaInstallBanner';
+import PwaSplashScreen from '../views/components/PwaSplashScreen';
 import { ModalsProvider } from '../context/ModalsContext';
 import { apiService } from '../services/apiService';
 import { realtimeSync } from '../services/realtimeService';
@@ -46,6 +48,12 @@ export default function ClientShell({ children }) {
     checkUser();
     window.addEventListener('storage', checkUser);
     window.addEventListener('codeguru_user_updated', checkUser);
+
+    // Register PWA service worker for Chrome installation & offline support
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
     return () => {
       window.removeEventListener('storage', checkUser);
       window.removeEventListener('codeguru_user_updated', checkUser);
@@ -144,7 +152,7 @@ export default function ClientShell({ children }) {
         if (document.visibilityState === 'visible') {
           sendHeartbeat(pathname);
         }
-      }, 30000); // 30s interval for presence detection (F10)
+      }, 8000); // 8s high-frequency interval for live active presence
     };
 
     const stopHeartbeat = () => {
@@ -216,6 +224,12 @@ export default function ClientShell({ children }) {
   return (
     <DeviceGuard>
       <ModalsProvider value={modalsValue}>
+        {/* CINEMATIC PWA SPLASH SCREEN (MOBILE & STANDALONE APP LAUNCH) */}
+        <PwaSplashScreen />
+
+        {/* MOBILE CHROME TOP INSTALL BANNER POPUP */}
+        <PwaInstallBanner />
+
         <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 justify-between overflow-x-clip pt-[70px] sm:pt-20 pb-20 sm:pb-8" suppressHydrationWarning>
           
           {/* RESPONSIVE TOPBAR HEADER */}

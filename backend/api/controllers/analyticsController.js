@@ -91,18 +91,58 @@ const categorizeReferrer = (referrer = '') => {
 };
 
 // ============================================================================
-// ULTRA-FAST 1-SECOND IN-MEMORY MICRO-CACHE & SSE SUBSCRIBERS
+// HIGH-PERFORMANCE IN-MEMORY CACHE, ACTIVE PRESENCE STORE & SSE SUBSCRIBERS
 // ============================================================================
 let cachedBaseMetrics = null;
 let lastBaseCalculationTime = 0;
 let lastCalculatedDay = '';
-const BASE_CACHE_TTL_MS = 1000; // 1-second TTL for instant response times
+const BASE_CACHE_TTL_MS = 8000; // 8-second base metric TTL (invalidated instantly on new visit)
+
+// Active sessions memory map for sub-millisecond live visitor lookups (<0.01ms)
+const activeSessionsMemory = new Map(); // sessionId -> { visitorId, lastSeen, path, device }
+
+export const updateActiveSessionMemory = (sessionId, visitorId, path, device) => {
+  if (!sessionId || !visitorId) return;
+  activeSessionsMemory.set(sessionId, {
+    visitorId,
+    path: path || '/',
+    device: device || 'desktop',
+    lastSeen: Date.now()
+  });
+};
+
+export const removeActiveSessionMemory = (sessionId) => {
+  if (sessionId) {
+    activeSessionsMemory.delete(sessionId);
+  }
+};
+
+// Report micro-cache (daily, top-pages, insights) to eliminate repeated heavy Mongo aggregations
+const reportCache = new Map();
+const REPORT_CACHE_TTL_MS = 6000; // 6 seconds
+
+const getCachedReport = (key) => {
+  const entry = reportCache.get(key);
+  if (entry && (Date.now() - entry.time < REPORT_CACHE_TTL_MS)) {
+    return entry.data;
+  }
+  return null;
+};
+
+const setCachedReport = (key, data) => {
+  reportCache.set(key, { time: Date.now(), data });
+  if (reportCache.size > 100) {
+    const oldestKey = reportCache.keys().next().value;
+    reportCache.delete(oldestKey);
+  }
+};
 
 /**
  * Invalidate the cache immediately when new visits or events are recorded
  */
 export const invalidateAnalyticsCache = () => {
   lastBaseCalculationTime = 0;
+  reportCache.clear();
 };
 
 // Active Server-Sent Events subscribers for instant live push
@@ -127,15 +167,32 @@ export const broadcastAnalyticsUpdate = async () => {
 };
 
 /**
- * Helper: Query live unique visitors count from active_sessions in MongoDB
- * Uses a strict 35-second activity threshold and counts distinct visitorIds (1 user with 3 tabs = 1 live visitor)
- * Runs in ~1-2ms on indexed fields.
+ * Helper: Query live unique visitors count from active_sessions in Memory & MongoDB
+ * 50-second active window (pairs with 8s client heartbeat) for rock-solid real-time accuracy.
  */
 export const getLiveVisitorsCount = async () => {
+  const now = Date.now();
+  const thresholdMs = now - 50 * 1000;
+
+  // 1. Fast in-memory evaluation
+  const activeVisitorSet = new Set();
+  for (const [sid, sess] of activeSessionsMemory.entries()) {
+    if (sess.lastSeen >= thresholdMs) {
+      activeVisitorSet.add(sess.visitorId);
+    } else if (now - sess.lastSeen > 120 * 1000) {
+      activeSessionsMemory.delete(sid);
+    }
+  }
+
+  if (activeVisitorSet.size > 0) {
+    return activeVisitorSet.size;
+  }
+
+  // 2. Fallback to MongoDB index
   try {
-    const threshold = new Date(Date.now() - 35 * 1000);
+    const thresholdDate = new Date(thresholdMs);
     const distinctVisitors = await ActiveSession.distinct('visitorId', { 
-      lastSeen: { $gte: threshold } 
+      lastSeen: { $gte: thresholdDate } 
     });
     return distinctVisitors.length;
   } catch (err) {
@@ -316,8 +373,9 @@ export const trackPageView = async (req, res) => {
       return res.json({ success: true, filtered: 'admin_path' });
     }
 
-    // 2. Upsert active session in MongoDB Atlas for live visitor tracking
-    await ActiveSession.updateOne(
+    // 2. Upsert active session in Memory and MongoDB Atlas for instant live visitor tracking
+    updateActiveSessionMemory(cleanSessionId, cleanVisitorId, cleanPath, safeDevice);
+    ActiveSession.updateOne(
       { sessionId: cleanSessionId },
       { 
         $set: { 
@@ -328,7 +386,7 @@ export const trackPageView = async (req, res) => {
         } 
       },
       { upsert: true }
-    );
+    ).catch(() => {});
 
     // If pure heartbeat, return immediately
     if (isHeartbeat) {
@@ -440,7 +498,8 @@ export const recordHeartbeat = async (req, res) => {
     const cleanSessionId = sessionId.trim().substring(0, 64);
     const safeDevice = ['desktop', 'mobile', 'tablet'].includes(device) ? device : 'desktop';
 
-    await ActiveSession.updateOne(
+    updateActiveSessionMemory(cleanSessionId, cleanVisitorId, cleanPath, safeDevice);
+    ActiveSession.updateOne(
       { sessionId: cleanSessionId },
       { 
         $set: { 
@@ -451,7 +510,7 @@ export const recordHeartbeat = async (req, res) => {
         } 
       },
       { upsert: true }
-    );
+    ).catch(() => {});
 
     // Instant broadcast
     broadcastAnalyticsUpdate();
@@ -484,7 +543,9 @@ export const recordLeave = async (req, res) => {
 
     const { sessionId } = payload || {};
     if (sessionId) {
-      await ActiveSession.deleteOne({ sessionId: sessionId.toString().trim() });
+      const cleanSid = sessionId.toString().trim();
+      removeActiveSessionMemory(cleanSid);
+      await ActiveSession.deleteOne({ sessionId: cleanSid }).catch(() => {});
     }
 
     // Instant cache invalidation & live notification
@@ -526,6 +587,11 @@ export const getDailyAnalytics = async (req, res) => {
   setNoCacheHeaders(res);
   try {
     const { range = '7d', startDate, endDate, grouping = 'daily' } = req.query;
+    const cacheKey = `daily_${range}_${startDate || ''}_${endDate || ''}_${grouping}`;
+    const cachedData = getCachedReport(cacheKey);
+    if (cachedData) {
+      return res.json({ success: true, data: cachedData, fromCache: true });
+    }
     let dateKeys = [];
 
     if (range === 'custom' && startDate && endDate) {
@@ -665,20 +731,22 @@ export const getDailyAnalytics = async (req, res) => {
       totalVisitorsInPeriod = allTimeCount;
     }
 
+    const finalDaily = {
+      range,
+      grouping,
+      points: chartData,
+      rawDailyPoints: dailyPoints,
+      totals: {
+        pageViews: totalViewsInPeriod,
+        uniqueVisitors: totalVisitorsInPeriod,
+        avgViewsPerDay: dailyPoints.length > 0 ? Math.round(totalViewsInPeriod / dailyPoints.length) : 0,
+        avgVisitorsPerDay: dailyPoints.length > 0 ? Math.round(totalVisitorsInPeriod / dailyPoints.length) : 0
+      }
+    };
+    setCachedReport(cacheKey, finalDaily);
     return res.json({
       success: true,
-      data: {
-        range,
-        grouping,
-        points: chartData,
-        rawDailyPoints: dailyPoints,
-        totals: {
-          pageViews: totalViewsInPeriod,
-          uniqueVisitors: totalVisitorsInPeriod,
-          avgViewsPerDay: dailyPoints.length > 0 ? Math.round(totalViewsInPeriod / dailyPoints.length) : 0,
-          avgVisitorsPerDay: dailyPoints.length > 0 ? Math.round(totalVisitorsInPeriod / dailyPoints.length) : 0
-        }
-      }
+      data: finalDaily
     });
   } catch (err) {
     console.error('[analyticsController getDailyAnalytics Error]:', err.message);
@@ -695,6 +763,11 @@ export const getTopPages = async (req, res) => {
   setNoCacheHeaders(res);
   try {
     const { range = '7d', startDate, endDate, limit = 10 } = req.query;
+    const cacheKey = `topPages_${range}_${startDate || ''}_${endDate || ''}_${limit}`;
+    const cachedData = getCachedReport(cacheKey);
+    if (cachedData) {
+      return res.json({ success: true, data: cachedData, fromCache: true });
+    }
     let matchFilter = {};
 
     if (range === 'today') {
@@ -761,12 +834,14 @@ export const getTopPages = async (req, res) => {
       };
     });
 
+    const finalPages = {
+      totalViews: totalViewsInRange,
+      pages: formattedPages
+    };
+    setCachedReport(cacheKey, finalPages);
     return res.json({
       success: true,
-      data: {
-        totalViews: totalViewsInRange,
-        pages: formattedPages
-      }
+      data: finalPages
     });
   } catch (err) {
     console.error('[analyticsController getTopPages Error]:', err.message);
@@ -828,6 +903,11 @@ export const getVisitorInsights = async (req, res) => {
   setNoCacheHeaders(res);
   try {
     const { range = '30d' } = req.query;
+    const cacheKey = `insights_${range}`;
+    const cachedData = getCachedReport(cacheKey);
+    if (cachedData) {
+      return res.json({ success: true, data: cachedData, fromCache: true });
+    }
     const dateKeys = range === '7d' ? getPastNDaysKeys(7) : getPastNDaysKeys(30);
 
     const { start } = getISTDayBoundaries(dateKeys[0]);
@@ -897,24 +977,26 @@ export const getVisitorInsights = async (req, res) => {
       }
     });
 
+    const finalInsights = {
+      devices: deviceMap,
+      visitors: {
+        newVisitors: newCount,
+        returningVisitors: returningCount,
+        total: newCount + returningCount
+      },
+      referrers: referrerAgg.map(r => ({
+        channel: r._id || 'Direct',
+        count: r.count
+      })),
+      dayOfWeek: daysOfWeek.map(d => ({
+        day: d,
+        views: dayCounts[d]
+      }))
+    };
+    setCachedReport(cacheKey, finalInsights);
     return res.json({
       success: true,
-      data: {
-        devices: deviceMap,
-        visitors: {
-          newVisitors: newCount,
-          returningVisitors: returningCount,
-          total: newCount + returningCount
-        },
-        referrers: referrerAgg.map(r => ({
-          channel: r._id || 'Direct',
-          count: r.count
-        })),
-        dayOfWeek: daysOfWeek.map(d => ({
-          day: d,
-          views: dayCounts[d]
-        }))
-      }
+      data: finalInsights
     });
   } catch (err) {
     console.error('[analyticsController getVisitorInsights Error]:', err.message);

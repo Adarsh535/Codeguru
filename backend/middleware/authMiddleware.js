@@ -162,10 +162,10 @@ export const requireAdminOrTicket = async (req, res, next) => {
       req.user = ticketData;
       return next();
     }
-    return res.status(401).json({
-      success: false,
-      message: 'Invalid or expired realtime ticket.'
-    });
+  }
+  if (req.query?.token) {
+    req.headers['authorization'] = `Bearer ${req.query.token}`;
+    req.headers['x-admin-token'] = req.query.token;
   }
   return requireAdmin(req, res, next);
 };

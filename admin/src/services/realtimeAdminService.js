@@ -137,6 +137,8 @@ class RealtimeAdminManager {
 
   notify(eventType, data) {
     window.dispatchEvent(new CustomEvent('codeguru_realtime_event', { detail: { type: eventType, data } }));
+    window.dispatchEvent(new CustomEvent(`codeguru_refresh_${eventType}`, { detail: data }));
+    window.dispatchEvent(new CustomEvent('codeguru_refresh_all', { detail: data }));
     for (const listener of this.listeners) {
       if (listener.eventType === 'all' || listener.eventType === eventType) {
         try { listener.callback(data); } catch {}

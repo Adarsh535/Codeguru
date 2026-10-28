@@ -16,6 +16,7 @@ const bannerSchema = new mongoose.Schema({
   imageUrl: { type: String, default: '' },
   badge: { type: String, default: '' },
   ctaText: { type: String, default: '' },
+  order: { type: Number, default: 0 },
   active: { type: Boolean, default: true }
 }, {
   timestamps: true

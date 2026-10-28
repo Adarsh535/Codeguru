@@ -25,10 +25,13 @@ const cleanSlide = (slide) => ({
 });
 
 // Ask Cloudinary for a compressed, right-sized image (WebP/AVIF where supported)
-const optimizeImage = (url) =>
-  typeof url === 'string' && url.includes('res.cloudinary.com') && url.includes('/upload/') && !url.includes('/upload/f_auto')
-    ? url.replace('/upload/', '/upload/f_auto,q_auto,w_1600/')
-    : url;
+const optimizeImage = (url) => {
+  if (!url || typeof url !== 'string') return '';
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/') && !url.includes('/upload/f_auto')) {
+    return url.replace('/upload/', '/upload/f_auto,q_auto,w_1600/');
+  }
+  return url;
+};
 
 export default function BannerSlider({ onOpenContactModal }) {
   const [slides, setSlides] = useState([]);
@@ -49,7 +52,10 @@ export default function BannerSlider({ onOpenContactModal }) {
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          setSlides(parsed.map(cleanSlide));
+          const valid = parsed.filter(p => p && (p.mediaUrl || p.imageUrl || p.videoUrl || p.poster));
+          if (valid.length > 0) {
+            setSlides(valid.map(cleanSlide));
+          }
         }
       }
     } catch (e) {}
@@ -59,15 +65,18 @@ export default function BannerSlider({ onOpenContactModal }) {
         if (!isMounted) return;
         if (Array.isArray(dynamicBanners) && dynamicBanners.length > 0) {
           const formatted = dynamicBanners.map(b => {
-            const media = b.mediaUrl || b.videoUrl || b.imageUrl || '';
-            const isVid = b.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(media) || media.includes('/video/');
+            const media = b.mediaUrl || b.imageUrl || b.videoUrl || b.poster || '';
+            const isVid = b.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(media) || (typeof media === 'string' && media.includes('/video/'));
+            const imageSource = b.imageUrl || (!isVid ? media : (b.poster || ''));
+            const videoSource = b.videoUrl || (isVid ? media : '');
             return {
               ...cleanSlide(b),
               id: b._id || b.id,
               type: isVid ? 'video' : 'image',
               mediaUrl: media,
-              videoUrl: b.videoUrl || media,
-              imageUrl: b.imageUrl || media
+              videoUrl: videoSource,
+              imageUrl: imageSource,
+              poster: b.poster || (isVid ? imageSource : '')
             };
           });
           setSlides(formatted);
@@ -202,9 +211,9 @@ export default function BannerSlider({ onOpenContactModal }) {
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {slides.map((slide, index) => {
-            const videoSource = slide.videoUrl || slide.mediaUrl;
-            const imageSource = slide.imageUrl || slide.mediaUrl;
-            const isVideoSlide = slide.type === 'video' || (videoSource && (/\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(videoSource) || videoSource.includes('/video/')));
+            const videoSource = slide.videoUrl || slide.mediaUrl || '';
+            const imageSource = slide.imageUrl || slide.mediaUrl || slide.poster || '';
+            const isVideoSlide = slide.type === 'video' || (videoSource && (/\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(videoSource) || (typeof videoSource === 'string' && videoSource.includes('/video/'))));
 
             return (
               <div key={slide.id || index} className="relative w-full h-full shrink-0 overflow-hidden bg-slate-900">
@@ -227,11 +236,16 @@ export default function BannerSlider({ onOpenContactModal }) {
                 ) : (
                   <div className="relative w-full h-full">
                     <img
-                      src={optimizeImage(imageSource)}
-                      alt={slide.title || 'CodeGurru'}
+                      src={optimizeImage(imageSource) || imageSource}
+                      alt={slide.title || 'CodeGurru Banner'}
                       loading={index === 0 ? 'eager' : 'lazy'}
                       fetchPriority={index === 0 ? 'high' : 'auto'}
                       decoding="async"
+                      onError={(e) => {
+                        if (imageSource && e.currentTarget.src !== imageSource) {
+                          e.currentTarget.src = imageSource;
+                        }
+                      }}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -272,31 +286,29 @@ export default function BannerSlider({ onOpenContactModal }) {
                   </div>
                 )}
 
-              {/* TOP-RIGHT CONTROLS (Play/Pause & Mute) */}
-              <div className="absolute top-4 right-4 z-10 pointer-events-auto">
-                <div className="bg-[#1e293b]/70 backdrop-blur-sm rounded-full flex items-center p-1 shadow-lg gap-1">
-                  {(slide.type === 'video' || (slide.videoUrl && (/\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(slide.videoUrl) || slide.videoUrl.includes('/video/')))) && (
-                    <>
-                      <button
-                        suppressHydrationWarning
-                        onClick={() => toggleVideoPlay(index)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors text-white cursor-pointer"
-                        title={isPlaying ? 'Pause' : 'Play'}
-                      >
-                        {isPlaying ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
-                      </button>
-                      <button
-                        suppressHydrationWarning
-                        onClick={toggleAudio}
-                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors text-white bg-white/10 cursor-pointer"
-                        title={isMuted ? 'Unmute' : 'Mute'}
-                      >
-                        {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-                      </button>
-                    </>
-                  )}
+              {/* TOP-RIGHT CONTROLS (Play/Pause & Mute for Video Slides Only) */}
+              {isVideoSlide && (
+                <div className="absolute top-4 right-4 z-10 pointer-events-auto">
+                  <div className="bg-[#1e293b]/70 backdrop-blur-sm rounded-full flex items-center p-1 shadow-lg gap-1">
+                    <button
+                      suppressHydrationWarning
+                      onClick={() => toggleVideoPlay(index)}
+                      className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors text-white cursor-pointer"
+                      title={isPlaying ? 'Pause' : 'Play'}
+                    >
+                      {isPlaying ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+                    </button>
+                    <button
+                      suppressHydrationWarning
+                      onClick={toggleAudio}
+                      className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors text-white bg-white/10 cursor-pointer"
+                      title={isMuted ? 'Unmute' : 'Mute'}
+                    >
+                      {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           );
         })}

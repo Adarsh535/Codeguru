@@ -183,12 +183,17 @@ export const analyticsModel = {
 
       try {
         const ticket = await getRealtimeTicket();
-        if (!ticket) {
-          reconnectTimer = setTimeout(connect, 5000);
+        const token = getAdminAuthToken();
+        const params = new URLSearchParams();
+        if (ticket) params.set('ticket', ticket);
+        if (token) params.set('token', token);
+
+        if (!ticket && !token) {
+          reconnectTimer = setTimeout(connect, 3000);
           return;
         }
 
-        const streamUrl = `${API_BASE}/analytics/stream?ticket=${encodeURIComponent(ticket)}`;
+        const streamUrl = `${API_BASE}/analytics/stream?${params.toString()}`;
         eventSource = new EventSource(streamUrl);
 
         eventSource.onopen = () => {

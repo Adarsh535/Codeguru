@@ -15,7 +15,7 @@ import { broadcastRealtimeEvent } from '../../services/realtimeService.js';
  */
 export const getBanners = async (req, res) => {
   try {
-    const banners = await Banner.find().sort({ createdAt: -1 });
+    const banners = await Banner.find().sort({ order: 1, createdAt: -1 });
     return res.json({ success: true, data: banners });
   } catch (err) {
     console.error('[bannerController Error]:', err.message);
@@ -31,7 +31,7 @@ export const getBanners = async (req, res) => {
 export const addBanner = async (req, res) => {
   try {
     const mediaUrl = req.body.mediaUrl || '';
-    const isVideo = req.body.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(mediaUrl);
+    const isVideo = req.body.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(mediaUrl) || (typeof mediaUrl === 'string' && mediaUrl.includes('/video/'));
 
     const banner = await Banner.create({
       title: req.body.title !== undefined ? String(req.body.title).trim() : '',
@@ -42,6 +42,7 @@ export const addBanner = async (req, res) => {
       imageUrl: req.body.imageUrl || (!isVideo ? mediaUrl : ''),
       badge: req.body.badge !== undefined ? String(req.body.badge).trim() : '',
       ctaText: req.body.ctaText !== undefined ? String(req.body.ctaText).trim() : '',
+      order: req.body.order !== undefined ? (Number(req.body.order) || 0) : 0,
       active: true
     });
 
@@ -66,6 +67,7 @@ export const updateBanner = async (req, res) => {
     if (updateData.subtitle !== undefined) updateData.subtitle = String(updateData.subtitle).trim();
     if (updateData.badge !== undefined) updateData.badge = String(updateData.badge).trim();
     if (updateData.ctaText !== undefined) updateData.ctaText = String(updateData.ctaText).trim();
+    if (updateData.order !== undefined) updateData.order = Number(updateData.order) || 0;
 
     const banner = await Banner.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (banner) {
