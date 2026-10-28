@@ -295,44 +295,44 @@ export default function ServicesPage({ onOpenContactModal, onOpenOtpSheet }) {
     <div className="w-full bg-[#f8fafc] min-h-screen pb-20 text-slate-900 font-sans selection:bg-orange-200 overflow-x-hidden">
       
       {/* =========================================================================
-          HERO SECTION: RESPONSIVE CINEMATIC DARK CANVAS
+          HERO SECTION: CLEAN PREMIUM LIGHT CANVAS
       ========================================================================== */}
-      <section className="relative w-full bg-[#070b14] text-white pt-12 pb-16 sm:pt-20 sm:pb-28 px-3.5 sm:px-6 lg:px-8 overflow-hidden select-none">
+      <section className="relative w-full bg-white text-slate-900 pt-12 pb-16 sm:pt-20 sm:pb-24 px-3.5 sm:px-6 lg:px-8 border-b border-slate-200/80 overflow-hidden select-none">
         
-        {/* Engineering Blueprint Mesh & Ambient Radiance */}
+        {/* Engineering Blueprint Mesh & Subtle Ambient Glow */}
         <div 
-          className="absolute inset-0 opacity-20 pointer-events-none"
+          className="absolute inset-0 opacity-40 pointer-events-none"
           style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, #94a3b8 1px, transparent 0)',
+            backgroundImage: 'radial-gradient(circle at 1px 1px, #cbd5e1 1.2px, transparent 0)',
             backgroundSize: '24px 24px'
           }}
         />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] sm:w-[700px] h-[220px] sm:h-[350px] bg-gradient-to-b from-orange-500/20 via-amber-500/10 to-transparent blur-[80px] sm:blur-[110px] pointer-events-none" />
-        <div className="absolute top-1/4 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-indigo-600/15 rounded-full blur-[90px] sm:blur-[120px] pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] sm:w-[700px] h-[220px] sm:h-[350px] bg-gradient-to-b from-orange-100/70 via-amber-50/40 to-transparent blur-[80px] sm:blur-[110px] pointer-events-none" />
+        <div className="absolute top-1/4 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-indigo-50/50 rounded-full blur-[90px] sm:blur-[120px] pointer-events-none" />
 
         <div className="max-w-5xl mx-auto text-center relative z-10 flex flex-col items-center">
           
           {/* Live Studio Availability Pill */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-slate-900/90 border border-slate-700/80 shadow-inner mb-4 sm:mb-6 backdrop-blur-md max-w-full">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/90 shadow-2xs mb-4 sm:mb-6 backdrop-blur-md max-w-full">
             <span className="relative flex h-2 w-2 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
-            <span className="text-[11px] sm:text-xs font-semibold text-slate-200 tracking-wide truncate">
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-700 tracking-wide truncate">
               Engineering Lab &amp; Tech Campus • Ayodhya &amp; Lucknow
             </span>
           </div>
 
           {/* Main Headline */}
-          <h1 className="text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-extrabold font-heading tracking-tight text-white max-w-4xl leading-[1.2] mb-3 sm:mb-5">
+          <h1 className="text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-extrabold font-heading tracking-tight text-slate-950 max-w-4xl leading-[1.2] mb-3 sm:mb-5">
             Bespoke Software Engineering &amp;{' '}
-            <span className="bg-gradient-to-r from-amber-300 via-orange-400 to-amber-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-orange-600 via-amber-600 to-orange-500 bg-clip-text text-transparent">
               Precision Tech Care.
             </span>
           </h1>
 
           {/* Authentic, Human Sub-Headline */}
-          <p className="text-xs xs:text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal mb-6 sm:mb-8 px-1">
+          <p className="text-xs xs:text-sm sm:text-base md:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal mb-6 sm:mb-8 px-1">
             We architect high-performing web platforms, native mobile apps, and enterprise billing ERPs — plus same-day motherboard chip repair by certified engineers across Uttar Pradesh.
           </p>
 
@@ -342,10 +342,10 @@ export default function ServicesPage({ onOpenContactModal, onOpenOtpSheet }) {
               type="button"
               suppressHydrationWarning
               onClick={handleOpenOtp}
-              className="w-full sm:w-auto justify-center group bg-gradient-to-r from-orange-500 via-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-bold px-5 py-3 sm:px-6 sm:py-3.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-orange-500/25 transition-all duration-200 flex items-center gap-2 cursor-pointer active:scale-95"
+              className="w-full sm:w-auto justify-center group bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-700 hover:to-amber-600 text-white font-bold px-5 py-3 sm:px-6 sm:py-3.5 rounded-xl text-xs sm:text-sm shadow-md shadow-orange-500/25 hover:shadow-lg transition-all duration-200 flex items-center gap-2 cursor-pointer active:scale-95"
             >
               <span>Request a Project Quote</span>
-              <ArrowRight className="w-4 h-4 text-slate-950 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
             </button>
 
             <div className="grid grid-cols-2 sm:flex items-center gap-2 sm:gap-3.5 w-full sm:w-auto">
@@ -353,7 +353,7 @@ export default function ServicesPage({ onOpenContactModal, onOpenOtpSheet }) {
                 type="button"
                 suppressHydrationWarning
                 onClick={() => handleWhatsApp('General IT Services & Software')}
-                className="w-full sm:w-auto justify-center bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#4ade80] hover:text-[#22c55e] font-semibold px-3 sm:px-5 py-3 sm:py-3.5 rounded-xl text-[11px] sm:text-xs transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95 backdrop-blur-sm"
+                className="w-full sm:w-auto justify-center bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 text-[#16a34a] hover:text-[#15803d] font-semibold px-3 sm:px-5 py-3 sm:py-3.5 rounded-xl text-[11px] sm:text-xs transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs"
               >
                 <MessageSquare className="w-3.5 h-3.5 text-[#25D366] shrink-0" />
                 <span>WhatsApp</span>
@@ -363,31 +363,31 @@ export default function ServicesPage({ onOpenContactModal, onOpenOtpSheet }) {
                 type="button"
                 suppressHydrationWarning
                 onClick={handleCall}
-                className="w-full sm:w-auto justify-center bg-white/5 hover:bg-white/10 border border-white/15 text-slate-200 font-semibold px-3 sm:px-5 py-3 sm:py-3.5 rounded-xl text-[11px] sm:text-xs transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95 backdrop-blur-sm truncate"
+                className="w-full sm:w-auto justify-center bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 hover:text-slate-950 font-semibold px-3 sm:px-5 py-3 sm:py-3.5 rounded-xl text-[11px] sm:text-xs transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs truncate"
               >
-                <PhoneCall className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <PhoneCall className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                 <span className="truncate">Call Helpline</span>
               </button>
             </div>
           </div>
 
           {/* Proof / Trust Metrics Ribbon */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 md:gap-6 w-full max-w-4xl pt-4 sm:pt-6 border-t border-slate-800/80 text-left">
-            <div className="p-2.5 sm:p-4 rounded-xl bg-slate-900/50 border border-slate-800/80">
-              <div className="text-lg sm:text-2xl font-black text-white font-heading">150+</div>
-              <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5 leading-snug">Deployed Systems &amp; Apps</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6 w-full max-w-4xl pt-6 sm:pt-8 border-t border-slate-200 text-left">
+            <div className="p-3 sm:p-4 rounded-xl bg-slate-50/90 border border-slate-200/90 hover:bg-white hover:shadow-xs transition-all">
+              <div className="text-lg sm:text-2xl font-black text-slate-950 font-heading">150+</div>
+              <div className="text-[10px] sm:text-xs text-slate-500 mt-0.5 leading-snug font-medium">Deployed Systems &amp; Apps</div>
             </div>
-            <div className="p-2.5 sm:p-4 rounded-xl bg-slate-900/50 border border-slate-800/80">
-              <div className="text-lg sm:text-2xl font-black text-emerald-400 font-heading">Same-Day</div>
-              <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5 leading-snug">Hardware Chip Diagnostics</div>
+            <div className="p-3 sm:p-4 rounded-xl bg-emerald-50/60 border border-emerald-200/70 hover:bg-white hover:shadow-xs transition-all">
+              <div className="text-lg sm:text-2xl font-black text-emerald-600 font-heading">Same-Day</div>
+              <div className="text-[10px] sm:text-xs text-slate-500 mt-0.5 leading-snug font-medium">Hardware Chip Diagnostics</div>
             </div>
-            <div className="p-2.5 sm:p-4 rounded-xl bg-slate-900/50 border border-slate-800/80">
-              <div className="text-lg sm:text-2xl font-black text-amber-400 font-heading">100% IP</div>
-              <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5 leading-snug">Full Code &amp; Repo Ownership</div>
+            <div className="p-3 sm:p-4 rounded-xl bg-orange-50/60 border border-orange-200/70 hover:bg-white hover:shadow-xs transition-all">
+              <div className="text-lg sm:text-2xl font-black text-orange-600 font-heading">100% IP</div>
+              <div className="text-[10px] sm:text-xs text-slate-500 mt-0.5 leading-snug font-medium">Full Code &amp; Repo Ownership</div>
             </div>
-            <div className="p-2.5 sm:p-4 rounded-xl bg-slate-900/50 border border-slate-800/80">
-              <div className="text-lg sm:text-2xl font-black text-white font-heading">6 Months</div>
-              <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5 leading-snug">Complimentary Post-Launch SLA</div>
+            <div className="p-3 sm:p-4 rounded-xl bg-indigo-50/60 border border-indigo-200/70 hover:bg-white hover:shadow-xs transition-all">
+              <div className="text-lg sm:text-2xl font-black text-indigo-600 font-heading">6 Months</div>
+              <div className="text-[10px] sm:text-xs text-slate-500 mt-0.5 leading-snug font-medium">Complimentary Post-Launch SLA</div>
             </div>
           </div>
 
