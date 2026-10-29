@@ -100,6 +100,19 @@ export default function HomePage({ onOpenContactModal, onOpenEnrollModal }) {
 
   return (
     <>
+      {/* High-priority speculative preloads for instant homepage video & 40KB poster */}
+      <link
+        rel="preload"
+        as="image"
+        href="https://res.cloudinary.com/bb0xm24y/video/upload/f_auto,q_auto,so_0/v1793004094/codeguru_uploads/1793004094123_codeguru_video.jpg"
+        fetchPriority="high"
+      />
+      <link
+        rel="preload"
+        as="video"
+        type="video/mp4"
+        href="https://res.cloudinary.com/bb0xm24y/video/upload/f_auto,q_auto:eco/v1793004094/codeguru_uploads/1793004094123_codeguru_video.mp4"
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}

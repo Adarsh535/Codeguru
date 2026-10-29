@@ -316,32 +316,7 @@ export default function BottomBarOtpSheet({
 
           ) : step === 'phone' ? (
             /* ---------------- 2. STEP 1: MOBILE NUMBER ENTRY ---------------- */
-            <form onSubmit={handlePhoneNext} className="flex flex-col">
-              
-              {/* SOCIAL PROOF AVATAR CLUSTER */}
-              <div className="flex items-center justify-center -space-x-2 pt-1 mb-2 select-none">
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f97316] text-white font-semibold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
-                  R
-                </span>
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#8b5cf6] text-white font-semibold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
-                  A
-                </span>
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0ea5e9] text-white font-semibold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
-                  S
-                </span>
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#10b981] text-white font-semibold text-sm flex items-center justify-center ring-2 ring-white shadow-xs">
-                  P
-                </span>
-                <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0f172a] text-white font-bold text-xs sm:text-xs flex items-center justify-center ring-2 ring-white shadow-xs">
-                  5k+
-                </span>
-              </div>
-
-              {/* SOCIAL PROOF SUB-BANNER */}
-              <p className="text-center text-xs sm:text-[13px] text-slate-600 font-medium mb-4 select-none">
-                Join <strong className="text-orange-500 font-bold">5000+</strong> students learning with us
-              </p>
-
+            <form onSubmit={handlePhoneNext} className="flex flex-col pt-1">
               {/* HEADLINE & SUBTITLE */}
               <div className="text-center mb-5">
                 <h2 className="text-[25px] sm:text-[27px] font-bold text-slate-900 tracking-tight font-heading">

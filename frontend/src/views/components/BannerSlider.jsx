@@ -33,8 +33,48 @@ const optimizeImage = (url) => {
   return url;
 };
 
+// Cloudinary video auto-compression and format optimization for instant streaming
+const optimizeVideo = (url) => {
+  if (!url || typeof url !== 'string') return '';
+  if (url.includes('res.cloudinary.com') && url.includes('/video/upload/') && !url.includes('/upload/f_auto')) {
+    return url.replace('/video/upload/', '/video/upload/f_auto,q_auto:eco/');
+  }
+  return url;
+};
+
+// Ultra-fast 40KB poster extracted from video frame so video renders instantly on frame 0
+const getVideoPoster = (videoUrl, existingPoster) => {
+  if (existingPoster && typeof existingPoster === 'string' && existingPoster.trim().length > 0) {
+    return optimizeImage(existingPoster);
+  }
+  if (videoUrl && typeof videoUrl === 'string' && videoUrl.includes('res.cloudinary.com') && videoUrl.includes('/video/upload/')) {
+    return videoUrl
+      .replace('/video/upload/', '/video/upload/f_auto,q_auto,so_0/')
+      .replace(/\.(mp4|webm|mov|m4v|avi|mkv)$/i, '.jpg');
+  }
+  return '';
+};
+
+// Instant initial banner so video element exists in HTML immediately without waiting for API
+const DEFAULT_INITIAL_BANNERS = [
+  {
+    id: 'default-hero-video',
+    _id: 'default-hero-video',
+    title: 'Codegurru',
+    subtitle: '',
+    type: 'video',
+    mediaUrl: 'https://res.cloudinary.com/bb0xm24y/video/upload/f_auto,q_auto:eco/v1793004094/codeguru_uploads/1793004094123_codeguru_video.mp4',
+    videoUrl: 'https://res.cloudinary.com/bb0xm24y/video/upload/f_auto,q_auto:eco/v1793004094/codeguru_uploads/1793004094123_codeguru_video.mp4',
+    imageUrl: '',
+    poster: 'https://res.cloudinary.com/bb0xm24y/video/upload/f_auto,q_auto,so_0/v1793004094/codeguru_uploads/1793004094123_codeguru_video.jpg',
+    badge: '',
+    ctaText: '',
+    active: true
+  }
+];
+
 export default function BannerSlider({ onOpenContactModal }) {
-  const [slides, setSlides] = useState([]);
+  const [slides, setSlides] = useState(DEFAULT_INITIAL_BANNERS);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
@@ -67,8 +107,10 @@ export default function BannerSlider({ onOpenContactModal }) {
           const formatted = dynamicBanners.map(b => {
             const media = b.mediaUrl || b.imageUrl || b.videoUrl || b.poster || '';
             const isVid = b.type === 'video' || /\.(mp4|webm|mov|m4v|avi|mkv)$/i.test(media) || (typeof media === 'string' && media.includes('/video/'));
-            const imageSource = b.imageUrl || (!isVid ? media : (b.poster || ''));
-            const videoSource = b.videoUrl || (isVid ? media : '');
+            const rawVideo = b.videoUrl || (isVid ? media : '');
+            const videoSource = isVid ? optimizeVideo(rawVideo) : '';
+            const posterSource = isVid ? getVideoPoster(rawVideo, b.poster || b.imageUrl) : '';
+            const imageSource = !isVid ? optimizeImage(b.imageUrl || media) : posterSource;
             return {
               ...cleanSlide(b),
               id: b._id || b.id,
@@ -76,7 +118,7 @@ export default function BannerSlider({ onOpenContactModal }) {
               mediaUrl: media,
               videoUrl: videoSource,
               imageUrl: imageSource,
-              poster: b.poster || (isVid ? imageSource : '')
+              poster: posterSource
             };
           });
           setSlides(formatted);
@@ -221,14 +263,28 @@ export default function BannerSlider({ onOpenContactModal }) {
                   <div className="relative w-full h-full">
                     <video
                       suppressHydrationWarning
-                      ref={(el) => (videoRefs.current[index] = el)}
-                      src={videoSource}
-                      poster={slide.poster}
+                      ref={(el) => {
+                        videoRefs.current[index] = el;
+                        if (el && index === currentIndex) {
+                          el.muted = true;
+                          el.defaultMuted = true;
+                          if (el.paused) {
+                            el.play().catch(() => {});
+                          }
+                        }
+                      }}
+                      src={optimizeVideo(videoSource)}
+                      poster={slide.poster || getVideoPoster(videoSource)}
                       muted={isMuted}
-                      playsInline
+                      playsInline={true}
                       preload={index === 0 ? 'auto' : 'none'}
                       autoPlay={index === 0}
                       loop
+                      onLoadedData={() => {
+                        if (index === currentIndex) {
+                          setIsPlaying(true);
+                        }
+                      }}
                       onEnded={handleNext}
                       className="w-full h-full object-cover opacity-100"
                     />

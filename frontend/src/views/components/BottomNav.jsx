@@ -26,14 +26,19 @@ export default function BottomNav({
 
   const currentTab = getTabFromPathname(pathname);
 
-  const handleNavClick = (id) => {
+  const handleNavClick = (e, item) => {
+    e.stopPropagation();
     if (externalSetActiveTab) {
-      externalSetActiveTab(id);
+      externalSetActiveTab(item.id);
+    }
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "instant" });
     }
   };
 
   const handleCallClick = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     if (onOpenOtpSheet) {
       onOpenOtpSheet();
     } else if (onOpenContactModal) {
@@ -79,13 +84,13 @@ export default function BottomNav({
         {navItems.map((item) => {
           if (item.isCenter) {
             return (
-              <div key={item.id} className="relative flex flex-col items-center justify-center w-16 h-full z-20">
-                <div className="absolute -top-[22px] w-[62px] h-[62px] bg-white rounded-full flex items-center justify-center z-10 shadow-md border border-slate-100">
+              <div key={item.id} className="relative flex flex-col items-center justify-center w-14 h-full pointer-events-none z-20">
+                <div className="absolute -top-[22px] w-[62px] h-[62px] bg-white rounded-full flex items-center justify-center z-20 shadow-md border border-slate-100 pointer-events-auto">
                   <button
                     type="button"
                     suppressHydrationWarning
                     onClick={handleCallClick}
-                    className="relative bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 w-[52px] h-[52px] rounded-full flex items-center justify-center shadow-lg z-20 transition-transform active:scale-90 hover:scale-105 duration-300 cursor-pointer"
+                    className="relative bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 w-[52px] h-[52px] rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-90 hover:scale-105 duration-300 cursor-pointer touch-manipulation"
                     title={user ? 'My Account' : 'Instant Login / Inquiry'}
                   >
                     <Phone className="w-6 h-6 fill-slate-900 stroke-none rotate-[10deg]" />
@@ -102,8 +107,10 @@ export default function BottomNav({
             <Link
               key={item.id}
               href={item.route}
-              onClick={() => handleNavClick(item.id)}
-              className="relative flex flex-col items-center justify-center w-14 h-full z-10 group transition-transform active:scale-90 cursor-pointer"
+              prefetch={true}
+              scroll={true}
+              onClick={(e) => handleNavClick(e, item)}
+              className="relative flex flex-col items-center justify-center flex-1 max-w-[72px] h-full z-30 group transition-transform active:scale-90 cursor-pointer touch-manipulation"
             >
               <div
                 className={`relative flex items-center justify-center transition-all duration-300 mb-0.5 ${

@@ -520,26 +520,40 @@ export default function ServicesPage({ onOpenContactModal, onOpenOtpSheet }) {
                     <strong className="text-slate-800 text-xs sm:text-sm font-semibold">{service.warranty}</strong>
                   </div>
 
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <div className="flex flex-col gap-2 w-full sm:w-auto">
+                    {/* Call Me Button directly above Inquire Scope & WhatsApp */}
                     <button
                       type="button"
                       suppressHydrationWarning
-                      onClick={() => handleWhatsApp(service.title)}
-                      className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 shadow-2xs transition-colors shrink-0 cursor-pointer active:scale-95"
-                      title="Quick WhatsApp message"
+                      onClick={handleCall}
+                      className="w-full bg-amber-50 hover:bg-amber-100/90 border border-amber-300/80 text-amber-950 font-bold text-xs py-2 sm:py-1.5 px-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs active:scale-95"
+                      title="Direct phone consultation"
                     >
-                      <MessageSquare className="w-4 h-4 text-[#25D366]" />
+                      <PhoneCall className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      <span>Call Me</span>
                     </button>
-                    
-                    <button
-                      type="button"
-                      suppressHydrationWarning
-                      onClick={handleOpenOtp}
-                      className="flex-1 sm:flex-initial sm:w-auto bg-slate-950 hover:bg-orange-500 hover:text-slate-950 text-white font-bold text-xs px-4 h-10 sm:h-9 rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
-                    >
-                      <span>Inquire Scope</span>
-                      <ArrowRight className="w-3.5 h-3.5 shrink-0" />
-                    </button>
+
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <button
+                        type="button"
+                        suppressHydrationWarning
+                        onClick={() => handleWhatsApp(service.title)}
+                        className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 shadow-2xs transition-colors shrink-0 cursor-pointer active:scale-95"
+                        title="Quick WhatsApp message"
+                      >
+                        <MessageSquare className="w-4 h-4 text-[#25D366]" />
+                      </button>
+                      
+                      <button
+                        type="button"
+                        suppressHydrationWarning
+                        onClick={handleOpenOtp}
+                        className="flex-1 sm:flex-initial sm:w-auto bg-slate-950 hover:bg-orange-500 hover:text-slate-950 text-white font-bold text-xs px-4 h-10 sm:h-9 rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                      >
+                        <span>Inquire Scope</span>
+                        <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
