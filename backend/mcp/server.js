@@ -432,7 +432,13 @@ server.registerTool(
     if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
       return fail('Cloudinary keys backend/.env me set nahi hain');
     }
-    const result = await cloudinary.uploader.upload(source, { folder, resource_type: 'auto' });
+    let result;
+    try {
+      result = await cloudinary.uploader.upload(source, { folder, resource_type: 'auto' });
+    } catch (err) {
+      // Cloudinary plain object reject karta hai, Error nahi
+      return fail(`Cloudinary upload failed: ${err?.message || err?.error?.message || JSON.stringify(err)}`);
+    }
     return json({ url: result.secure_url, type: result.resource_type, width: result.width, height: result.height });
   }
 );

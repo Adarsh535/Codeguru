@@ -83,6 +83,8 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
       const urlCat = params.get('category');
       if (urlCat) {
         setActiveCategory(urlCat);
+        // Default 'web' sub-category sirf Software me match karta hai - URL se aaye to poori category dikhao
+        setActiveSubCategory('all');
         scrollToCatalogSection(150);
         scrollToCatalogSection(400);
       }
@@ -375,7 +377,8 @@ export default function CategoryNavbar({ onOpenContactModal, onOpenEnrollModal, 
     const matchesCat = !catId || 
                        courseCatSlug === activeCatSlug || 
                        courseCatRaw === activeCatRaw || 
-                       (courseCatSlug && activeCatSlug && (courseCatSlug.includes(activeCatSlug) || activeCatSlug.includes(courseCatSlug))) ||
+                       // 1-2 letter slugs (e.g. 'n' = Networking) har category me "include" ho jaate hain, isliye partial match sirf lambe slugs par
+                       (courseCatSlug.length > 2 && activeCatSlug.length > 2 && (courseCatSlug.includes(activeCatSlug) || activeCatSlug.includes(courseCatSlug))) ||
                        isCodingMatch || isRepairMatch || isNetworkMatch || isRoboticsMatch || isElecMatch || isMarketMatch;
     
     let matchesSubCat = true;
